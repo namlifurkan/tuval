@@ -206,34 +206,42 @@ language sql
 immutable
 as $$ select lower(split_part(coalesce(addr, ''), '@', 2)) $$;
 
-create table if not exists public.public_mail_domains (domain text primary key);
-insert into public.public_mail_domains (domain) values
-  ('gmail.com'), ('googlemail.com'), ('outlook.com'), ('hotmail.com'), ('live.com'),
-  ('yahoo.com'), ('icloud.com'), ('me.com'), ('proton.me'), ('protonmail.com'),
-  ('yandex.com'), ('mail.ru'), ('aol.com'), ('gmx.com'), ('zoho.com')
-on conflict (domain) do nothing;
+-- Instance policy. Both defaults are the operator's call, not the product's: an internal
+-- company deployment usually wants them, a team on shared mailboxes does not.
+create table if not exists public.tuval_settings (
+  id                       int primary key default 1 check (id = 1),
+  restrict_to_own_domain   boolean not null default true,
+  blocked_domains          text[] not null default '{}'
+);
 
-alter table public.public_mail_domains enable row level security;
-drop policy if exists public_mail_read on public.public_mail_domains;
-create policy public_mail_read on public.public_mail_domains for select to authenticated using (true);
+insert into public.tuval_settings (id) values (1) on conflict (id) do nothing;
 
--- Refuse a domain the owner does not sign in with, and refuse shared mailbox providers.
+alter table public.tuval_settings enable row level security;
+drop policy if exists settings_read on public.tuval_settings;
+create policy settings_read on public.tuval_settings for select to authenticated using (true);
+
 create or replace function public.boards_guard_domain()
 returns trigger
 language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  cfg public.tuval_settings;
 begin
   if new.allowed_domain is null then
     return new;
   end if;
   new.allowed_domain := lower(new.allowed_domain);
-  if new.allowed_domain <> public.email_domain((select auth.jwt() ->> 'email')) then
+  select * into cfg from public.tuval_settings where id = 1;
+
+  if cfg.restrict_to_own_domain
+     and new.allowed_domain <> public.email_domain((select auth.jwt() ->> 'email')) then
     raise exception 'a board can only be opened to the domain you sign in with';
   end if;
-  if exists (select 1 from public.public_mail_domains d where d.domain = new.allowed_domain) then
-    raise exception 'that domain is a public mailbox provider';
+
+  if new.allowed_domain = any (cfg.blocked_domains) then
+    raise exception 'that domain is blocked on this instance';
   end if;
   return new;
 end;

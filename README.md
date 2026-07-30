@@ -56,11 +56,23 @@ Sharing is by email. The owner invites an address from the **Share** menu; the i
 invite someone who has never opened Tuval. Roles are `editor` and `viewer`, enforced by row
 level security rather than by the interface.
 
-A board can also be opened to a whole domain: **Everyone at okul.com.tr**. Two things make
-that safe without any DNS setup. The domain is never typed, it is read from the owner's own
-verified address, so you can only open a board to a domain you receive mail at. And public
-mailbox providers are refused, so a board cannot be opened to everyone with a Gmail account.
-Both rules live in a database trigger, not in the interface.
+A board can also be opened to a whole email domain, so a team never has to be invited one by
+one. The domain is never typed in: it is read from the owner's own verified address, which is
+also why no DNS ownership check is needed.
+
+Two knobs belong to whoever runs the instance, not to Tuval, and they live in
+`public.tuval_settings`:
+
+```sql
+-- allow opening a board to any domain, not only your own
+update tuval_settings set restrict_to_own_domain = false;
+
+-- refuse domains outright, for example shared mailbox providers
+update tuval_settings set blocked_domains = '{gmail.com,outlook.com,yahoo.com}';
+```
+
+Both are enforced by a trigger, so a client that talks to the API directly obeys them too.
+The defaults are conservative: own domain only, nothing blocked.
 
 The invite itself travels as a sign-in link, which is the only mail Supabase sends on your
 behalf. Configure **Authentication → SMTP Settings** with your own server before relying on
