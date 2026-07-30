@@ -190,7 +190,6 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 ### Çoklu kullanıcı
 
-- [ ] Gerçek zamanlı ortak çalışma doğrulaması (sunucu var, test edilmedi)
 - [ ] Follow mode / spotlight
 - [ ] İmleç sohbeti
 - [ ] Oylama, zamanlayıcı, tahmin (estimation) araçları

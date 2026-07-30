@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "collab": "HOST=0.0.0.0 PORT=1234 npx y-websocket"
+    "collab": "HOST=0.0.0.0 PORT=1234 node node_modules/y-websocket/bin/server.cjs"
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
@@ -18,7 +18,7 @@
     "react-dom": "^19.2.8",
     "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.7",
-    "y-websocket": "^3.0.0",
+    "y-websocket": "^2.1.0",
     "yjs": "^13.6.31",
     "zustand": "^5.0.14"
   },

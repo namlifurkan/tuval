@@ -13,7 +13,9 @@ npm run dev            # uygulama → http://localhost:5173
 npm run collab         # (opsiyonel) y-websocket sunucusu :1234
 ```
 
-Çoklu kullanıcı için `.env.local` içine `VITE_COLLAB_URL=ws://localhost:1234` yaz.
+Çoklu kullanıcı için `.env.local` içine `VITE_COLLAB_URL=ws://localhost:1234` yaz, `npm run collab`
+ile sunucuyu başlat ve dev server'ı yeniden başlat (Vite env'i açılışta okur). İki sekme aç:
+item'lar, seçim ve canlı imleçler senkronize olur.
 Board odası URL hash'inden gelir: `http://localhost:5173/#takim-board`.
 
 ## Mimari
