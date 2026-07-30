@@ -60,6 +60,7 @@ export interface TextItem extends BaseItem, TextStyle {
   type: 'text'
   text: string
   fill: string
+  autoWidth: boolean
 }
 
 export interface DrawItem extends BaseItem {

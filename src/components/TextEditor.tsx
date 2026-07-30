@@ -4,7 +4,7 @@ import { patchItem, removeItems } from '../board/doc'
 import { connectorGeometry } from '../board/render'
 import { textInsetFor } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
-import { fontString, layoutText, LINE_HEIGHT, wrapText } from '../board/text'
+import { fontString, layoutText, LINE_HEIGHT, measureWidth, wrapText } from '../board/text'
 import { useItemIndex } from '../board/useBoard'
 import type { Item, TextStyle } from '../board/types'
 
@@ -73,6 +73,11 @@ export function TextEditor() {
         const needed = lines.length * fitted.fontSize * LINE_HEIGHT
         if (needed > box.h + 1) patchItem(item.id, { h: Math.ceil(needed * (item.h / box.h)) })
       }
+    }
+    if (item.type === 'text' && item.autoWidth) {
+      const font = fontString(style, style.fontSize)
+      const widest = Math.max(...(value || ' ').split('\n').map((line) => measureWidth(line, font)))
+      patchItem(item.id, { w: Math.min(1600, Math.max(120, Math.ceil(widest) + 12)) })
     }
     if (item.type === 'text') {
       const h = Math.max(

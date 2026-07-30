@@ -2,6 +2,8 @@ import { Canvas } from './components/Canvas'
 import { CommentThread } from './components/CommentThread'
 import { ContextMenu } from './components/ContextMenu'
 import { ContextToolbar } from './components/ContextToolbar'
+import { FramesPanel } from './components/FramesPanel'
+import { FrameTitleEditor } from './components/FrameTitleEditor'
 import { Presentation } from './components/Presentation'
 import { SearchPanel } from './components/SearchPanel'
 import { TextEditor } from './components/TextEditor'
@@ -25,6 +27,8 @@ export default function App() {
           <ContextMenu />
           <CommentThread />
           <SearchPanel />
+          <FramesPanel />
+          <FrameTitleEditor />
         </>
       )}
       <Presentation />

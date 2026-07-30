@@ -211,6 +211,53 @@ export function snapMove(moving: Rect, others: Rect[], threshold: number): SnapR
   return { dx, dy, guides }
 }
 
+export interface SpacingResult { delta: number; marks: Rect[] }
+
+function spacingOn(
+  moving: Rect, others: Rect[], axis: 'x' | 'y', threshold: number,
+): SpacingResult | null {
+  const span = axis === 'x' ? 'w' : 'h'
+  const cross = axis === 'x' ? 'y' : 'x'
+  const crossSpan = axis === 'x' ? 'h' : 'w'
+  const band = others.filter(
+    (o) => o[cross] < moving[cross] + moving[crossSpan] && o[cross] + o[crossSpan] > moving[cross],
+  )
+  if (band.length < 2) return null
+
+  const before = band.filter((o) => o[axis] + o[span] <= moving[axis] + threshold)
+    .sort((a, b) => (b[axis] + b[span]) - (a[axis] + a[span]))[0]
+  const after = band.filter((o) => o[axis] >= moving[axis] + moving[span] - threshold)
+    .sort((a, b) => a[axis] - b[axis])[0]
+  if (!before || !after) return null
+
+  const gapBefore = moving[axis] - (before[axis] + before[span])
+  const gapAfter = after[axis] - (moving[axis] + moving[span])
+  if (Math.abs(gapBefore - gapAfter) > threshold) return null
+
+  const total = after[axis] - (before[axis] + before[span]) - moving[span]
+  const gap = total / 2
+  const delta = before[axis] + before[span] + gap - moving[axis]
+  const start = moving[cross] + moving[crossSpan] / 2 - 1
+  const mk = (from: number, size: number): Rect =>
+    axis === 'x'
+      ? { x: from, y: start, w: size, h: 2 }
+      : { x: start, y: from, w: 2, h: size }
+  return {
+    delta,
+    marks: [
+      mk(before[axis] + before[span], gap),
+      mk(moving[axis] + delta + moving[span], gap),
+    ],
+  }
+}
+
+export function snapSpacing(moving: Rect, others: Rect[], threshold: number) {
+  return {
+    x: spacingOn(moving, others, 'x', threshold),
+    y: spacingOn(moving, others, 'y', threshold),
+  }
+}
+
 export function anchorPoint(item: Item, side: AnchorSide): Vec {
   const c = center(item)
   const hw = item.w / 2, hh = item.h / 2

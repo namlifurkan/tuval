@@ -33,13 +33,14 @@ export function ContextToolbar() {
   const selected = useSelectedItems()
   const camera = useBoardStore((s) => s.camera)
   const editing = useBoardStore((s) => s.editing)
+  const dragging = useBoardStore((s) => s.dragging)
   const fillPop = usePopover()
   const strokePop = usePopover()
   const textPop = usePopover()
   const linePop = usePopover()
   const alignPop = usePopover()
 
-  if (!selected.length || editing) return null
+  if (!selected.length || editing || dragging) return null
   if (selected.every((i) => i.type === 'comment')) return null
 
   const box = boxOf(selected)

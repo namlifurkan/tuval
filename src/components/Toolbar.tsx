@@ -215,6 +215,13 @@ export function Toolbar() {
             <Frame size={20} strokeWidth={1.8} />
           </IconButton>
           <Popover open={framePop.open} onClose={framePop.close} className="w-[212px]">
+            <button
+              type="button"
+              onClick={() => { update({ framesPanel: true }); framePop.close() }}
+              className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-[#4262FF] hover:bg-[#F1F1F3]"
+            >
+              Frame panelini aç
+            </button>
             <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Frame boyutu</div>
             <div className="flex flex-col gap-0.5">
               {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(

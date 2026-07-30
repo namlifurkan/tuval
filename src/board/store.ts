@@ -30,6 +30,9 @@ interface BoardState {
   openComment: Id | null
   presenting: number | null
   searchOpen: boolean
+  framesPanel: boolean
+  renamingFrame: Id | null
+  dragging: boolean
 
   setCamera: (c: Camera | ((c: Camera) => Camera)) => void
   setTool: (t: Tool, remember?: boolean) => void
@@ -64,6 +67,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   openComment: null,
   presenting: null,
   searchOpen: false,
+  framesPanel: false,
+  renamingFrame: null,
+  dragging: false,
 
   setCamera: (c) => set((s) => ({ camera: typeof c === 'function' ? c(s.camera) : c })),
   setTool: (tool, remember) =>
@@ -90,6 +96,9 @@ export interface RemoteUser {
 
 export interface Session {
   preview: Map<Id, Record<string, unknown>>
+  badge: string | null
+  spacing: { x: number; y: number; w: number; h: number }[]
+  dropFrame: Id | null
   marquee: { x: number; y: number; w: number; h: number } | null
   guides: [Vec, Vec][]
   draft: unknown | null
@@ -102,6 +111,9 @@ export interface Session {
 
 export const session: Session = {
   preview: new Map(),
+  badge: null,
+  spacing: [],
+  dropFrame: null,
   marquee: null,
   guides: [],
   draft: null,

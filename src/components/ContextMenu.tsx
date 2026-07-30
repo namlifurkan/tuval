@@ -1,7 +1,8 @@
 import { getIndex, getItems, patchItems } from '../board/doc'
+import { exportPng } from '../board/export'
 import {
   arrangeInGrid, copyStyle, deleteSelection, duplicateSelection, groupSelection, hasStyleClipboard,
-  pasteStyle, reorder, ungroupSelection,
+  pasteStyle, reorder, selectInsideFrame, ungroupSelection,
 } from '../board/interaction'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Id } from '../board/types'
@@ -35,6 +36,16 @@ export function ContextMenu() {
       shortcut: grouped ? '⌘⇧G' : '⌘G',
       run: () => (grouped ? ungroupSelection() : groupSelection()),
       hidden: items.length < 2 && !grouped,
+    },
+    {
+      label: 'Frame içindekileri seç',
+      run: () => selectInsideFrame(items[0].id),
+      hidden: items.length !== 1 || items[0].type !== 'frame',
+    },
+    {
+      label: 'PNG olarak dışa aktar',
+      run: () => exportPng(items, items.length === 1 && items[0].type === 'frame' ? items[0].title : 'secim'),
+      hidden: !items.length,
     },
     { label: 'Stili kopyala', shortcut: '⌘⌥C', run: () => copyStyle(), hidden: !items.length },
     {

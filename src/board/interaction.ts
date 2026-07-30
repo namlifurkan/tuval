@@ -5,7 +5,7 @@ import {
 } from './doc'
 import {
   aabb, anchorPoint, ANCHOR_SIDES, contains, hitTest, nearestAnchor, overlaps, resizeBox, snapAngle,
-  snapMove,
+  snapMove, snapSpacing,
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
@@ -206,7 +206,11 @@ export function flushPreview() {
 }
 
 export function cancelDrag() {
+  if (store().dragging) store().update({ dragging: false })
   session.preview.clear()
+  session.badge = null
+  session.spacing = []
+  session.dropFrame = null
   drag = null
   session.marquee = null
   session.guides = []
@@ -376,6 +380,7 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
     return
   }
   didDrag = true
+  if (!s.dragging && drag.kind !== 'pan') s.update({ dragging: true })
 
   switch (drag.kind) {
     case 'pan': {
@@ -416,21 +421,43 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
         if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0
       }
       const movingBox = boxFromSnaps(drag.snaps, dx, dy)
-      const snap = snapMove(movingBox, drag.others, 6 / s.camera.z)
       if (!e.metaKey && !e.ctrlKey) {
-        dx += snap.dx; dy += snap.dy
-        session.guides = snap.guides
-      } else session.guides = []
+        const tol = 6 / s.camera.z
+        const spacing = snapSpacing(movingBox, drag.others, tol)
+        session.spacing = []
+        if (spacing.x) { dx += spacing.x.delta; session.spacing.push(...spacing.x.marks) }
+        if (spacing.y) { dy += spacing.y.delta; session.spacing.push(...spacing.y.marks) }
+        const snap = snapMove(boxFromSnaps(drag.snaps, dx, dy), drag.others, tol)
+        if (!spacing.x) dx += snap.dx
+        if (!spacing.y) dy += snap.dy
+        session.guides = [
+          ...(spacing.x ? [] : snap.guides.filter((g) => g[0].x === g[1].x)),
+          ...(spacing.y ? [] : snap.guides.filter((g) => g[0].y === g[1].y)),
+        ]
+      } else { session.guides = []; session.spacing = [] }
+
+      const moved = boxFromSnaps(drag.snaps, dx, dy)
+      const c = { x: moved.x + moved.w / 2, y: moved.y + moved.h / 2 }
+      const movingIds = new Set(drag.snaps.map((sn) => sn.id))
+      const frame = [...getItems()].reverse().find(
+        (f) => f.type === 'frame' && !movingIds.has(f.id) &&
+          c.x >= f.x && c.x <= f.x + f.w && c.y >= f.y && c.y <= f.y + f.h,
+      )
+      session.dropFrame = frame?.id ?? null
       stage(drag.snaps.map((sn) => [sn.id, { x: sn.x + dx, y: sn.y + dy }]))
       break
     }
     case 'resize': {
-      const next = resizeBox(drag.box, drag.handle, p, e.shiftKey || !drag.single, e.altKey)
+      const only = drag.single ? getIndex().get(s.selection[0]) : null
+      const keepsAspect = only?.type === 'image' || only?.type === 'draw'
+      const ratio = keepsAspect ? !e.shiftKey : e.shiftKey || !drag.single
+      const next = resizeBox(drag.box, drag.handle, p, ratio, e.altKey)
+      session.badge = `${Math.round(next.w)} × ${Math.round(next.h)}`
       const sx = drag.box.w ? next.w / drag.box.w : 1
       const sy = drag.box.h ? next.h / drag.box.h : 1
       stage(drag.snaps.map((sn) => {
         if (drag!.kind !== 'resize') return [sn.id, {}]
-        if (drag.single) return [sn.id, { x: next.x, y: next.y, w: next.w, h: next.h }]
+        if (drag.single) return [sn.id, { x: next.x, y: next.y, w: next.w, h: next.h, autoWidth: false }]
         return [sn.id, {
           x: next.x + (sn.x - drag.box.x) * sx,
           y: next.y + (sn.y - drag.box.y) * sy,
@@ -443,6 +470,7 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
     case 'rotate': {
       const a = Math.atan2(p.y - drag.center.y, p.x - drag.center.x)
       let delta = a - drag.start
+      session.badge = `${Math.round(((drag.snaps[0].rotation + delta) * 180 / Math.PI) % 360)}°`
       stage(drag.snaps.map((sn) => {
         const c = drag!.kind === 'rotate' ? drag.center : { x: 0, y: 0 }
         const rot = e.shiftKey ? snapAngle(sn.rotation + delta) : sn.rotation + delta
@@ -518,7 +546,11 @@ export function pointerUp(_e: PointerEvent, screen: Vec) {
   session.guides = []
   session.draft = null
   session.connectorDraft = null
+  session.badge = null
+  session.spacing = []
+  session.dropFrame = null
   drag = null
+  if (s.dragging) s.update({ dragging: false })
   requestRender()
 }
 
@@ -647,7 +679,11 @@ export function doubleClick(screen: Vec) {
   const p = toBoard(s.camera, screen.x, screen.y)
   const hit = pickAt(p)
   if (hit && hit.type !== 'draw' && hit.type !== 'image') {
-    if (hit.type === 'frame') return
+    if (hit.type === 'frame') {
+      s.setSelection([hit.id])
+      s.update({ renamingFrame: hit.id })
+      return
+    }
     s.setSelection([hit.id])
     s.setEditing({ id: hit.id, selectAll: true })
     return
@@ -750,6 +786,15 @@ export function pasteStyle() {
 }
 
 export const hasStyleClipboard = () => styleClipboard !== null
+
+export function selectInsideFrame(frameId: Id) {
+  const frame = getIndex().get(frameId)
+  if (!frame) return
+  const inside = getItems()
+    .filter((i) => i.id !== frameId && !i.locked && contains(frame, aabb(i)))
+    .map((i) => i.id)
+  if (inside.length) store().setSelection(inside)
+}
 
 export function contextMenuAt(screen: Vec) {
   const s = store()

@@ -56,6 +56,7 @@ export function makeText(x: number, y: number, w: number, style: TextStyle): Tex
     type: 'text',
     text: '',
     fill: 'transparent',
+    autoWidth: true,
     ...style,
     align: 'left',
     valign: 'top',

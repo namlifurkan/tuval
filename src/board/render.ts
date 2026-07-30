@@ -457,6 +457,23 @@ function drawOverlay(s: Scene) {
   ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0)
   ctx.lineCap = 'butt'
 
+  if (session.dropFrame) {
+    const frame = s.items.find((i) => i.id === session.dropFrame)
+    if (frame) {
+      const p = toScreen(cam, frame.x, frame.y)
+      ctx.strokeStyle = BRAND.blue
+      ctx.lineWidth = 2
+      ctx.setLineDash([])
+      ctx.strokeRect(p.x, p.y, frame.w * cam.z, frame.h * cam.z)
+    }
+  }
+
+  for (const mark of session.spacing) {
+    const p = toScreen(cam, mark.x, mark.y)
+    ctx.fillStyle = BRAND.guide
+    ctx.fillRect(p.x, p.y, Math.max(2, mark.w * cam.z), Math.max(2, mark.h * cam.z))
+  }
+
   for (const [a, b] of session.guides) {
     const p = toScreen(cam, a.x, a.y), q = toScreen(cam, b.x, b.y)
     ctx.strokeStyle = BRAND.guide
@@ -543,6 +560,23 @@ function drawOverlay(s: Scene) {
     ctx.lineWidth = 1
     ctx.fillRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
     ctx.strokeRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
+  }
+
+  if (session.badge) {
+    const box = selected.length ? boxOf(selected) : null
+    if (box) {
+      const at = toScreen(cam, box.x + box.w / 2, box.y + box.h)
+      ctx.font = '600 12px "Open Sans", system-ui, sans-serif'
+      const w = ctx.measureText(session.badge).width + 16
+      ctx.beginPath()
+      ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
+      ctx.fillStyle = BRAND.blue
+      ctx.fill()
+      ctx.fillStyle = '#FFFFFF'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(session.badge, at.x, at.y + 24.5)
+    }
   }
 
   for (const user of session.remote) {
