@@ -39,29 +39,30 @@ export function Canvas() {
     let raf = 0
     let size = { w: 0, h: 0 }
 
-    let refit = 0
     const resize = () => {
       const dpr = window.devicePixelRatio || 1
       const was = size
+      const cam = useBoardStore.getState().camera
+      // Hold the world point under the viewport centre, so a window resize never moves
+      // the user's place. Refitting to content here would throw away their zoom.
+      const centre = was.w && was.h
+        ? { x: cam.x + was.w / 2 / cam.z, y: cam.y + was.h / 2 / cam.z }
+        : null
+
       size = { w: wrap.clientWidth, h: wrap.clientHeight }
       canvas.width = Math.floor(size.w * dpr)
       canvas.height = Math.floor(size.h * dpr)
       canvas.style.width = `${size.w}px`
       canvas.style.height = `${size.h}px`
-      requestRender()
 
-      // Refit after the viewport settles, so content stays visible when the window changes.
-      // Skip the first measurement and skip while a drag is in flight.
-      if (!was.w || !was.h) return
-      clearTimeout(refit)
-      refit = window.setTimeout(() => {
-        const store = useBoardStore.getState()
-        if (store.editing || store.presenting !== null || session.preview.size) return
-        const all = getItems()
-        if (!all.length) return
-        store.setCamera(fitRect(boxOf(all), size.w, size.h))
-        requestRender()
-      }, 180)
+      if (centre && (was.w !== size.w || was.h !== size.h)) {
+        useBoardStore.getState().setCamera({
+          ...cam,
+          x: centre.x - size.w / 2 / cam.z,
+          y: centre.y - size.h / 2 / cam.z,
+        })
+      }
+      requestRender()
     }
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
@@ -93,7 +94,7 @@ export function Canvas() {
 
     const unsub = useBoardStore.subscribe(requestRender)
     const unsubMeta = subscribeMeta(requestRender)
-    return () => { cancelAnimationFrame(raf); clearTimeout(refit); ro.disconnect(); unsub(); unsubMeta() }
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubMeta() }
   }, [])
 
   useEffect(() => {
