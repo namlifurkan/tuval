@@ -158,6 +158,7 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   ctx.strokeStyle = 'rgba(20, 19, 16, 0.10)'
   ctx.lineWidth = Math.max(1, Math.min(item.w, item.h) * 0.008)
   ctx.strokeRect(item.x, item.y, item.w, item.h)
+
   if (s.editing === item.id) return
   const inset = Math.min(item.w, item.h) * 0.1
   drawText(s, item, {
@@ -366,7 +367,7 @@ function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {
   const { ctx, cam } = s
   ctx.fillStyle = '#EBE7DE'
   ctx.beginPath()
-  ctx.roundRect(item.x, item.y, item.w, item.h, 3)
+  ctx.roundRect(item.x, item.y, item.w, item.h, 8)
   ctx.fill()
   ctx.strokeStyle = '#DDD8CD'
   ctx.lineWidth = 1 / cam.z
@@ -512,7 +513,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.fill()
   ctx.stroke()
   ctx.beginPath()
-  ctx.rect(c.x - PIN_R, c.y - PIN_R, PIN_R * 2, PIN_R * 2)
+  ctx.roundRect(c.x - PIN_R, c.y - PIN_R, PIN_R * 2, PIN_R * 2, 4)
   ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.stroke()
@@ -566,7 +567,7 @@ function drawQuickArrows(s: Scene, item: Item) {
     ctx.stroke()
 
     ctx.beginPath()
-    ctx.roundRect(a.x - QUICK_R, a.y - QUICK_R, QUICK_R * 2, QUICK_R * 2, 2)
+    ctx.roundRect(a.x - QUICK_R, a.y - QUICK_R, QUICK_R * 2, QUICK_R * 2, 4)
     ctx.fillStyle = '#FCFBF8'
     ctx.fill()
     ctx.strokeStyle = 'rgba(20,19,16,0.22)'
@@ -652,11 +653,13 @@ function drawOverlay(s: Scene) {
       const count = s.votes.get(item.id)
       if (!count) continue
       const at = toScreen(cam, item.x + item.w, item.y)
+      const chip = new Path2D()
+      chip.roundRect(at.x - 19, at.y - 7, 26, 26, 6)
       ctx.fillStyle = BRAND.pigment
-      ctx.fillRect(at.x - 19, at.y - 7, 26, 26)
+      ctx.fill(chip)
       ctx.strokeStyle = '#FCFBF8'
       ctx.lineWidth = 2
-      ctx.strokeRect(at.x - 19, at.y - 7, 26, 26)
+      ctx.stroke(chip)
       ctx.fillStyle = '#FCFBF8'
       ctx.font = '700 12px "Instrument Sans", system-ui, sans-serif'
       ctx.textAlign = 'center'
@@ -755,7 +758,7 @@ function drawOverlay(s: Scene) {
       ctx.font = '600 12px "Instrument Sans", system-ui, sans-serif'
       const w = ctx.measureText(session.badge).width + 16
       ctx.beginPath()
-      ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 2)
+      ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
       ctx.fillStyle = BRAND.selection
       ctx.fill()
       ctx.fillStyle = '#FCFBF8'
@@ -855,11 +858,13 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
 }
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  const box = new Path2D()
+  box.roundRect(x - r, y - r, r * 2, r * 2, 1.5)
   ctx.fillStyle = '#FCFBF8'
-  ctx.fillRect(x - r, y - r, r * 2, r * 2)
+  ctx.fill(box)
   ctx.lineWidth = 1.6
   ctx.strokeStyle = BRAND.selection
-  ctx.strokeRect(x - r, y - r, r * 2, r * 2)
+  ctx.stroke(box)
 }
 
 function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, text: string) {
@@ -869,7 +874,7 @@ function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, te
   const x = p.x + 12
   const y = p.y + 36
   ctx.beginPath()
-  ctx.roundRect(x, y, w, 26, 2)
+  ctx.roundRect(x, y, w, 26, 7)
   ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.strokeStyle = color
@@ -899,7 +904,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.font = '600 11px "Instrument Sans", system-ui, sans-serif'
   const w = ctx.measureText(name).width
   ctx.beginPath()
-  ctx.roundRect(12, 12, w + 14, 20, 2)
+  ctx.roundRect(12, 12, w + 14, 20, 6)
   ctx.fillStyle = color
   ctx.fill()
   ctx.fillStyle = '#FCFBF8'

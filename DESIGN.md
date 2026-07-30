@@ -85,10 +85,13 @@ her tuval aracı böyle görünür. Yükseklik burada baskı dilinden gelir — 
 - Buton hover/aktif: `1px 1px 0 rgba(20,19,16,0.10)`
 - Sticky (tuvalde): `min(w,h)*0.022` sert kayma, mürekkep %10
 
-**Yarıçap neredeyse sıfır.** Tailwind ölçeği `@theme` içinde tek yerden eziliyor:
-`sm 1px · md/lg 2px · xl/2xl 3px`. Yuvarlak (`rounded-full`) rozet, avatar ve pin'lerde de
-kullanılmaz — katılımcı çipi, yorum pini, bağlayıcı uç tutamağı ve oy rozeti **karedir**.
-Sebep: daire dostane-uygulama sesi, kare matbaa sesi.
+**Yarıçap yumuşak ama tam daire değil.** Tailwind ölçeği `@theme` içinde tek yerden tanımlanır:
+`sm 4px · md 6px · lg 8px · xl 12px · 2xl 14px`. Ölçek burada tektir; bileşenlerde
+`rounded-[Npx]` yazılmaz, ölçek değişince her yer değişir.
+
+Kullanılmayan tek şey **tam daire** (`rounded-full`): katılımcı çipi, yorum pini, bağlayıcı uç
+tutamağı ve oy rozeti yuvarlatılmış karedir. Sebep: daire kroması her ekip aracında aynı; kare
+matbaa sesini taşır. Yumuşaklık kalır, klişe gitmiş olur.
 
 ## Hareket
 

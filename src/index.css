@@ -4,11 +4,11 @@
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --color-ink: #141310;
   --color-pigment: #c8452d;
-  --radius-sm: 1px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 3px;
-  --radius-2xl: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
 }
 
 html,
