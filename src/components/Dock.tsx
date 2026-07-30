@@ -367,14 +367,22 @@ export function Dock() {
     }
   }
 
+  const lift = Math.ceil(unit * MAGNIFY_AMPLITUDE) + 12
+
   return (
     <div className="pointer-events-auto absolute bottom-5 left-1/2 z-40 max-w-[calc(100vw-1.5rem)] -translate-x-1/2">
+      <div
+        aria-hidden
+        style={{ height: unit + 12 }}
+        className="absolute inset-x-0 bottom-0 rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[0_6px_24px_rgba(20,19,16,0.14)]"
+      />
       <div
         ref={barRef}
         onPointerMove={onMove}
         onPointerLeave={resetScale}
         onContextMenu={(e) => { e.preventDefault(); settingsPop.setOpen(true) }}
-        className="flex items-end gap-0.5 overflow-x-auto rounded-2xl border border-black/5 bg-[#FCFBF8] px-2 py-1.5 shadow-[0_6px_24px_rgba(20,19,16,0.14)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ paddingTop: magnify ? lift : 6 }}
+        className="relative flex items-end gap-0.5 overflow-x-auto px-2 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((id) => (
           <div
