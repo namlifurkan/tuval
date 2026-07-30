@@ -66,7 +66,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   editing: null,
   hover: null,
   showMinimap: true,
-  showGrid: true,
+  showGrid: false,
   boardName: 'Adsız board',
   previousTool: 'select',
   menu: null,

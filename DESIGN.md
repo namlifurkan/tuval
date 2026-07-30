@@ -112,10 +112,15 @@ disk/kare yığını yerine mürekkep işaretleri.
   künye satırıyla aynı ses. Düzenleyici de aynı biçimde görünür.
 - **Marquee** pigment hairline + `%6` pigment yıkama. Seçim mürekkep, geçici jest pigment.
 - **Hover** mürekkep %30, çoklu seçim üyeleri mürekkep %45. Arayüzde tek bir mavi yoktur.
-- **Zemin = tescil işaretleri.** Nokta ızgarası yerine 25 birimde bir küçük artı; matbaa
-  registration mark'ı. Yakınlaştıkça kol uzunluğu 1.6→3px, alfa aynı eğriyle sönümlenir.
+- **Zemin ızgarasız.** Varsayılan yüzey düz kağıttır: `#F2EFE9` üzerine ince bir **kağıt dokusu**
+  (`src/board/paper.ts`, 128px döşeme, yumuşatılmış gürültü, tepe alfa ~%5, kamerayla kayar).
+  Düzenli ızgara beyaz tahta dilidir ve bilinçli olarak kapalı gelir; hizalama zaten snap ve
+  guide'larla çözülür. İsteyen board menüsünden açar, o zaman nokta değil **tescil artıları** çıkar
+  (matbaa registration mark).
 - **Sticky gölgesi bulanık değil.** `min(w,h)*0.022` kadar sert kaydırılmış mürekkep %10 dikdörtgen —
   serigrafi kayması. Blur'lu drop shadow kullanılmaz.
+- **Dolgular boyanmış kenar taşır.** Sticky ve konturu olmayan şekiller mürekkep %10–12 hairline
+  ile bitirilir; guaj boyanın kağıt kenarında toplanması. Düz plastik dolgu yok.
 
 ### İkon ailesi
 

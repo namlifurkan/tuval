@@ -7,6 +7,7 @@ import {
 } from './geometry'
 import type { Handle } from './geometry'
 import { cellRect, connectorEnds } from './items'
+import { drawPaper } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
@@ -46,8 +47,7 @@ export interface Scene {
 export function render(s: Scene) {
   const { ctx, cam, width, height, dpr } = s
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  ctx.fillStyle = '#F2EFE9'
-  ctx.fillRect(0, 0, width, height)
+  drawPaper(ctx, cam, width, height)
   if (s.showGrid) drawGrid(s)
 
   ctx.save()
@@ -155,6 +155,9 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   ctx.fillStyle = item.fill
   ctx.fillRect(item.x, item.y, item.w, item.h)
   ctx.restore()
+  ctx.strokeStyle = 'rgba(20, 19, 16, 0.10)'
+  ctx.lineWidth = Math.max(1, Math.min(item.w, item.h) * 0.008)
+  ctx.strokeRect(item.x, item.y, item.w, item.h)
   if (s.editing === item.id) return
   const inset = Math.min(item.w, item.h) * 0.1
   drawText(s, item, {
@@ -166,11 +169,18 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
 function drawShape(s: Scene, item: Item & { type: 'shape' }) {
   const { ctx } = s
   const path = shapePath(item.kind, item.x, item.y, item.w, item.h)
+  const inked = item.strokeWidth > 0 && item.stroke !== 'transparent'
   if (item.fill !== 'transparent' && !STROKE_ONLY.has(item.kind)) {
     ctx.fillStyle = item.fill
     ctx.fill(path)
+    if (!inked) {
+      ctx.strokeStyle = 'rgba(20, 19, 16, 0.12)'
+      ctx.lineWidth = 1.5
+      ctx.setLineDash([])
+      ctx.stroke(path)
+    }
   }
-  if (item.strokeWidth > 0 && item.stroke !== 'transparent') {
+  if (inked) {
     ctx.lineWidth = item.strokeWidth
     ctx.strokeStyle = item.stroke
     ctx.lineJoin = 'round'
