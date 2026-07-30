@@ -1,0 +1,515 @@
+import getStroke from 'perfect-freehand'
+import type { Camera } from './camera'
+import { toScreen, viewportRect } from './camera'
+import {
+  ANCHOR_SIDES, aabb, anchorPoint, connectorPath, corners, curveControls, overlaps,
+} from './geometry'
+import type { Handle } from './geometry'
+import { resolveEndpoint } from './items'
+import { shapePath, textInsetFor } from './shapes'
+import type { Session } from './store'
+import { fontString, layoutText } from './text'
+import type { Cap, Id, Item, Rect, TextStyle, Vec } from './types'
+import { BRAND } from './types'
+
+const images = new Map<string, HTMLImageElement>()
+export function getImage(src: string, onLoad: () => void) {
+  let img = images.get(src)
+  if (!img) {
+    img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = onLoad
+    img.src = src
+    images.set(src, img)
+  }
+  return img.complete ? img : null
+}
+
+export interface Scene {
+  ctx: CanvasRenderingContext2D
+  cam: Camera
+  width: number
+  height: number
+  items: Item[]
+  selection: Set<Id>
+  hover: Id | null
+  editing: Id | null
+  session: Session
+  showGrid: boolean
+  showAnchors: boolean
+  dpr: number
+}
+
+export function render(s: Scene) {
+  const { ctx, cam, width, height, dpr } = s
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.fillStyle = '#F7F7F8'
+  ctx.fillRect(0, 0, width, height)
+  if (s.showGrid) drawGrid(s)
+
+  ctx.save()
+  ctx.scale(cam.z, cam.z)
+  ctx.translate(-cam.x, -cam.y)
+  const view = viewportRect(cam, width, height)
+  const pad = 200 / cam.z
+  const visible = { x: view.x - pad, y: view.y - pad, w: view.w + pad * 2, h: view.h + pad * 2 }
+
+  for (const item of s.items) {
+    if (item.type !== 'connector' && !overlaps(aabb(item), visible)) continue
+    drawItem(s, item)
+  }
+  ctx.restore()
+
+  drawOverlay(s)
+}
+
+function drawGrid(s: Scene) {
+  const { ctx, cam, width, height } = s
+  let step = 25
+  while (step * cam.z < 16) step *= 4
+  const start = toScreen(cam, Math.floor(cam.x / step) * step, Math.floor(cam.y / step) * step)
+  const gap = step * cam.z
+  const alpha = Math.min(1, (gap - 12) / 18)
+  if (alpha <= 0) return
+  ctx.fillStyle = `rgba(9, 9, 20, ${0.14 * alpha})`
+  const size = cam.z > 2 ? 2 : 1.6
+  for (let x = start.x; x < width + gap; x += gap) {
+    for (let y = start.y; y < height + gap; y += gap) {
+      ctx.fillRect(x - size / 2, y - size / 2, size, size)
+    }
+  }
+}
+
+function withTransform(ctx: CanvasRenderingContext2D, item: Item, fn: () => void) {
+  if (!item.rotation) return fn()
+  const cx = item.x + item.w / 2, cy = item.y + item.h / 2
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(item.rotation)
+  ctx.translate(-cx, -cy)
+  fn()
+  ctx.restore()
+}
+
+function dash(ctx: CanvasRenderingContext2D, style: string, width: number) {
+  if (style === 'dashed') ctx.setLineDash([width * 3, width * 2.2])
+  else if (style === 'dotted') ctx.setLineDash([0.1, width * 2.4])
+  else ctx.setLineDash([])
+}
+
+function drawItem(s: Scene, item: Item) {
+  const { ctx } = s
+  ctx.globalAlpha = item.opacity ?? 1
+  withTransform(ctx, item, () => {
+    switch (item.type) {
+      case 'frame': drawFrame(s, item); break
+      case 'sticky': drawSticky(s, item); break
+      case 'shape': drawShape(s, item); break
+      case 'text': drawTextItem(s, item); break
+      case 'draw': drawStroke(s, item); break
+      case 'image': drawImage(s, item); break
+      case 'connector': drawConnector(s, item); break
+    }
+  })
+  ctx.globalAlpha = 1
+}
+
+function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
+  const { ctx, cam } = s
+  ctx.fillStyle = item.fill
+  ctx.fillRect(item.x, item.y, item.w, item.h)
+  ctx.lineWidth = 1 / cam.z
+  ctx.strokeStyle = '#D8D8DE'
+  ctx.setLineDash([])
+  ctx.strokeRect(item.x, item.y, item.w, item.h)
+  const size = 13 / cam.z
+  ctx.fillStyle = s.selection.has(item.id) ? BRAND.blue : '#7A7A8C'
+  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Open Sans' }, size)
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillText(item.title, item.x, item.y - 6 / cam.z)
+}
+
+function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
+  const { ctx } = s
+  ctx.save()
+  ctx.shadowColor = 'rgba(9, 9, 20, 0.16)'
+  ctx.shadowBlur = 6
+  ctx.shadowOffsetY = 3
+  ctx.fillStyle = item.fill
+  ctx.fillRect(item.x, item.y, item.w, item.h)
+  ctx.restore()
+  if (s.editing === item.id) return
+  const inset = Math.min(item.w, item.h) * 0.1
+  drawText(s, item, {
+    x: item.x + inset, y: item.y + inset,
+    w: item.w - inset * 2, h: item.h - inset * 2,
+  })
+}
+
+function drawShape(s: Scene, item: Item & { type: 'shape' }) {
+  const { ctx } = s
+  const path = shapePath(item.kind, item.x, item.y, item.w, item.h)
+  if (item.fill !== 'transparent') {
+    ctx.fillStyle = item.fill
+    ctx.fill(path)
+  }
+  if (item.strokeWidth > 0 && item.stroke !== 'transparent') {
+    ctx.lineWidth = item.strokeWidth
+    ctx.strokeStyle = item.stroke
+    ctx.lineJoin = 'round'
+    dash(ctx, item.strokeStyle, item.strokeWidth)
+    ctx.stroke(path)
+    ctx.setLineDash([])
+  }
+  if (s.editing === item.id) return
+  const box = textInsetFor(item.kind, item.w, item.h)
+  drawText(s, item, { x: item.x + box.x, y: item.y + box.y, w: box.w, h: box.h })
+}
+
+function drawTextItem(s: Scene, item: Item & { type: 'text' }) {
+  if (s.editing === item.id) return
+  if (item.fill && item.fill !== 'transparent') {
+    s.ctx.fillStyle = item.fill
+    s.ctx.fillRect(item.x, item.y, item.w, item.h)
+  }
+  drawText(s, item, { x: item.x, y: item.y, w: item.w, h: item.h })
+}
+
+function drawStroke(s: Scene, item: Item & { type: 'draw' }) {
+  const { ctx } = s
+  const pts: number[][] = []
+  for (let i = 0; i < item.points.length; i += 3) {
+    pts.push([item.x + item.points[i] * item.w, item.y + item.points[i + 1] * item.h, item.points[i + 2]])
+  }
+  if (!pts.length) return
+  const outline = getStroke(pts, {
+    size: item.strokeWidth,
+    thinning: item.highlighter ? 0 : 0.55,
+    smoothing: 0.6,
+    streamline: 0.4,
+    simulatePressure: false,
+    last: true,
+  })
+  const path = new Path2D()
+  outline.forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y)))
+  path.closePath()
+  ctx.globalAlpha = (item.opacity ?? 1) * (item.highlighter ? 0.4 : 1)
+  ctx.fillStyle = item.stroke
+  ctx.fill(path)
+  ctx.globalAlpha = 1
+}
+
+function drawImage(s: Scene, item: Item & { type: 'image' }) {
+  const img = getImage(item.src, () => s.session && requestAnimationFrame(() => {}))
+  if (img) s.ctx.drawImage(img, item.x, item.y, item.w, item.h)
+  else {
+    s.ctx.fillStyle = '#E9E9EE'
+    s.ctx.fillRect(item.x, item.y, item.w, item.h)
+  }
+}
+
+function capLength(cap: Cap, width: number) {
+  return cap === 'none' ? 0 : width * 4
+}
+
+function drawCap(ctx: CanvasRenderingContext2D, cap: Cap, at: Vec, dir: Vec, width: number, color: string) {
+  if (cap === 'none') return
+  const len = width * 4
+  const a = Math.atan2(dir.y, dir.x)
+  ctx.save()
+  ctx.translate(at.x, at.y)
+  ctx.rotate(a)
+  ctx.fillStyle = color
+  ctx.strokeStyle = color
+  ctx.setLineDash([])
+  ctx.beginPath()
+  if (cap === 'arrow') {
+    ctx.lineWidth = width
+    ctx.lineCap = 'round'
+    ctx.moveTo(-len, -len * 0.62)
+    ctx.lineTo(0, 0)
+    ctx.lineTo(-len, len * 0.62)
+    ctx.stroke()
+  } else if (cap === 'triangle') {
+    ctx.moveTo(0, 0)
+    ctx.lineTo(-len, -len * 0.55)
+    ctx.lineTo(-len, len * 0.55)
+    ctx.closePath()
+    ctx.fill()
+  } else if (cap === 'circle') {
+    ctx.arc(-len * 0.4, 0, len * 0.42, 0, Math.PI * 2)
+    ctx.fill()
+  } else if (cap === 'diamond') {
+    ctx.moveTo(0, 0)
+    ctx.lineTo(-len * 0.5, -len * 0.45)
+    ctx.lineTo(-len, 0)
+    ctx.lineTo(-len * 0.5, len * 0.45)
+    ctx.closePath()
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+export function connectorGeometry(item: Item & { type: 'connector' }) {
+  const a = resolveEndpoint(item.from)
+  const b = resolveEndpoint(item.to)
+  return { a, b }
+}
+
+function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
+  const { ctx } = s
+  const { a, b } = connectorGeometry(item)
+  const path = new Path2D()
+  const startTrim = capLength(item.capStart, item.strokeWidth)
+  const endTrim = capLength(item.capEnd, item.strokeWidth)
+
+  if (item.shape === 'curved') {
+    const [c1, c2] = curveControls(item, a, b)
+    path.moveTo(a.x, a.y)
+    path.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y)
+  } else {
+    const pts = connectorPath(item, resolveEndpoint)
+    pts.forEach((p, i) => (i ? path.lineTo(p.x, p.y) : path.moveTo(p.x, p.y)))
+  }
+  ctx.lineWidth = item.strokeWidth
+  ctx.strokeStyle = item.stroke
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  dash(ctx, item.strokeStyle, item.strokeWidth)
+  ctx.stroke(path)
+  ctx.setLineDash([])
+
+  const pts = connectorPath(item, resolveEndpoint)
+  const dirEnd = { x: b.x - pts[pts.length - 2].x, y: b.y - pts[pts.length - 2].y }
+  const dirStart = { x: a.x - pts[1].x, y: a.y - pts[1].y }
+  drawCap(ctx, item.capEnd, b, dirEnd, item.strokeWidth, item.stroke)
+  drawCap(ctx, item.capStart, a, dirStart, item.strokeWidth, item.stroke)
+  void startTrim; void endTrim
+
+  if (item.text && s.editing !== item.id) {
+    const mid = pts[Math.floor(pts.length / 2)]
+    const font = fontString(item, item.fontSize)
+    ctx.font = font
+    const w = ctx.measureText(item.text).width
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(mid.x - w / 2 - 4, mid.y - item.fontSize * 0.75, w + 8, item.fontSize * 1.5)
+    ctx.fillStyle = item.textColor
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(item.text, mid.x, mid.y)
+  }
+}
+
+function drawText(s: Scene, item: Item & TextStyle & { text: string }, box: Rect) {
+  if (!item.text) return
+  const { ctx } = s
+  const layout = layoutText(item.text, box.w, box.h, item)
+  ctx.font = fontString(item, layout.fontSize)
+  ctx.fillStyle = item.textColor
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = item.align
+  const total = layout.lines.length * layout.lineHeight
+  const startY =
+    item.valign === 'top' ? box.y : item.valign === 'bottom' ? box.y + box.h - total : box.y + (box.h - total) / 2
+  const x = item.align === 'left' ? box.x : item.align === 'right' ? box.x + box.w : box.x + box.w / 2
+  layout.lines.forEach((line, i) => {
+    const y = startY + i * layout.lineHeight + layout.lineHeight / 2
+    ctx.fillText(line, x, y)
+    if (item.underline || item.strike) {
+      const w = ctx.measureText(line).width
+      const lx = item.align === 'left' ? x : item.align === 'right' ? x - w : x - w / 2
+      ctx.fillRect(
+        lx,
+        item.underline ? y + layout.fontSize * 0.42 : y - layout.fontSize * 0.05,
+        w,
+        Math.max(1, layout.fontSize / 16),
+      )
+    }
+  })
+}
+
+const HANDLE_SIZE = 9
+
+export function handleScreenRects(cam: Camera, box: Rect & { rotation: number }) {
+  const out: { handle: Handle; x: number; y: number }[] = []
+  const hs: Handle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
+  for (const h of hs) {
+    const hw = box.w / 2, hh = box.h / 2
+    const local = {
+      x: h.includes('w') ? -hw : h.includes('e') ? hw : 0,
+      y: h.includes('n') ? -hh : h.includes('s') ? hh : 0,
+    }
+    const c = { x: box.x + hw, y: box.y + hh }
+    const cos = Math.cos(box.rotation), sin = Math.sin(box.rotation)
+    const p = toScreen(cam, c.x + local.x * cos - local.y * sin, c.y + local.x * sin + local.y * cos)
+    out.push({ handle: h, x: p.x, y: p.y })
+  }
+  return out
+}
+
+function drawOverlay(s: Scene) {
+  const { ctx, cam, session } = s
+  ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0)
+  ctx.lineCap = 'butt'
+
+  for (const [a, b] of session.guides) {
+    const p = toScreen(cam, a.x, a.y), q = toScreen(cam, b.x, b.y)
+    ctx.strokeStyle = BRAND.guide
+    ctx.lineWidth = 1
+    ctx.setLineDash([4, 4])
+    ctx.beginPath()
+    ctx.moveTo(p.x, p.y)
+    ctx.lineTo(q.x, q.y)
+    ctx.stroke()
+    ctx.setLineDash([])
+  }
+
+  const selected = s.items.filter((i) => s.selection.has(i.id))
+  if (s.hover && !s.selection.has(s.hover)) {
+    const item = s.items.find((i) => i.id === s.hover)
+    if (item && item.type !== 'connector') outline(ctx, cam, item, 'rgba(66, 98, 255, 0.55)', 1.5)
+  }
+
+  if (selected.length === 1 && s.editing !== selected[0].id) {
+    const item = selected[0]
+    if (item.type === 'connector') {
+      const { a, b } = connectorGeometry(item)
+      for (const p of [a, b]) {
+        const sp = toScreen(cam, p.x, p.y)
+        dot(ctx, sp.x, sp.y, 5)
+      }
+    } else {
+      outline(ctx, cam, item, BRAND.blue, 2)
+      if (!item.locked) drawHandles(ctx, cam, item)
+    }
+  } else if (selected.length > 1) {
+    for (const item of selected) {
+      if (item.type === 'connector') continue
+      outline(ctx, cam, item, 'rgba(66, 98, 255, 0.7)', 1.5)
+    }
+    const box = boxOf(selected)
+    const p = toScreen(cam, box.x, box.y)
+    ctx.strokeStyle = BRAND.blue
+    ctx.lineWidth = 2
+    ctx.strokeRect(p.x, p.y, box.w * cam.z, box.h * cam.z)
+    drawHandles(ctx, cam, { ...box, rotation: 0 })
+  }
+
+  if (s.showAnchors && s.hover) {
+    const item = s.items.find((i) => i.id === s.hover)
+    if (item && item.type !== 'connector' && item.type !== 'frame') {
+      for (const side of ANCHOR_SIDES) {
+        const p = toScreen(cam, ...(({ x, y }) => [x, y] as [number, number])(anchorPoint(item, side)))
+        dot(ctx, p.x, p.y, 5)
+      }
+    }
+  }
+
+  if (session.connectorDraft) {
+    const a = toScreen(cam, session.connectorDraft.from.x, session.connectorDraft.from.y)
+    const b = toScreen(cam, session.connectorDraft.to.x, session.connectorDraft.to.y)
+    ctx.strokeStyle = BRAND.blue
+    ctx.lineWidth = 2
+    ctx.setLineDash([6, 4])
+    ctx.beginPath()
+    ctx.moveTo(a.x, a.y)
+    ctx.lineTo(b.x, b.y)
+    ctx.stroke()
+    ctx.setLineDash([])
+    dot(ctx, b.x, b.y, 5)
+  }
+
+  if (session.marquee) {
+    const m = session.marquee
+    const p = toScreen(cam, m.x, m.y)
+    ctx.fillStyle = 'rgba(66, 98, 255, 0.08)'
+    ctx.strokeStyle = BRAND.blue
+    ctx.lineWidth = 1
+    ctx.fillRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
+    ctx.strokeRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
+  }
+
+  for (const user of session.remote) {
+    if (!user.cursor) continue
+    const p = toScreen(cam, user.cursor.x, user.cursor.y)
+    drawCursor(ctx, p, user.color, user.name)
+  }
+}
+
+export function boxOf(items: Item[]): Rect {
+  const rects = items.map(aabb)
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+  for (const r of rects) {
+    x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y)
+    x1 = Math.max(x1, r.x + r.w); y1 = Math.max(y1, r.y + r.h)
+  }
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
+}
+
+function outline(ctx: CanvasRenderingContext2D, cam: Camera, item: Item, color: string, width: number) {
+  if (item.type === 'connector') return
+  const pts = corners(item).map((p) => toScreen(cam, p.x, p.y))
+  ctx.strokeStyle = color
+  ctx.lineWidth = width
+  ctx.setLineDash([])
+  ctx.beginPath()
+  pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)))
+  ctx.closePath()
+  ctx.stroke()
+}
+
+function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { rotation: number }) {
+  for (const h of handleScreenRects(cam, box)) {
+    const small = h.handle.length === 1
+    const w = small ? HANDLE_SIZE - 2 : HANDLE_SIZE
+    ctx.save()
+    ctx.translate(h.x, h.y)
+    ctx.rotate(box.rotation)
+    ctx.fillStyle = '#FFFFFF'
+    ctx.strokeStyle = BRAND.blue
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.roundRect(-w / 2, -w / 2, w, w, 2)
+    ctx.fill()
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+
+function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.beginPath()
+  ctx.arc(x, y, r, 0, Math.PI * 2)
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fill()
+  ctx.lineWidth = 2
+  ctx.strokeStyle = BRAND.blue
+  ctx.stroke()
+}
+
+function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: string) {
+  ctx.save()
+  ctx.translate(p.x, p.y)
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(0, 17)
+  ctx.lineTo(4.5, 12.8)
+  ctx.lineTo(10.5, 12.2)
+  ctx.closePath()
+  ctx.fillStyle = color
+  ctx.strokeStyle = '#FFFFFF'
+  ctx.lineWidth = 1.4
+  ctx.fill()
+  ctx.stroke()
+  ctx.font = '600 11px "Open Sans", system-ui, sans-serif'
+  const w = ctx.measureText(name).width
+  ctx.beginPath()
+  ctx.roundRect(12, 12, w + 14, 20, 10)
+  ctx.fillStyle = color
+  ctx.fill()
+  ctx.fillStyle = '#FFFFFF'
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = 'left'
+  ctx.fillText(name, 19, 22.5)
+  ctx.restore()
+}
