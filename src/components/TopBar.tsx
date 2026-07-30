@@ -6,6 +6,7 @@ import { exportPng } from '../board/export'
 import { printFrames } from '../board/print'
 import { requestRender, useBoardStore } from '../board/store'
 import { Collaborators } from './Collaborators'
+import { SessionTools } from './SessionTools'
 import { IconButton, Popover, usePopover } from './ui'
 
 export function TopBar() {
@@ -93,6 +94,7 @@ export function TopBar() {
           <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
+          <SessionTools />
           <IconButton
             title="Sürüm geçmişi"
             onClick={() => update({ historyPanel: !useBoardStore.getState().historyPanel })}

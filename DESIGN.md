@@ -56,6 +56,23 @@ gerekirse gece çalışan tek kullanıcı senaryosu ayrıca gerekçelendirilir.
 - Hiyerarşi ağırlık + boyutla kurulur, renkle değil. Panel başlıkları 12px/600, gövde 14px/400.
 - Gövde metni 65–75ch ile sınırlanır (yorum thread'i, doküman fazı).
 
+## Yerleşim
+
+Kroma dört yüzeye ayrılır, her birinin tek bir işi var:
+
+- **Üst bar** — board kimliği (sol) ve board seviyesi eylemler (sağ): arama, zamanlayıcı, oylama,
+  sürüm geçmişi, çağrı, katılımcılar, paylaş, sunum. Tek grup, ayrı yüzen ada yok.
+- **Alt dock (orta)** — araçlar. Geri/ileri al · araç paleti · minimap, sığdır, zoom. Board'lar
+  geniş olduğu için yatay alan yenmez; projeksiyonda izleyicinin baktığı üst-orta bölge boş kalır.
+  Dar ekranda zoom kümesi gizlenir (tekerlek, klavye ve minimap zaten var), dock viewport'u aşmaz.
+- **Sağ inspector** — seçim özellikleri. Dikey, etiketli bölümler. Seçimin **üstünü kapatmaz**;
+  bu bilinçli bir tercih: yüzen seçim çubuğu tam da incelediğin şeyi gizler.
+- **Tuval** — geri kalan her şey.
+
+Miro'nun sol dikey rail + seçim üstü yüzen çubuk + sağ alt zoom/minimap kümesi düzeni bilinçli
+olarak kullanılmadı. Araç paleti, zoom, minimap gibi öğeler kategori konvansiyonudur ve korunur;
+**onların yerleşimi** bize ait.
+
 ## Yükseklik ve kenar
 
 Gölge tek bir aileden gelir, sıcak siyaha kırıktır:

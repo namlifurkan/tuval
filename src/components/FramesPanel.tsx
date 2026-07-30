@@ -63,7 +63,7 @@ export function FramesPanel() {
   }
 
   return (
-    <div className="absolute left-[76px] top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.16)]">
+    <div className="absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.16)]">
       <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
         <span className="text-xs font-semibold text-[#141310]">Frame'ler ({frames.length})</span>
         <div className="flex items-center gap-0.5">

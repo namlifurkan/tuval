@@ -47,8 +47,8 @@ export function SessionTools() {
   }
 
   return (
-    <div className="pointer-events-auto absolute right-4 top-[76px] z-40 flex flex-col items-end gap-2">
-      <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1 shadow-[0_4px_16px_rgba(20,19,16,0.12)]">
+    <>
+      <div className="flex items-center gap-0.5">
         {showTimer && (
           <span
             className={`px-2 font-semibold tabular-nums ${left === 0 ? 'text-[#C8452D]' : 'text-[#141310]'}`}
@@ -166,6 +166,6 @@ export function SessionTools() {
           </Popover>
         </div>
       </div>
-    </div>
+    </>
   )
 }
