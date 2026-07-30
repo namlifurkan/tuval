@@ -1,5 +1,5 @@
 import {
-  Clock, Download, Grid3x3, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
+  Clock, Download, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
 } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
@@ -8,6 +8,8 @@ import { awareness, getItems, getMeta, removeItems, room, setMeta, subscribeMeta
 import { exportPng } from '../board/export'
 import { me } from '../board/me'
 import { printFrames } from '../board/print'
+import { TEXTURES } from '../board/paper'
+import { readTexture } from '../board/paperPrefs'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import { Collaborators } from './Collaborators'
@@ -51,8 +53,9 @@ const readSurface = () => (getMeta().surface as string) ?? 'paper'
 
 export function TopBar() {
   const surface = useSyncExternalStore(subscribeMeta, readSurface, readSurface)
-  const dark = isDarkSurface(surfaceColor(surface))
-  const showGrid = useBoardStore((s) => s.showGrid)
+  const paint = surfaceColor(surface)
+  const dark = isDarkSurface(paint)
+  const texture = useSyncExternalStore(subscribeMeta, readTexture, readTexture)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
 
@@ -63,7 +66,7 @@ export function TopBar() {
         className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24"
         style={dark
           ? { background: '#F2EFE9', height: 76, boxShadow: '0 2px 0 rgba(20,19,16,0.18)' }
-          : { backgroundImage: 'linear-gradient(to bottom, #F2EFE9, #F2EFE9B3, #F2EFE900)' }}
+          : { backgroundImage: `linear-gradient(to bottom, ${paint}, ${paint}B3, ${paint}00)` }}
       />
       <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
         <div className="pointer-events-auto min-w-0">
@@ -104,14 +107,6 @@ export function TopBar() {
               >
                 <Printer size={15} /> Frame'leri PDF yazdır
               </button>
-              <button
-                type="button"
-                onClick={() => { update({ showGrid: !showGrid }); requestRender() }}
-                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
-              >
-                <span className="flex items-center gap-2"><Grid3x3 size={15} /> Izgara</span>
-                <span className="text-xs text-[#8A867C]">{showGrid ? 'Açık' : 'Kapalı'}</span>
-              </button>
               <div className="my-1 h-px bg-[#EAE6DD]" />
               <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">Zemin</div>
               <div className="grid grid-cols-5 gap-1.5 px-2 pb-1">
@@ -125,6 +120,18 @@ export function TopBar() {
                     className={`h-7 rounded-md border transition-transform hover:scale-105
                       ${surface === s.id ? 'border-[#C8452D] ring-1 ring-[#C8452D]' : 'border-black/10'}`}
                   />
+                ))}
+              </div>
+              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">Doku</div>
+              <div className="flex flex-wrap gap-1 px-2 pb-1">
+                {TEXTURES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => { setMeta('texture', t.id); requestRender() }}
+                    className={`rounded-lg px-2 py-1 text-xs font-semibold
+                      ${texture === t.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  >{t.name}</button>
                 ))}
               </div>
               <div className="my-1 h-px bg-[#EAE6DD]" />

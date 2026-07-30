@@ -24,7 +24,6 @@ interface BoardState {
   editing: EditingState | null
   hover: Id | null
   showMinimap: boolean
-  showGrid: boolean
   boardName: string
   previousTool: Tool
   menu: { x: number; y: number } | null
@@ -66,7 +65,6 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   editing: null,
   hover: null,
   showMinimap: true,
-  showGrid: false,
   boardName: 'Adsız board',
   previousTool: 'select',
   menu: null,

@@ -8,8 +8,8 @@ import {
 import type { Handle } from './geometry'
 import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
 import { CODE_THEME, tokenize } from './code'
-import { isDarkSurface } from './brand'
 import { drawPaper } from './paper'
+import type { TextureId } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
@@ -41,8 +41,8 @@ export interface Scene {
   editingCell: [number, number] | null
   session: Session
   votes: Map<Id, number> | null
-  showGrid: boolean
   surface: string
+  texture: TextureId
   showAnchors: boolean
   dpr: number
 }
@@ -50,8 +50,7 @@ export interface Scene {
 export function render(s: Scene) {
   const { ctx, cam, width, height, dpr } = s
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  drawPaper(ctx, cam, width, height, s.surface)
-  if (s.showGrid) drawGrid(s)
+  drawPaper(ctx, cam, width, height, s.surface, s.texture)
 
   ctx.save()
   ctx.scale(cam.z, cam.z)
@@ -70,31 +69,6 @@ export function render(s: Scene) {
   drawOverlay(s)
 }
 
-function drawGrid(s: Scene) {
-  const { ctx, cam, width, height } = s
-  let step = 25
-  while (step * cam.z < 16) step *= 4
-  const start = toScreen(cam, Math.floor(cam.x / step) * step, Math.floor(cam.y / step) * step)
-  const gap = step * cam.z
-  const alpha = Math.min(1, (gap - 12) / 18)
-  if (alpha <= 0) return
-  const arm = Math.min(3, 1.6 + gap / 40)
-  const marks = new Path2D()
-  for (let x = start.x; x < width + gap; x += gap) {
-    for (let y = start.y; y < height + gap; y += gap) {
-      marks.moveTo(x - arm, y)
-      marks.lineTo(x + arm, y)
-      marks.moveTo(x, y - arm)
-      marks.lineTo(x, y + arm)
-    }
-  }
-  ctx.strokeStyle = isDarkSurface(s.surface)
-    ? `rgba(252, 251, 248, ${0.22 * alpha})`
-    : `rgba(20, 19, 16, ${0.2 * alpha})`
-  ctx.lineWidth = 1
-  ctx.lineCap = 'butt'
-  ctx.stroke(marks)
-}
 
 function withTransform(ctx: CanvasRenderingContext2D, item: Item, fn: () => void) {
   if (!item.rotation) return fn()

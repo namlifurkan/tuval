@@ -121,11 +121,18 @@ disk/kare yığını yerine mürekkep işaretleri.
   künye satırıyla aynı ses. Düzenleyici de aynı biçimde görünür.
 - **Marquee** pigment hairline + `%6` pigment yıkama. Seçim mürekkep, geçici jest pigment.
 - **Hover** mürekkep %30, çoklu seçim üyeleri mürekkep %45. Arayüzde tek bir mavi yoktur.
-- **Zemin ızgarasız.** Varsayılan yüzey düz kağıttır: `#F2EFE9` üzerine ince bir **kağıt dokusu**
-  (`src/board/paper.ts`, 128px döşeme, yumuşatılmış gürültü, tepe alfa ~%5, kamerayla kayar).
-  Düzenli ızgara beyaz tahta dilidir ve bilinçli olarak kapalı gelir; hizalama zaten snap ve
-  guide'larla çözülür. İsteyen board menüsünden açar, o zaman nokta değil **tescil artıları** çıkar
-  (matbaa registration mark).
+- **Zemin = renk + doku, ikisi de seçilir.** Board menüsünde on **yüzey** (kağıt, badana, kum,
+  keten, kil, seladon, sis, gri karton, mavi baskı, kara tahta) ve yedi **doku** (kağıt, keten,
+  tescil, nokta, kareli, çizgili, düz). İkisi de Yjs `meta`'da tutulur, yani board'a ait ve
+  ekipçe ortaktır — kişisel tercih değil.
+
+  Doku iki aileye ayrılır: **malzeme** (kağıt gerçeği, keten dokuma) raster döşemedir, ekran
+  ölçeğinde kalır ve kamerayla kayar — çünkü doku yüzeyin kendisine aittir, zoom'la büyümez.
+  **Çizim** (tescil, nokta, kareli, çizgili) vektördür ve dünya ölçeğinde çizilir — çünkü o bir
+  ölçü ızgarasıdır. Varsayılan kağıt dokusudur; düzenli ızgara beyaz tahta dilidir, isteyen açar.
+
+  Koyu yüzeylerde doku beyaza, üst bar geçişli scrim yerine opak açık plakaya döner. Panel,
+  popover ve dock zaten kendi kağıt yüzeyinde olduğu için chrome her koşulda okunur kalır.
 - **Sticky gölgesi bulanık değil.** `min(w,h)*0.022` kadar sert kaydırılmış mürekkep %10 dikdörtgen —
   serigrafi kayması. Blur'lu drop shadow kullanılmaz.
 - **Dolgular boyanmış kenar taşır.** Sticky ve konturu olmayan şekiller mürekkep %10–12 hairline

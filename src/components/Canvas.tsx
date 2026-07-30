@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { surfaceColor } from '../board/brand'
+import { readTexture } from '../board/paperPrefs'
 import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, getMeta, subscribeMeta, undoManager } from '../board/doc'
 import {
@@ -69,8 +70,8 @@ export function Canvas() {
         editingCell: s.editing?.cell ?? null,
         session,
         votes: voteSnapshot(),
-        showGrid: s.showGrid,
         surface: surfaceColor(getMeta().surface as string),
+        texture: readTexture(),
         showAnchors: s.tool === 'select' || s.tool === 'connector',
       })
       canvas.style.cursor = session.cursor
