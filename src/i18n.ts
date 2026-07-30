@@ -280,6 +280,8 @@ const tr: Record<string, string> = {
   'Add child': 'Alt dal',
   'Add sibling': 'Kardeş dal',
   'Tidy layout': 'Yerleşimi düzelt',
+  'Assigned to': 'Atanan',
+  'Owner': 'Sahip',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

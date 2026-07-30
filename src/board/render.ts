@@ -9,6 +9,7 @@ import type { Handle } from './geometry'
 import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
 import { CODE_THEME, tokenize } from './code'
 import { labelColor, labelFontSize, labelHeight, labelInk } from './labels'
+import { initials } from './me'
 import { drawPaper } from './paper'
 import type { TextureId } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
@@ -123,7 +124,28 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
   ctx.fillText(item.title.toUpperCase(), item.x, item.y - 7 / cam.z)
+  const titleW = ctx.measureText(item.title.toUpperCase()).width
   ctx.letterSpacing = '0px'
+
+  const crew = item.assignees ?? []
+  if (crew.length) {
+    const chip = 16 / cam.z
+    let x = item.x + titleW + 10 / cam.z
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    for (const person of crew) {
+      const box = new Path2D()
+      box.roundRect(x, item.y - 7 / cam.z - chip * 0.78, chip, chip, chip * 0.28)
+      ctx.fillStyle = person.color
+      ctx.fill(box)
+      ctx.fillStyle = '#FCFBF8'
+      ctx.font = `700 ${chip * 0.5}px "Instrument Sans", system-ui, sans-serif`
+      ctx.fillText(initials(person.name), x + chip / 2, item.y - 7 / cam.z - chip * 0.28)
+      x += chip + 3 / cam.z
+    }
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'alphabetic'
+  }
 }
 
 function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {

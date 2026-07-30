@@ -49,6 +49,7 @@ How to interpret it:
 | Markdown | On the canvas | Read it as |
 |---|---|---|
 | `## Heading` | a frame | a section, a column, a phase |
+| `Owner: Ada, Mina` under a heading | people assigned to that frame | who is responsible for the section |
 | `- bullet` | a sticky note | one idea, one card, one task |
 | `- [Decision] bullet` | a sticky with a status chip | the author's state: Idea, Question, Doing, Blocked, Decision, Done |
 | fenced code | a code block | real source, quote it exactly |
@@ -112,7 +113,9 @@ Rules that matter:
 5. **Only draw arrows that mean something.** Dependency, sequence, causality. Do not connect
    every node to the next one just to fill the graph.
 6. **Do not invent `## Comments`.** Comments come from humans on the board.
-7. **Code blocks stay code.** Do not turn source into bullets; the canvas renders code blocks
+7. **Keep `Owner:` lines you were given.** Drop the line if you do not know who owns a section;
+   never guess a name.
+8. **Code blocks stay code.** Do not turn source into bullets; the canvas renders code blocks
    with syntax colouring and line numbers.
 
 ## Round trip

@@ -1,3 +1,5 @@
+import { boardPeople, isAssigned, toggleAssignee } from '../board/people'
+import { initials } from '../board/me'
 import { isNode, layoutMindmap, rootOf } from '../board/mindmap'
 import { mindmapBranch, quickCreateFromSelection } from '../board/interaction'
 import { LABEL_SIZES, labelInk, STATUS_LABELS } from '../board/labels'
@@ -219,6 +221,33 @@ export function Inspector() {
             placeholder={t('Frame name')}
             className="w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
           />
+          <div className="mt-2 text-xs text-[#8A867C]">{t('Assigned to')}</div>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {boardPeople().map((person) => {
+              const on = isAssigned(frame.assignees, person.id)
+              return (
+                <button
+                  key={person.id}
+                  type="button"
+                  title={person.name}
+                  onClick={() => {
+                    patchItem(frame.id, { assignees: toggleAssignee(frame.assignees, person) })
+                    requestRender()
+                  }}
+                  className={`flex items-center gap-1.5 rounded-md py-1 pl-1 pr-2 text-xs font-semibold transition-colors
+                    ${on ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EFEBE2]'}`}
+                >
+                  <span
+                    className="grid h-5 w-5 place-items-center rounded-md text-[9px] font-bold text-white"
+                    style={{ background: person.color }}
+                  >
+                    {initials(person.name)}
+                  </span>
+                  {person.name}
+                </button>
+              )
+            })}
+          </div>
         </Section>
       )}
 

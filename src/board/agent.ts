@@ -17,6 +17,7 @@ export interface AgentNode {
 export interface AgentSection {
   id: Id | null
   title: string
+  assignees?: string[]
   nodes: AgentNode[]
 }
 
@@ -74,7 +75,13 @@ export function boardToGraph(items: Item[], board: string, scope = 'board'): Age
     if (frame.type !== 'frame') continue
     const own = content.filter((i) => (i.parentId ? i.parentId === frame.id : inside(frame, i)))
     own.forEach((i) => claimed.add(i.id))
-    sections.push({ id: frame.id, title: frame.title, nodes: own.sort(readingOrder).map(toNode) })
+    const crew = (frame.assignees ?? []).map((a) => a.name)
+    sections.push({
+      id: frame.id,
+      title: frame.title,
+      ...(crew.length ? { assignees: crew } : {}),
+      nodes: own.sort(readingOrder).map(toNode),
+    })
   }
   const loose = content.filter((i) => !claimed.has(i.id))
   if (loose.length) {
@@ -142,6 +149,10 @@ export function graphToMarkdown(g: AgentGraph): string {
     if (!section.nodes.length) continue
     out.push(`## ${section.title}`)
     out.push('')
+    if (section.assignees?.length) {
+      out.push(`${t('Owner')}: ${section.assignees.join(', ')}`)
+      out.push('')
+    }
     for (const node of section.nodes) {
       if (node.kind === 'code') {
         if (out[out.length - 1] !== '') out.push('')

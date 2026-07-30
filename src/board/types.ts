@@ -84,11 +84,14 @@ export interface ImageItem extends BaseItem {
   naturalH: number
 }
 
+export interface Assignee { id: string; name: string; color: string }
+
 export interface FrameItem extends BaseItem {
   type: 'frame'
   title: string
   fill: string
   order?: number
+  assignees?: Assignee[]
 }
 
 export interface CommentReply {

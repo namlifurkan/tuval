@@ -1,3 +1,4 @@
+import { boardPeople } from './people'
 import { codeHeight, makeCode, makeConnector, makeFrame, makeSticky, makeTable, STICKY_SIZE } from './items'
 import { PIGMENTS } from './brand'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -11,7 +12,7 @@ interface Node {
   rows?: string[][]
 }
 
-interface Section { title: string; nodes: Node[] }
+interface Section { title: string; owners?: string[]; nodes: Node[] }
 
 interface Parsed {
   title: string
@@ -102,6 +103,8 @@ export function parseBrief(md: string): Parsed {
     }
 
     const text = line.trim()
+    const owner = /^(?:owner|sahip|atanan)\s*:\s*(.+)$/i.exec(text)
+    if (owner && section) { section.owners = owner[1].split(',').map((o) => o.trim()).filter(Boolean); continue }
     if (text && section && !/^[-=_]{3,}$/.test(text)) push({ kind: 'sticky', text })
   }
 
@@ -187,6 +190,13 @@ export function briefToItems(md: string, origin: Vec): { items: Item[]; title: s
     const frameW = innerW + FRAME_PAD * 2
     const frameH = innerH + FRAME_PAD * 2
     const frame = makeFrame(cursorX, origin.y, frameW, frameH, section.title || `Frame ${si + 1}`)
+    if (section.owners?.length) {
+      const pool = boardPeople()
+      const crew = section.owners
+        .map((name) => pool.find((p) => p.name.toLowerCase() === name.toLowerCase()))
+        .filter((p): p is NonNullable<typeof p> => !!p)
+      if (crew.length) frame.assignees = crew
+    }
     items.push(frame)
 
     for (const p of placed) {
