@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { boardToGraph, download, graphToPrompt } from '../board/agent'
 import { getItems } from '../board/doc'
 import { useBoardStore } from '../board/store'
-import { Handoff } from './icons'
+import { Spark } from './icons'
 import { IconButton, Popover, usePopover } from './ui'
 
 const CHAT = [
@@ -55,12 +55,17 @@ export function HandoffMenu() {
 
   return (
     <div className="relative">
-      <IconButton title="AI'ya devret" active={pop.open} onClick={pop.toggle}>
-        <Handoff size={18} />
+      <IconButton
+        title="AI'ya devret"
+        active={pop.open}
+        onClick={pop.toggle}
+        className={pop.open ? '' : 'text-[#C8452D] hover:bg-[#F7E9E4] hover:ring-[#C8452D]/25'}
+      >
+        <Spark size={18} />
       </IconButton>
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[270px]">
         <div className="flex items-center justify-between px-2.5 pb-1.5 pt-1">
-          <span className="text-xs font-semibold text-[#8A867C]">AI'ya devret</span>
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#C8452D]"><Spark size={13} /> AI'ya devret</span>
           <span className="text-xs text-[#8A867C]">{scope}</span>
         </div>
 
@@ -115,7 +120,7 @@ export function HandoffMenu() {
       </Popover>
 
       {note && (
-        <div className="fixed bottom-24 left-1/2 z-[80] max-w-[420px] -translate-x-1/2 rounded-lg border border-black/5 bg-[#141310] px-3 py-2 text-sm text-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+        <div className="fixed bottom-24 left-1/2 z-[80] max-w-[420px] -translate-x-1/2 rounded-lg border border-black/5 bg-[#C8452D] px-3 py-2 text-sm text-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
           {note}
         </div>
       )}

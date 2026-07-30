@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { fitRect } from '../board/camera'
 import { aabb } from '../board/geometry'
 import { requestRender, useBoardStore } from '../board/store'
@@ -23,15 +23,23 @@ export function SearchPanel() {
   const setSelection = useBoardStore((s) => s.setSelection)
   const items = useItems()
   const [query, setQuery] = useState('')
+  const [cursor, setCursor] = useState(0)
   const ref = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => { if (open) ref.current?.focus() }, [open])
+  useEffect(() => { setCursor(0) }, [query])
+  useEffect(() => {
+    listRef.current?.children[cursor]?.scrollIntoView({ block: 'nearest' })
+  }, [cursor])
   if (!open) return null
 
   const q = query.trim().toLowerCase()
   const hits = q
     ? items.filter((i) => textOf(i).toLowerCase().includes(q)).slice(0, 30)
     : []
+
+  const active = Math.min(cursor, Math.max(0, hits.length - 1))
 
   const jump = (item: Item) => {
     const el = document.querySelector('canvas')!
@@ -52,8 +60,21 @@ export function SearchPanel() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             e.stopPropagation()
-            if (e.key === 'Escape') update({ searchOpen: false })
-            if (e.key === 'Enter' && hits[0]) jump(hits[0])
+            if (e.key === 'Escape') { update({ searchOpen: false }); return }
+            if (e.key === 'ArrowDown' || (e.key === 'n' && e.ctrlKey)) {
+              e.preventDefault()
+              setCursor((c) => (hits.length ? (c + 1) % hits.length : 0))
+              return
+            }
+            if (e.key === 'ArrowUp' || (e.key === 'p' && e.ctrlKey)) {
+              e.preventDefault()
+              setCursor((c) => (hits.length ? (c - 1 + hits.length) % hits.length : 0))
+              return
+            }
+            if (e.key === 'Enter' && hits[active]) {
+              jump(hits[active])
+              if (!e.shiftKey) update({ searchOpen: false })
+            }
           }}
           placeholder="Board içinde ara…"
           className="flex-1 text-sm outline-none placeholder:text-[#8A867C]"
@@ -68,16 +89,18 @@ export function SearchPanel() {
       </div>
 
       {q && (
-        <div className="max-h-[320px] overflow-y-auto border-t border-[#EAE6DD] p-1">
+        <div ref={listRef} className="max-h-[320px] overflow-y-auto border-t border-[#EAE6DD] p-1">
           {hits.length === 0 && (
             <div className="px-3 py-4 text-center text-sm text-[#8A867C]">Sonuç yok</div>
           )}
-          {hits.map((i) => (
+          {hits.map((i, n) => (
             <button
               key={i.id}
               type="button"
-              onClick={() => jump(i)}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left hover:bg-[#EFEBE2]"
+              onClick={() => { jump(i); update({ searchOpen: false }) }}
+              onPointerEnter={() => setCursor(n)}
+              className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left
+                ${n === active ? 'bg-[#F7E9E4] ring-1 ring-[#C8452D]/25' : 'hover:bg-[#EFEBE2]'}`}
             >
               <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A463E]">
                 {TYPE_LABEL[i.type] ?? i.type}
@@ -85,6 +108,15 @@ export function SearchPanel() {
               <span className="truncate text-sm text-[#141310]">{textOf(i)}</span>
             </button>
           ))}
+        </div>
+      )}
+
+      {q && hits.length > 0 && (
+        <div className="flex items-center gap-3 border-t border-[#EAE6DD] px-3 py-1.5 text-[11px] text-[#8A867C]">
+          <span><kbd className="font-semibold">↑↓</kbd> gez</span>
+          <span><kbd className="font-semibold">↵</kbd> git</span>
+          <span><kbd className="font-semibold">⇧↵</kbd> git, açık kal</span>
+          <span className="ml-auto">{active + 1}/{hits.length}</span>
         </div>
       )}
     </div>

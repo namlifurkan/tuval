@@ -84,9 +84,19 @@ export const CodeTool = (p: Props) => (
   <Ico {...p} d={['M9 7.5 L3.5 12 L9 16.5', 'M15 7.5 L20.5 12 L15 16.5', 'M13.5 4 L10.5 20']} />
 )
 
-export const Handoff = (p: Props) => (
-  <Ico {...p} d={['M3 4 H13 V11', 'M3 4 V20 H13 V16', 'M9 12 H21', 'M17 8 L21 12 L17 16']} />
-)
+export function Spark({ size = 20, strokeWidth = 1.4 }: Props) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M13.5 2 L15.9 9.6 L23.5 12 L15.9 14.4 L13.5 22 L11.1 14.4 L3.5 12 L11.1 9.6 Z"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinejoin="miter"
+      />
+      <path d="M5 2 L6 4.9 L8.9 6 L6 7.1 L5 10 L4 7.1 L1.1 6 L4 4.9 Z" fill="currentColor" />
+    </svg>
+  )
+}
 
 export const More = (p: Props) => (
   <Ico {...p} d={['M3.5 10.5 H6.5 V13.5 H3.5 Z', 'M10.5 10.5 H13.5 V13.5 H10.5 Z', 'M17.5 10.5 H20.5 V13.5 H17.5 Z']} />
