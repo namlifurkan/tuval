@@ -1,7 +1,8 @@
-import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Search, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Printer, Search, Star, Trash2 } from 'lucide-react'
 import { COLOR, PRODUCT } from '../board/brand'
 import { getItems, removeItems, room } from '../board/doc'
 import { exportPng } from '../board/export'
+import { printFrames } from '../board/print'
 import { requestRender, useBoardStore } from '../board/store'
 import { Collaborators } from './Collaborators'
 import { IconButton, Popover, usePopover } from './ui'
@@ -47,6 +48,17 @@ export function TopBar() {
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <Download size={15} /> Board'u PNG indir
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const count = printFrames(getItems())
+                  if (!count) alert('PDF için en az bir frame gerekiyor.')
+                  menu.close()
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+              >
+                <Printer size={15} /> Frame'leri PDF yazdır
               </button>
               <button
                 type="button"

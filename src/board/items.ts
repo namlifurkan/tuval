@@ -1,4 +1,4 @@
-import { getIndex, newId, nextZ } from './doc'
+import { getIndex, getItems, newId, nextZ } from './doc'
 import { session } from './store'
 import { anchorPoint, nearestAnchor, resolveConnector } from './geometry'
 import type { Ends } from './geometry'
@@ -74,7 +74,14 @@ export function makeDraw(
 }
 
 export function makeFrame(x: number, y: number, w: number, h: number, title: string): FrameItem {
-  return { ...base(x, y, w, h), type: 'frame', title, fill: '#FCFBF8', z: -1000 - Math.random() }
+  const order = getItems().filter((i) => i.type === 'frame').length
+  return { ...base(x, y, w, h), type: 'frame', title, fill: '#FCFBF8', order, z: -1000 - Math.random() }
+}
+
+export function sortedFrames(all: Item[]): FrameItem[] {
+  return all
+    .filter((i): i is FrameItem => i.type === 'frame')
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id < b.id ? -1 : 1))
 }
 
 export function makeImage(x: number, y: number, w: number, h: number, src: string): ImageItem {

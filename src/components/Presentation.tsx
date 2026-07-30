@@ -2,12 +2,12 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { fitRect } from '../board/camera'
 import { requestRender, useBoardStore } from '../board/store'
+import { sortedFrames } from '../board/items'
 import { useItems } from '../board/useBoard'
 import type { FrameItem } from '../board/types'
 
 export function usePresentationFrames(): FrameItem[] {
-  const items = useItems()
-  return items.filter((i): i is FrameItem => i.type === 'frame')
+  return sortedFrames(useItems())
 }
 
 export function Presentation() {

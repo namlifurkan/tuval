@@ -1,8 +1,11 @@
-import { Play, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Play, Printer, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { fitRect } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
 import { renderToCanvas } from '../board/export'
+import { patchItems } from '../board/doc'
+import { sortedFrames } from '../board/items'
+import { printFrames } from '../board/print'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { FrameItem } from '../board/types'
@@ -34,7 +37,21 @@ export function FramesPanel() {
   const setSelection = useBoardStore((s) => s.setSelection)
   const items = useItems()
   const [renaming, setRenaming] = useState<string | null>(null)
-  const frames = items.filter((i): i is FrameItem => i.type === 'frame')
+  const [dragging, setDragging] = useState<string | null>(null)
+  const frames = sortedFrames(items)
+
+  const commitOrder = (list: FrameItem[]) => {
+    patchItems(list.map((f, i) => [f.id, { order: i }]))
+    requestRender()
+  }
+
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= frames.length || from === to) return
+    const list = [...frames]
+    const [moved] = list.splice(from, 1)
+    list.splice(to, 0, moved)
+    commitOrder(list)
+  }
 
   if (!open) return null
 
@@ -56,6 +73,12 @@ export function FramesPanel() {
           >
             <Play size={15} strokeWidth={2} />
           </IconButton>
+          <IconButton
+            title="PDF olarak yazdır"
+            onClick={() => printFrames(items)}
+          >
+            <Printer size={15} strokeWidth={2} />
+          </IconButton>
           <IconButton title="Kapat" onClick={() => update({ framesPanel: false })}>
             <X size={15} strokeWidth={2} />
           </IconButton>
@@ -71,7 +94,16 @@ export function FramesPanel() {
         {frames.map((frame, i) => (
           <div
             key={frame.id}
-            className="group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-[#F2EFE9]"
+            draggable
+            onDragStart={() => setDragging(frame.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (dragging) move(frames.findIndex((f) => f.id === dragging), i)
+              setDragging(null)
+            }}
+            onDragEnd={() => setDragging(null)}
+            className={`group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-[#F2EFE9]
+              ${dragging === frame.id ? 'opacity-40' : ''}`}
           >
             <span className="w-4 shrink-0 text-center text-[11px] font-semibold text-[#8A867C]">{i + 1}</span>
             <button type="button" onClick={() => jump(frame)} className="shrink-0">
@@ -101,6 +133,26 @@ export function FramesPanel() {
                   {frame.title}
                 </button>
               )}
+            </div>
+            <div className="flex shrink-0 flex-col opacity-0 group-hover:opacity-100">
+              <button
+                type="button"
+                title="Yukarı taşı"
+                onClick={() => move(i, i - 1)}
+                disabled={i === 0}
+                className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"
+              >
+                <ChevronUp size={12} strokeWidth={2.5} />
+              </button>
+              <button
+                type="button"
+                title="Aşağı taşı"
+                onClick={() => move(i, i + 1)}
+                disabled={i === frames.length - 1}
+                className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"
+              >
+                <ChevronDown size={12} strokeWidth={2.5} />
+              </button>
             </div>
             <button
               type="button"

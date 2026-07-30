@@ -186,8 +186,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 - [ ] Tabloda hücre birleştirme
 - [ ] Connector üzerinde birden çok etiket
 - [ ] Canlı reaksiyon (oturum sırasında uçuşan emoji)
-- [ ] Frame panelinde sürükleyerek sıralama, sunumda geçişler
-- [ ] PDF dışa aktarma ve çoklu frame dışa aktarma
+- [ ] Sunumda frame geçiş animasyonları
 - [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u
 
 ### Çoklu kullanıcı

@@ -86,6 +86,7 @@ export interface FrameItem extends BaseItem {
   type: 'frame'
   title: string
   fill: string
+  order?: number
 }
 
 export interface CommentReply {
