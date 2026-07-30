@@ -51,6 +51,7 @@ export interface StickyItem extends BaseItem, TextStyle {
 
 export interface ShapeItem extends BaseItem, TextStyle {
   type: 'shape'
+  mindParent?: Id | null
   kind: ShapeKind
   fill: string
   stroke: string

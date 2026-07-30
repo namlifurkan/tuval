@@ -5,7 +5,7 @@ import { DEFAULT_TEXT_STYLE } from './types'
 
 export type Tool =
   | 'select' | 'hand' | 'sticky' | 'text' | 'shape' | 'connector' | 'pen' | 'frame' | 'comment'
-  | 'table'
+  | 'table' | 'mindmap'
 
 export interface EditingState { id: Id; selectAll: boolean; cell?: [number, number] }
 

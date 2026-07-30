@@ -3,8 +3,8 @@ import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, undoManager } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
-  groupSelection, nudge, pasteStyle, pointerDown, pointerMove, pointerUp, quickCreateFromSelection,
-  reorder, ungroupSelection, wheel,
+  groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
+  quickCreateFromSelection, reorder, ungroupSelection, wheel,
 } from '../board/interaction'
 import { cloneItems, makeImage, makeSticky, makeText, withPreview } from '../board/items'
 import { me } from '../board/me'
@@ -211,8 +211,8 @@ export function Canvas() {
         e.shiftKey ? ungroupSelection() : groupSelection()
         return
       }
-      if (mod && e.key === ']') { e.preventDefault(); reorder(e.shiftKey ? 'front' : 'forward'); return }
-      if (mod && e.key === '[') { e.preventDefault(); reorder(e.shiftKey ? 'back' : 'backward'); return }
+      if (mod && e.code === 'BracketRight') { e.preventDefault(); reorder(e.shiftKey ? 'front' : 'forward'); return }
+      if (mod && e.code === 'BracketLeft') { e.preventDefault(); reorder(e.shiftKey ? 'back' : 'backward'); return }
 
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(); return }
       if (e.key === 'Escape') {
@@ -224,6 +224,7 @@ export function Canvas() {
         quickCreateFromSelection(e.shiftKey ? 'left' : 'right')
         return
       }
+      if (e.key === 'Enter' && !e.shiftKey && mindmapBranch(true)) { e.preventDefault(); return }
       if (e.key === 'Enter' && s.selection.length === 1) {
         const item = getIndex().get(s.selection[0])
         if (item && 'text' in item) { e.preventDefault(); s.setEditing({ id: item.id, selectAll: true }) }
@@ -238,16 +239,16 @@ export function Canvas() {
         )
         return
       }
-      if (e.shiftKey && ['1', '2', '3'].includes(e.key)) {
+      if (e.shiftKey && !mod && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
         const el = ref.current!
         const all = getItems()
-        if (e.key === '1' && all.length) s.setCamera(fitRect(boxOf(all), el.clientWidth, el.clientHeight))
-        if (e.key === '2' && s.selection.length) {
+        if (e.code === 'Digit1' && all.length) s.setCamera(fitRect(boxOf(all), el.clientWidth, el.clientHeight))
+        if (e.code === 'Digit2' && s.selection.length) {
           const index = getIndex()
           const sel = s.selection.map((id) => index.get(id)!).filter(Boolean)
           s.setCamera(fitRect(boxOf(sel), el.clientWidth, el.clientHeight))
         }
-        if (e.key === '3') s.setCamera((c) => ({ ...c, z: 1 }))
+        if (e.code === 'Digit3') s.setCamera((c) => ({ ...c, z: 1 }))
         return
       }
       if (!mod && TOOL_KEYS[e.key.toLowerCase()]) s.setTool(TOOL_KEYS[e.key.toLowerCase()])

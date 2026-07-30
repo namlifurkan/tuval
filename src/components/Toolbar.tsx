@@ -1,7 +1,7 @@
 import {
   Circle, Diamond, Eraser, Frame, Highlighter, Image as ImageIcon, LayoutTemplate, Minus,
   MessageSquare, MousePointer2, MoreHorizontal, Pen, Redo2, Spline, Square, StickyNote, Table2,
-  Triangle, Type, Undo2,
+  Triangle, Type, Undo2, Workflow,
 } from 'lucide-react'
 import { useRef } from 'react'
 import { fitRect } from '../board/camera'
@@ -153,6 +153,10 @@ export function Toolbar() {
             ))}
           </Popover>
         </div>
+
+        <IconButton title="Zihin haritası" active={tool === 'mindmap'} onClick={pick('mindmap')}>
+          <Workflow size={20} strokeWidth={1.8} />
+        </IconButton>
 
         <IconButton title="Tablo" active={tool === 'table'} onClick={pick('table')}>
           <Table2 size={20} strokeWidth={1.8} />

@@ -10,9 +10,11 @@ import {
 import type { Box, Handle } from './geometry'
 import {
   cellAt, cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape,
+  resizeTableTrack, tableEdgeAt,
   makeSticky, makeTable, makeText, anchorTowards, connectorEnds, STICKY_SIZE, TABLE_CELL_H,
   TABLE_CELL_W,
 } from './items'
+import { addMindNode, isNode, layoutMindmap, makeMindRoot, rootOf } from './mindmap'
 import { firstUrl, layoutText } from './text'
 import {
   boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
@@ -36,6 +38,7 @@ type Drag =
   | { kind: 'endpoint'; id: Id; which: 'from' | 'to' }
   | { kind: 'bend'; id: Id; index: number }
   | { kind: 'erase' }
+  | { kind: 'tableTrack'; id: Id; axis: 'col' | 'row'; index: number }
 
 let drag: Drag | null = null
 let lastPointer: Vec = { x: 0, y: 0 }
@@ -107,7 +110,29 @@ export function quickCreateFromSelection(side: 'top' | 'right' | 'bottom' | 'lef
   const s = store()
   if (s.selection.length !== 1) return
   const item = getIndex().get(s.selection[0])
-  if (item && QUICK_TYPES.has(item.type)) quickCreate(item.id, side)
+  if (!item) return
+  if (isNode(item)) {
+    const id = addMindNode(item.id, side === 'bottom')
+    if (id) {
+      s.setSelection([id])
+      s.setEditing({ id, selectAll: false })
+    }
+    return
+  }
+  if (QUICK_TYPES.has(item.type)) quickCreate(item.id, side)
+}
+
+export function mindmapBranch(asSibling: boolean) {
+  const s = store()
+  if (s.selection.length !== 1) return false
+  const item = getIndex().get(s.selection[0])
+  if (!item || !isNode(item)) return false
+  const id = addMindNode(item.id, asSibling)
+  if (id) {
+    s.setSelection([id])
+    s.setEditing({ id, selectAll: false })
+  }
+  return true
 }
 
 function eraseAt(p: Vec) {
@@ -253,6 +278,16 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     return
   }
 
+  if (s.tool === 'mindmap') {
+    const root = makeMindRoot(p.x, p.y)
+    createItems([root])
+    s.setSelection([root.id])
+    s.setTool('select')
+    s.setEditing({ id: root.id, selectAll: true })
+    drag = null
+    return
+  }
+
   if (s.tool === 'comment') {
     const existing = pickAt(p)
     if (existing?.type === 'comment') {
@@ -285,6 +320,13 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
 
   if (s.selection.length === 1) {
     const only = getIndex().get(s.selection[0])
+    if (only?.type === 'table' && !only.locked) {
+      const edge = tableEdgeAt(only, p, 6 / s.camera.z)
+      if (edge) {
+        drag = { kind: 'tableTrack', id: only.id, axis: edge.axis, index: edge.index }
+        return
+      }
+    }
     if (only?.type === 'connector' && !only.locked) {
       const { a, b } = connectorGeometry(only)
       const sa = toScreen(s.camera, a.x, a.y)
@@ -549,6 +591,13 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
       }
       break
     }
+    case 'tableTrack': {
+      const table = getIndex().get(drag.id)
+      if (table?.type === 'table') {
+        patchItems([[drag.id, resizeTableTrack(table, drag.axis, drag.index, p)]])
+      }
+      break
+    }
     case 'erase': {
       eraseAt(p)
       break
@@ -581,6 +630,8 @@ export function pointerUp(_e: PointerEvent, screen: Vec) {
     finishConnect(drag, p)
   } else if (drag?.kind === 'translate' && drag.moved) {
     reparentToFrames(drag.snaps.map((x) => x.id))
+    const moved = getIndex().get(drag.snaps[0]?.id ?? '')
+    if (moved && isNode(moved) && moved.mindParent) layoutMindmap(rootOf(moved.id))
   }
 
   session.marquee = null
@@ -708,6 +759,14 @@ function updateHover(p: Vec, screen: Vec) {
   } else if (s.tool === 'pen' || s.tool === 'connector' || s.tool === 'shape' || s.tool === 'frame') {
     session.cursor = 'crosshair'
   } else if (s.tool === 'sticky' || s.tool === 'text') session.cursor = 'copy'
+  else if (s.selection.length === 1 && (() => {
+    const only = getIndex().get(s.selection[0])
+    if (only?.type !== 'table') return false
+    const edge = tableEdgeAt(only, p, 6 / s.camera.z)
+    if (!edge) return false
+    session.cursor = edge.axis === 'col' ? 'col-resize' : 'row-resize'
+    return true
+  })()) { /* cursor set above */ }
   else if (hit && anchorAt(p, hit)) session.cursor = 'crosshair'
   else session.cursor = hit ? 'move' : 'default'
 }

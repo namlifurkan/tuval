@@ -128,6 +128,45 @@ export function cellAt(t: TableItem, p: Vec): [number, number] | null {
   return null
 }
 
+export function tableEdgeAt(t: TableItem, p: Vec, tol: number): { axis: 'col' | 'row'; index: number } | null {
+  const sx = t.w / t.widths.reduce((a, b) => a + b, 0)
+  const sy = t.h / t.heights.reduce((a, b) => a + b, 0)
+  if (p.y >= t.y - tol && p.y <= t.y + t.h + tol) {
+    let x = t.x
+    for (let c = 0; c < t.cols; c++) {
+      x += t.widths[c] * sx
+      if (Math.abs(p.x - x) <= tol) return { axis: 'col', index: c }
+    }
+  }
+  if (p.x >= t.x - tol && p.x <= t.x + t.w + tol) {
+    let y = t.y
+    for (let r = 0; r < t.rows; r++) {
+      y += t.heights[r] * sy
+      if (Math.abs(p.y - y) <= tol) return { axis: 'row', index: r }
+    }
+  }
+  return null
+}
+
+export function resizeTableTrack(
+  t: TableItem, axis: 'col' | 'row', index: number, pointer: Vec,
+): Record<string, unknown> {
+  if (axis === 'col') {
+    const sx = t.w / t.widths.reduce((a, b) => a + b, 0)
+    let left = t.x
+    for (let c = 0; c < index; c++) left += t.widths[c] * sx
+    const next = [...t.widths]
+    next[index] = Math.max(48, (pointer.x - left) / sx)
+    return { widths: next, w: next.reduce((a, b) => a + b, 0) * sx }
+  }
+  const sy = t.h / t.heights.reduce((a, b) => a + b, 0)
+  let top = t.y
+  for (let r = 0; r < index; r++) top += t.heights[r] * sy
+  const next = [...t.heights]
+  next[index] = Math.max(28, (pointer.y - top) / sy)
+  return { heights: next, h: next.reduce((a, b) => a + b, 0) * sy }
+}
+
 export function setCell(t: TableItem, r: number, c: number, value: string): string[][] {
   return t.cells.map((row, i) => (i === r ? row.map((cell, j) => (j === c ? value : cell)) : row))
 }
