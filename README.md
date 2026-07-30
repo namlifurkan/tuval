@@ -23,6 +23,15 @@ The loop closes: paste an agent's Markdown back into **Build a board from a brie
 become frames, bullets become stickies, fenced code becomes code blocks and a mermaid flow
 becomes connectors.
 
+## Boards
+
+Every board is a room in the URL hash: `#team-board`. The grid icon in the top bar opens the
+board list — create, search, switch, delete. The registry lives in `localStorage` and older
+rooms are recovered from `indexedDB.databases()`, so a board you visited once is never lost to
+a forgotten link. The list is per-browser: share the URL for someone else to open a board.
+
+Your camera is remembered per board, so a refresh puts you back where you were.
+
 ## Agent skill
 
 `skills/tuval-board/SKILL.md` teaches a coding agent both directions of the format: how to read

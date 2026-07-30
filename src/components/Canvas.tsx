@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { surfaceColor } from '../board/brand'
 import { readTexture } from '../board/paperPrefs'
+import { touchBoard } from '../board/boards'
 import { flushCamera, saveCamera } from '../board/viewport'
 import { fitRect, toBoard } from '../board/camera'
-import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeMeta, undoManager } from '../board/doc'
+import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, undoManager } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
@@ -115,11 +116,26 @@ export function Canvas() {
     const persist = () => flushCamera(room)
     window.addEventListener('pagehide', persist)
     const unsubMeta = subscribeMeta(requestRender)
+
+    const record = () => {
+      const all = getItems()
+      touchBoard(room, {
+        name: (getMeta().name as string) ?? '',
+        opened: Date.now(),
+        items: all.filter((i) => i.type !== 'frame').length,
+        frames: all.filter((i) => i.type === 'frame').length,
+      })
+    }
+    record()
+    const unsubRecord = subscribeDoc(record)
+    const unsubRecordMeta = subscribeMeta(record)
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
       unsub()
       unsubMeta()
+      unsubRecord()
+      unsubRecordMeta()
       window.removeEventListener('pagehide', persist)
       flushCamera(room)
     }

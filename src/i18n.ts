@@ -282,6 +282,20 @@ const tr: Record<string, string> = {
   'Tidy layout': 'Yerleşimi düzelt',
   'Assigned to': 'Atanan',
   'Owner': 'Sahip',
+  // boards
+  'Boards': 'Board\'lar',
+  'New board': 'Yeni board',
+  'Filter boards': 'Board ara',
+  'No boards yet': 'Henüz board yok',
+  'Delete board': 'Board\'u sil',
+  'never opened': 'hiç açılmadı',
+  '{n} d ago': '{n} gün önce',
+  'Open another board before deleting this one.':
+    'Bunu silmek için önce başka bir board aç.',
+  'Delete "{name}" from this browser? This cannot be undone.':
+    '"{name}" bu tarayıcıdan silinsin mi? Geri alınamaz.',
+  'Boards live in this browser. Share the link to let someone else open one.':
+    'Board\'lar bu tarayıcıda tutulur. Başkasının açması için linki paylaş.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }
