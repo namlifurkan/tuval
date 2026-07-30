@@ -12,7 +12,6 @@ import { HistoryPanel } from './components/HistoryPanel'
 import { FrameTitleEditor } from './components/FrameTitleEditor'
 import { Presentation } from './components/Presentation'
 import { SearchPanel } from './components/SearchPanel'
-import { SpotlightInvite } from './components/SpotlightInvite'
 import { TextEditor } from './components/TextEditor'
 import { TopBar } from './components/TopBar'
 import { Inspector } from './components/Inspector'
@@ -58,7 +57,6 @@ export default function App() {
           <SearchPanel />
           <CursorChat />
           <FollowBanner />
-          <SpotlightInvite />
           <FramesPanel />
           <HistoryPanel />
           <FrameTitleEditor />

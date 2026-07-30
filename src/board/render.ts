@@ -40,7 +40,6 @@ export interface Scene {
   editing: Id | null
   editingCell: [number, number] | null
   session: Session
-  votes: Map<Id, number> | null
   surface: string
   texture: TextureId
   showAnchors: boolean
@@ -683,25 +682,6 @@ function drawOverlay(s: Scene) {
     if (item.type === 'comment') drawCommentPin(s, item)
   }
 
-  if (s.votes?.size) {
-    for (const item of s.items) {
-      const count = s.votes.get(item.id)
-      if (!count) continue
-      const at = toScreen(cam, item.x + item.w, item.y)
-      const chip = new Path2D()
-      chip.roundRect(at.x - 19, at.y - 7, 26, 26, 6)
-      ctx.fillStyle = BRAND.pigment
-      ctx.fill(chip)
-      ctx.strokeStyle = '#FCFBF8'
-      ctx.lineWidth = 2
-      ctx.stroke(chip)
-      ctx.fillStyle = '#FCFBF8'
-      ctx.font = '700 12px "Instrument Sans", system-ui, sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(String(count), at.x - 6, at.y + 6.5)
-    }
-  }
 
   const selected = s.items.filter((i) => s.selection.has(i.id))
   if (s.hover && !s.selection.has(s.hover)) {

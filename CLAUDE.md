@@ -195,14 +195,12 @@ Sıra, günlük kullanımda ne kadar engelleyici olduğuna göre.
 - [ ] Connector üzerinde birden çok etiket
 - [ ] Daha geniş şablon kütüphanesi
 
-### Değer/çaba oranı düşük (şimdilik yapılmayacak)
+### Değer/çaba oranı düşük (yapılmayacak)
 
-- Canlı reaksiyon (uçuşan emoji) — başlandı, kullanıcı kararıyla geri alındı
-- Tahmin / planning poker
-- Mention edilene bildirim gitmesi
-
-Zaten yapılmış olan spotlight ve imleç sohbeti duruyor (çalışıyor, bakım maliyeti yok);
-istenirse silinir.
+- Canlı reaksiyon (uçuşan emoji), tahmin / planning poker, mention bildirimi
+- **Silindi (2026-07-30):** zamanlayıcı, dot-voting, spotlight çağrısı. "Oturum şovu" sınıfı;
+  günlük şirket içi kullanımda kimse açmadı. `src/board/session.ts`, `SessionTools.tsx`,
+  `SpotlightInvite.tsx` ve oy rozeti render'ı kaldırıldı. İmleç sohbeti duruyor.
 
 ### Bilinen sınırlar
 

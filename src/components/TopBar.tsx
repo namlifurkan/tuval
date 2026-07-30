@@ -1,12 +1,11 @@
 import {
-  Clock, Download, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
+  Clock, Download, Layers, MoreHorizontal, Printer, Search, Trash2,
 } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { isDarkSurface, PRODUCT, SURFACES, surfaceColor } from '../board/brand'
-import { awareness, getItems, getMeta, removeItems, room, setMeta, subscribeMeta } from '../board/doc'
+import { getItems, getMeta, removeItems, room, setMeta, subscribeMeta } from '../board/doc'
 import { exportPng } from '../board/export'
-import { me } from '../board/me'
 import { printFrames } from '../board/print'
 import { TEXTURES } from '../board/paper'
 import { readTexture } from '../board/paperPrefs'
@@ -14,7 +13,6 @@ import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import { Collaborators } from './Collaborators'
 import { HandoffMenu } from './HandoffMenu'
-import { SessionTools } from './SessionTools'
 import { IconButton, Popover, usePopover } from './ui'
 
 function Caption({ children }: { children: ReactNode }) {
@@ -159,16 +157,6 @@ export function TopBar() {
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <HandoffMenu />
-          <SessionTools />
-          <IconButton
-            title="Herkesi kendi görüşüne çağır"
-            onClick={() => {
-              awareness.setLocalStateField('spotlight', { at: Date.now(), name: me.name })
-              setTimeout(() => awareness.setLocalStateField('spotlight', null), 15000)
-            }}
-          >
-            <Radio size={18} strokeWidth={1.8} />
-          </IconButton>
 
           <span className="mx-1 h-6 w-px bg-[#E2DED5]" aria-hidden />
 

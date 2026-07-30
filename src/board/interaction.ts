@@ -15,7 +15,6 @@ import {
   TABLE_CELL_W,
 } from './items'
 import { addMindNode, isNode, layoutMindmap, makeMindRoot, rootOf } from './mindmap'
-import { castVote, getVoteState } from './session'
 import { firstUrl, layoutText } from './text'
 import {
   boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
@@ -282,16 +281,6 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
 
   if (s.editing) s.setEditing(null)
 
-  if (getVoteState().active && e.button === 0 && !e.shiftKey) {
-    const target = pickAt(p)
-    if (target && target.type !== 'comment' && target.type !== 'connector') {
-      castVote(target.id, e.altKey ? -1 : 1)
-      s.setSelection([target.id])
-      drag = null
-      requestRender()
-      return
-    }
-  }
   if (s.openComment) {
     const under = pickAt(p)
     if (under?.id !== s.openComment) s.update({ openComment: null })
