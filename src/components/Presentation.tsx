@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect } from 'react'
-import { fitRect } from '../board/camera'
+import { animateCamera, fitRect } from '../board/camera'
 import { requestRender, useBoardStore } from '../board/store'
 import { sortedFrames } from '../board/items'
 import { useItems } from '../board/useBoard'
@@ -22,8 +22,11 @@ export function Presentation() {
     if (!frame) return
     const el = document.querySelector('canvas')
     if (!el) return
-    setCamera(fitRect(frame, el.clientWidth, el.clientHeight, 40))
-    requestRender()
+    const target = fitRect(frame, el.clientWidth, el.clientHeight, 40)
+    animateCamera(useBoardStore.getState().camera, target, (c) => {
+      setCamera(c)
+      requestRender()
+    })
   }, [presenting, frames, setCamera])
 
   useEffect(() => {

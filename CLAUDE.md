@@ -176,27 +176,33 @@ gidiyor (kontrolü ayrı bir çağrıda yap).
 
 ## 4. Miro parite borcu
 
-Hedef %95. Aşağıdaki liste "Miro'da var, bizde yok" davranışlarıdır; bir madde kapandığında
-buradan silinir. Sıra öncelik sırasıdır.
+Hedef %95, ama **hedef günlük şirket içi kullanım** — Miro'nun premium vitrini değil. Kullanıcı
+kararı (2026-07-30): canlı reaksiyon, spotlight, imleç sohbeti gibi "oturum şovu" özellikleri
+gerçek işe değer katmıyor, satış demosuna hitap ediyor. Bu sınıfa yatırım yapılmayacak.
 
-### Tuval içi (parite için şart)
+Sıra, günlük kullanımda ne kadar engelleyici olduğuna göre.
 
-- [ ] Mention edilene bildirim gitmesi
+### Günlük kullanımı engelleyenler
+
+- [ ] Giriş, workspace, board listesi/dashboard — **en büyük engel**: şu an board'lara sadece
+      URL hash'iyle ulaşılıyor, ekip günlük kullanamaz
+- [ ] Paylaşım linkleri, yetkiler, salt-görüntüleme modu
+- [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u (Miro'dan çıkış için şart)
+
+### Tuval içi eksikler
+
 - [ ] Tabloda hücre birleştirme
 - [ ] Connector üzerinde birden çok etiket
-- [ ] Canlı reaksiyon (oturum sırasında uçuşan emoji)
-- [ ] Sunumda frame geçiş animasyonları
-- [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u
-
-### Çoklu kullanıcı
-
-- [ ] Tahmin (estimation / planning poker) aracı
-
-### Çevresi
-
-- [ ] Giriş, workspace, board listesi/dashboard (Supabase fazı)
-- [ ] Paylaşım linkleri, yetkiler, salt-görüntüleme modu
 - [ ] Daha geniş şablon kütüphanesi
+
+### Değer/çaba oranı düşük (şimdilik yapılmayacak)
+
+- Canlı reaksiyon (uçuşan emoji) — başlandı, kullanıcı kararıyla geri alındı
+- Tahmin / planning poker
+- Mention edilene bildirim gitmesi
+
+Zaten yapılmış olan spotlight ve imleç sohbeti duruyor (çalışıyor, bakım maliyeti yok);
+istenirse silinir.
 
 ### Bilinen sınırlar
 

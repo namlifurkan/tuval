@@ -36,6 +36,28 @@ export function fitRect(target: Rect, vw: number, vh: number, padding = 80): Cam
   }
 }
 
+const easeOutQuart = (t: number) => 1 - (1 - t) ** 4
+
+let tween = 0
+
+export function animateCamera(
+  from: Camera, to: Camera, apply: (c: Camera) => void, ms = 420,
+) {
+  cancelAnimationFrame(tween)
+  const start = performance.now()
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / ms)
+    const k = easeOutQuart(t)
+    apply({
+      x: from.x + (to.x - from.x) * k,
+      y: from.y + (to.y - from.y) * k,
+      z: from.z + (to.z - from.z) * k,
+    })
+    if (t < 1) tween = requestAnimationFrame(step)
+  }
+  tween = requestAnimationFrame(step)
+}
+
 export function centerOn(cam: Camera, p: Vec, vw: number, vh: number): Camera {
   return { ...cam, x: p.x - vw / 2 / cam.z, y: p.y - vh / 2 / cam.z }
 }
