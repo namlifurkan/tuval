@@ -2,13 +2,14 @@ import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical,
   AlignHorizontalDistributeCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight,
   AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowRight, Bold,
-  Copy, Grid3x3, Italic, LayoutGrid, Lock, MoveDown, MoveUp, PenLine, Strikethrough, Trash2,
+  Copy, Grid3x3, Italic, LayoutGrid, Lock, Maximize, MoveDown, MoveUp, PenLine, Strikethrough, Trash2,
   Type, Underline, Unlock,
 } from 'lucide-react'
 import { toScreen } from '../board/camera'
 import { patchItems } from '../board/doc'
 import {
-  alignSelection, arrangeInGrid, deleteSelection, distributeSelection, duplicateSelection, reorder,
+  alignSelection, arrangeInGrid, deleteSelection, distributeSelection, duplicateSelection,
+  fitStickyToText, reorder,
 } from '../board/interaction'
 import type { AlignMode } from '../board/interaction'
 import { boxOf } from '../board/render'
@@ -39,6 +40,7 @@ export function ContextToolbar() {
   const textPop = usePopover()
   const linePop = usePopover()
   const alignPop = usePopover()
+  const sizePop = usePopover()
 
   if (!selected.length || editing || dragging) return null
   if (selected.every((i) => i.type === 'comment')) return null
@@ -157,6 +159,38 @@ export function ContextToolbar() {
                   >{c}</button>
                 ))}
               </div>
+            </Popover>
+          </div>
+        )}
+
+        {has(selected, 'sticky') && (
+          <div className="relative">
+            <IconButton title="Sticky boyutu" onClick={sizePop.toggle}>
+              <Maximize size={18} strokeWidth={1.8} />
+            </IconButton>
+            <Popover open={sizePop.open} onClose={sizePop.close} anchor="bottom" className="w-[196px]">
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Boyut</div>
+              {([['Küçük', 120], ['Orta', 228], ['Büyük', 340], ['Çok büyük', 480]] as [string, number][]).map(
+                ([label, size]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => patch({ w: size, h: size }, (i) => i.type === 'sticky')}
+                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                  >
+                    <span>{label}</span>
+                    <span className="text-xs text-[#8A867C]">{size}px</span>
+                  </button>
+                ),
+              )}
+              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <button
+                type="button"
+                onClick={() => { fitStickyToText(); sizePop.close() }}
+                className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+              >
+                Metne sığdır
+              </button>
             </Popover>
           </div>
         )}

@@ -178,9 +178,8 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 ### Tuval içi (parite için şart)
 
-- [ ] Sticky "pack / auto-arrange" ve sticky ızgarasına yapışma
-- [ ] Sticky ve shape içinde zengin metin: madde imi, numaralı liste, bağlantı
-- [ ] Yorum yan paneli: tüm yorumlar, çözülmüş filtresi, mention
+- [ ] Sticky ızgarasına yapışma (sürüklerken kümenin kafesine oturma; "ızgaraya diz" hazır)
+- [ ] Yorumlarda mention (@kişi) ve bildirim
 - [ ] Tablo aracı
 - [ ] Mind map aracı (otomatik yerleşim, dal ekleme)
 - [ ] Connector: birden çok kırılma noktası ve çoklu etiket

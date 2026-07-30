@@ -1,4 +1,5 @@
 import { Canvas } from './components/Canvas'
+import { CommentsPanel } from './components/CommentsPanel'
 import { CommentThread } from './components/CommentThread'
 import { ContextMenu } from './components/ContextMenu'
 import { ContextToolbar } from './components/ContextToolbar'
@@ -26,6 +27,7 @@ export default function App() {
           <ZoomControls />
           <ContextMenu />
           <CommentThread />
+          <CommentsPanel />
           <SearchPanel />
           <FramesPanel />
           <FrameTitleEditor />

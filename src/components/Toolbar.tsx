@@ -203,7 +203,15 @@ export function Toolbar() {
           </Popover>
         </div>
 
-        <IconButton title="Comment — C" active={tool === 'comment'} onClick={pick('comment')}>
+        <IconButton
+          title="Yorum — C (tekrar tıkla: panel)"
+          active={tool === 'comment'}
+          onClick={() => {
+            if (tool === 'comment') update({ commentsPanel: !useBoardStore.getState().commentsPanel })
+            else setTool('comment')
+            requestRender()
+          }}
+        >
           <MessageSquare size={20} strokeWidth={1.8} />
         </IconButton>
         <div className="relative">

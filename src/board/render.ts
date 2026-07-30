@@ -8,7 +8,7 @@ import type { Handle } from './geometry'
 import { resolveEndpoint } from './items'
 import { shapePath, textInsetFor } from './shapes'
 import type { Session } from './store'
-import { fontString, layoutText } from './text'
+import { fontString, layoutText, URL_RE } from './text'
 import type { Cap, Id, Item, Rect, TextStyle, Vec } from './types'
 import { BRAND } from './types'
 
@@ -312,10 +312,27 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   }
 }
 
+interface Run { text: string; link: boolean }
+
+function splitRuns(text: string): Run[] {
+  const runs: Run[] = []
+  let last = 0
+  for (const m of text.matchAll(URL_RE)) {
+    const at = m.index ?? 0
+    if (at > last) runs.push({ text: text.slice(last, at), link: false })
+    runs.push({ text: m[0], link: true })
+    last = at + m[0].length
+  }
+  if (last < text.length) runs.push({ text: text.slice(last), link: false })
+  return runs.length ? runs : [{ text, link: false }]
+}
+
 function drawText(s: Scene, item: Item & TextStyle & { text: string }, box: Rect) {
   if (!item.text) return
   const { ctx } = s
   const layout = layoutText(item.text, box.w, box.h, item)
+  ctx.font = fontString(item, layout.fontSize)
+
   if (layout.fontSize * s.cam.z < 3.5) {
     ctx.fillStyle = item.textColor
     ctx.globalAlpha = 0.35
@@ -326,27 +343,36 @@ function drawText(s: Scene, item: Item & TextStyle & { text: string }, box: Rect
     ctx.globalAlpha = 1
     return
   }
-  ctx.font = fontString(item, layout.fontSize)
-  ctx.fillStyle = item.textColor
+
   ctx.textBaseline = 'middle'
-  ctx.textAlign = item.align
+  ctx.textAlign = 'left'
   const total = layout.lines.length * layout.lineHeight
   const startY =
     item.valign === 'top' ? box.y : item.valign === 'bottom' ? box.y + box.h - total : box.y + (box.h - total) / 2
-  const x = item.align === 'left' ? box.x : item.align === 'right' ? box.x + box.w : box.x + box.w / 2
+  const rule = Math.max(1, layout.fontSize / 16)
+
   layout.lines.forEach((line, i) => {
     const y = startY + i * layout.lineHeight + layout.lineHeight / 2
-    ctx.fillText(line, x, y)
-    if (item.underline || item.strike) {
-      const w = ctx.measureText(line).width
-      const lx = item.align === 'left' ? x : item.align === 'right' ? x - w : x - w / 2
-      ctx.fillRect(
-        lx,
-        item.underline ? y + layout.fontSize * 0.42 : y - layout.fontSize * 0.05,
-        w,
-        Math.max(1, layout.fontSize / 16),
-      )
-    }
+    const runs = splitRuns(line.text)
+    const widths = runs.map((r) => ctx.measureText(r.text).width)
+    const lineWidth = widths.reduce((a, b) => a + b, 0)
+
+    let x: number
+    if (line.marker) {
+      x = box.x + line.indent
+      ctx.fillStyle = item.textColor
+      ctx.fillText(line.marker, box.x, y)
+    } else if (item.align === 'left') x = box.x
+    else if (item.align === 'right') x = box.x + box.w - lineWidth
+    else x = box.x + (box.w - lineWidth) / 2
+
+    runs.forEach((run, j) => {
+      ctx.fillStyle = run.link ? BRAND.pigment : item.textColor
+      ctx.fillText(run.text, x, y)
+      if (run.link || item.underline) ctx.fillRect(x, y + layout.fontSize * 0.42, widths[j], rule)
+      if (item.strike) ctx.fillRect(x, y - layout.fontSize * 0.05, widths[j], rule)
+      x += widths[j]
+    })
   })
 }
 
@@ -371,7 +397,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.lineTo(c.x + PIN_R * 0.2, c.y + PIN_R * 0.92)
   ctx.closePath()
   ctx.fillStyle = '#FCFBF8'
-  ctx.strokeStyle = selected ? BRAND.selection : 'rgba(9,9,20,0.16)'
+  ctx.strokeStyle = selected ? BRAND.selection : 'rgba(20,19,16,0.16)'
   ctx.lineWidth = selected ? 2 : 1
   ctx.fill()
   ctx.stroke()
@@ -381,7 +407,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.fill()
   ctx.stroke()
   const first = item.replies[0]
-  ctx.fillStyle = first?.color ?? '#9B9BAB'
+  ctx.fillStyle = first?.color ?? '#8A867C'
   ctx.beginPath()
   ctx.arc(c.x, c.y, PIN_R - 4, 0, Math.PI * 2)
   ctx.fill()
@@ -423,7 +449,7 @@ function drawQuickArrows(s: Scene, item: Item) {
     ctx.arc(a.x, a.y, QUICK_R, 0, Math.PI * 2)
     ctx.fillStyle = '#FCFBF8'
     ctx.fill()
-    ctx.strokeStyle = 'rgba(9,9,20,0.14)'
+    ctx.strokeStyle = 'rgba(20,19,16,0.14)'
     ctx.lineWidth = 1
     ctx.stroke()
     ctx.save()

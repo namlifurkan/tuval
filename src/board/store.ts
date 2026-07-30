@@ -31,6 +31,7 @@ interface BoardState {
   presenting: number | null
   searchOpen: boolean
   framesPanel: boolean
+  commentsPanel: boolean
   renamingFrame: Id | null
   dragging: boolean
 
@@ -68,6 +69,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   presenting: null,
   searchOpen: false,
   framesPanel: false,
+  commentsPanel: false,
   renamingFrame: null,
   dragging: false,
 

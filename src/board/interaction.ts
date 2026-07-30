@@ -322,6 +322,11 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   }
 
   const hovered = pickAt(p)
+  if (hovered && (e.metaKey || e.ctrlKey) && 'text' in hovered && firstUrl(hovered.text)) {
+    openLinkOf(hovered.id)
+    drag = null
+    return
+  }
   if (hovered?.type === 'comment') {
     s.setSelection([hovered.id])
     s.update({ openComment: hovered.id })
@@ -806,6 +811,32 @@ export function selectInsideFrame(frameId: Id) {
     .filter((i) => i.id !== frameId && !i.locked && contains(frame, aabb(i)))
     .map((i) => i.id)
   if (inside.length) store().setSelection(inside)
+}
+
+export function fitStickyToText() {
+  const index = getIndex()
+  const patches: [Id, Record<string, unknown>][] = []
+  for (const id of store().selection) {
+    const item = index.get(id)
+    if (!item || item.type !== 'sticky') continue
+    const inset = 0.1
+    let size = 100
+    for (const candidate of [100, 140, 180, 228, 280, 340, 420, 480, 560]) {
+      const box = candidate * (1 - inset * 2)
+      const fitted = layoutText(item.text || ' ', box, box, item)
+      if (fitted.fontSize >= Math.min(item.fontSize, 18)) { size = candidate; break }
+      size = candidate
+    }
+    patches.push([id, { w: size, h: size }])
+  }
+  if (patches.length) patchItems(patches)
+}
+
+export function openLinkOf(id: Id) {
+  const item = getIndex().get(id)
+  if (!item || !('text' in item)) return
+  const url = firstUrl(item.text)
+  if (url) window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 export function contextMenuAt(screen: Vec) {

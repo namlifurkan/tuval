@@ -2,9 +2,10 @@ import { getIndex, getItems, patchItems } from '../board/doc'
 import { exportPng } from '../board/export'
 import {
   arrangeInGrid, copyStyle, deleteSelection, duplicateSelection, groupSelection, hasStyleClipboard,
-  pasteStyle, reorder, selectInsideFrame, ungroupSelection,
+  openLinkOf, pasteStyle, reorder, selectInsideFrame, ungroupSelection,
 } from '../board/interaction'
 import { requestRender, useBoardStore } from '../board/store'
+import { firstUrl } from '../board/text'
 import type { Id } from '../board/types'
 
 interface Entry {
@@ -36,6 +37,12 @@ export function ContextMenu() {
       shortcut: grouped ? '⌘⇧G' : '⌘G',
       run: () => (grouped ? ungroupSelection() : groupSelection()),
       hidden: items.length < 2 && !grouped,
+    },
+    {
+      label: 'Bağlantıyı aç',
+      shortcut: '⌘tık',
+      run: () => openLinkOf(items[0].id),
+      hidden: items.length !== 1 || !('text' in items[0]) || !firstUrl((items[0] as { text: string }).text),
     },
     {
       label: 'Frame içindekileri seç',
