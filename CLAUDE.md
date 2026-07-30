@@ -181,8 +181,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 ### Tuval içi (parite için şart)
 
-- [ ] Sticky ızgarasına yapışma (sürüklerken kümenin kafesine oturma; "ızgaraya diz" hazır)
-- [ ] Yorumlarda mention (@kişi) ve bildirim
+- [ ] Mention edilene bildirim gitmesi
 - [ ] Tabloda hücre birleştirme
 - [ ] Connector üzerinde birden çok etiket
 - [ ] Canlı reaksiyon (oturum sırasında uçuşan emoji)

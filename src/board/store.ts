@@ -51,11 +51,11 @@ interface BoardState {
 export const useBoardStore = create<BoardState>((set, get) => ({
   camera: { x: -600, y: -400, z: 1 },
   tool: 'select',
-  stickyFill: '#FFF9B1',
-  shape: { kind: 'rect', fill: '#FFFFFF', stroke: '#16161D', strokeWidth: 2, strokeStyle: 'solid' },
-  pen: { stroke: '#16161D', strokeWidth: 4, highlighter: false, eraser: false },
+  stickyFill: '#F0E3B0',
+  shape: { kind: 'rect', fill: '#FCFBF8', stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' },
+  pen: { stroke: '#1F1D1A', strokeWidth: 4, highlighter: false, eraser: false },
   connector: {
-    shape: 'curved', stroke: '#16161D', strokeWidth: 2,
+    shape: 'curved', stroke: '#1F1D1A', strokeWidth: 2,
     strokeStyle: 'solid', capStart: 'none', capEnd: 'arrow',
   },
   textStyle: { ...DEFAULT_TEXT_STYLE },

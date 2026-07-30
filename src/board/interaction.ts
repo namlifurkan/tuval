@@ -5,7 +5,7 @@ import {
 } from './doc'
 import {
   aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, overlaps,
-  resizeBox, snapAngle, snapMove, snapSpacing,
+  resizeBox, snapAngle, snapLattice, snapMove, snapSpacing,
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
@@ -530,9 +530,16 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
         session.spacing = []
         if (spacing.x) { dx += spacing.x.delta; session.spacing.push(...spacing.x.marks) }
         if (spacing.y) { dy += spacing.y.delta; session.spacing.push(...spacing.y.marks) }
+        const index = getIndex()
+        const allSticky = drag.snaps.every((sn) => index.get(sn.id)?.type === 'sticky')
+        const lattice = allSticky
+          ? snapLattice(boxFromSnaps(drag.snaps, dx, dy), drag.others, tol * 2)
+          : { dx: 0, dy: 0 }
+        if (!spacing.x && lattice.dx) dx += lattice.dx
+        if (!spacing.y && lattice.dy) dy += lattice.dy
         const snap = snapMove(boxFromSnaps(drag.snaps, dx, dy), drag.others, tol)
-        if (!spacing.x) dx += snap.dx
-        if (!spacing.y) dy += snap.dy
+        if (!spacing.x && !lattice.dx) dx += snap.dx
+        if (!spacing.y && !lattice.dy) dy += snap.dy
         session.guides = [
           ...(spacing.x ? [] : snap.guides.filter((g) => g[0].x === g[1].x)),
           ...(spacing.y ? [] : snap.guides.filter((g) => g[0].y === g[1].y)),

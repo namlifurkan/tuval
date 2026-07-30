@@ -258,6 +258,51 @@ export function snapSpacing(moving: Rect, others: Rect[], threshold: number) {
   }
 }
 
+const DEFAULT_GAP = 24
+
+function commonGap(peers: Rect[], axis: 'x' | 'y'): number {
+  const span = axis === 'x' ? 'w' : 'h'
+  const cross = axis === 'x' ? 'y' : 'x'
+  const crossSpan = axis === 'x' ? 'h' : 'w'
+  const gaps: number[] = []
+  for (const a of peers) {
+    for (const b of peers) {
+      if (a === b) continue
+      const aligned = a[cross] < b[cross] + b[crossSpan] && a[cross] + a[crossSpan] > b[cross]
+      if (!aligned) continue
+      const gap = b[axis] - (a[axis] + a[span])
+      if (gap > 0 && gap < 400) gaps.push(Math.round(gap))
+    }
+  }
+  if (!gaps.length) return DEFAULT_GAP
+  const tally = new Map<number, number>()
+  for (const g of gaps) tally.set(g, (tally.get(g) ?? 0) + 1)
+  return [...tally.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0]
+}
+
+export function snapLattice(moving: Rect, others: Rect[], threshold: number): { dx: number; dy: number } {
+  const peers = others.filter(
+    (o) => Math.abs(o.w - moving.w) <= 2 && Math.abs(o.h - moving.h) <= 2,
+  )
+  if (!peers.length) return { dx: 0, dy: 0 }
+  const gapX = commonGap(peers, 'x')
+  const gapY = commonGap(peers, 'y')
+
+  let dx = 0, bestX = threshold
+  let dy = 0, bestY = threshold
+  for (const peer of peers) {
+    for (const candidate of [peer.x, peer.x + peer.w + gapX, peer.x - moving.w - gapX]) {
+      const delta = candidate - moving.x
+      if (Math.abs(delta) < bestX) { bestX = Math.abs(delta); dx = delta }
+    }
+    for (const candidate of [peer.y, peer.y + peer.h + gapY, peer.y - moving.h - gapY]) {
+      const delta = candidate - moving.y
+      if (Math.abs(delta) < bestY) { bestY = Math.abs(delta); dy = delta }
+    }
+  }
+  return { dx, dy }
+}
+
 export function anchorPoint(item: Item, side: AnchorSide): Vec {
   const c = center(item)
   const hw = item.w / 2, hh = item.h / 2

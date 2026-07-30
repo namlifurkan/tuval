@@ -1,11 +1,25 @@
 import { Check, Trash2 } from 'lucide-react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { awareness } from '../board/doc'
 import { patchItem, removeItems } from '../board/doc'
 import { makeReply } from '../board/items'
 import { initials, me } from '../board/me'
 import { commentPinScreen } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItemIndex } from '../board/useBoard'
+
+function MentionText({ text }: { text: string }) {
+  const parts = text.split(/(@[\p{L}\p{N}_]+)/gu)
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith('@')
+          ? <span key={i} className="font-semibold text-[#C8452D]">{part}</span>
+          : <span key={i}>{part}</span>,
+      )}
+    </>
+  )
+}
 
 const timeAgo = (at: number) => {
   const m = Math.floor((Date.now() - at) / 60000)
@@ -21,12 +35,31 @@ export function CommentThread() {
   const update = useBoardStore((s) => s.update)
   const index = useItemIndex()
   const [draft, setDraft] = useState('')
+  const [people, setPeople] = useState<string[]>([])
+  const mentionQuery = /(?:^|\s)@([\p{L}\p{N}_]*)$/u.exec(draft)?.[1]
+  const suggestions = mentionQuery === undefined
+    ? []
+    : people.filter((n) => n.toLowerCase().startsWith(mentionQuery.toLowerCase())).slice(0, 5)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const item = openComment ? index.get(openComment) : undefined
 
   useLayoutEffect(() => {
     if (openComment) inputRef.current?.focus({ preventScroll: true })
   }, [openComment])
+
+  useEffect(() => {
+    const sync = () => {
+      const names = new Set<string>([me.name])
+      awareness.getStates().forEach((state) => {
+        const user = (state as { user?: { name: string } }).user
+        if (user?.name) names.add(user.name)
+      })
+      setPeople([...names])
+    }
+    awareness.on('change', sync)
+    sync()
+    return () => awareness.off('change', sync)
+  }, [])
 
   if (!item || item.type !== 'comment') return null
 
@@ -92,11 +125,38 @@ export function CommentThread() {
                 <span className="text-xs font-semibold text-[#141310]">{r.author}</span>
                 <span className="text-[10px] text-[#8A867C]">{timeAgo(r.at)}</span>
               </div>
-              <p className="whitespace-pre-wrap break-words text-sm text-[#2E2B26]">{r.text}</p>
+              <p className="whitespace-pre-wrap break-words text-sm text-[#2E2B26]">
+                <MentionText text={r.text} />
+              </p>
             </div>
           </div>
         ))}
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="border-t border-[#EAE6DD] px-2 py-1">
+          {suggestions.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setDraft(draft.replace(/@[\p{L}\p{N}_]*$/u, `@${name} `))
+                inputRef.current?.focus()
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-[#EFEBE2]"
+            >
+              <span
+                className="grid h-5 w-5 place-items-center rounded-full text-[9px] font-bold text-white"
+                style={{ background: name === me.name ? me.color : '#8A867C' }}
+              >
+                {initials(name)}
+              </span>
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-end gap-2 border-t border-[#EAE6DD] p-2">
         <div
