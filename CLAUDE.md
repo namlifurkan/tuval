@@ -224,3 +224,19 @@ entegrasyonları (kendi Kanban'ımıza bağlanacak), video konferans, ödeme/fat
 2. Supabase fazı — auth, board listesi, Storage'a görsel, Postgres'e snapshot
 3. Çoklu kullanıcı testi ve sertleştirme
 4. Workspace çekirdeği (bkz. §1) — sonra doküman/blok editörü fazı
+
+---
+
+## 6. AI'ya devret (bizim farkımız)
+
+`src/board/agent.ts` board'u **anlamsal bir grafa** çevirir: frame → bölüm, konektör → yönlü
+kenar, yorum → en yakın öğeye iliştirilmiş not, kod bloğu → fenced code, tablo → markdown tablo.
+Okuma sırası y bandına göre satırlanır, satır içinde soldan sağa.
+
+Çıktı üç biçimde: **prompt** (kısa brief + markdown), **markdown dosyası**, **JSON**. Üst bardaki
+"AI'ya devret" butonu Claude/ChatGPT'yi doğrudan açar; CLI ajanları (Claude Code, Cursor, Codex)
+için prompt panoya kopyalanır veya `.md` indirilir.
+
+Neden önemli: Miro'nun dışa aktarımı görsel (PNG/PDF) veya ham REST dökümüdür — ikisi de bir
+ajanın *niyeti* okumasına yaramaz. Tuvaldeki bir akışı tek tıkla çalışan bir brief'e çevirmek
+bizim ürün farkımız, kopya değil.

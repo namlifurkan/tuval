@@ -13,6 +13,7 @@ import { readTexture } from '../board/paperPrefs'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import { Collaborators } from './Collaborators'
+import { HandoffMenu } from './HandoffMenu'
 import { SessionTools } from './SessionTools'
 import { IconButton, Popover, usePopover } from './ui'
 
@@ -157,6 +158,7 @@ export function TopBar() {
           <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
+          <HandoffMenu />
           <SessionTools />
           <IconButton
             title="Herkesi kendi görüşüne çağır"
