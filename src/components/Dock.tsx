@@ -94,13 +94,10 @@ export function Dock() {
 
     const pointer = e.clientX - bar.getBoundingClientRect().left + bar.scrollLeft
     const centers = slots.map((el) => el.offsetLeft + el.offsetWidth / 2)
-    const scales = centers.map((c) => 1 + MAGNIFY_AMPLITUDE * Math.exp(-(((c - pointer) / MAGNIFY_SPREAD) ** 2)))
+    const scales = slots.map((el, i) => (el.dataset.noMagnify !== undefined
+      ? 1
+      : 1 + MAGNIFY_AMPLITUDE * Math.exp(-(((centers[i] - pointer) / MAGNIFY_SPREAD) ** 2))))
     const extras = slots.map((el, i) => el.offsetWidth * (scales[i] - 1))
-
-    let nearest = 0
-    for (let i = 1; i < centers.length; i++) {
-      if (Math.abs(centers[i] - pointer) < Math.abs(centers[nearest] - pointer)) nearest = i
-    }
 
     const before: number[] = []
     let running = 0
@@ -108,7 +105,15 @@ export function Dock() {
       before.push(running)
       running += extra
     }
-    const anchor = before[nearest] + extras[nearest] / 2
+
+    // Continuous anchor: how much of each icon's growth sits left of the pointer.
+    // An index-based anchor jumps as the pointer crosses a midpoint, which shows up as a flicker.
+    let anchor = 0
+    slots.forEach((el, i) => {
+      const left = el.offsetLeft
+      const portion = Math.min(1, Math.max(0, (pointer - left) / el.offsetWidth))
+      anchor += extras[i] * portion
+    })
 
     slots.forEach((el, i) => {
       const shift = before[i] + extras[i] / 2 - anchor
@@ -412,6 +417,7 @@ export function Dock() {
           <div
             key={id}
             data-slot
+            {...(id === 'zoom' ? { 'data-no-magnify': '' } : {})}
             draggable
             onDragStart={() => setDragId(id)}
             onDragEnd={() => setDragId(null)}
