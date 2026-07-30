@@ -1,6 +1,7 @@
-import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Printer, Search, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Printer, Radio, Search, Star, Trash2 } from 'lucide-react'
 import { COLOR, PRODUCT } from '../board/brand'
-import { getItems, removeItems, room } from '../board/doc'
+import { awareness, getItems, removeItems, room } from '../board/doc'
+import { me } from '../board/me'
 import { exportPng } from '../board/export'
 import { printFrames } from '../board/print'
 import { requestRender, useBoardStore } from '../board/store'
@@ -92,7 +93,21 @@ export function TopBar() {
           <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
-          <IconButton title="Activity"><Clock size={18} strokeWidth={1.8} /></IconButton>
+          <IconButton
+            title="Sürüm geçmişi"
+            onClick={() => update({ historyPanel: !useBoardStore.getState().historyPanel })}
+          >
+            <Clock size={18} strokeWidth={1.8} />
+          </IconButton>
+          <IconButton
+            title="Herkesi kendi görüşüne çağır"
+            onClick={() => {
+              awareness.setLocalStateField('spotlight', { at: Date.now(), name: me.name })
+              setTimeout(() => awareness.setLocalStateField('spotlight', null), 15000)
+            }}
+          >
+            <Radio size={18} strokeWidth={1.8} />
+          </IconButton>
           <Collaborators />
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">

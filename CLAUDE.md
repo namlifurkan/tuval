@@ -190,9 +190,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 ### Çoklu kullanıcı
 
-- [ ] Spotlight: herkesi kendi görüşüne çekme
 - [ ] Tahmin (estimation / planning poker) aracı
-- [ ] Versiyon geçmişi
 
 ### Çevresi
 

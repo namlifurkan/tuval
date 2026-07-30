@@ -7,10 +7,12 @@ import { ContextMenu } from './components/ContextMenu'
 import { ContextToolbar } from './components/ContextToolbar'
 import { EmbedLayer } from './components/EmbedLayer'
 import { FramesPanel } from './components/FramesPanel'
+import { HistoryPanel } from './components/HistoryPanel'
 import { FrameTitleEditor } from './components/FrameTitleEditor'
 import { Presentation } from './components/Presentation'
 import { SearchPanel } from './components/SearchPanel'
 import { SessionTools } from './components/SessionTools'
+import { SpotlightInvite } from './components/SpotlightInvite'
 import { TextEditor } from './components/TextEditor'
 import { Toolbar } from './components/Toolbar'
 import { TopBar } from './components/TopBar'
@@ -37,7 +39,9 @@ export default function App() {
           <SessionTools />
           <CursorChat />
           <FollowBanner />
+          <SpotlightInvite />
           <FramesPanel />
+          <HistoryPanel />
           <FrameTitleEditor />
         </>
       )}
