@@ -183,8 +183,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 - [ ] Sticky ızgarasına yapışma (sürüklerken kümenin kafesine oturma; "ızgaraya diz" hazır)
 - [ ] Yorumlarda mention (@kişi) ve bildirim
-- [ ] Tabloda sütun/satır genişliğini sürükleyerek değiştirme ve hücre birleştirme
-- [ ] Mind map aracı (otomatik yerleşim, dal ekleme)
+- [ ] Tabloda hücre birleştirme
 - [ ] Connector üzerinde birden çok etiket
 - [ ] Embed: video, iframe, harici doküman
 - [ ] Emoji ve reaksiyon
