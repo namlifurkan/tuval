@@ -102,6 +102,12 @@ export interface CommentItem extends BaseItem {
   resolved: boolean
 }
 
+export interface EmbedItem extends BaseItem {
+  type: 'embed'
+  url: string
+  title: string
+}
+
 export interface TableItem extends BaseItem, TextStyle {
   type: 'table'
   rows: number
@@ -140,7 +146,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
 
 export type Item =
   | StickyItem | ShapeItem | TextItem | DrawItem | ImageItem | FrameItem | ConnectorItem
-  | CommentItem | TableItem
+  | CommentItem | TableItem | EmbedItem
 
 export type ItemType = Item['type']
 

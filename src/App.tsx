@@ -3,6 +3,7 @@ import { CommentsPanel } from './components/CommentsPanel'
 import { CommentThread } from './components/CommentThread'
 import { ContextMenu } from './components/ContextMenu'
 import { ContextToolbar } from './components/ContextToolbar'
+import { EmbedLayer } from './components/EmbedLayer'
 import { FramesPanel } from './components/FramesPanel'
 import { FrameTitleEditor } from './components/FrameTitleEditor'
 import { Presentation } from './components/Presentation'
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <div className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
       <Canvas />
+      <EmbedLayer />
       <TextEditor />
       {presenting === null && (
         <>

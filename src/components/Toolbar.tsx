@@ -6,7 +6,7 @@ import {
 import { useRef } from 'react'
 import { fitRect } from '../board/camera'
 import { createItems, getItems, undoManager } from '../board/doc'
-import { makeFrame, makeImage } from '../board/items'
+import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
 import { boxOf } from '../board/render'
 import { TEMPLATES } from '../board/templates'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
@@ -18,6 +18,11 @@ import { ColorGrid, IconButton, Popover, usePopover } from './ui'
 const SHAPE_ICONS: Partial<Record<ShapeKind, typeof Square>> = {
   rect: Square, ellipse: Circle, triangle: Triangle, diamond: Diamond,
 }
+
+const EMOJI = [
+  '👍', '👎', '❤️', '🔥', '✅', '❌', '⭐', '🎯',
+  '💡', '⚠️', '❓', '🚀', '🐛', '📌', '⏳', '🎉',
+]
 
 const dCache = new Map<ShapeKind, string>()
 
@@ -48,6 +53,7 @@ export function Toolbar() {
   const penPop = usePopover()
   const templatePop = usePopover()
   const framePop = usePopover()
+  const morePop = usePopover()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const pick = (t: Tool) => () => { setTool(t); requestRender() }
@@ -58,11 +64,16 @@ export function Toolbar() {
     return { x: cam.x + el.clientWidth / 2 / cam.z, y: cam.y + el.clientHeight / 2 / cam.z }
   }
 
-  const insert = (items: ReturnType<typeof makeFrame>[] | Parameters<typeof createItems>[0]) => {
+  const insert = (items: Parameters<typeof createItems>[0], fit = false) => {
     createItems(items)
-    const el = document.querySelector('canvas')!
-    useBoardStore.getState().setCamera(fitRect(boxOf(items), el.clientWidth, el.clientHeight))
-    useBoardStore.getState().setSelection([])
+    const store = useBoardStore.getState()
+    if (fit) {
+      const el = document.querySelector('canvas')!
+      store.setCamera(fitRect(boxOf(items), el.clientWidth, el.clientHeight))
+      store.setSelection([])
+    } else {
+      store.setSelection(items.map((i) => i.id))
+    }
     requestRender()
   }
 
@@ -83,7 +94,7 @@ export function Toolbar() {
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => { insert(t.build(viewportCenter())); templatePop.close() }}
+                  onClick={() => { insert(t.build(viewportCenter()), true); templatePop.close() }}
                   className="rounded-lg px-2.5 py-2 text-left hover:bg-[#EFEBE2]"
                 >
                   <div className="text-sm font-semibold text-[#141310]">{t.name}</div>
@@ -252,7 +263,7 @@ export function Toolbar() {
                     onClick={() => {
                       const c = viewportCenter()
                       const n = getItems().filter((i) => i.type === 'frame').length + 1
-                      insert([makeFrame(c.x - w / 2, c.y - h / 2, w, h, `Frame ${n}`)])
+                      insert([makeFrame(c.x - w / 2, c.y - h / 2, w, h, `Frame ${n}`)], true)
                       framePop.close()
                     }}
                     className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
@@ -268,9 +279,48 @@ export function Toolbar() {
         <IconButton title="Upload image" onClick={() => fileRef.current?.click()}>
           <ImageIcon size={20} strokeWidth={1.8} />
         </IconButton>
-        <IconButton title="More">
-          <MoreHorizontal size={20} strokeWidth={1.8} />
-        </IconButton>
+        <div className="relative">
+          <IconButton title="Daha fazla" active={morePop.open} onClick={morePop.toggle}>
+            <MoreHorizontal size={20} strokeWidth={1.8} />
+          </IconButton>
+          <Popover open={morePop.open} onClose={morePop.close} className="w-[268px]">
+            <button
+              type="button"
+              onClick={() => {
+                const url = prompt('Gömülecek bağlantı (YouTube, Vimeo, Loom, Figma veya herhangi bir site)')
+                if (url?.trim()) {
+                  const c = viewportCenter()
+                  insert([makeEmbed(c.x, c.y, url.trim())])
+                }
+                morePop.close()
+              }}
+              className="mb-2 w-full rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
+            >
+              Bağlantı göm
+            </button>
+            <div className="px-1 pb-1.5 text-xs font-semibold text-[#141310]">Emoji</div>
+            <div className="grid grid-cols-8 gap-1">
+              {EMOJI.map((glyph) => (
+                <button
+                  key={glyph}
+                  type="button"
+                  onClick={() => {
+                    const c = viewportCenter()
+                    const style = { ...useBoardStore.getState().textStyle, fontSize: 96, align: 'center' as const }
+                    const item = makeText(c.x - 60, c.y - 60, 120, style)
+                    item.text = glyph
+                    item.autoWidth = true
+                    insert([item])
+                    morePop.close()
+                  }}
+                  className="grid h-8 w-8 place-items-center rounded-lg text-xl hover:bg-[#EFEBE2]"
+                >
+                  {glyph}
+                </button>
+              ))}
+            </div>
+          </Popover>
+        </div>
 
         <input
           ref={fileRef}

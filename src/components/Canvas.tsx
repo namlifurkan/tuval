@@ -6,7 +6,7 @@ import {
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
   quickCreateFromSelection, reorder, ungroupSelection, wheel,
 } from '../board/interaction'
-import { cloneItems, makeImage, makeSticky, makeText, withPreview } from '../board/items'
+import { cloneItems, makeEmbed, makeImage, makeSticky, makeText, withPreview } from '../board/items'
 import { me } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
@@ -275,10 +275,11 @@ export function Canvas() {
         readImage(file, p)
         return
       }
-      const text = e.clipboardData?.getData('text/plain')
+      const text = e.clipboardData?.getData('text/plain')?.trim()
       if (text && !clipboard.length) {
         e.preventDefault()
-        const item = makeSticky(p.x - 114, p.y - 114, s.stickyFill, text)
+        const looksLikeUrl = /^(https?:\/\/|www\.)\S+$/i.test(text)
+        const item = looksLikeUrl ? makeEmbed(p.x, p.y, text) : makeSticky(p.x - 114, p.y - 114, s.stickyFill, text)
         createItems([item])
         s.setSelection([item.id])
       }

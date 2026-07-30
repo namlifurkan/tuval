@@ -34,6 +34,7 @@ interface BoardState {
   framesPanel: boolean
   commentsPanel: boolean
   renamingFrame: Id | null
+  activeEmbed: Id | null
   dragging: boolean
 
   setCamera: (c: Camera | ((c: Camera) => Camera)) => void
@@ -72,6 +73,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   framesPanel: false,
   commentsPanel: false,
   renamingFrame: null,
+  activeEmbed: null,
   dragging: false,
 
   setCamera: (c) => set((s) => ({ camera: typeof c === 'function' ? c(s.camera) : c })),

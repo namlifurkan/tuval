@@ -4,7 +4,8 @@ import { anchorPoint, nearestAnchor, resolveConnector } from './geometry'
 import type { Ends } from './geometry'
 import { me } from './me'
 import type {
-  AnchorSide, CommentItem, CommentReply, ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item,
+  AnchorSide, CommentItem, CommentReply, ConnectorItem, DrawItem, EmbedItem, Endpoint, FrameItem,
+  ImageItem, Item,
   Rect, ShapeItem, StickyItem, TableItem, TextItem, TextStyle, Vec,
 } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -206,6 +207,41 @@ export function dropCol(t: TableItem, at: number): Partial<TableItem> | null {
   const cells = t.cells.map((row) => row.filter((_, i) => i !== at))
   const scale = t.w / t.widths.reduce((a, b) => a + b, 0)
   return { cols: t.cols - 1, widths, cells, w: widths.reduce((a, b) => a + b, 0) * scale }
+}
+
+const EMBED_RULES: [RegExp, (m: RegExpMatchArray) => string][] = [
+  [/youtube\.com\/watch\?v=([\w-]+)/i, (m) => `https://www.youtube.com/embed/${m[1]}`],
+  [/youtu\.be\/([\w-]+)/i, (m) => `https://www.youtube.com/embed/${m[1]}`],
+  [/vimeo\.com\/(\d+)/i, (m) => `https://player.vimeo.com/video/${m[1]}`],
+  [/loom\.com\/share\/([\w-]+)/i, (m) => `https://www.loom.com/embed/${m[1]}`],
+  [/figma\.com\/(file|design|board)\/(.+)/i, (m) => `https://www.figma.com/embed?embed_host=tuval&url=https://www.figma.com/${m[1]}/${m[2]}`],
+]
+
+export function embedUrl(raw: string): string {
+  const url = raw.startsWith('http') ? raw : `https://${raw}`
+  for (const [re, build] of EMBED_RULES) {
+    const match = url.match(re)
+    if (match) return build(match)
+  }
+  return url
+}
+
+export function embedTitle(raw: string): string {
+  try {
+    return new URL(raw.startsWith('http') ? raw : `https://${raw}`).hostname.replace(/^www\./, '')
+  } catch {
+    return raw.slice(0, 40)
+  }
+}
+
+export function makeEmbed(x: number, y: number, raw: string): EmbedItem {
+  const w = 640, h = 400
+  return {
+    ...base(x - w / 2, y - h / 2, w, h),
+    type: 'embed',
+    url: embedUrl(raw),
+    title: embedTitle(raw),
+  }
 }
 
 export function makeComment(x: number, y: number, text: string): CommentItem {

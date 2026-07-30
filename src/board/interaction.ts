@@ -284,6 +284,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     const under = pickAt(p)
     if (under?.id !== s.openComment) s.update({ openComment: null })
   }
+  if (s.activeEmbed) s.update({ activeEmbed: null })
 
   if (s.tool === 'pen') {
     if (s.pen.eraser) {
@@ -830,6 +831,11 @@ export function doubleClick(screen: Vec) {
   const s = store()
   const p = toBoard(s.camera, screen.x, screen.y)
   const hit = pickAt(p)
+  if (hit?.type === 'embed') {
+    s.setSelection([hit.id])
+    s.update({ activeEmbed: hit.id })
+    return
+  }
   if (hit?.type === 'table') {
     const cell = cellAt(hit, p)
     s.setSelection([hit.id])

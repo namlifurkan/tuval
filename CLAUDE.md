@@ -185,8 +185,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 - [ ] Yorumlarda mention (@kişi) ve bildirim
 - [ ] Tabloda hücre birleştirme
 - [ ] Connector üzerinde birden çok etiket
-- [ ] Embed: video, iframe, harici doküman
-- [ ] Emoji ve reaksiyon
+- [ ] Canlı reaksiyon (oturum sırasında uçuşan emoji)
 - [ ] Frame panelinde sürükleyerek sıralama, sunumda geçişler
 - [ ] PDF dışa aktarma ve çoklu frame dışa aktarma
 - [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u
@@ -204,6 +203,13 @@ buradan silinir. Sıra öncelik sırasıdır.
 - [ ] Giriş, workspace, board listesi/dashboard (Supabase fazı)
 - [ ] Paylaşım linkleri, yetkiler, salt-görüntüleme modu
 - [ ] Daha geniş şablon kütüphanesi
+
+### Bilinen sınırlar
+
+- Embed'ler DOM iframe katmanında yaşıyor, yani tuvalin üstünde duruyorlar; z-sırasında
+  embed'in üstündeki bir item görsel olarak arkada kalır. Miro'da da embed'ler pratikte üstte.
+  Düzeltmek tüm render'ı DOM'a taşımayı gerektirir. TODO: aktif değilken iframe yerine
+  önizleme görüntüsü çizmek bunu çözer.
 
 ### Bilinçli olarak yapılmayacaklar
 

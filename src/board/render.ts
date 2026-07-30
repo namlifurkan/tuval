@@ -113,6 +113,7 @@ function drawItem(s: Scene, item: Item) {
       case 'image': drawImage(s, item); break
       case 'connector': drawConnector(s, item); break
       case 'table': drawTable(s, item); break
+      case 'embed': drawEmbed(s, item); break
       case 'comment': break
     }
   })
@@ -339,6 +340,23 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
     ctx.textBaseline = 'middle'
     ctx.fillText(item.text, mid.x, mid.y)
   }
+}
+
+function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {
+  const { ctx, cam } = s
+  ctx.fillStyle = '#EBE7DE'
+  ctx.beginPath()
+  ctx.roundRect(item.x, item.y, item.w, item.h, 10)
+  ctx.fill()
+  ctx.strokeStyle = '#DDD8CD'
+  ctx.lineWidth = 1 / cam.z
+  ctx.stroke()
+  const size = Math.min(item.h * 0.16, 26)
+  ctx.fillStyle = '#8A867C'
+  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Instrument Sans' }, size)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(item.title, item.x + item.w / 2, item.y + item.h / 2)
 }
 
 function drawTable(s: Scene, item: Item & { type: 'table' }) {
