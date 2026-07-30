@@ -185,7 +185,28 @@ function moveEndpointsFor(snaps: Snap[], dx: number, dy: number): [Id, Record<st
   return out
 }
 
+let lastFlush = 0
+
+function stage(entries: [Id, Record<string, unknown>][]) {
+  for (const [id, patch] of entries) {
+    const cur = session.preview.get(id)
+    session.preview.set(id, cur ? { ...cur, ...patch } : { ...patch })
+  }
+  const now = performance.now()
+  if (now - lastFlush > 80) {
+    lastFlush = now
+    patchItems([...session.preview.entries()])
+  }
+}
+
+export function flushPreview() {
+  if (!session.preview.size) return
+  patchItems([...session.preview.entries()])
+  session.preview.clear()
+}
+
 export function cancelDrag() {
+  session.preview.clear()
   drag = null
   session.marquee = null
   session.guides = []
@@ -400,14 +421,14 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
         dx += snap.dx; dy += snap.dy
         session.guides = snap.guides
       } else session.guides = []
-      patchItems(drag.snaps.map((sn) => [sn.id, { x: sn.x + dx, y: sn.y + dy }]))
+      stage(drag.snaps.map((sn) => [sn.id, { x: sn.x + dx, y: sn.y + dy }]))
       break
     }
     case 'resize': {
       const next = resizeBox(drag.box, drag.handle, p, e.shiftKey || !drag.single, e.altKey)
       const sx = drag.box.w ? next.w / drag.box.w : 1
       const sy = drag.box.h ? next.h / drag.box.h : 1
-      patchItems(drag.snaps.map((sn) => {
+      stage(drag.snaps.map((sn) => {
         if (drag!.kind !== 'resize') return [sn.id, {}]
         if (drag.single) return [sn.id, { x: next.x, y: next.y, w: next.w, h: next.h }]
         return [sn.id, {
@@ -422,7 +443,7 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
     case 'rotate': {
       const a = Math.atan2(p.y - drag.center.y, p.x - drag.center.x)
       let delta = a - drag.start
-      patchItems(drag.snaps.map((sn) => {
+      stage(drag.snaps.map((sn) => {
         const c = drag!.kind === 'rotate' ? drag.center : { x: 0, y: 0 }
         const rot = e.shiftKey ? snapAngle(sn.rotation + delta) : sn.rotation + delta
         const applied = e.shiftKey ? rot - sn.rotation : delta
@@ -480,6 +501,7 @@ export function pointerUp(_e: PointerEvent, screen: Vec) {
   const s = store()
   const p = toBoard(s.camera, screen.x, screen.y)
   const quick = performance.now() - downAt < 250 && !didDrag
+  flushPreview()
 
   if (drag?.kind === 'create') {
     const r = rectBetween(drag.origin, p)

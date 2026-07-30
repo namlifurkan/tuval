@@ -1,4 +1,5 @@
 import { getIndex, newId, nextZ } from './doc'
+import { session } from './store'
 import { anchorPoint, nearestAnchor } from './geometry'
 import { me } from './me'
 import type {
@@ -109,10 +110,16 @@ export function makeConnector(
 
 export const freeEndpoint = (p: Vec): Endpoint => ({ itemId: null, anchor: null, x: p.x, y: p.y })
 
+export function withPreview<T extends Item>(item: T): T {
+  const p = session.preview.get(item.id)
+  return p ? ({ ...item, ...p } as T) : item
+}
+
 export function resolveEndpoint(e: Endpoint, other?: Vec): Vec {
   if (!e.itemId) return { x: e.x, y: e.y }
-  const item = getIndex().get(e.itemId)
-  if (!item) return { x: e.x, y: e.y }
+  const raw = getIndex().get(e.itemId)
+  if (!raw) return { x: e.x, y: e.y }
+  const item = withPreview(raw)
   const side = e.anchor ?? nearestAnchor(item, other ?? { x: item.x, y: item.y })
   return anchorPoint(item, side)
 }

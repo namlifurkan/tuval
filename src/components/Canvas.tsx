@@ -6,7 +6,7 @@ import {
   groupSelection, nudge, pasteStyle, pointerDown, pointerMove, pointerUp, quickCreateFromSelection,
   reorder, ungroupSelection, wheel,
 } from '../board/interaction'
-import { cloneItems, makeImage, makeSticky, makeText } from '../board/items'
+import { cloneItems, makeImage, makeSticky, makeText, withPreview } from '../board/items'
 import { me } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
@@ -60,7 +60,7 @@ export function Canvas() {
         cam: s.camera,
         width: size.w,
         height: size.h,
-        items: itemsRef.current,
+        items: session.preview.size ? itemsRef.current.map(withPreview) : itemsRef.current,
         selection: new Set(s.selection),
         hover: s.hover,
         editing: s.editing?.id ?? null,

@@ -89,6 +89,7 @@ export interface RemoteUser {
 }
 
 export interface Session {
+  preview: Map<Id, Record<string, unknown>>
   marquee: { x: number; y: number; w: number; h: number } | null
   guides: [Vec, Vec][]
   draft: unknown | null
@@ -100,6 +101,7 @@ export interface Session {
 }
 
 export const session: Session = {
+  preview: new Map(),
   marquee: null,
   guides: [],
   draft: null,
