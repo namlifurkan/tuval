@@ -19,4 +19,11 @@ export function labelInk(color: string) {
   return lum < 150 ? '#FCFBF8' : '#141310'
 }
 
-export const labelHeight = (w: number, h: number) => Math.max(16, Math.min(w, h) * 0.115)
+export const LABEL_SIZES = [10, 12, 14, 18, 24, 32]
+
+// Auto keeps the chip proportional to the sticky; an explicit size pins the type.
+export const labelFontSize = (w: number, h: number, size?: number) =>
+  size ?? Math.max(16, Math.min(w, h) * 0.115) * 0.58
+
+export const labelHeight = (w: number, h: number, size?: number) =>
+  labelFontSize(w, h, size) / 0.58

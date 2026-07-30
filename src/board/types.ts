@@ -48,6 +48,7 @@ export interface StickyItem extends BaseItem, TextStyle {
   text: string
   shape: 'square' | 'rect'
   label?: string
+  labelSize?: number
 }
 
 export interface ShapeItem extends BaseItem, TextStyle {

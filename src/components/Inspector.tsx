@@ -1,4 +1,4 @@
-import { labelInk, STATUS_LABELS } from '../board/labels'
+import { LABEL_SIZES, labelInk, STATUS_LABELS } from '../board/labels'
 import { t } from '../i18n'
 import { LANGS } from '../board/code'
 import { codeHeight } from '../board/items'
@@ -76,6 +76,7 @@ export function Inspector() {
   const textual = selected.filter((i) => 'text' in i && i.type !== 'code')
   const code = selected.length === 1 && selected[0].type === 'code' ? selected[0] : null
   const stickies = selected.filter((i) => i.type === 'sticky')
+  const frame = selected.length === 1 && selected[0].type === 'frame' ? selected[0] : null
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
 
@@ -178,6 +179,18 @@ export function Inspector() {
         </Section>
       )}
 
+      {frame && (
+        <Section title={t('Frame')}>
+          <input
+            value={frame.title}
+            onChange={(e) => { patchItem(frame.id, { title: e.target.value }); requestRender() }}
+            spellCheck={false}
+            placeholder={t('Frame name')}
+            className="w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+          />
+        </Section>
+      )}
+
       {stickies.length > 0 && (
         <Section title={t('Status')}>
           <div className="flex flex-wrap gap-1">
@@ -203,6 +216,22 @@ export function Inspector() {
               {t('None')}
             </button>
           </div>
+          {stickies.some((i) => i.type === 'sticky' && i.label) && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-[#8A867C]">{t('Label size')}</span>
+              <select
+                value={(stickies[0] as { labelSize?: number }).labelSize ?? ''}
+                onChange={(e) => patch(
+                  { labelSize: e.target.value ? Number(e.target.value) : undefined },
+                  (i) => i.type === 'sticky',
+                )}
+                className="flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+              >
+                <option value="">{t('Auto')}</option>
+                {LABEL_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+          )}
         </Section>
       )}
 

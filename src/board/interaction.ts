@@ -4,7 +4,7 @@ import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
 } from './doc'
 import {
-  aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, overlaps,
+  aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, onFrameTitle, overlaps,
   resizeBox, snapAngle, snapLattice, snapMove, snapSpacing,
 } from './geometry'
 import type { Box, Handle } from './geometry'
@@ -407,6 +407,16 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     if (only && QUICK_TYPES.has(only.type) && !only.locked) {
       const side = quickHit(s.camera, only, screen)
       if (side) { quickCreate(only.id, side); drag = null; return }
+    }
+  }
+
+  // A selected frame renames from a single click on its title, the way a file does.
+  if (s.selection.length === 1) {
+    const only = getIndex().get(s.selection[0])
+    if (only && only.type === 'frame' && !only.locked && onFrameTitle(only, p)) {
+      s.update({ renamingFrame: only.id })
+      drag = null
+      return
     }
   }
 

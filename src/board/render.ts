@@ -8,7 +8,7 @@ import {
 import type { Handle } from './geometry'
 import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
 import { CODE_THEME, tokenize } from './code'
-import { labelColor, labelHeight, labelInk } from './labels'
+import { labelColor, labelFontSize, labelHeight, labelInk } from './labels'
 import { drawPaper } from './paper'
 import type { TextureId } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
@@ -144,8 +144,8 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   let top = item.y + inset
   let room = item.h - inset * 2
   if (item.label) {
-    const chipH = labelHeight(item.w, item.h)
-    const font = `700 ${chipH * 0.58}px "Instrument Sans", system-ui, sans-serif`
+    const chipH = labelHeight(item.w, item.h, item.labelSize)
+    const font = `700 ${labelFontSize(item.w, item.h, item.labelSize)}px "Instrument Sans", system-ui, sans-serif`
     ctx.font = font
     ctx.letterSpacing = `${chipH * 0.07}px`
     const text = item.label.toUpperCase()

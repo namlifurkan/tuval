@@ -69,6 +69,13 @@ export function distToPolyline(p: Vec, pts: Vec[]): number {
   return pts.length === 1 ? Math.hypot(p.x - pts[0].x, p.y - pts[0].y) : min
 }
 
+export function onFrameTitle(item: Item, p: Vec): boolean {
+  if (item.type !== 'frame') return false
+  const l = toLocal(item, p)
+  const hh = item.h / 2
+  return l.y < -hh && l.y > -hh - 28 && Math.abs(l.x) <= item.w / 2
+}
+
 export function hitTest(item: Item, p: Vec, tolerance: number, ends: (c: Item & { type: 'connector' }) => Ends): boolean {
   if (item.type === 'connector') {
     return distToPolyline(p, connectorPath(item, ends(item))) <= Math.max(tolerance, item.strokeWidth / 2 + 4)
@@ -83,8 +90,7 @@ export function hitTest(item: Item, p: Vec, tolerance: number, ends: (c: Item & 
     const edge = tolerance + 2
     const inside = Math.abs(l.x) <= hw + edge && Math.abs(l.y) <= hh + edge
     const inner = Math.abs(l.x) <= hw - edge && Math.abs(l.y) <= hh - edge
-    const onTitle = l.y < -hh && l.y > -hh - 28 && Math.abs(l.x) <= hw
-    return onTitle || (inside && !inner)
+    return onFrameTitle(item, p) || (inside && !inner)
   }
   if (item.type === 'shape' && item.kind === 'ellipse') {
     return (l.x / hw) ** 2 + (l.y / hh) ** 2 <= 1
