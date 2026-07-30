@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import * as Y from 'yjs'
 import { getItems, newId, ydoc, yitems } from './doc'
 import { me } from './me'
@@ -47,7 +48,7 @@ export function saveVersion(label: string): Version | null {
     id: newId(),
     at: Date.now(),
     by: me.name,
-    label: label.trim() || 'Kaydedilen sürüm',
+    label: label.trim() || t('Saved version'),
     count: items.length,
     items: JSON.stringify(items),
   }

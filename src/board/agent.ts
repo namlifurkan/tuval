@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { aabb } from './geometry'
 import type { Item, Id } from './types'
 
@@ -75,7 +76,7 @@ export function boardToGraph(items: Item[], board: string, scope = 'board'): Age
   }
   const loose = content.filter((i) => !claimed.has(i.id))
   if (loose.length) {
-    sections.push({ id: null, title: 'Frame dışı', nodes: loose.sort(readingOrder).map(toNode) })
+    sections.push({ id: null, title: t('Outside frames'), nodes: loose.sort(readingOrder).map(toNode) })
   }
 
   const edges: AgentEdge[] = []
@@ -122,7 +123,7 @@ export function graphToMarkdown(g: AgentGraph): string {
   let n = 0
   for (const section of g.sections) {
     for (const node of section.nodes) {
-      names.set(node.id, short(node.text) || `(boş ${node.kind})`)
+      names.set(node.id, short(node.text) || t('(empty {kind})', { kind: node.kind }))
       alias.set(node.id, `n${++n}`)
     }
   }
@@ -130,7 +131,9 @@ export function graphToMarkdown(g: AgentGraph): string {
   const out: string[] = []
   out.push(`# ${g.board}`)
   out.push('')
-  out.push(`Sonsuz tuval dışa aktarımı · ${g.counts.item} öğe · ${g.counts.frame} frame · ${g.counts.edge} bağlantı`)
+  out.push(t('Infinite canvas export · {items} items · {frames} frames · {edges} connections', {
+    items: g.counts.item, frames: g.counts.frame, edges: g.counts.edge,
+  }))
   out.push('')
 
   for (const section of g.sections) {
@@ -154,7 +157,7 @@ export function graphToMarkdown(g: AgentGraph): string {
         continue
       }
       if (node.url) {
-        out.push(`- ${node.kind === 'image' ? 'Görsel' : 'Gömülü'}: ${node.url}`)
+        out.push(`- ${t(node.kind === 'image' ? 'Image' : 'Embed')}: ${node.url}`)
         continue
       }
       const text = node.text.trim()
@@ -167,7 +170,7 @@ export function graphToMarkdown(g: AgentGraph): string {
   }
 
   if (g.edges.length) {
-    out.push('## Akış')
+    out.push(`## ${t('Flow')}`)
     out.push('')
     const used = new Set<Id>()
     const body: string[] = ['flowchart TD']
@@ -187,11 +190,11 @@ export function graphToMarkdown(g: AgentGraph): string {
 
   const withThread = g.comments.filter((c) => c.thread.length)
   if (withThread.length) {
-    out.push('## Yorumlar')
+    out.push(`## ${t('Comments')}`)
     out.push('')
     for (const c of withThread) {
       const on = c.on ? names.get(c.on) : null
-      out.push(`- ${on ? `"${on}" üzerinde` : 'Serbest'} — ${c.thread.join(' / ')}`)
+      out.push(`- ${on ? t('On "{name}"', { name: on }) : t('Free')} — ${c.thread.join(' / ')}`)
     }
     out.push('')
   }
@@ -199,17 +202,15 @@ export function graphToMarkdown(g: AgentGraph): string {
   return out.join('\n')
 }
 
-export const AGENT_BRIEF = `Aşağıdaki içerik bir sonsuz tuval board'ından dışa aktarıldı.
-Frame'ler bölüm, madde işaretleri tuvaldeki öğeler (okuma sırası: yukarıdan aşağı, soldan sağa),
-"Akış" bölümündeki mermaid grafiği öğeler arasındaki okları temsil eder.
-Önce ne yapılmak istendiğini bir paragrafta özetle, sonra somut adımlara dök.
-
----
-
-`
+export const agentBrief = () => t(
+  'The content below was exported from an infinite canvas board. Frames are sections, bullets are '
+  + 'items on the canvas (reading order: top to bottom, left to right), and the mermaid graph under '
+  + '"Flow" represents the arrows between items. First summarise in one paragraph what is being '
+  + 'asked for, then break it into concrete steps.',
+)
 
 export function graphToPrompt(g: AgentGraph) {
-  return AGENT_BRIEF + graphToMarkdown(g)
+  return `${agentBrief()}\n\n---\n\n${graphToMarkdown(g)}`
 }
 
 export function download(name: string, body: string, type: string) {

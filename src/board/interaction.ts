@@ -11,7 +11,7 @@ import type { Box, Handle } from './geometry'
 import {
   cellAt, cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape,
   resizeTableTrack, tableEdgeAt,
-  makeSticky, makeTable, makeText, anchorTowards, connectorEnds, STICKY_SIZE, TABLE_CELL_H,
+  makeCode, makeSticky, makeTable, makeText, anchorTowards, connectorEnds, STICKY_SIZE, TABLE_CELL_H,
   TABLE_CELL_W,
 } from './items'
 import { addMindNode, isNode, layoutMindmap, makeMindRoot, rootOf } from './mindmap'
@@ -325,7 +325,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     return
   }
 
-  if (s.tool === 'sticky' || s.tool === 'shape' || s.tool === 'frame' || s.tool === 'text' || s.tool === 'table') {
+  if (s.tool === 'sticky' || s.tool === 'shape' || s.tool === 'frame' || s.tool === 'text' || s.tool === 'table' || s.tool === 'code') {
     drag = { kind: 'create', tool: s.tool, origin: p, id: null }
     return
   }
@@ -731,6 +731,9 @@ function finishCreate(tool: Tool, r: Rect, quick: boolean, p: Vec) {
     const h = quick ? 900 : Math.max(r.h, 100)
     const count = getItems().filter((i) => i.type === 'frame').length + 1
     item = makeFrame(quick ? p.x - w / 2 : r.x, quick ? p.y - h / 2 : r.y, w, h, `Frame ${count}`)
+  } else if (tool === 'code') {
+    const w = quick ? 520 : Math.max(r.w, 200)
+    item = makeCode(quick ? p.x - w / 2 : r.x, quick ? p.y - 40 : r.y, w)
   } else if (tool === 'table') {
     const cols = quick ? 3 : Math.max(1, Math.round(r.w / TABLE_CELL_W))
     const rows = quick ? 3 : Math.max(1, Math.round(r.h / TABLE_CELL_H))
@@ -809,7 +812,7 @@ function updateHover(p: Vec, screen: Vec) {
       : { n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize' }[handle.handle]
   } else if (s.tool === 'pen' || s.tool === 'connector' || s.tool === 'shape' || s.tool === 'frame') {
     session.cursor = 'crosshair'
-  } else if (s.tool === 'sticky' || s.tool === 'text') session.cursor = 'copy'
+  } else if (s.tool === 'sticky' || s.tool === 'text' || s.tool === 'code') session.cursor = 'copy'
   else if (s.selection.length === 1 && (() => {
     const only = getIndex().get(s.selection[0])
     if (only?.type !== 'table') return false

@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { getIndex, getItems, patchItems } from '../board/doc'
 import { exportPng } from '../board/export'
 import {
@@ -39,18 +40,18 @@ export function ContextMenu() {
       hidden: items.length < 2 && !grouped,
     },
     {
-      label: 'Bağlantıyı aç',
-      shortcut: '⌘tık',
+      label: t('Open link'),
+      shortcut: t('⌘click'),
       run: () => openLinkOf(items[0].id),
       hidden: items.length !== 1 || !('text' in items[0]) || !firstUrl((items[0] as { text: string }).text),
     },
     {
-      label: 'Frame içindekileri seç',
+      label: t('Select frame contents'),
       run: () => selectInsideFrame(items[0].id),
       hidden: items.length !== 1 || items[0].type !== 'frame',
     },
     {
-      label: 'Kırılmaları sıfırla',
+      label: t('Reset bends'),
       run: () => {
         patchItems(selection.map((id) => [id, { bend: null, bends: [] }] as [Id, Record<string, unknown>]))
         requestRender()
@@ -58,13 +59,13 @@ export function ContextMenu() {
       hidden: !items.some((i) => i.type === 'connector' && (i.bend || i.bends?.length)),
     },
     {
-      label: 'PNG olarak dışa aktar',
+      label: t('Export as PNG'),
       run: () => exportPng(items, items.length === 1 && items[0].type === 'frame' ? items[0].title : 'secim'),
       hidden: !items.length,
     },
     { label: 'Stili kopyala', shortcut: '⌘⌥C', run: () => copyStyle(), hidden: !items.length },
     {
-      label: 'Stili yapıştır',
+      label: t('Paste style'),
       shortcut: '⌘⌥V',
       run: () => { pasteStyle(); requestRender() },
       hidden: !items.length || !hasStyleClipboard(),

@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { makeConnector, makeFrame, makeShape, makeSticky, makeText } from './items'
 import type { Item, TextStyle, Vec } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -11,10 +12,10 @@ export interface Template {
 
 const heading = (x: number, y: number, w: number, text: string, size = 40): Item => {
   const style: TextStyle = { ...DEFAULT_TEXT_STYLE, fontSize: size, align: 'center', autoFit: false }
-  const t = makeText(x, y, w, style)
-  t.text = text
-  t.h = size * 1.4
-  return t
+  const node = makeText(x, y, w, style)
+  node.text = text
+  node.h = size * 1.4
+  return node
 }
 
 const columnLabels = (
@@ -49,8 +50,8 @@ export const TEMPLATES: Template[] = [
       const items = columnLabels(o, cols, colors, colW, gap, 'Kanban')
       const totalW = cols.length * colW + (cols.length - 1) * gap
       const seed = [
-        ['Kullanıcı görüşmeleri', 'Fiyatlandırma sayfası'],
-        ['Onboarding akışı'],
+        [t('User interviews'), t('Pricing page')],
+        [t('Onboarding flow')],
         [],
         ['Landing yenileme'],
       ]
@@ -80,7 +81,7 @@ export const TEMPLATES: Template[] = [
   {
     id: 'brainwriting',
     name: 'Brainwriting',
-    description: '4×3 fikir ızgarası',
+    description: '4×3 idea grid',
     build: (o) => {
       const items: Item[] = []
       const cols = 4, rows = 3, size = 220, gap = 32
@@ -105,21 +106,21 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: 'flow',
-    name: 'Akış şeması',
-    description: 'Başlangıç → karar → sonuç',
+    name: 'Flowchart',
+    description: 'Start → decision → outcome',
     build: (o) => {
       const items: Item[] = []
       const style = { stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' as const }
       const start = makeShape(o.x - 110, o.y, 220, 90, { kind: 'roundRect', fill: '#7FA5BE', ...style })
-      start.text = 'Başlangıç'
+      start.text = t('Start')
       const decision = makeShape(o.x - 130, o.y + 180, 260, 180, { kind: 'diamond', fill: '#F0E3B0', ...style })
-      decision.text = 'Koşul?'
+      decision.text = t('Condition?')
       const yes = makeShape(o.x + 220, o.y + 220, 220, 100, { kind: 'rect', fill: '#CBD79A', ...style })
       yes.text = 'Evet yolu'
       const no = makeShape(o.x - 440, o.y + 220, 220, 100, { kind: 'rect', fill: '#E7B7B4', ...style })
-      no.text = 'Hayır yolu'
+      no.text = t('No path')
       const done = makeShape(o.x - 110, o.y + 460, 220, 90, { kind: 'roundRect', fill: '#8A7FB0', ...style })
-      done.text = 'Bitiş'
+      done.text = t('End')
       items.push(start, decision, yes, no, done)
 
       const conn = { shape: 'elbow' as const, stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' as const, capStart: 'none' as const, capEnd: 'arrow' as const }
@@ -134,7 +135,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: 'mindmap',
-    name: 'Zihin haritası',
+    name: 'Mind map',
     description: 'Merkez fikir + 5 dal',
     build: (o) => {
       const items: Item[] = []
@@ -143,7 +144,7 @@ export const TEMPLATES: Template[] = [
       }, { ...DEFAULT_TEXT_STYLE, fontSize: 30, bold: true, textColor: '#FFFFFF' })
       core.text = 'Ana fikir'
       items.push(core)
-      const branches = ['Kullanıcılar', 'Sorun', 'Çözüm', 'Riskler', 'Metrikler']
+      const branches = [t('Users'), t('Problem'), t('Solution'), t('Risks'), t('Metrics')]
       const colors = ['#F0E3B0', '#CBD79A', '#7FA5BE', '#E7B7B4', '#8A7FB0']
       branches.forEach((label, i) => {
         const a = (i / branches.length) * Math.PI * 2 - Math.PI / 2

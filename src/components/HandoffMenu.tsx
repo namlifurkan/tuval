@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { useState } from 'react'
 import { boardToGraph, download, graphToPrompt } from '../board/agent'
 import { getItems } from '../board/doc'
@@ -20,7 +21,7 @@ export function HandoffMenu() {
   const build = () => {
     const all = getItems()
     const picked = selection.length ? all.filter((i) => selection.includes(i.id)) : all
-    const name = useBoardStore.getState().boardName || 'Adsız board'
+    const name = useBoardStore.getState().boardName || t('Untitled board')
     return {
       name,
       graph: boardToGraph(picked, name, selection.length ? 'selection' : 'board'),
@@ -35,7 +36,7 @@ export function HandoffMenu() {
   const copyPrompt = async () => {
     const { graph } = build()
     await navigator.clipboard.writeText(graphToPrompt(graph))
-    flash('Prompt panoya kopyalandı. Claude Code, Cursor veya Codex\'e yapıştır.')
+    flash(t('Prompt copied. Paste it into Claude Code, Cursor or Codex.'))
   }
 
   const openChat = (make: (q: string) => string) => {
@@ -44,19 +45,19 @@ export function HandoffMenu() {
     const url = make(encodeURIComponent(prompt))
     if (url.length > 7500) {
       navigator.clipboard.writeText(prompt)
-      flash('Board bir URL için fazla büyük — prompt panoya kopyalandı, sohbete yapıştır.')
+      flash(t('Board is too large for a URL — the prompt was copied, paste it into the chat.'))
       window.open(CHAT[0].href(''), '_blank', 'noopener')
       return
     }
     window.open(url, '_blank', 'noopener')
   }
 
-  const scope = selection.length ? `Seçim (${selection.length})` : 'Tüm board'
+  const scope = selection.length ? t('Selection ({n})', { n: selection.length }) : t('Whole board')
 
   return (
     <div className="relative">
       <IconButton
-        title="AI'ya devret"
+        title={t('Hand off to AI')}
         active={pop.open}
         onClick={pop.toggle}
         className={pop.open ? '' : 'text-[#C8452D] hover:bg-[#F7E9E4] hover:ring-[#C8452D]/25'}
@@ -65,7 +66,7 @@ export function HandoffMenu() {
       </IconButton>
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[270px]">
         <div className="flex items-center justify-between px-2.5 pb-1.5 pt-1">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#C8452D]"><Spark size={13} /> AI'ya devret</span>
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#C8452D]"><Spark size={13} /> {t('Hand off to AI')}</span>
           <span className="text-xs text-[#8A867C]">{scope}</span>
         </div>
 
@@ -76,7 +77,7 @@ export function HandoffMenu() {
             onClick={() => { openChat(c.href); pop.close() }}
             className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
           >
-            <span>{c.name}'da aç</span>
+            <span>{t('Open in {app}', { app: c.name })}</span>
             <span className="text-xs text-[#8A867C]">↗</span>
           </button>
         ))}
@@ -88,7 +89,7 @@ export function HandoffMenu() {
           onClick={() => { copyPrompt(); pop.close() }}
           className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
         >
-          Prompt'u kopyala
+          {t('Copy prompt')}
         </button>
         <button
           type="button"
@@ -99,7 +100,7 @@ export function HandoffMenu() {
           }}
           className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
         >
-          Markdown indir
+          {t('Download Markdown')}
         </button>
         <button
           type="button"
@@ -110,12 +111,11 @@ export function HandoffMenu() {
           }}
           className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
         >
-          JSON indir
+          {t('Download JSON')}
         </button>
 
         <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
-          Frame'ler bölüme, oklar mermaid akışına, kod blokları fenced code'a dönüşür.
-          Okuma sırası yukarıdan aşağı, soldan sağa.
+          {t('Frames become sections, arrows become a mermaid flow, code blocks become fenced code. Reading order is top to bottom, left to right.')}
         </p>
       </Popover>
 

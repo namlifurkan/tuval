@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { toScreen } from '../board/camera'
 import { awareness } from '../board/doc'
@@ -40,7 +41,7 @@ export function CursorChat() {
         ref={ref}
         value={text}
         maxLength={44}
-        placeholder="Bir şey söyle…"
+        placeholder={t('Say something…')}
         onChange={(e) => {
           setText(e.target.value)
           awareness.setLocalStateField('chat', { text: e.target.value, at: Date.now() })

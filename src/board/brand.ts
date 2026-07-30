@@ -18,16 +18,16 @@ export const COLOR = {
 }
 
 export const SURFACES = [
-  { id: 'paper', name: 'Kağıt', color: '#F2EFE9' },
-  { id: 'chalk', name: 'Badana', color: '#FAF8F4' },
-  { id: 'sand', name: 'Kum', color: '#EDE5D4' },
-  { id: 'linen', name: 'Keten', color: '#E7E2D6' },
-  { id: 'clay', name: 'Kil', color: '#F0E5E0' },
-  { id: 'celadon', name: 'Seladon', color: '#E2E9E1' },
-  { id: 'mist', name: 'Sis', color: '#E3E7EA' },
-  { id: 'board', name: 'Gri karton', color: '#D8D5CD' },
-  { id: 'blueprint', name: 'Mavi baskı', color: '#20344A' },
-  { id: 'slate', name: 'Kara tahta', color: '#25262A' },
+  { id: 'paper', name: 'Paper', color: '#F2EFE9' },
+  { id: 'chalk', name: 'Whitewash', color: '#FAF8F4' },
+  { id: 'sand', name: 'Sand', color: '#EDE5D4' },
+  { id: 'linen', name: 'Linen', color: '#E7E2D6' },
+  { id: 'clay', name: 'Clay', color: '#F0E5E0' },
+  { id: 'celadon', name: 'Celadon', color: '#E2E9E1' },
+  { id: 'mist', name: 'Mist', color: '#E3E7EA' },
+  { id: 'board', name: 'Grey board', color: '#D8D5CD' },
+  { id: 'blueprint', name: 'Blueprint', color: '#20344A' },
+  { id: 'slate', name: 'Slate', color: '#25262A' },
 ] as const
 
 export type SurfaceId = (typeof SURFACES)[number]['id']

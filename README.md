@@ -1,87 +1,96 @@
 # Tuval
 
-Açık kaynak sonsuz tuval. Canvas 2D renderer + Yjs CRDT.
+Open source infinite canvas. Canvas 2D renderer + Yjs CRDT, local-first, self-hostable.
 
-Miro, FigJam ve benzeri araçlara açık kaynak bir alternatif. Kod, tasarım ve marka
-tamamen kendimize ait; hiçbir ticari üründen görsel kimlik veya varlık kopyalanmamıştır.
-Ürün vizyonu ve çalışma kuralları için [CLAUDE.md](CLAUDE.md).
+An open alternative to Miro, FigJam and the like. All code, design and branding are our own;
+no visual identity or asset is copied from any commercial product.
 
-## Lisans
+[Türkçe README](README.tr.md) · [Product notes](CLAUDE.md) · [Design system](DESIGN.md)
 
-[AGPL-3.0-or-later](LICENSE). Tuval'i dilediğin gibi kullan, değiştir ve self-host et.
-Değiştirilmiş bir sürümü ağ üzerinden bir servis olarak sunuyorsan, kullanıcılarına
-kaynak kodunu da sunmak zorundasın.
+## Why
 
-## Çalıştırma
+Whiteboard, task board and document are three views of one workspace, not three products.
+Tuval is the canvas view. It is meant to be used daily by a real team, self-hosted, without
+a per-seat bill.
+
+One thing here does not exist elsewhere: **Hand off to AI**. A board is reduced to a semantic
+graph — frames become sections, connectors become directed edges, comments attach to the nearest
+item, code blocks stay fenced code — and exported as a prompt, Markdown or JSON that a coding
+agent can actually act on. Spatial layout is resolved into reading order, so the output is not
+a screenshot but a brief.
+
+## Run
 
 ```bash
-npm run dev            # uygulama → http://localhost:5173
-npm run collab         # (opsiyonel) y-websocket sunucusu :1234
+npm install
+npm run dev            # app  → http://localhost:5173
+npm run collab         # optional y-websocket server on :1234
 ```
 
-Çoklu kullanıcı için `.env.local` içine `VITE_COLLAB_URL=ws://localhost:1234` yaz, `npm run collab`
-ile sunucuyu başlat ve dev server'ı yeniden başlat (Vite env'i açılışta okur). İki sekme aç:
-item'lar, seçim ve canlı imleçler senkronize olur.
-Board odası URL hash'inden gelir: `http://localhost:5173/#takim-board`.
+For multiplayer put `VITE_COLLAB_URL=ws://localhost:1234` in `.env.local`, start the collab
+server and restart the dev server (Vite reads env at boot). Open two tabs: items, selection
+and live cursors sync. The board room comes from the URL hash: `http://localhost:5173/#team-board`.
 
-## Mimari
+## Architecture
 
-| Dosya | Sorumluluk |
+Single `<canvas>` with a dirty-flag rAF loop. DOM overlays only where they earn it: text
+editing, embeds, popovers. The document is a Yjs CRDT; persistence is IndexedDB, multiplayer
+is y-websocket.
+
+| File | Responsibility |
 |---|---|
-| `src/board/types.ts` | Item şeması, renk paletleri |
-| `src/board/doc.ts` | Yjs döküman, CRUD, undo/redo, IndexedDB + WS provider |
-| `src/board/camera.ts` | Viewport dönüşümleri, zoom, fit |
-| `src/board/geometry.ts` | Hit-test, resize/rotate matematiği, snap, connector routing |
-| `src/board/shapes.ts` | 18 shape path generator (canvas + SVG) |
-| `src/board/text.ts` | Text wrap, sticky auto-fit |
-| `src/board/render.ts` | Canvas render pipeline, seçim overlay, remote cursor |
-| `src/board/interaction.ts` | Pointer state machine (pan/marquee/move/resize/rotate/draw/connect) |
-| `src/board/store.ts` | Zustand UI state + render dirty flag |
+| `src/board/types.ts` | Item schema, palettes |
+| `src/board/doc.ts` | Yjs document, CRUD, undo/redo, persistence, provider |
+| `src/board/camera.ts` | Viewport transforms, zoom, fit |
+| `src/board/geometry.ts` | Hit-testing, resize/rotate math, snapping, connector routing |
+| `src/board/interaction.ts` | Pointer state machine |
+| `src/board/render.ts` | Render pipeline, selection overlay, remote cursors |
+| `src/board/paper.ts` | Surface colour and texture |
+| `src/board/code.ts` | Syntax tokenizer for code blocks (no external highlighter) |
+| `src/board/agent.ts` | Board → semantic graph → prompt / Markdown / JSON |
+| `src/board/store.ts` | Zustand UI state + ephemeral session |
+| `src/i18n.ts` | String catalogue; English is the source language |
 
-Render tek `<canvas>` üzerinde, dirty-flag'li rAF döngüsüyle. Text düzenleme sadece
-düzenleme anında DOM overlay (`TextEditor.tsx`).
+High-frequency work (dragging) does not write to Yjs every frame; it accumulates in a local
+preview layer and flushes every ~80 ms and on release.
 
-## Kısayollar
+## Shortcuts
 
-| Tuş | İşlem |
+| Key | Action |
 |---|---|
 | `V` `H` `N` `T` `S` `L` `P` `F` `C` | Select, Hand, Sticky, Text, Shape, Connector, Pen, Frame, Comment |
-| `Space` + sürükle / orta tık | Pan |
-| `⌘`+wheel / trackpad pinch | İmlece zoom |
+| `Space` + drag / middle click | Pan |
+| `⌘` + wheel / trackpad pinch | Zoom to cursor |
 | `⌘Z` / `⌘⇧Z` | Undo / Redo |
-| `⌘D` `⌘C` `⌘X` `⌘V` `⌘A` | Duplicate, kopyala, kes, yapıştır, tümünü seç |
-| `⌘G` / `⌘⇧G` | Grupla / Grubu çöz |
-| `⌘]` `⌘[` (`⇧` ile en öne/arkaya) | Z-sırası |
-| `⇧1` `⇧2` `⇧3` | Fit, seçime zoom, %100 |
-| Ok tuşları (`⇧` = 10px) | Nudge |
-| `Tab` / `⇧Tab` | Seçili item'ın sağına/soluna yeni item (hızlı ekleme) |
-| `⌘F` | Board içinde ara |
-| `⌘⌥C` / `⌘⌥V` | Stili kopyala / yapıştır |
-| `Alt`+sürükle | Kopyalayarak taşı |
-| `⇧`+resize | Oranı koru · `Alt`+resize: merkezden |
-| `⌘`+taşı | Snap'i kapat |
+| `⌘D` `⌘C` `⌘X` `⌘V` `⌘A` | Duplicate, copy, cut, paste, select all |
+| `⌘G` / `⌘⇧G` | Group / Ungroup |
+| `⌘]` `⌘[` (with `⇧` for front/back) | Z-order |
+| `⇧1` `⇧2` `⇧3` | Fit, zoom to selection, 100% |
+| Arrow keys (`⇧` = 10px) | Nudge |
+| `Tab` / `⇧Tab` | New item to the right / left of the selection |
+| `⌘F` | Search the board (`↑↓` navigate, `↵` go) |
+| `⌘⌥C` / `⌘⌥V` | Copy / paste style |
+| `Alt` + drag | Duplicate while moving |
+| `⇧` + resize | Keep ratio · `Alt` + resize: from centre |
+| `⌘` + move | Disable snapping |
 
-## Durum
+## Translating
 
-**Faz 1 — canvas motoru:** sonsuz canvas, sticky/shape/text/pen/frame/image/connector,
-çoklu seçim, resize+rotate, hizalama guide'ları, gruplama, frame'e otomatik ekleme,
-z-sırası, undo/redo, minimap, sağ tık menüsü, context toolbar, awareness (canlı imleç),
-IndexedDB kalıcılık, resim sürükle-bırak/yapıştır.
+English is the source language. `t('Some string')` looks the string up in
+[`src/i18n.ts`](src/i18n.ts); a missing entry falls back to the English source, so a partial
+translation is always safe. To add a language, copy the `tr` catalogue, translate the values
+and register it in `CATALOG` and `LANGS`.
 
-**Faz 2 — canvas fidelity:** yorum pin'leri + thread (yanıt, çözüldü, sil), seçimin
-4 yanındaki hızlı-ekle okları ve `Tab` kısayolu, 5 şablon (Kanban, Retrospektif,
-Brainwriting, Akış şeması, Zihin haritası), sunum modu (frame'ler slayt), silgi,
-frame boyut preset'leri, metin taşınca shape/sticky'nin otomatik büyümesi.
+## Verifying changes
 
-**Faz 3 — etkileşim doğruluğu:** connector uç noktalarını sürükleyerek yeniden bağlama,
-kilitli item'lar seçilebilir (rozetli, taşınamaz), hizala/dağıt/ızgaraya diz, stil
-kopyala-yapıştır, opaklık + hex renk seçici, board içi arama (`⌘F`), connector etiketi
-düzenleme, marquee frame'i ancak tamamen kapsayınca seçer.
+```bash
+npx tsc -b --noEmit && npx vite build
+```
 
-**Faz 4-5 — cila:** resize/rotate sırasında canlı boyut-açı rozeti, görsellerde oran
-kilidi, eşit-aralık snap'i ve aralık işaretleri, sürüklenen item'ın altındaki frame'in
-vurgulanması, canlı önizlemeli frame paneli, canvas'ta frame başlığı yeniden adlandırma,
-metin yazarken otomatik genişleme, PNG dışa aktarma, connector kırılma noktası,
-zoom menüsü, board menüsü, canlı katılımcı avatarları, uzak zoom'da metin LOD'u.
+`npx tsc --noEmit` without `-b` checks nothing here: the root `tsconfig.json` is a solution
+file with `"files": []`. It exits successfully and hides every error.
 
-Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi.
+## License
+
+[AGPL-3.0-or-later](LICENSE). Use, modify and self-host Tuval freely. If you run a modified
+version as a network service, you must offer its source to your users.

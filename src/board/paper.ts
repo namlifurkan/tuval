@@ -3,13 +3,13 @@ import type { Camera } from './camera'
 import { toScreen } from './camera'
 
 export const TEXTURES = [
-  { id: 'paper', name: 'Kağıt' },
-  { id: 'linen', name: 'Keten' },
-  { id: 'ticks', name: 'Tescil' },
-  { id: 'dots', name: 'Nokta' },
-  { id: 'grid', name: 'Kareli' },
-  { id: 'rules', name: 'Çizgili' },
-  { id: 'none', name: 'Düz' },
+  { id: 'paper', name: 'Paper' },
+  { id: 'linen', name: 'Linen' },
+  { id: 'ticks', name: 'Registration' },
+  { id: 'dots', name: 'Dots' },
+  { id: 'grid', name: 'Grid' },
+  { id: 'rules', name: 'Ruled' },
+  { id: 'none', name: 'Plain' },
 ] as const
 
 export type TextureId = (typeof TEXTURES)[number]['id']

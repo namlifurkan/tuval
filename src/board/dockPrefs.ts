@@ -4,11 +4,11 @@ export type DockItemId =
   | 'minimap' | 'fit' | 'zoom'
 
 export const DOCK_LABELS: Record<DockItemId, string> = {
-  undo: 'Geri al', redo: 'İleri al', select: 'Seç', sticky: 'Sticky', text: 'Metin',
-  shape: 'Şekil', connector: 'Bağlantı', pen: 'Kalem', table: 'Tablo', mindmap: 'Zihin haritası',
-  frame: 'Frame', comment: 'Yorum', code: 'Kod bloğu', templates: 'Şablonlar', image: 'Görsel',
-  more: 'Daha fazla',
-  minimap: 'Minimap', fit: 'İçeriğe sığdır', zoom: 'Zoom',
+  undo: 'Undo', redo: 'Redo', select: 'Select', sticky: 'Sticky', text: 'Text',
+  shape: 'Shape', connector: 'Connector', pen: 'Pen', table: 'Table', mindmap: 'Mind map',
+  frame: 'Frame', comment: 'Comment', code: 'Code block', templates: 'Templates', image: 'Image',
+  more: 'More',
+  minimap: 'Minimap', fit: 'Fit to content', zoom: 'Zoom',
 }
 
 export const DEFAULT_ORDER: DockItemId[] = [
@@ -21,8 +21,8 @@ export type DockSize = 'sm' | 'md' | 'lg'
 export type DockSide = 'bottom' | 'left' | 'right' | 'top'
 
 export const DOCK_SIDES: { id: DockSide; name: string }[] = [
-  { id: 'bottom', name: 'Alt' }, { id: 'top', name: 'Üst' },
-  { id: 'left', name: 'Sol' }, { id: 'right', name: 'Sağ' },
+  { id: 'bottom', name: 'Bottom' }, { id: 'top', name: 'Top' },
+  { id: 'left', name: 'Left' }, { id: 'right', name: 'Right' },
 ]
 
 export interface DockPrefs {

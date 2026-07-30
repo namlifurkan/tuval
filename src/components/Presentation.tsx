@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { animateCamera, fitRect } from '../board/camera'
@@ -73,7 +74,7 @@ export function Presentation() {
           type="button"
           onClick={() => update({ presenting: null })}
           className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]"
-          title="Çıkış — Esc"
+          title={`${t('Exit')} — Esc`}
         >
           <X size={19} />
         </button>

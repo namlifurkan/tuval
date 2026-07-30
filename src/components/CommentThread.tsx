@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Check, Trash2 } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { awareness } from '../board/doc'
@@ -23,7 +24,7 @@ function MentionText({ text }: { text: string }) {
 
 const timeAgo = (at: number) => {
   const m = Math.floor((Date.now() - at) / 60000)
-  if (m < 1) return 'şimdi'
+  if (m < 1) return t('now')
   if (m < 60) return `${m}dk`
   if (m < 1440) return `${Math.floor(m / 60)}sa`
   return `${Math.floor(m / 1440)}g`
@@ -94,7 +95,7 @@ export function CommentThread() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            title={item.resolved ? 'Yeniden aç' : 'Çözüldü olarak işaretle'}
+            title={t(item.resolved ? 'Reopen' : 'Mark resolved')}
             onClick={() => { patchItem(item.id, { resolved: !item.resolved }); requestRender() }}
             className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-[#EFEBE2]'}`}
           >
@@ -184,7 +185,7 @@ export function CommentThread() {
           disabled={!draft.trim()}
           className="rounded-lg bg-[#C8452D] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
         >
-          Gönder
+          {t('Send')}
         </button>
       </div>
     </div>

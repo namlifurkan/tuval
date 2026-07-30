@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { History, RotateCcw, Trash2, X } from 'lucide-react'
 import { useEffect, useSyncExternalStore } from 'react'
 import {
@@ -7,9 +8,9 @@ import { requestRender, useBoardStore } from '../board/store'
 
 const when = (at: number) => {
   const mins = Math.floor((Date.now() - at) / 60000)
-  if (mins < 1) return 'az önce'
-  if (mins < 60) return `${mins} dk önce`
-  if (mins < 1440) return `${Math.floor(mins / 60)} sa önce`
+  if (mins < 1) return t('just now')
+  if (mins < 60) return t('{n} min ago', { n: mins })
+  if (mins < 1440) return t('{n} h ago', { n: Math.floor(mins / 60) })
   return new Date(at).toLocaleDateString('tr-TR')
 }
 
@@ -30,7 +31,7 @@ export function HistoryPanel() {
       <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-[#141310]">
           <History size={14} strokeWidth={2} />
-          Sürümler ({versions.length})
+          {t('Versions')} ({versions.length})
         </span>
         <button
           type="button"
@@ -44,18 +45,18 @@ export function HistoryPanel() {
       <button
         type="button"
         onClick={() => {
-          const label = prompt('Sürüm adı', 'Kontrol noktası')
+          const label = prompt(t('Version name'), t('Checkpoint'))
           if (label !== null) saveVersion(label)
         }}
         className="m-2 rounded-lg bg-[#C8452D] px-2 py-1.5 text-xs font-semibold text-white"
       >
-        Şu anki hâli kaydet
+        {t('Save current state')}
       </button>
 
       <div className="flex-1 overflow-y-auto px-1.5 pb-1.5">
         {versions.length === 0 && (
           <p className="px-2 py-4 text-center text-xs text-[#8A867C]">
-            Henüz sürüm yok. Board her 10 dakikada bir kendiliğinden de kaydedilir.
+            {t('No versions yet. The board is also saved automatically every 10 minutes.')}
           </p>
         )}
         {versions.map((v) => (
@@ -65,14 +66,14 @@ export function HistoryPanel() {
               <span className="shrink-0 text-[10px] text-[#8A867C]">{when(v.at)}</span>
             </div>
             <div className="mt-0.5 flex items-center justify-between">
-              <span className="text-[11px] text-[#8A867C]">{v.by} · {v.count} öğe</span>
+              <span className="text-[11px] text-[#8A867C]">{v.by} · {v.count} {t(v.count === 1 ? 'item' : 'items')}</span>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100">
                 <button
                   type="button"
-                  title="Bu sürüme dön"
+                  title={t('Restore this version')}
                   onClick={() => {
-                    if (confirm(`"${v.label}" sürümüne dönülsün mü? Şu anki hâl önce kaydedilir.`)) {
-                      saveVersion('Geri dönmeden önce')
+                    if (confirm(t('Restore version "{name}"? The current state is saved first.', { name: v.label }))) {
+                      saveVersion(t('Before going back'))
                       restoreVersion(v.id)
                       requestRender()
                     }

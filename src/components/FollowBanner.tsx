@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Eye, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { awareness } from '../board/doc'
@@ -16,7 +17,7 @@ export function FollowBanner() {
         update({ following: null })
         return
       }
-      setName(state.user?.name ?? 'Katılımcı')
+      setName(state.user?.name ?? t('Participant'))
     }
     awareness.on('change', sync)
     sync()

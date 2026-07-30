@@ -151,6 +151,11 @@ döngüsü. Doküman Yjs CRDT; kalıcılık IndexedDB, çoklu kullanıcı y-webs
 ### Konvansiyonlar
 
 - **Kod yorumu yazma.** Sadece `// TODO:` serbest. Kod kendini anlatmalı.
+- **Arayüz metinlerinin kaynak dili İngilizce.** Her kullanıcıya görünen string `t('...')`
+  içinden geçer (`src/i18n.ts`). Katalogda karşılığı yoksa kaynak metne düşer, yani eksik
+  çeviri hiçbir zaman boş ekran üretmez. Yeni dil: `tr` kataloğunu kopyala, `CATALOG` ve
+  `LANGS`'a ekle. Dil `localStorage`'ta; değişince App kökü `key={lang}` ile remount olur
+  (`t()` render sırasında okunuyor, hook değil).
 - Mevcut kalıpları birebir takip et (isimlendirme, dosya düzeni, import sırası).
 - Tembel-kıdemli merdiveni: gerekmiyorsa yazma → stdlib → platform özelliği → kurulu bağımlılık
   → tek satır → ancak sonra minimum kod. Yeni bağımlılık, birkaç satırın çözdüğü şey için asla.

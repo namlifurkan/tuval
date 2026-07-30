@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { ChevronDown, ChevronUp, Play, Printer, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { fitRect } from '../board/camera'
@@ -68,13 +69,13 @@ export function FramesPanel() {
         <span className="text-xs font-semibold text-[#141310]">Frame'ler ({frames.length})</span>
         <div className="flex items-center gap-0.5">
           <IconButton
-            title="Sunumu başlat"
+            title={t('Start presentation')}
             onClick={() => frames.length && update({ presenting: 0, selection: [] })}
           >
             <Play size={15} strokeWidth={2} />
           </IconButton>
           <IconButton
-            title="PDF olarak yazdır"
+            title={t('Print as PDF')}
             onClick={() => printFrames(items)}
           >
             <Printer size={15} strokeWidth={2} />
@@ -88,7 +89,7 @@ export function FramesPanel() {
       <div className="flex-1 overflow-y-auto p-1.5">
         {frames.length === 0 && (
           <p className="px-2 py-4 text-center text-xs text-[#8A867C]">
-            Henüz frame yok. Sol araç çubuğundaki frame aracını kullan.
+            {t('No frames yet. Use the frame tool in the dock.')}
           </p>
         )}
         {frames.map((frame, i) => (
@@ -128,7 +129,7 @@ export function FramesPanel() {
                   onDoubleClick={() => setRenaming(frame.id)}
                   onClick={() => jump(frame)}
                   className="block w-full truncate text-left text-xs font-medium text-[#141310]"
-                  title="Çift tıkla: yeniden adlandır"
+                  title={t('Double click to rename')}
                 >
                   {frame.title}
                 </button>
@@ -137,7 +138,7 @@ export function FramesPanel() {
             <div className="flex shrink-0 flex-col opacity-0 group-hover:opacity-100">
               <button
                 type="button"
-                title="Yukarı taşı"
+                title={t('Move up')}
                 onClick={() => move(i, i - 1)}
                 disabled={i === 0}
                 className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"
@@ -146,7 +147,7 @@ export function FramesPanel() {
               </button>
               <button
                 type="button"
-                title="Aşağı taşı"
+                title={t('Move down')}
                 onClick={() => move(i, i + 1)}
                 disabled={i === frames.length - 1}
                 className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"

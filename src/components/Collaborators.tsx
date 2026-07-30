@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Eye } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { awareness } from '../board/doc'
@@ -45,7 +46,7 @@ export function Collaborators() {
     <div className="relative flex items-center pl-1">
       <button
         type="button"
-        title={`${all.length} kişi bu board'da`}
+        title={`${all.length} ${t('people on this board')}`}
         onClick={pop.toggle}
         className="flex items-center rounded-lg p-0.5 transition-[background-color] hover:bg-[#EAE6DD]"
       >
@@ -76,7 +77,7 @@ export function Collaborators() {
 
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[248px]">
         <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">
-          Board'da {all.length} kişi
+          {t('On the board')} {all.length} {t('people')}
         </div>
         {all.map((p) => (
           <button
@@ -94,11 +95,11 @@ export function Collaborators() {
             {chip(p, 26)}
             <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
               {p.name}
-              {p.id === -1 && <span className="ml-1 text-xs text-[#8A867C]">(sen)</span>}
+              {p.id === -1 && <span className="ml-1 text-xs text-[#8A867C]">{t('(you)')}</span>}
             </span>
             {p.id !== -1 && (
               <span className={`shrink-0 text-xs ${following === p.id ? 'font-semibold text-[#C8452D]' : 'text-[#8A867C]'}`}>
-                {following === p.id ? 'takipte' : 'takip et'}
+                {t(following === p.id ? 'following' : 'follow')}
               </span>
             )}
           </button>

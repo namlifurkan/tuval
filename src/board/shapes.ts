@@ -289,7 +289,7 @@ export const SHAPE_GROUPS: { name: string; kinds: ShapeKind[] }[] = [
       'speech', 'cloud', 'bracket', 'stadium'],
   },
   {
-    name: 'Akış şeması',
+    name: 'Flowchart',
     kinds: ['rect', 'diamond', 'stadium', 'parallelogram', 'document', 'manualInput',
       'hexagon', 'cylinder', 'display', 'delay', 'trapezoid'],
   },

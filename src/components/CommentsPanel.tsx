@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Check, MessageSquare, X } from 'lucide-react'
 import { useState } from 'react'
 import { fitRect } from '../board/camera'
@@ -9,7 +10,7 @@ import type { CommentItem } from '../board/types'
 
 const timeAgo = (at: number) => {
   const m = Math.floor((Date.now() - at) / 60000)
-  if (m < 1) return 'şimdi'
+  if (m < 1) return t('now')
   if (m < 60) return `${m}dk`
   if (m < 1440) return `${Math.floor(m / 60)}sa`
   return `${Math.floor(m / 1440)}g`
@@ -60,14 +61,14 @@ export function CommentsPanel() {
           className="flex items-center gap-1.5 border-b border-[#EAE6DD] px-3 py-1.5 text-left text-[11px] font-medium text-[#8A867C] hover:bg-[#EFEBE2]"
         >
           <Check size={12} strokeWidth={2.5} />
-          {showResolved ? 'Çözülmüşleri gizle' : `Çözülmüşleri göster (${resolvedCount})`}
+          {showResolved ? t('Hide resolved') : t('Show resolved ({n})', { n: resolvedCount })}
         </button>
       )}
 
       <div className="flex-1 overflow-y-auto p-1.5">
         {shown.length === 0 && (
           <p className="px-2 py-6 text-center text-xs text-[#8A867C]">
-            {all.length ? 'Açık yorum yok.' : 'Henüz yorum yok. Yorum aracıyla tuvale pin bırak.'}
+            {t(all.length ? 'No open comments.' : 'No comments yet. Drop a pin with the comment tool.')}
           </p>
         )}
         {shown.map((comment) => {
@@ -86,14 +87,14 @@ export function CommentsPanel() {
                   <span className="text-[10px] text-[#8A867C]">{first ? timeAgo(first.at) : ''}</span>
                   {comment.resolved && (
                     <span className="ml-auto rounded bg-[#EAE6DD] px-1.5 py-0.5 text-[9px] font-semibold text-[#4A463E]">
-                      çözüldü
+                      {t('resolved')}
                     </span>
                   )}
                 </div>
-                <p className="line-clamp-3 text-xs text-[#2E2B26]">{first?.text ?? '(boş)'}</p>
+                <p className="line-clamp-3 text-xs text-[#2E2B26]">{first?.text ?? t('(empty)')}</p>
                 {comment.replies.length > 1 && (
                   <span className="mt-1 block text-[10px] text-[#8A867C]">
-                    +{comment.replies.length - 1} yanıt
+                    +{comment.replies.length - 1} {t('replies')}
                   </span>
                 )}
               </button>
@@ -102,7 +103,7 @@ export function CommentsPanel() {
                 onClick={() => { patchItem(comment.id, { resolved: !comment.resolved }); requestRender() }}
                 className="mt-1.5 text-[10px] font-semibold text-[#8A867C] hover:text-[#C8452D]"
               >
-                {comment.resolved ? 'Yeniden aç' : 'Çözüldü işaretle'}
+                {t(comment.resolved ? 'Reopen' : 'Mark resolved')}
               </button>
             </div>
           )

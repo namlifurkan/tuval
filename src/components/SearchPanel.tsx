@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Search, X } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { fitRect } from '../board/camera'
@@ -7,8 +8,8 @@ import { useItems } from '../board/useBoard'
 import type { Item } from '../board/types'
 
 const TYPE_LABEL: Record<string, string> = {
-  sticky: 'Sticky', shape: 'Shape', text: 'Metin', frame: 'Frame',
-  connector: 'Bağlantı', comment: 'Yorum',
+  sticky: 'Sticky', shape: 'Shape', text: 'Text', frame: 'Frame',
+  connector: 'Connector', comment: 'Comment',
 }
 
 const textOf = (i: Item): string =>
@@ -76,7 +77,7 @@ export function SearchPanel() {
               if (!e.shiftKey) update({ searchOpen: false })
             }
           }}
-          placeholder="Board içinde ara…"
+          placeholder={t('Search the board…')}
           className="flex-1 text-sm outline-none placeholder:text-[#8A867C]"
         />
         <button
@@ -91,7 +92,7 @@ export function SearchPanel() {
       {q && (
         <div ref={listRef} className="max-h-[320px] overflow-y-auto border-t border-[#EAE6DD] p-1">
           {hits.length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-[#8A867C]">Sonuç yok</div>
+            <div className="px-3 py-4 text-center text-sm text-[#8A867C]">{t('No results')}</div>
           )}
           {hits.map((i, n) => (
             <button
@@ -103,7 +104,7 @@ export function SearchPanel() {
                 ${n === active ? 'bg-[#F7E9E4] ring-1 ring-[#C8452D]/25' : 'hover:bg-[#EFEBE2]'}`}
             >
               <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A463E]">
-                {TYPE_LABEL[i.type] ?? i.type}
+                {t(TYPE_LABEL[i.type] ?? i.type)}
               </span>
               <span className="truncate text-sm text-[#141310]">{textOf(i)}</span>
             </button>
@@ -113,9 +114,9 @@ export function SearchPanel() {
 
       {q && hits.length > 0 && (
         <div className="flex items-center gap-3 border-t border-[#EAE6DD] px-3 py-1.5 text-[11px] text-[#8A867C]">
-          <span><kbd className="font-semibold">↑↓</kbd> gez</span>
-          <span><kbd className="font-semibold">↵</kbd> git</span>
-          <span><kbd className="font-semibold">⇧↵</kbd> git, açık kal</span>
+          <span><kbd className="font-semibold">↑↓</kbd> {t('navigate')}</span>
+          <span><kbd className="font-semibold">↵</kbd> {t('go')}</span>
+          <span><kbd className="font-semibold">⇧↵</kbd> {t('go, keep open')}</span>
           <span className="ml-auto">{active + 1}/{hits.length}</span>
         </div>
       )}

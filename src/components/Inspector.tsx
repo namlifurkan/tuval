@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { LANGS } from '../board/code'
 import { codeHeight } from '../board/items'
 import { useSyncExternalStore } from 'react'
@@ -25,12 +26,12 @@ import { FONT_SIZES, LINE_COLORS, SHAPE_FILLS, STICKY_COLORS } from '../board/ty
 import { ColorGrid, HexInput } from './ui'
 
 const ALIGNMENTS: [AlignMode, typeof AlignLeft, string][] = [
-  ['left', AlignStartVertical, 'Sola'],
-  ['centerX', AlignCenterVertical, 'Yatay orta'],
-  ['right', AlignEndVertical, 'Sağa'],
-  ['top', AlignStartHorizontal, 'Üste'],
-  ['centerY', AlignCenterHorizontal, 'Dikey orta'],
-  ['bottom', AlignEndHorizontal, 'Alta'],
+  ['left', AlignStartVertical, 'Align left'],
+  ['centerX', AlignCenterVertical, 'Center horizontally'],
+  ['right', AlignEndVertical, 'Align right'],
+  ['top', AlignStartHorizontal, 'Align top'],
+  ['centerY', AlignCenterHorizontal, 'Center vertically'],
+  ['bottom', AlignEndHorizontal, 'Align bottom'],
 ]
 
 const has = (items: Item[], type: Item['type']) => items.some((i) => i.type === type)
@@ -92,7 +93,7 @@ export function Inspector() {
       className="pointer-events-auto absolute top-[76px] z-30 flex w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <header className="flex items-baseline justify-between border-b border-[#EAE6DD] px-3 py-2.5">
         <span className="text-sm font-semibold text-[#141310]">
-          {selected.length === 1 ? TYPE_LABEL[selected[0].type] ?? selected[0].type : `${selected.length} öğe`}
+          {selected.length === 1 ? t(TYPE_LABEL[selected[0].type] ?? selected[0].type) : `${selected.length} ${t(selected.length === 1 ? 'item' : 'items')}`}
         </span>
         <span className="text-[11px] text-[#8A867C]">
           {Math.round(first.w as number)} × {Math.round(first.h as number)}
@@ -100,7 +101,7 @@ export function Inspector() {
       </header>
 
       {(has(selected, 'sticky') || has(selected, 'shape') || has(selected, 'text')) && (
-        <Section title="Dolgu">
+        <Section title={t('Fill')}>
           <ColorGrid
             colors={has(selected, 'sticky') ? STICKY_COLORS : SHAPE_FILLS}
             value={first.fill as string}
@@ -111,7 +112,7 @@ export function Inspector() {
             onPick={(c) => patch({ fill: c }, (i) => i.type !== 'draw' && i.type !== 'connector' && i.type !== 'image')}
           />
           <label className="mt-2 flex items-center gap-2 text-xs text-[#4A463E]">
-            Opaklık
+            {t('Opacity')}
             <input
               type="range" min={10} max={100}
               value={Math.round(((first.opacity as number) ?? 1) * 100)}
@@ -123,10 +124,10 @@ export function Inspector() {
       )}
 
       {(has(selected, 'shape') || has(selected, 'connector') || has(selected, 'draw')) && (
-        <Section title="Çizgi">
+        <Section title={t('Line')}>
           <ColorGrid colors={LINE_COLORS} value={first.stroke as string} onPick={(c) => patch({ stroke: c })} columns={6} />
           <label className="mt-2 flex items-center gap-2 text-xs text-[#4A463E]">
-            Kalınlık
+            {t('Thickness')}
             <input
               type="range" min={1} max={24}
               value={(first.strokeWidth as number) ?? 2}
@@ -149,7 +150,7 @@ export function Inspector() {
       )}
 
       {has(selected, 'connector') && (
-        <Section title="Bağlantı">
+        <Section title={t('Connector')}>
           <div className="mb-2 flex gap-1">
             {(['straight', 'elbow', 'curved'] as ConnectorShape[]).map((sh) => (
               <button
@@ -176,7 +177,7 @@ export function Inspector() {
       )}
 
       {code && (
-        <Section title="Kod">
+        <Section title={t('Code')}>
           <div className="mb-2 flex gap-1.5">
             <select
               value={code.lang}
@@ -197,13 +198,13 @@ export function Inspector() {
             </select>
           </div>
           <div className="flex gap-1">
-            <Chip title="Açık tema" active={code.theme === 'light'} onClick={() => patch({ theme: 'light' })}>
-              <span className="px-1 text-xs font-semibold">Açık</span>
+            <Chip title={t('Light theme')} active={code.theme === 'light'} onClick={() => patch({ theme: 'light' })}>
+              <span className="px-1 text-xs font-semibold">{t('Light')}</span>
             </Chip>
-            <Chip title="Koyu tema" active={code.theme === 'dark'} onClick={() => patch({ theme: 'dark' })}>
-              <span className="px-1 text-xs font-semibold">Koyu</span>
+            <Chip title={t('Dark theme')} active={code.theme === 'dark'} onClick={() => patch({ theme: 'dark' })}>
+              <span className="px-1 text-xs font-semibold">{t('Dark')}</span>
             </Chip>
-            <Chip title="Satır numarası" active={code.showLines} onClick={() => patch({ showLines: !code.showLines })}>
+            <Chip title={t('Line numbers')} active={code.showLines} onClick={() => patch({ showLines: !code.showLines })}>
               <span className="px-1 text-xs font-semibold">1 2 3</span>
             </Chip>
           </div>
@@ -211,7 +212,7 @@ export function Inspector() {
       )}
 
       {textual.length > 0 && (
-        <Section title="Metin">
+        <Section title={t('Text')}>
           <div className="mb-2 flex items-center gap-2">
             <select
               value={(first.fontSize as number) ?? 24}
@@ -221,10 +222,10 @@ export function Inspector() {
               {FONT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <div className="flex gap-0.5">
-              <Chip title="Kalın" active={!!first.bold} onClick={() => patch({ bold: !first.bold })}><Bold size={15} strokeWidth={2.4} /></Chip>
-              <Chip title="İtalik" active={!!first.italic} onClick={() => patch({ italic: !first.italic })}><Italic size={15} strokeWidth={2.4} /></Chip>
-              <Chip title="Altı çizili" active={!!first.underline} onClick={() => patch({ underline: !first.underline })}><Underline size={15} strokeWidth={2.4} /></Chip>
-              <Chip title="Üstü çizili" active={!!first.strike} onClick={() => patch({ strike: !first.strike })}><Strikethrough size={15} strokeWidth={2.4} /></Chip>
+              <Chip title={t('Bold')} active={!!first.bold} onClick={() => patch({ bold: !first.bold })}><Bold size={15} strokeWidth={2.4} /></Chip>
+              <Chip title={t('Italic')} active={!!first.italic} onClick={() => patch({ italic: !first.italic })}><Italic size={15} strokeWidth={2.4} /></Chip>
+              <Chip title={t('Underline')} active={!!first.underline} onClick={() => patch({ underline: !first.underline })}><Underline size={15} strokeWidth={2.4} /></Chip>
+              <Chip title={t('Strikethrough')} active={!!first.strike} onClick={() => patch({ strike: !first.strike })}><Strikethrough size={15} strokeWidth={2.4} /></Chip>
             </div>
           </div>
           <div className="mb-2 flex gap-0.5">
@@ -239,60 +240,60 @@ export function Inspector() {
       )}
 
       {has(selected, 'sticky') && (
-        <Section title="Sticky boyutu">
+        <Section title={t('Sticky size')}>
           <div className="flex flex-wrap gap-1">
             {([['S', 120], ['M', 228], ['L', 340], ['XL', 480]] as [string, number][]).map(([label, size]) => (
               <button
-                key={label}
+                key={t(label)}
                 type="button"
                 onClick={() => patch({ w: size, h: size }, (i) => i.type === 'sticky')}
                 className="rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
-              >{label}</button>
+              >{t(label)}</button>
             ))}
             <button
               type="button"
               onClick={() => fitStickyToText()}
               className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
             >
-              <Maximize size={13} /> Metne sığdır
+              <Maximize size={13} /> {t('Fit to text')}
             </button>
           </div>
         </Section>
       )}
 
       {table && (
-        <Section title="Tablo">
+        <Section title={t('Table')}>
           <div className="grid grid-cols-2 gap-1">
-            <button type="button" onClick={() => { patchItem(table.id, addRow(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">Satır ekle</button>
-            <button type="button" onClick={() => { patchItem(table.id, addCol(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">Sütun ekle</button>
-            <button type="button" onClick={() => { const c = dropRow(table, table.rows - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">Satır sil</button>
-            <button type="button" onClick={() => { const c = dropCol(table, table.cols - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">Sütun sil</button>
+            <button type="button" onClick={() => { patchItem(table.id, addRow(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Add row')}</button>
+            <button type="button" onClick={() => { patchItem(table.id, addCol(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Add column')}</button>
+            <button type="button" onClick={() => { const c = dropRow(table, table.rows - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Remove row')}</button>
+            <button type="button" onClick={() => { const c = dropCol(table, table.cols - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Remove column')}</button>
           </div>
           <button
             type="button"
             onClick={() => patch({ headerRow: !table.headerRow }, (i) => i.type === 'table')}
             className="mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs hover:bg-[#EFEBE2]"
           >
-            <span>Başlık satırı</span>
-            <span className="text-[#8A867C]">{table.headerRow ? 'Açık' : 'Kapalı'}</span>
+            <span>{t('Header row')}</span>
+            <span className="text-[#8A867C]">{t(table.headerRow ? 'On' : 'Off')}</span>
           </button>
         </Section>
       )}
 
       {selected.length > 1 && (
-        <Section title="Hizala">
+        <Section title={t('Align')}>
           <div className="mb-2 grid grid-cols-6 gap-0.5">
             {ALIGNMENTS.map(([mode, Icon, label]) => (
-              <Chip key={mode} title={label} onClick={() => { alignSelection(mode); requestRender() }}>
+              <Chip key={mode} title={t(label)} onClick={() => { alignSelection(mode); requestRender() }}>
                 <Icon size={15} strokeWidth={1.9} />
               </Chip>
             ))}
           </div>
           <div className="flex gap-0.5">
-            <Chip title="Yatayda eşit dağıt" onClick={() => { distributeSelection('h'); requestRender() }}>
+            <Chip title={t('Distribute horizontally')} onClick={() => { distributeSelection('h'); requestRender() }}>
               <AlignHorizontalDistributeCenter size={15} strokeWidth={1.9} />
             </Chip>
-            <Chip title="Dikeyde eşit dağıt" onClick={() => { distributeSelection('v'); requestRender() }}>
+            <Chip title={t('Distribute vertically')} onClick={() => { distributeSelection('v'); requestRender() }}>
               <AlignVerticalDistributeCenter size={15} strokeWidth={1.9} />
             </Chip>
             <Chip title="Izgaraya diz" onClick={() => { arrangeInGrid(); requestRender() }}>
@@ -302,17 +303,17 @@ export function Inspector() {
         </Section>
       )}
 
-      <Section title="Düzen">
+      <Section title={t('Layout')}>
         <div className="flex gap-0.5">
-          <Chip title="Öne getir — ⌘]" onClick={() => reorder('forward')}><MoveUp size={15} strokeWidth={1.9} /></Chip>
-          <Chip title="Arkaya gönder — ⌘[" onClick={() => reorder('backward')}><MoveDown size={15} strokeWidth={1.9} /></Chip>
-          <Chip title={locked ? 'Kilidi aç' : 'Kilitle'} active={locked} onClick={() => patch({ locked: !locked })}>
+          <Chip title={`${t('Bring forward')} — ⌘]`} onClick={() => reorder('forward')}><MoveUp size={15} strokeWidth={1.9} /></Chip>
+          <Chip title={`${t('Send backward')} — ⌘[`} onClick={() => reorder('backward')}><MoveDown size={15} strokeWidth={1.9} /></Chip>
+          <Chip title={t(locked ? 'Unlock' : 'Lock')} active={locked} onClick={() => patch({ locked: !locked })}>
             {locked ? <Unlock size={15} strokeWidth={1.9} /> : <Lock size={15} strokeWidth={1.9} />}
           </Chip>
-          <Chip title="Çoğalt — ⌘D" onClick={() => duplicateSelection()}><Copy size={15} strokeWidth={1.9} /></Chip>
+          <Chip title={`${t('Duplicate')} — ⌘D`} onClick={() => duplicateSelection()}><Copy size={15} strokeWidth={1.9} /></Chip>
           <button
             type="button"
-            title="Sil — Del"
+            title={`${t('Delete')} — Del`}
             onClick={() => deleteSelection()}
             className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#DC2626] hover:bg-[#FEF2F2]"
           >
@@ -325,7 +326,7 @@ export function Inspector() {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  sticky: 'Sticky', shape: 'Şekil', text: 'Metin', draw: 'Çizim', image: 'Görsel',
-  frame: 'Frame', connector: 'Bağlantı', table: 'Tablo', embed: 'Gömülü', comment: 'Yorum',
-  code: 'Kod bloğu',
+  sticky: 'Sticky', shape: 'Shape', text: 'Text', draw: 'Drawing', image: 'Image',
+  frame: 'Frame', connector: 'Connector', table: 'Table', embed: 'Embed', comment: 'Comment',
+  code: 'Code block',
 }

@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { toScreen } from '../board/camera'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
@@ -48,7 +49,7 @@ export function EmbedLayer() {
             {selected && !live && (
               <div className="pointer-events-none absolute inset-0 grid place-items-end justify-center pb-2">
                 <span className="rounded-md bg-[#141310]/80 px-2 py-0.5 text-[11px] font-medium text-white">
-                  Çift tıkla: içeriği kullan
+                  {t('Double click to use the content')}
                 </span>
               </div>
             )}

@@ -2,6 +2,7 @@ import {
   Clock, Download, Layers, MoreHorizontal, Printer, Search, Trash2,
 } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
+import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import type { ReactNode } from 'react'
 import { isDarkSurface, PRODUCT, SURFACES, surfaceColor } from '../board/brand'
 import { getItems, getMeta, removeItems, room, setMeta, subscribeMeta } from '../board/doc'
@@ -22,8 +23,8 @@ function Caption({ children }: { children: ReactNode }) {
   const frames = items.filter((i) => i.type === 'frame').length
 
   const parts = [
-    `${items.length} öğe`,
-    frames ? `${frames} frame` : null,
+    `${items.length} ${t(items.length === 1 ? 'item' : 'items')}`,
+    frames ? `${frames} ${t(frames === 1 ? 'frame' : 'frames')}` : null,
     room,
   ].filter(Boolean)
 
@@ -32,9 +33,10 @@ function Caption({ children }: { children: ReactNode }) {
       <div className="flex items-center gap-1">
         <input
           value={boardName}
+          placeholder={t('Untitled board')}
           onChange={(e) => update({ boardName: e.target.value })}
           spellCheck={false}
-          aria-label="Board adı"
+          aria-label={t('Board name')}
           className="w-auto min-w-[8ch] max-w-[min(40vw,380px)] truncate bg-transparent field-sizing-content text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
         />
         {children}
@@ -55,6 +57,7 @@ export function TopBar() {
   const paint = surfaceColor(surface)
   const dark = isDarkSurface(paint)
   const texture = useSyncExternalStore(subscribeMeta, readTexture, readTexture)
+  const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
 
@@ -71,7 +74,7 @@ export function TopBar() {
         <div className="pointer-events-auto min-w-0">
           <Caption>
           <div className="relative">
-            <IconButton title="Board menüsü" active={menu.open} onClick={menu.toggle}>
+            <IconButton title={t('Board menu')} active={menu.open} onClick={menu.toggle}>
               <MoreHorizontal size={18} strokeWidth={1.8} />
             </IconButton>
             <Popover open={menu.open} onClose={menu.close} anchor="bottom" className="w-[236px]">
@@ -80,40 +83,40 @@ export function TopBar() {
                 onClick={() => { update({ framesPanel: true }); menu.close() }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <Layers size={15} /> Frame paneli
+                <Layers size={15} /> {t('Frame panel')}
               </button>
               <button
                 type="button"
                 onClick={() => { update({ historyPanel: true }); menu.close() }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <Clock size={15} /> Sürüm geçmişi
+                <Clock size={15} /> {t('Version history')}
               </button>
               <button
                 type="button"
                 onClick={() => { exportPng(getItems(), useBoardStore.getState().boardName || 'board'); menu.close() }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <Download size={15} /> PNG indir
+                <Download size={15} /> {t('Download PNG')}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  if (!printFrames(getItems())) alert('PDF için en az bir frame gerekiyor.')
+                  if (!printFrames(getItems())) alert(t('At least one frame is needed for PDF.'))
                   menu.close()
                 }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <Printer size={15} /> Frame'leri PDF yazdır
+                <Printer size={15} /> {t('Print frames as PDF')}
               </button>
               <div className="my-1 h-px bg-[#EAE6DD]" />
-              <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">Zemin</div>
+              <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Surface')}</div>
               <div className="grid grid-cols-5 gap-1.5 px-2 pb-1">
                 {SURFACES.map((s) => (
                   <button
                     key={s.id}
                     type="button"
-                    title={s.name}
+                    title={t(s.name)}
                     onClick={() => { setMeta('surface', s.id); requestRender() }}
                     style={{ background: s.color }}
                     className={`h-7 rounded-md border transition-transform hover:scale-105
@@ -121,23 +124,35 @@ export function TopBar() {
                   />
                 ))}
               </div>
-              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">Doku</div>
+              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">{t('Texture')}</div>
               <div className="flex flex-wrap gap-1 px-2 pb-1">
-                {TEXTURES.map((t) => (
+                {TEXTURES.map((tex) => (
                   <button
-                    key={t.id}
+                    key={tex.id}
                     type="button"
-                    onClick={() => { setMeta('texture', t.id); requestRender() }}
+                    onClick={() => { setMeta('texture', tex.id); requestRender() }}
                     className={`rounded-lg px-2 py-1 text-xs font-semibold
-                      ${texture === t.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-                  >{t.name}</button>
+                      ${texture === tex.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  >{t(tex.name)}</button>
+                ))}
+              </div>
+              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">{t('Language')}</div>
+              <div className="flex gap-1 px-2 pb-1">
+                {LANGS.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => setLang(l.id)}
+                    className={`flex-1 rounded-lg px-2 py-1 text-xs font-semibold
+                      ${lang === l.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  >{l.name}</button>
                 ))}
               </div>
               <div className="my-1 h-px bg-[#EAE6DD]" />
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm('Board\'daki her şey silinsin mi?')) {
+                  if (confirm(t('Delete everything on this board?'))) {
                     removeItems(getItems().map((i) => i.id))
                     requestRender()
                   }
@@ -145,7 +160,7 @@ export function TopBar() {
                 }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#DC2626] hover:bg-[#FEF2F2]"
               >
-                <Trash2 size={15} /> Board'u temizle
+                <Trash2 size={15} /> {t('Clear board')}
               </button>
             </Popover>
           </div>
@@ -153,7 +168,7 @@ export function TopBar() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-1.5">
-          <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
+          <IconButton title={t('Search — ⌘F')} onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <HandoffMenu />
@@ -170,18 +185,18 @@ export function TopBar() {
             }}
             className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:bg-[#EAE6DD]"
           >
-            Bağlantıyı kopyala
+            {t('Copy link')}
           </button>
           <button
             type="button"
             onClick={() => {
               const frames = getItems().filter((i) => i.type === 'frame')
               if (frames.length) update({ presenting: 0, selection: [] })
-              else alert('Sunum için en az bir frame gerekiyor.')
+              else alert(t('At least one frame is needed to present.'))
             }}
             className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
           >
-            Sunum
+            {t('Present')}
           </button>
         </div>
       </header>

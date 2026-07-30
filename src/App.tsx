@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { getLang, subscribeLang } from './i18n'
 import { Canvas } from './components/Canvas'
 import { CommentsPanel } from './components/CommentsPanel'
 import { CursorChat } from './components/CursorChat'
@@ -40,8 +41,10 @@ function MinimapCorner() {
 
 export default function App() {
   const presenting = useBoardStore((s) => s.presenting)
+  // Remount on language change: t() is read during render, not through a hook.
+  const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
   return (
-    <div className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
+    <div key={lang} className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
       <Canvas />
       <EmbedLayer />
       <TextEditor />

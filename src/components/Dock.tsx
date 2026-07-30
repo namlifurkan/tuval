@@ -8,12 +8,13 @@ import {
   setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
-import { makeCode, makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
+import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
 import { TEMPLATES } from '../board/templates'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
+import { t } from '../i18n'
 import { LINE_COLORS, STICKY_COLORS, type ShapeKind } from '../board/types'
 import {
   CodeTool, Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
@@ -89,8 +90,14 @@ export function Dock() {
 
   useEffect(() => { if (!magnify) resetScale() }, [magnify, resetScale])
 
+  // A popover covers the bar, so no pointermove/leave reaches it and the last
+  // magnification transform would stick after the popover closes.
+  const popoverOpen = stickyPop.open || shapePop.open || penPop.open || templatePop.open
+    || framePop.open || morePop.open || zoomPop.open || settingsPop.open
+  useEffect(() => { if (popoverOpen) resetScale() }, [popoverOpen, resetScale])
+
   const onMove = (e: React.PointerEvent) => {
-    if (!magnify || dragId) return
+    if (!magnify || dragId || popoverOpen) return
     const bar = barRef.current
     if (!bar) return
     const slots = [...bar.querySelectorAll<HTMLElement>('[data-slot]')]
@@ -171,7 +178,7 @@ export function Dock() {
       type="button"
       title={title}
       aria-label={title}
-      onClick={onClick}
+      onClick={() => { resetScale(); onClick() }}
       style={{ width: unit, height: unit }}
       className={`tap-target grid place-items-center rounded-xl transition-[background-color,box-shadow] duration-150
         ${active
@@ -184,16 +191,16 @@ export function Dock() {
 
   const renderItem = (id: DockItemId): ReactNode => {
     switch (id) {
-      case 'undo': return button('Geri al — ⌘Z', false, () => undoManager.undo(), <Undo2 size={glyph} strokeWidth={1.8} />)
-      case 'redo': return button('İleri al — ⌘⇧Z', false, () => undoManager.redo(), <Redo2 size={glyph} strokeWidth={1.8} />)
-      case 'select': return button('Seç — V', tool === 'select', pick('select'), <Select size={glyph} />)
-      case 'text': return button('Metin — T', tool === 'text', pick('text'), <TextTool size={glyph} />)
-      case 'connector': return button('Bağlantı — L', tool === 'connector', pick('connector'), <Connector size={glyph} />)
-      case 'table': return button('Tablo', tool === 'table', pick('table'), <TableTool size={glyph} />)
-      case 'mindmap': return button('Zihin haritası', tool === 'mindmap', pick('mindmap'), <Mindmap size={glyph} />)
-      case 'image': return button('Görsel yükle', false, () => fileRef.current?.click(), <ImageTool size={glyph} />)
-      case 'minimap': return button('Minimap', showMinimap, () => update({ showMinimap: !showMinimap }), <Minimap size={glyph} />)
-      case 'fit': return button('İçeriğe sığdır — ⇧1', false, fitAll, <Fit size={glyph - 1} />)
+      case 'undo': return button(`${t('Undo')} — ⌘Z`, false, () => undoManager.undo(), <Undo2 size={glyph} strokeWidth={1.8} />)
+      case 'redo': return button(`${t('Redo')} — ⌘⇧Z`, false, () => undoManager.redo(), <Redo2 size={glyph} strokeWidth={1.8} />)
+      case 'select': return button(`${t('Select')} — V`, tool === 'select', pick('select'), <Select size={glyph} />)
+      case 'text': return button(`${t('Text')} — T`, tool === 'text', pick('text'), <TextTool size={glyph} />)
+      case 'connector': return button(`${t('Connector')} — L`, tool === 'connector', pick('connector'), <Connector size={glyph} />)
+      case 'table': return button(t('Table'), tool === 'table', pick('table'), <TableTool size={glyph} />)
+      case 'mindmap': return button(t('Mind map'), tool === 'mindmap', pick('mindmap'), <Mindmap size={glyph} />)
+      case 'image': return button(t('Upload image'), false, () => fileRef.current?.click(), <ImageTool size={glyph} />)
+      case 'minimap': return button(t('Minimap'), showMinimap, () => update({ showMinimap: !showMinimap }), <Minimap size={glyph} />)
+      case 'fit': return button(`${t('Fit to content')} — ⇧1`, false, fitAll, <Fit size={glyph - 1} />)
       case 'comment':
         return button('Yorum — C', tool === 'comment', () => {
           if (tool === 'comment') update({ commentsPanel: !useBoardStore.getState().commentsPanel })
@@ -219,7 +226,7 @@ export function Dock() {
       case 'shape':
         return (
           <div className="relative">
-            {button('Şekil — S', tool === 'shape', () => (tool === 'shape' ? shapePop.toggle() : setTool('shape')), <ShapeGlyph kind={shape.kind} size={glyph} />)}
+            {button(`${t('Shape')} — S`, tool === 'shape', () => (tool === 'shape' ? shapePop.toggle() : setTool('shape')), <ShapeGlyph kind={shape.kind} size={glyph} />)}
             <Popover open={shapePop.open} onClose={shapePop.close} anchor={popSide} className="w-[268px]">
               {SHAPE_GROUPS.map((group) => (
                 <div key={group.name} className="mb-2 last:mb-0">
@@ -286,14 +293,14 @@ export function Dock() {
       case 'frame':
         return (
           <div className="relative">
-            {button('Frame — F', tool === 'frame', () => (tool === 'frame' ? framePop.toggle() : setTool('frame')), <FrameTool size={glyph} />)}
+            {button(`${t('Frame')} — F`, tool === 'frame', () => (tool === 'frame' ? framePop.toggle() : setTool('frame')), <FrameTool size={glyph} />)}
             <Popover open={framePop.open} onClose={framePop.close} anchor={popSide} className="w-[212px]">
               <button
                 type="button"
                 onClick={() => { update({ framesPanel: true }); framePop.close() }}
                 className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
-              >Frame panelini aç</button>
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Frame boyutu</div>
+              >{t('Open frame panel')}</button>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Frame size')}</div>
               {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(([label, w, h]) => (
                 <button
                   key={label}
@@ -314,21 +321,13 @@ export function Dock() {
           </div>
         )
 
-      case 'code':
-        return button('Kod bloğu', false, () => {
-          const c = viewportCenter()
-          const item = makeCode(c.x - 260, c.y - 40)
-          createItems([item])
-          useBoardStore.getState().setSelection([item.id])
-          useBoardStore.getState().setEditing({ id: item.id, selectAll: false })
-          requestRender()
-        }, <CodeTool size={glyph} />)
+      case 'code': return button(t('Code block'), tool === 'code', pick('code'), <CodeTool size={glyph} />)
       case 'templates':
         return (
           <div className="relative">
-            {button('Şablonlar', templatePop.open, templatePop.toggle, <Templates size={glyph} />)}
+            {button(t('Templates'), templatePop.open, templatePop.toggle, <Templates size={glyph} />)}
             <Popover open={templatePop.open} onClose={templatePop.close} anchor={popSide} className="w-[268px]">
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Şablonlar</div>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Templates')}</div>
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
@@ -347,17 +346,17 @@ export function Dock() {
       case 'more':
         return (
           <div className="relative">
-            {button('Daha fazla', morePop.open, morePop.toggle, <More size={glyph} />)}
+            {button(t('More'), morePop.open, morePop.toggle, <More size={glyph} />)}
             <Popover open={morePop.open} onClose={morePop.close} anchor={popSide} className="w-[268px]">
               <button
                 type="button"
                 onClick={() => {
-                  const url = prompt('Gömülecek bağlantı (YouTube, Vimeo, Loom, Figma veya herhangi bir site)')
+                  const url = prompt(t('Link to embed (YouTube, Vimeo, Loom, Figma or any site)'))
                   if (url?.trim()) { const c = viewportCenter(); insert([makeEmbed(c.x, c.y, url.trim())]) }
                   morePop.close()
                 }}
                 className="mb-2 w-full rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
-              >Bağlantı göm</button>
+              >{t('Embed a link')}</button>
               <div className="px-1 pb-1.5 text-xs font-semibold text-[#141310]">Emoji</div>
               <div className="grid grid-cols-8 gap-1">
                 {EMOJI.map((g) => (
@@ -384,7 +383,7 @@ export function Dock() {
       case 'zoom':
         return (
           <div className={`relative flex items-center gap-0.5 ${vertical ? 'flex-col' : ''}`}>
-            {button('Uzaklaş', false, () => step(1 / 1.2), <Minus size={glyph - 2} strokeWidth={2} />)}
+            {button(t('Zoom out'), false, () => step(1 / 1.2), <Minus size={glyph - 2} strokeWidth={2} />)}
             <button
               type="button"
               onClick={zoomPop.toggle}
@@ -393,7 +392,7 @@ export function Dock() {
             >
               {Math.round(camera.z * 100)}%
             </button>
-            {button('Yakınlaş', false, () => step(1.2), <Plus size={glyph - 2} strokeWidth={2} />)}
+            {button(t('Zoom in'), false, () => step(1.2), <Plus size={glyph - 2} strokeWidth={2} />)}
             <Popover open={zoomPop.open} onClose={zoomPop.close} anchor={popSide} className="w-[200px]">
               {[0.5, 1, 2, 4].map((z) => (
                 <button
@@ -485,11 +484,11 @@ export function Dock() {
           onDrop={() => { if (dragId) moveDockItem(dragId, null); setDragId(null) }}
         >
           <div className="relative">
-            <IconButton title="Dock ayarları (sağ tık)" active={settingsPop.open} onClick={settingsPop.toggle}>
+            <IconButton title={t('Dock settings (right click)')} active={settingsPop.open} onClick={settingsPop.toggle}>
               <Settings2 size={17} strokeWidth={1.8} />
             </IconButton>
             <Popover open={settingsPop.open} onClose={settingsPop.close} anchor={popSide} className="w-[248px]">
-              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Konum</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">{t('Position')}</div>
               <div className="mb-2 grid grid-cols-4 gap-1">
                 {DOCK_SIDES.map((o) => (
                   <button
@@ -498,10 +497,10 @@ export function Dock() {
                     onClick={() => setDockSide(o.id)}
                     className={`rounded-lg px-1 py-1.5 text-xs font-semibold
                       ${side === o.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-                  >{o.name}</button>
+                  >{t(o.name)}</button>
                 ))}
               </div>
-              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Boyut</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">{t('Size')}</div>
               <div className="mb-2 flex gap-1">
                 {(['sm', 'md', 'lg'] as DockSize[]).map((s) => (
                   <button
@@ -518,12 +517,12 @@ export function Dock() {
                 onClick={() => setMagnify(!prefs.magnify)}
                 className="mb-2 flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <span>Büyüteç</span>
-                <span className="text-xs text-[#8A867C]">{prefs.magnify ? 'Açık' : 'Kapalı'}</span>
+                <span>{t('Magnifier')}</span>
+                <span className="text-xs text-[#8A867C]">{t(prefs.magnify ? 'On' : 'Off')}</span>
               </button>
 
               <div className="mb-1 border-t border-[#EAE6DD] px-1 pt-2 text-xs font-semibold text-[#141310]">
-                Görünen araçlar
+                {t('Visible tools')}
               </div>
               <div className="max-h-[220px] overflow-y-auto">
                 {DEFAULT_ORDER.map((id) => (
@@ -534,7 +533,7 @@ export function Dock() {
                       onChange={() => toggleDockItem(id)}
                       className="accent-[#C8452D]"
                     />
-                    {DOCK_LABELS[id]}
+                    {t(DOCK_LABELS[id])}
                   </label>
                 ))}
               </div>
@@ -543,10 +542,10 @@ export function Dock() {
                 onClick={() => resetDock()}
                 className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#E2DED5] px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
               >
-                <RotateCcw size={12} /> Varsayılana dön
+                <RotateCcw size={12} /> {t('Reset to default')}
               </button>
               <p className="mt-2 px-1 text-[11px] leading-snug text-[#8A867C]">
-                Araçları sürükleyerek sıralayabilirsin.
+                {t('Drag tools to reorder them.')}
               </p>
             </Popover>
           </div>
