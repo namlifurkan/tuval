@@ -296,6 +296,12 @@ const tr: Record<string, string> = {
     '"{name}" bu tarayıcıdan silinsin mi? Geri alınamaz.',
   'Boards live in this browser. Share the link to let someone else open one.':
     'Board\'lar bu tarayıcıda tutulur. Başkasının açması için linki paylaş.',
+  'Write a comment…': 'Yorum yaz…',
+  'Close': 'Kapat',
+  'Snap to grid': 'Izgaraya diz',
+  'Sticky colour': 'Sticky rengi',
+  'Emoji': 'Emoji',
+  'Hex': 'Hex',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

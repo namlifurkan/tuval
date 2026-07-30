@@ -103,7 +103,7 @@ export function CommentThread() {
           </button>
           <button
             type="button"
-            title="Sil"
+            title={t('Delete')}
             onClick={remove}
             className="grid h-7 w-7 place-items-center rounded-md text-[#DC2626] hover:bg-[#FEF2F2]"
           >
@@ -170,20 +170,20 @@ export function CommentThread() {
           ref={inputRef}
           value={draft}
           rows={1}
-          placeholder="Yorum yaz…"
+          placeholder={t('Write a comment…')}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             e.stopPropagation()
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
             if (e.key === 'Escape') close()
           }}
-          className="max-h-24 min-h-[30px] flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-[#FCFBF8] focus:ring-1 focus:ring-[#C8452D]"
+          className="max-h-24 min-h-[30px] w-full min-w-0 flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-[#FCFBF8] focus:ring-1 focus:ring-[#C8452D]"
         />
         <button
           type="button"
           onClick={submit}
           disabled={!draft.trim()}
-          className="rounded-lg bg-[#C8452D] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
+          className="shrink-0 rounded-lg bg-[#C8452D] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
         >
           {t('Send')}
         </button>

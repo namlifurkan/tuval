@@ -416,7 +416,7 @@ export function Inspector() {
             <Chip title={t('Distribute vertically')} onClick={() => { distributeSelection('v'); requestRender() }}>
               <AlignVerticalDistributeCenter size={15} strokeWidth={1.9} />
             </Chip>
-            <Chip title="Izgaraya diz" onClick={() => { arrangeInGrid(); requestRender() }}>
+            <Chip title={t('Snap to grid')} onClick={() => { arrangeInGrid(); requestRender() }}>
               <Grid3x3 size={15} strokeWidth={1.9} />
             </Chip>
           </div>

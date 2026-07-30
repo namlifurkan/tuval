@@ -84,7 +84,7 @@ export function HistoryPanel() {
                 </button>
                 <button
                   type="button"
-                  title="Sil"
+                  title={t('Delete')}
                   onClick={() => deleteVersion(v.id)}
                   className="grid h-6 w-6 place-items-center rounded-md text-[#DC2626] hover:bg-[#FEF2F2]"
                 >

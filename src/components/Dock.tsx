@@ -226,7 +226,7 @@ export function Dock() {
                 <span className="absolute -bottom-1.5 -right-1.5 h-2 w-2 rounded-[2px] border border-black/10" style={{ background: stickyFill }} />
               </span>)}
             <Popover open={stickyPop.open} onClose={stickyPop.close} anchor={popSide} className="w-[228px]">
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Sticky rengi</div>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Sticky colour')}</div>
               <ColorGrid colors={STICKY_COLORS} value={stickyFill} onPick={(c) => { update({ stickyFill: c }); stickyPop.close() }} />
             </Popover>
           </div>
@@ -263,27 +263,27 @@ export function Dock() {
       case 'pen':
         return (
           <div className="relative">
-            {button('Kalem — P', tool === 'pen', () => (tool === 'pen' ? penPop.toggle() : setTool('pen')),
+            {button(`${t('Pen')} — P`, tool === 'pen', () => (tool === 'pen' ? penPop.toggle() : setTool('pen')),
               pen.eraser ? <EraserTool size={glyph} />
                 : pen.highlighter ? <Highlight size={glyph} />
                 : <Nib size={glyph} />)}
-            <Popover open={penPop.open} onClose={penPop.close} anchor={popSide} className="w-[212px]">
+            <Popover open={penPop.open} onClose={penPop.close} anchor={popSide} className="w-[248px]">
               <div className="mb-2 flex gap-1">
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: false, eraser: false } })}
-                  className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-                >Kalem</button>
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                >{t('Pen')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: true, eraser: false, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
-                  className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-                >Marker</button>
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                >{t('Highlighter')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, eraser: true } })}
-                  className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-                >Silgi</button>
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                >{t('Eraser')}</button>
               </div>
               <div className="mb-2 flex items-center gap-2 px-1">
                 <Minus size={14} />
@@ -366,7 +366,7 @@ export function Dock() {
                 }}
                 className="mb-2 w-full rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
               >{t('Embed a link')}</button>
-              <div className="px-1 pb-1.5 text-xs font-semibold text-[#141310]">Emoji</div>
+              <div className="px-1 pb-1.5 text-xs font-semibold text-[#141310]">{t('Emoji')}</div>
               <div className="grid grid-cols-8 gap-1">
                 {EMOJI.map((g) => (
                   <button

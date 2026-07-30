@@ -80,7 +80,7 @@ export function FramesPanel() {
           >
             <Printer size={15} strokeWidth={2} />
           </IconButton>
-          <IconButton title="Kapat" onClick={() => update({ framesPanel: false })}>
+          <IconButton title={t('Close')} onClick={() => update({ framesPanel: false })}>
             <X size={15} strokeWidth={2} />
           </IconButton>
         </div>
@@ -157,7 +157,7 @@ export function FramesPanel() {
             </div>
             <button
               type="button"
-              title="Sil"
+              title={t('Delete')}
               onClick={() => { removeItems([frame.id]); requestRender() }}
               className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#DC2626] opacity-0 hover:bg-[#FEF2F2] group-hover:opacity-100"
             >

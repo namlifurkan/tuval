@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { CSSProperties, ReactNode } from 'react'
@@ -177,7 +178,7 @@ export function HexInput({ value, onPick }: { value?: string; onPick: (c: string
   const [hex, setHex] = useState(value && value.startsWith('#') ? value : '#')
   return (
     <div className="mt-2 flex items-center gap-1.5 border-t border-[#EAE6DD] pt-2">
-      <span className="text-xs font-semibold text-[#8A867C]">Hex</span>
+      <span className="text-xs font-semibold text-[#8A867C]">{t('Hex')}</span>
       <input
         value={hex}
         onChange={(e) => {
