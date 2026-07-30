@@ -9,8 +9,8 @@ import {
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
-  cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape, makeSticky,
-  makeText, resolveEndpoint, STICKY_SIZE,
+  cellAt, cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape,
+  makeSticky, makeTable, makeText, resolveEndpoint, STICKY_SIZE, TABLE_CELL_H, TABLE_CELL_W,
 } from './items'
 import {
   boxOf, commentPinScreen, connectorGeometry, connectorMid, handleScreenRects, PIN_R, quickHit,
@@ -267,7 +267,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     return
   }
 
-  if (s.tool === 'sticky' || s.tool === 'shape' || s.tool === 'frame' || s.tool === 'text') {
+  if (s.tool === 'sticky' || s.tool === 'shape' || s.tool === 'frame' || s.tool === 'text' || s.tool === 'table') {
     drag = { kind: 'create', tool: s.tool, origin: p, id: null }
     return
   }
@@ -605,6 +605,13 @@ function finishCreate(tool: Tool, r: Rect, quick: boolean, p: Vec) {
     const h = quick ? 900 : Math.max(r.h, 100)
     const count = getItems().filter((i) => i.type === 'frame').length + 1
     item = makeFrame(quick ? p.x - w / 2 : r.x, quick ? p.y - h / 2 : r.y, w, h, `Frame ${count}`)
+  } else if (tool === 'table') {
+    const cols = quick ? 3 : Math.max(1, Math.round(r.w / TABLE_CELL_W))
+    const rows = quick ? 3 : Math.max(1, Math.round(r.h / TABLE_CELL_H))
+    const t = makeTable(0, 0, rows, cols, s.textStyle)
+    t.x = quick ? p.x - t.w / 2 : r.x
+    t.y = quick ? p.y - t.h / 2 : r.y
+    item = t
   } else {
     const w = quick ? 320 : Math.max(r.w, 80)
     item = makeText(quick ? p.x : r.x, quick ? p.y - s.textStyle.fontSize : r.y, w, s.textStyle)
@@ -612,7 +619,8 @@ function finishCreate(tool: Tool, r: Rect, quick: boolean, p: Vec) {
   createItems([item])
   s.setSelection([item.id])
   s.setTool('select')
-  if (item.type !== 'frame') s.setEditing({ id: item.id, selectAll: false })
+  if (item.type === 'table') s.setEditing({ id: item.id, selectAll: false, cell: [0, 0] })
+  else if (item.type !== 'frame') s.setEditing({ id: item.id, selectAll: false })
   reparentToFrames([item.id])
 }
 
@@ -695,6 +703,12 @@ export function doubleClick(screen: Vec) {
   const s = store()
   const p = toBoard(s.camera, screen.x, screen.y)
   const hit = pickAt(p)
+  if (hit?.type === 'table') {
+    const cell = cellAt(hit, p)
+    s.setSelection([hit.id])
+    s.setEditing({ id: hit.id, selectAll: true, cell: cell ?? [0, 0] })
+    return
+  }
   if (hit && hit.type !== 'draw' && hit.type !== 'image') {
     if (hit.type === 'frame') {
       s.setSelection([hit.id])

@@ -5,7 +5,7 @@ import {
   ANCHOR_SIDES, aabb, anchorPoint, bendControl, connectorPath, corners, curveControls, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
-import { resolveEndpoint } from './items'
+import { cellRect, resolveEndpoint } from './items'
 import { shapePath, textInsetFor } from './shapes'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
@@ -34,6 +34,7 @@ export interface Scene {
   selection: Set<Id>
   hover: Id | null
   editing: Id | null
+  editingCell: [number, number] | null
   session: Session
   showGrid: boolean
   showAnchors: boolean
@@ -109,6 +110,7 @@ function drawItem(s: Scene, item: Item) {
       case 'draw': drawStroke(s, item); break
       case 'image': drawImage(s, item); break
       case 'connector': drawConnector(s, item); break
+      case 'table': drawTable(s, item); break
       case 'comment': break
     }
   })
@@ -309,6 +311,49 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(item.text, mid.x, mid.y)
+  }
+}
+
+function drawTable(s: Scene, item: Item & { type: 'table' }) {
+  const { ctx } = s
+  ctx.fillStyle = item.fill
+  ctx.fillRect(item.x, item.y, item.w, item.h)
+  if (item.headerRow) {
+    const head = cellRect(item, 0, 0)
+    ctx.fillStyle = item.headerFill
+    ctx.fillRect(item.x, item.y, item.w, head.h)
+  }
+
+  ctx.strokeStyle = item.stroke
+  ctx.lineWidth = item.strokeWidth
+  ctx.setLineDash([])
+  ctx.beginPath()
+  for (let r = 0; r <= item.rows; r++) {
+    const y = r === item.rows ? item.y + item.h : cellRect(item, r, 0).y
+    ctx.moveTo(item.x, y)
+    ctx.lineTo(item.x + item.w, y)
+  }
+  for (let c = 0; c <= item.cols; c++) {
+    const x = c === item.cols ? item.x + item.w : cellRect(item, 0, c).x
+    ctx.moveTo(x, item.y)
+    ctx.lineTo(x, item.y + item.h)
+  }
+  ctx.stroke()
+
+  const editing = s.editing === item.id ? s.editingCell : null
+  for (let r = 0; r < item.rows; r++) {
+    for (let c = 0; c < item.cols; c++) {
+      if (editing && editing[0] === r && editing[1] === c) continue
+      const text = item.cells[r]?.[c]
+      if (!text) continue
+      const rect = cellRect(item, r, c)
+      const pad = 8
+      drawText(
+        s,
+        { ...item, text, bold: item.bold || (item.headerRow && r === 0) },
+        { x: rect.x + pad, y: rect.y + pad / 2, w: rect.w - pad * 2, h: rect.h - pad },
+      )
+    }
   }
 }
 

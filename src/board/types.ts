@@ -98,6 +98,20 @@ export interface CommentItem extends BaseItem {
   resolved: boolean
 }
 
+export interface TableItem extends BaseItem, TextStyle {
+  type: 'table'
+  rows: number
+  cols: number
+  widths: number[]
+  heights: number[]
+  cells: string[][]
+  headerRow: boolean
+  fill: string
+  headerFill: string
+  stroke: string
+  strokeWidth: number
+}
+
 export interface Endpoint {
   itemId: Id | null
   anchor: AnchorSide | null
@@ -121,7 +135,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
 
 export type Item =
   | StickyItem | ShapeItem | TextItem | DrawItem | ImageItem | FrameItem | ConnectorItem
-  | CommentItem
+  | CommentItem | TableItem
 
 export type ItemType = Item['type']
 

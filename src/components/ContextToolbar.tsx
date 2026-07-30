@@ -2,11 +2,13 @@ import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical,
   AlignHorizontalDistributeCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight,
   AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowRight, Bold,
-  Copy, Grid3x3, Italic, LayoutGrid, Lock, Maximize, MoveDown, MoveUp, PenLine, Strikethrough, Trash2,
+  Copy, Grid3x3, Italic, LayoutGrid, Lock, Maximize, MoveDown, MoveUp, PenLine, Strikethrough,
+  Table2, Trash2,
   Type, Underline, Unlock,
 } from 'lucide-react'
 import { toScreen } from '../board/camera'
-import { patchItems } from '../board/doc'
+import { patchItem, patchItems } from '../board/doc'
+import { addCol, addRow, dropCol, dropRow } from '../board/items'
 import {
   alignSelection, arrangeInGrid, deleteSelection, distributeSelection, duplicateSelection,
   fitStickyToText, reorder,
@@ -41,6 +43,7 @@ export function ContextToolbar() {
   const linePop = usePopover()
   const alignPop = usePopover()
   const sizePop = usePopover()
+  const tablePop = usePopover()
 
   if (!selected.length || editing || dragging) return null
   if (selected.every((i) => i.type === 'comment')) return null
@@ -159,6 +162,41 @@ export function ContextToolbar() {
                   >{c}</button>
                 ))}
               </div>
+            </Popover>
+          </div>
+        )}
+
+        {selected.length === 1 && selected[0].type === 'table' && (
+          <div className="relative">
+            <IconButton title="Tablo" onClick={tablePop.toggle}>
+              <Table2 size={18} strokeWidth={1.8} />
+            </IconButton>
+            <Popover open={tablePop.open} onClose={tablePop.close} anchor="bottom" className="w-[212px]">
+              {([
+                ['Satır ekle', () => addRow(selected[0] as never)],
+                ['Sütun ekle', () => addCol(selected[0] as never)],
+                ['Son satırı sil', () => dropRow(selected[0] as never, (selected[0] as never as { rows: number }).rows - 1)],
+                ['Son sütunu sil', () => dropCol(selected[0] as never, (selected[0] as never as { cols: number }).cols - 1)],
+              ] as [string, () => Record<string, unknown> | null][]).map(([label, run]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    const changes = run()
+                    if (changes) { patchItem(selected[0].id, changes); requestRender() }
+                  }}
+                  className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+                >{label}</button>
+              ))}
+              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <button
+                type="button"
+                onClick={() => patch({ headerRow: !(first.headerRow as boolean) }, (i) => i.type === 'table')}
+                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+              >
+                <span>Başlık satırı</span>
+                <span className="text-xs text-[#8A867C]">{first.headerRow ? 'Açık' : 'Kapalı'}</span>
+              </button>
             </Popover>
           </div>
         )}

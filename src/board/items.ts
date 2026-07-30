@@ -4,7 +4,7 @@ import { anchorPoint, nearestAnchor } from './geometry'
 import { me } from './me'
 import type {
   CommentItem, CommentReply, ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item,
-  ShapeItem, StickyItem, TextItem, TextStyle, Vec,
+  Rect, ShapeItem, StickyItem, TableItem, TextItem, TextStyle, Vec,
 } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
 
@@ -77,6 +77,95 @@ export function makeFrame(x: number, y: number, w: number, h: number, title: str
 
 export function makeImage(x: number, y: number, w: number, h: number, src: string): ImageItem {
   return { ...base(x, y, w, h), type: 'image', src, naturalW: w, naturalH: h }
+}
+
+export const TABLE_CELL_W = 180
+export const TABLE_CELL_H = 56
+
+export function makeTable(x: number, y: number, rows = 3, cols = 3, style?: Partial<TextStyle>): TableItem {
+  const widths = Array.from({ length: cols }, () => TABLE_CELL_W)
+  const heights = Array.from({ length: rows }, () => TABLE_CELL_H)
+  return {
+    ...base(x, y, cols * TABLE_CELL_W, rows * TABLE_CELL_H),
+    type: 'table',
+    rows,
+    cols,
+    widths,
+    heights,
+    cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => '')),
+    headerRow: true,
+    fill: '#FCFBF8',
+    headerFill: '#EBE7DE',
+    stroke: '#D6D1C6',
+    strokeWidth: 1,
+    ...DEFAULT_TEXT_STYLE,
+    ...style,
+    fontSize: 14,
+    align: 'left',
+    valign: 'middle',
+    autoFit: false,
+  }
+}
+
+export function cellRect(t: TableItem, r: number, c: number): Rect {
+  const sx = t.w / t.widths.reduce((a, b) => a + b, 0)
+  const sy = t.h / t.heights.reduce((a, b) => a + b, 0)
+  let x = t.x
+  for (let i = 0; i < c; i++) x += t.widths[i] * sx
+  let y = t.y
+  for (let i = 0; i < r; i++) y += t.heights[i] * sy
+  return { x, y, w: t.widths[c] * sx, h: t.heights[r] * sy }
+}
+
+export function cellAt(t: TableItem, p: Vec): [number, number] | null {
+  for (let r = 0; r < t.rows; r++) {
+    for (let c = 0; c < t.cols; c++) {
+      const rect = cellRect(t, r, c)
+      if (p.x >= rect.x && p.x <= rect.x + rect.w && p.y >= rect.y && p.y <= rect.y + rect.h) return [r, c]
+    }
+  }
+  return null
+}
+
+export function setCell(t: TableItem, r: number, c: number, value: string): string[][] {
+  return t.cells.map((row, i) => (i === r ? row.map((cell, j) => (j === c ? value : cell)) : row))
+}
+
+export function addRow(t: TableItem, at = t.rows): Partial<TableItem> {
+  const heights = [...t.heights]
+  heights.splice(at, 0, t.heights[Math.min(at, t.rows - 1)] ?? TABLE_CELL_H)
+  const cells = [...t.cells]
+  cells.splice(at, 0, Array.from({ length: t.cols }, () => ''))
+  const scale = t.h / t.heights.reduce((a, b) => a + b, 0)
+  return { rows: t.rows + 1, heights, cells, h: heights.reduce((a, b) => a + b, 0) * scale }
+}
+
+export function addCol(t: TableItem, at = t.cols): Partial<TableItem> {
+  const widths = [...t.widths]
+  widths.splice(at, 0, t.widths[Math.min(at, t.cols - 1)] ?? TABLE_CELL_W)
+  const cells = t.cells.map((row) => {
+    const next = [...row]
+    next.splice(at, 0, '')
+    return next
+  })
+  const scale = t.w / t.widths.reduce((a, b) => a + b, 0)
+  return { cols: t.cols + 1, widths, cells, w: widths.reduce((a, b) => a + b, 0) * scale }
+}
+
+export function dropRow(t: TableItem, at: number): Partial<TableItem> | null {
+  if (t.rows <= 1) return null
+  const heights = t.heights.filter((_, i) => i !== at)
+  const cells = t.cells.filter((_, i) => i !== at)
+  const scale = t.h / t.heights.reduce((a, b) => a + b, 0)
+  return { rows: t.rows - 1, heights, cells, h: heights.reduce((a, b) => a + b, 0) * scale }
+}
+
+export function dropCol(t: TableItem, at: number): Partial<TableItem> | null {
+  if (t.cols <= 1) return null
+  const widths = t.widths.filter((_, i) => i !== at)
+  const cells = t.cells.map((row) => row.filter((_, i) => i !== at))
+  const scale = t.w / t.widths.reduce((a, b) => a + b, 0)
+  return { cols: t.cols - 1, widths, cells, w: widths.reduce((a, b) => a + b, 0) * scale }
 }
 
 export function makeComment(x: number, y: number, text: string): CommentItem {

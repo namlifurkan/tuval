@@ -1,6 +1,6 @@
 import {
   Circle, Diamond, Eraser, Frame, Highlighter, Image as ImageIcon, LayoutTemplate, Minus,
-  MessageSquare, MousePointer2, MoreHorizontal, Pen, Redo2, Spline, Square, StickyNote,
+  MessageSquare, MousePointer2, MoreHorizontal, Pen, Redo2, Spline, Square, StickyNote, Table2,
   Triangle, Type, Undo2,
 } from 'lucide-react'
 import { useRef } from 'react'
@@ -149,6 +149,10 @@ export function Toolbar() {
             </div>
           </Popover>
         </div>
+
+        <IconButton title="Tablo" active={tool === 'table'} onClick={pick('table')}>
+          <Table2 size={20} strokeWidth={1.8} />
+        </IconButton>
 
         <IconButton title="Connection line — L" active={tool === 'connector'} onClick={pick('connector')}>
           <Spline size={20} strokeWidth={1.8} />

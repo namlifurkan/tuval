@@ -36,6 +36,7 @@ export function renderToCanvas(items: Item[], scale = 2, padding = 40): HTMLCanv
     selection: new Set(),
     hover: null,
     editing: null,
+    editingCell: null,
     session: BLANK,
     showGrid: false,
     showAnchors: false,

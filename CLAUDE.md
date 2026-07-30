@@ -180,7 +180,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 - [ ] Sticky ızgarasına yapışma (sürüklerken kümenin kafesine oturma; "ızgaraya diz" hazır)
 - [ ] Yorumlarda mention (@kişi) ve bildirim
-- [ ] Tablo aracı
+- [ ] Tabloda sütun/satır genişliğini sürükleyerek değiştirme ve hücre birleştirme
 - [ ] Mind map aracı (otomatik yerleşim, dal ekleme)
 - [ ] Connector: birden çok kırılma noktası ve çoklu etiket
 - [ ] Shape kütüphaneleri: flowchart seti, UML, wireframe kiti

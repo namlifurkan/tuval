@@ -64,6 +64,7 @@ export function Canvas() {
         selection: new Set(s.selection),
         hover: s.hover,
         editing: s.editing?.id ?? null,
+        editingCell: s.editing?.cell ?? null,
         session,
         showGrid: s.showGrid,
         showAnchors: s.tool === 'select' || s.tool === 'connector',
