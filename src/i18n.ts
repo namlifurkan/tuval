@@ -276,6 +276,7 @@ const tr: Record<string, string> = {
   'Frame name': 'Frame adı',
   'Label size': 'Etiket boyutu',
   'Auto': 'Oto',
+  'Main idea': 'Ana fikir',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

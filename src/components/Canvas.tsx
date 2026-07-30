@@ -50,10 +50,17 @@ export function Canvas() {
         : null
 
       size = { w: wrap.clientWidth, h: wrap.clientHeight }
-      canvas.width = Math.floor(size.w * dpr)
-      canvas.height = Math.floor(size.h * dpr)
-      canvas.style.width = `${size.w}px`
-      canvas.style.height = `${size.h}px`
+      // Writing canvas.width clears the bitmap even when the value is unchanged, and the next
+      // paint is a frame away — that gap is the flash. Only touch it on a real size change.
+      const bw = Math.floor(size.w * dpr)
+      const bh = Math.floor(size.h * dpr)
+      const resized = canvas.width !== bw || canvas.height !== bh
+      if (resized) {
+        canvas.width = bw
+        canvas.height = bh
+        canvas.style.width = `${size.w}px`
+        canvas.style.height = `${size.h}px`
+      }
 
       if (centre && (was.w !== size.w || was.h !== size.h)) {
         useBoardStore.getState().setCamera({
@@ -63,14 +70,10 @@ export function Canvas() {
         })
       }
       requestRender()
+      if (resized) draw()
     }
-    const ro = new ResizeObserver(resize)
-    ro.observe(wrap)
-    resize()
 
-    const loop = () => {
-      raf = requestAnimationFrame(loop)
-      if (!consumeDirty()) return
+    const draw = () => {
       const s = useBoardStore.getState()
       render({
         ctx,
@@ -89,6 +92,16 @@ export function Canvas() {
         showAnchors: s.tool === 'select' || s.tool === 'connector',
       })
       canvas.style.cursor = session.cursor
+    }
+
+    const ro = new ResizeObserver(resize)
+    ro.observe(wrap)
+    resize()
+
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      if (!consumeDirty()) return
+      draw()
     }
     raf = requestAnimationFrame(loop)
 

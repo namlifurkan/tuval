@@ -269,6 +269,10 @@ export function flushPreview() {
 }
 
 export function cancelDrag() {
+  // A lost pointerup (blur, alt-tab, cancelled touch) used to leave an entry behind. One stale
+  // pointer makes the next press look like a two-finger gesture, and every tool goes dead.
+  pointers.clear()
+  gesture = null
   if (store().dragging) store().update({ dragging: false })
   session.preview.clear()
   session.badge = null

@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { createItems, getIndex, getItems, patchItems } from './doc'
 import { makeConnector, makeShape } from './items'
 import type { Id, Item, ShapeItem } from './types'
@@ -74,7 +75,7 @@ export function makeMindRoot(x: number, y: number): ShapeItem {
     strokeStyle: 'solid',
   }, { ...DEFAULT_TEXT_STYLE, fontSize: 20, bold: true, textColor: '#FCFBF8' })
   node.mindParent = null
-  node.text = 'Ana fikir'
+  node.text = t('Main idea')
   return node
 }
 

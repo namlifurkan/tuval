@@ -142,7 +142,7 @@ export const TEMPLATES: Template[] = [
       const core = makeShape(o.x - 150, o.y - 60, 300, 120, {
         kind: 'ellipse', fill: '#3E5C93', stroke: 'transparent', strokeWidth: 0, strokeStyle: 'solid',
       }, { ...DEFAULT_TEXT_STYLE, fontSize: 30, bold: true, textColor: '#FFFFFF' })
-      core.text = 'Ana fikir'
+      core.text = t('Main idea')
       items.push(core)
       const branches = [t('Users'), t('Problem'), t('Solution'), t('Risks'), t('Metrics')]
       const colors = ['#F0E3B0', '#CBD79A', '#7FA5BE', '#E7B7B4', '#8A7FB0']
