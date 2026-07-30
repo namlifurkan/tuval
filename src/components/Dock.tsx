@@ -4,8 +4,8 @@ import type { ReactNode } from 'react'
 import { clampZoom, fitRect, zoomAt } from '../board/camera'
 import { createItems, getItems, undoManager } from '../board/doc'
 import {
-  DEFAULT_ORDER, DOCK_LABELS, getDockPrefs, moveDockItem, resetDock, setDockSize, setMagnify,
-  SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
+  DEFAULT_ORDER, DOCK_LABELS, DOCK_SIDES, getDockPrefs, moveDockItem, resetDock, setDockSide,
+  setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
 import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
@@ -74,6 +74,10 @@ export function Dock() {
   const reduceMotion = typeof matchMedia === 'function'
     && matchMedia('(prefers-reduced-motion: reduce)').matches
   const magnify = prefs.magnify && !reduceMotion
+  const side = prefs.side
+  const vertical = side === 'left' || side === 'right'
+  const originClass = { bottom: 'origin-bottom', top: 'origin-top', left: 'origin-left', right: 'origin-right' }[side]
+  const popSide = { bottom: 'top', top: 'bottom', left: 'right', right: 'right' }[side] as 'top' | 'bottom' | 'right'
   const unit = SIZE_PX[prefs.size]
   const glyph = Math.round(unit * 0.52)
 
@@ -92,12 +96,17 @@ export function Dock() {
     const slots = [...bar.querySelectorAll<HTMLElement>('[data-slot]')]
     if (!slots.length) return
 
-    const pointer = e.clientX - bar.getBoundingClientRect().left + bar.scrollLeft
-    const centers = slots.map((el) => el.offsetLeft + el.offsetWidth / 2)
+    const box = bar.getBoundingClientRect()
+    const pointer = vertical
+      ? e.clientY - box.top + bar.scrollTop
+      : e.clientX - box.left + bar.scrollLeft
+    const centers = slots.map((el) => (vertical
+      ? el.offsetTop + el.offsetHeight / 2
+      : el.offsetLeft + el.offsetWidth / 2))
     const scales = slots.map((el, i) => (el.dataset.noMagnify !== undefined
       ? 1
       : 1 + MAGNIFY_AMPLITUDE * Math.exp(-(((centers[i] - pointer) / MAGNIFY_SPREAD) ** 2))))
-    const extras = slots.map((el, i) => el.offsetWidth * (scales[i] - 1))
+    const extras = slots.map((el, i) => (vertical ? el.offsetHeight : el.offsetWidth) * (scales[i] - 1))
 
     const before: number[] = []
     let running = 0
@@ -110,15 +119,18 @@ export function Dock() {
     // An index-based anchor jumps as the pointer crosses a midpoint, which shows up as a flicker.
     let anchor = 0
     slots.forEach((el, i) => {
-      const left = el.offsetLeft
-      const portion = Math.min(1, Math.max(0, (pointer - left) / el.offsetWidth))
+      const start = vertical ? el.offsetTop : el.offsetLeft
+      const span = vertical ? el.offsetHeight : el.offsetWidth
+      const portion = Math.min(1, Math.max(0, (pointer - start) / span))
       anchor += extras[i] * portion
     })
 
     slots.forEach((el, i) => {
       const shift = before[i] + extras[i] / 2 - anchor
-      const lift = -(scales[i] - 1) * unit * 0.55
-      el.style.transform = `translate(${shift}px, ${lift}px) scale(${scales[i]})`
+      const push = (scales[i] - 1) * unit * 0.55 * (side === 'right' || side === 'bottom' ? -1 : 1)
+      el.style.transform = vertical
+        ? `translate(${push}px, ${shift}px) scale(${scales[i]})`
+        : `translate(${shift}px, ${push}px) scale(${scales[i]})`
     })
   }
 
@@ -197,7 +209,7 @@ export function Dock() {
                 <Sticky size={glyph} />
                 <span className="absolute -bottom-1.5 -right-1.5 h-2 w-2 rounded-[2px] border border-black/10" style={{ background: stickyFill }} />
               </span>)}
-            <Popover open={stickyPop.open} onClose={stickyPop.close} anchor="top" className="w-[228px]">
+            <Popover open={stickyPop.open} onClose={stickyPop.close} anchor={popSide} className="w-[228px]">
               <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Sticky rengi</div>
               <ColorGrid colors={STICKY_COLORS} value={stickyFill} onPick={(c) => { update({ stickyFill: c }); stickyPop.close() }} />
             </Popover>
@@ -208,7 +220,7 @@ export function Dock() {
         return (
           <div className="relative">
             {button('Şekil — S', tool === 'shape', () => (tool === 'shape' ? shapePop.toggle() : setTool('shape')), <ShapeGlyph kind={shape.kind} size={glyph} />)}
-            <Popover open={shapePop.open} onClose={shapePop.close} anchor="top" className="w-[268px]">
+            <Popover open={shapePop.open} onClose={shapePop.close} anchor={popSide} className="w-[268px]">
               {SHAPE_GROUPS.map((group) => (
                 <div key={group.name} className="mb-2 last:mb-0">
                   <div className="px-1 pb-1.5 pt-1 text-xs font-semibold text-[#141310]">{group.name}</div>
@@ -239,7 +251,7 @@ export function Dock() {
               pen.eraser ? <EraserTool size={glyph} />
                 : pen.highlighter ? <Highlight size={glyph} />
                 : <Nib size={glyph} />)}
-            <Popover open={penPop.open} onClose={penPop.close} anchor="top" className="w-[212px]">
+            <Popover open={penPop.open} onClose={penPop.close} anchor={popSide} className="w-[212px]">
               <div className="mb-2 flex gap-1">
                 <button
                   type="button"
@@ -275,7 +287,7 @@ export function Dock() {
         return (
           <div className="relative">
             {button('Frame — F', tool === 'frame', () => (tool === 'frame' ? framePop.toggle() : setTool('frame')), <FrameTool size={glyph} />)}
-            <Popover open={framePop.open} onClose={framePop.close} anchor="top" className="w-[212px]">
+            <Popover open={framePop.open} onClose={framePop.close} anchor={popSide} className="w-[212px]">
               <button
                 type="button"
                 onClick={() => { update({ framesPanel: true }); framePop.close() }}
@@ -306,7 +318,7 @@ export function Dock() {
         return (
           <div className="relative">
             {button('Şablonlar', templatePop.open, templatePop.toggle, <Templates size={glyph} />)}
-            <Popover open={templatePop.open} onClose={templatePop.close} anchor="top" className="w-[268px]">
+            <Popover open={templatePop.open} onClose={templatePop.close} anchor={popSide} className="w-[268px]">
               <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Şablonlar</div>
               {TEMPLATES.map((t) => (
                 <button
@@ -327,7 +339,7 @@ export function Dock() {
         return (
           <div className="relative">
             {button('Daha fazla', morePop.open, morePop.toggle, <More size={glyph} />)}
-            <Popover open={morePop.open} onClose={morePop.close} anchor="top" className="w-[268px]">
+            <Popover open={morePop.open} onClose={morePop.close} anchor={popSide} className="w-[268px]">
               <button
                 type="button"
                 onClick={() => {
@@ -362,18 +374,18 @@ export function Dock() {
 
       case 'zoom':
         return (
-          <div className="relative flex items-center gap-0.5">
+          <div className={`relative flex items-center gap-0.5 ${vertical ? 'flex-col' : ''}`}>
             {button('Uzaklaş', false, () => step(1 / 1.2), <Minus size={glyph - 2} strokeWidth={2} />)}
             <button
               type="button"
               onClick={zoomPop.toggle}
-              style={{ height: unit }}
-              className="min-w-[50px] rounded-lg px-1 text-sm font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]"
+              style={vertical ? { width: unit } : { height: unit }}
+              className={`rounded-lg px-1 font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07] ${vertical ? 'py-1 text-[11px]' : 'min-w-[50px] text-sm'}`}
             >
               {Math.round(camera.z * 100)}%
             </button>
             {button('Yakınlaş', false, () => step(1.2), <Plus size={glyph - 2} strokeWidth={2} />)}
-            <Popover open={zoomPop.open} onClose={zoomPop.close} anchor="top" className="w-[200px]">
+            <Popover open={zoomPop.open} onClose={zoomPop.close} anchor={popSide} className="w-[200px]">
               {[0.5, 1, 2, 4].map((z) => (
                 <button
                   key={z}
@@ -398,20 +410,46 @@ export function Dock() {
 
   const lift = Math.ceil(unit * MAGNIFY_AMPLITUDE) + 12
 
+  const anchorClass = {
+    bottom: 'bottom-5 left-1/2 -translate-x-1/2',
+    top: 'top-24 left-1/2 -translate-x-1/2',
+    left: 'left-5 top-1/2 -translate-y-1/2',
+    right: 'right-5 top-1/2 -translate-y-1/2',
+  }[side]
+
+  const plateClass = {
+    bottom: 'absolute inset-x-0 bottom-0',
+    top: 'absolute inset-x-0 top-0',
+    left: 'absolute inset-y-0 left-0',
+    right: 'absolute inset-y-0 right-0',
+  }[side]
+
+  const plateSize = vertical ? { width: unit + 12 } : { height: unit + 12 }
+  const pad = magnify ? lift : 6
+  const barPad = {
+    bottom: { paddingTop: pad }, top: { paddingBottom: pad },
+    left: { paddingRight: pad }, right: { paddingLeft: pad },
+  }[side]
+
+  const barClass = vertical
+    ? `relative flex max-h-[calc(100vh-10rem)] flex-col gap-0.5 overflow-y-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${side === 'left' ? 'items-start pl-1.5' : 'items-end pr-1.5'}`
+    : `relative flex max-w-[calc(100vw-1.5rem)] gap-0.5 overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${side === 'bottom' ? 'items-end pb-1.5' : 'items-start pt-1.5'}`
+
+
   return (
-    <div className="pointer-events-auto absolute bottom-5 left-1/2 z-40 max-w-[calc(100vw-1.5rem)] -translate-x-1/2">
+    <div className={`pointer-events-auto absolute z-40 ${anchorClass}`}>
       <div
         aria-hidden
-        style={{ height: unit + 12 }}
-        className="absolute inset-x-0 bottom-0 rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+        style={plateSize}
+        className={`${plateClass} rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]`}
       />
       <div
         ref={barRef}
         onPointerMove={onMove}
         onPointerLeave={resetScale}
         onContextMenu={(e) => { e.preventDefault(); settingsPop.setOpen(true) }}
-        style={{ paddingTop: magnify ? lift : 6 }}
-        className="relative flex items-end gap-0.5 overflow-x-auto px-2 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={barPad}
+        className={barClass}
       >
         {items.map((id) => (
           <div
@@ -424,14 +462,16 @@ export function Dock() {
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => { if (dragId && dragId !== id) moveDockItem(dragId, id); setDragId(null) }}
             style={{ transition: 'transform 130ms cubic-bezier(0.22, 1, 0.36, 1)' }}
-            className={`shrink-0 origin-bottom ${dragId === id ? 'opacity-40' : ''}`}
+            className={`shrink-0 ${originClass} ${dragId === id ? 'opacity-40' : ''}`}
           >
             {renderItem(id)}
           </div>
         ))}
 
         <div
-          className="ml-0.5 flex shrink-0 items-center self-stretch border-l border-[#E2DED5] pl-1"
+          className={vertical
+            ? 'mt-0.5 flex shrink-0 justify-center self-stretch border-t border-[#E2DED5] pt-1'
+            : 'ml-0.5 flex shrink-0 items-center self-stretch border-l border-[#E2DED5] pl-1'}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => { if (dragId) moveDockItem(dragId, null); setDragId(null) }}
         >
@@ -439,7 +479,19 @@ export function Dock() {
             <IconButton title="Dock ayarları (sağ tık)" active={settingsPop.open} onClick={settingsPop.toggle}>
               <Settings2 size={17} strokeWidth={1.8} />
             </IconButton>
-            <Popover open={settingsPop.open} onClose={settingsPop.close} anchor="top" className="w-[248px]">
+            <Popover open={settingsPop.open} onClose={settingsPop.close} anchor={popSide} className="w-[248px]">
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Konum</div>
+              <div className="mb-2 grid grid-cols-4 gap-1">
+                {DOCK_SIDES.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    onClick={() => setDockSide(o.id)}
+                    className={`rounded-lg px-1 py-1.5 text-xs font-semibold
+                      ${side === o.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  >{o.name}</button>
+                ))}
+              </div>
               <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Boyut</div>
               <div className="mb-2 flex gap-1">
                 {(['sm', 'md', 'lg'] as DockSize[]).map((s) => (

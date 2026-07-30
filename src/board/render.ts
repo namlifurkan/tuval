@@ -7,6 +7,7 @@ import {
 } from './geometry'
 import type { Handle } from './geometry'
 import { cellRect, connectorEnds } from './items'
+import { isDarkSurface } from './brand'
 import { drawPaper } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
 import type { Session } from './store'
@@ -40,6 +41,7 @@ export interface Scene {
   session: Session
   votes: Map<Id, number> | null
   showGrid: boolean
+  surface: string
   showAnchors: boolean
   dpr: number
 }
@@ -47,7 +49,7 @@ export interface Scene {
 export function render(s: Scene) {
   const { ctx, cam, width, height, dpr } = s
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  drawPaper(ctx, cam, width, height)
+  drawPaper(ctx, cam, width, height, s.surface)
   if (s.showGrid) drawGrid(s)
 
   ctx.save()
@@ -85,7 +87,9 @@ function drawGrid(s: Scene) {
       marks.lineTo(x, y + arm)
     }
   }
-  ctx.strokeStyle = `rgba(20, 19, 16, ${0.2 * alpha})`
+  ctx.strokeStyle = isDarkSurface(s.surface)
+    ? `rgba(252, 251, 248, ${0.22 * alpha})`
+    : `rgba(20, 19, 16, ${0.2 * alpha})`
   ctx.lineWidth = 1
   ctx.lineCap = 'butt'
   ctx.stroke(marks)

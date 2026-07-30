@@ -17,19 +17,26 @@ export const DEFAULT_ORDER: DockItemId[] = [
 ]
 
 export type DockSize = 'sm' | 'md' | 'lg'
+export type DockSide = 'bottom' | 'left' | 'right' | 'top'
+
+export const DOCK_SIDES: { id: DockSide; name: string }[] = [
+  { id: 'bottom', name: 'Alt' }, { id: 'top', name: 'Üst' },
+  { id: 'left', name: 'Sol' }, { id: 'right', name: 'Sağ' },
+]
 
 export interface DockPrefs {
   order: DockItemId[]
   hidden: DockItemId[]
   size: DockSize
   magnify: boolean
+  side: DockSide
 }
 
 export const SIZE_PX: Record<DockSize, number> = { sm: 32, md: 38, lg: 46 }
 
 const KEY = 'tuval:dock'
 
-const DEFAULTS: DockPrefs = { order: DEFAULT_ORDER, hidden: [], size: 'md', magnify: true }
+const DEFAULTS: DockPrefs = { order: DEFAULT_ORDER, hidden: [], size: 'md', magnify: true, side: 'bottom' }
 
 function load(): DockPrefs {
   try {
@@ -43,6 +50,7 @@ function load(): DockPrefs {
       hidden: (parsed.hidden ?? []).filter((id) => DEFAULT_ORDER.includes(id)),
       size: parsed.size ?? 'md',
       magnify: parsed.magnify ?? true,
+      side: parsed.side ?? 'bottom',
     }
   } catch {
     return { ...DEFAULTS }
@@ -73,6 +81,10 @@ export function setDockSize(size: DockSize) {
 
 export function setMagnify(magnify: boolean) {
   commit({ ...prefs, magnify })
+}
+
+export function setDockSide(side: DockSide) {
+  commit({ ...prefs, side })
 }
 
 export function toggleDockItem(id: DockItemId) {

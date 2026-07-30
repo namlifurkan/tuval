@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
+import { surfaceColor } from '../board/brand'
 import { fitRect, toBoard } from '../board/camera'
-import { awareness, createItems, getIndex, getItems, undoManager } from '../board/doc'
+import { awareness, createItems, getIndex, getItems, getMeta, subscribeMeta, undoManager } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
@@ -69,6 +70,7 @@ export function Canvas() {
         session,
         votes: voteSnapshot(),
         showGrid: s.showGrid,
+        surface: surfaceColor(getMeta().surface as string),
         showAnchors: s.tool === 'select' || s.tool === 'connector',
       })
       canvas.style.cursor = session.cursor
@@ -77,7 +79,8 @@ export function Canvas() {
 
     const unsub = useBoardStore.subscribe(requestRender)
     const unsubSession = subscribeSession(requestRender)
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubSession() }
+    const unsubMeta = subscribeMeta(requestRender)
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubSession(); unsubMeta() }
   }, [])
 
   useEffect(() => {

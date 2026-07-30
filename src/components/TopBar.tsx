@@ -1,9 +1,10 @@
 import {
   Clock, Download, Grid3x3, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
 } from 'lucide-react'
+import { useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
-import { PRODUCT } from '../board/brand'
-import { awareness, getItems, removeItems, room } from '../board/doc'
+import { isDarkSurface, PRODUCT, SURFACES, surfaceColor } from '../board/brand'
+import { awareness, getItems, getMeta, removeItems, room, setMeta, subscribeMeta } from '../board/doc'
 import { exportPng } from '../board/export'
 import { me } from '../board/me'
 import { printFrames } from '../board/print'
@@ -46,7 +47,11 @@ function Caption({ children }: { children: ReactNode }) {
   )
 }
 
+const readSurface = () => (getMeta().surface as string) ?? 'paper'
+
 export function TopBar() {
+  const surface = useSyncExternalStore(subscribeMeta, readSurface, readSurface)
+  const dark = isDarkSurface(surfaceColor(surface))
   const showGrid = useBoardStore((s) => s.showGrid)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
@@ -55,7 +60,10 @@ export function TopBar() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-[#F2EFE9] via-[#F2EFE9]/70 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24"
+        style={dark
+          ? { background: '#F2EFE9', height: 76, boxShadow: '0 2px 0 rgba(20,19,16,0.18)' }
+          : { backgroundImage: 'linear-gradient(to bottom, #F2EFE9, #F2EFE9B3, #F2EFE900)' }}
       />
       <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
         <div className="pointer-events-auto min-w-0">
@@ -104,6 +112,21 @@ export function TopBar() {
                 <span className="flex items-center gap-2"><Grid3x3 size={15} /> Izgara</span>
                 <span className="text-xs text-[#8A867C]">{showGrid ? 'Açık' : 'Kapalı'}</span>
               </button>
+              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">Zemin</div>
+              <div className="grid grid-cols-5 gap-1.5 px-2 pb-1">
+                {SURFACES.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    title={s.name}
+                    onClick={() => { setMeta('surface', s.id); requestRender() }}
+                    style={{ background: s.color }}
+                    className={`h-7 rounded-md border transition-transform hover:scale-105
+                      ${surface === s.id ? 'border-[#C8452D] ring-1 ring-[#C8452D]' : 'border-black/10'}`}
+                  />
+                ))}
+              </div>
               <div className="my-1 h-px bg-[#EAE6DD]" />
               <button
                 type="button"

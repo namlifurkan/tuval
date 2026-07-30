@@ -42,6 +42,23 @@ function rebuild() {
   listeners.forEach((l) => l())
 }
 
+let meta: Record<string, unknown> = {}
+const metaListeners = new Set<() => void>()
+function rebuildMeta() {
+  meta = ymeta.toJSON() as Record<string, unknown>
+  metaListeners.forEach((l) => l())
+}
+ymeta.observe(rebuildMeta)
+persistence.on('synced', rebuildMeta)
+rebuildMeta()
+
+export const subscribeMeta = (fn: () => void) => {
+  metaListeners.add(fn)
+  return () => { metaListeners.delete(fn) }
+}
+export const getMeta = () => meta
+export const setMeta = (key: string, value: unknown) => ymeta.set(key, value)
+
 yitems.observeDeep(rebuild)
 persistence.on('synced', rebuild)
 rebuild()
