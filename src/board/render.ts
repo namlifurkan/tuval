@@ -37,6 +37,7 @@ export interface Scene {
   editing: Id | null
   editingCell: [number, number] | null
   session: Session
+  votes: Map<Id, number> | null
   showGrid: boolean
   showAnchors: boolean
   dpr: number
@@ -624,6 +625,26 @@ function drawOverlay(s: Scene) {
 
   for (const item of s.items) {
     if (item.type === 'comment') drawCommentPin(s, item)
+  }
+
+  if (s.votes?.size) {
+    for (const item of s.items) {
+      const count = s.votes.get(item.id)
+      if (!count) continue
+      const at = toScreen(cam, item.x + item.w, item.y)
+      ctx.beginPath()
+      ctx.arc(at.x - 6, at.y + 6, 13, 0, Math.PI * 2)
+      ctx.fillStyle = BRAND.pigment
+      ctx.fill()
+      ctx.strokeStyle = '#FCFBF8'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.fillStyle = '#FCFBF8'
+      ctx.font = '700 12px "Instrument Sans", system-ui, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(String(count), at.x - 6, at.y + 6.5)
+    }
   }
 
   const selected = s.items.filter((i) => s.selection.has(i.id))

@@ -40,6 +40,7 @@ export function renderToCanvas(items: Item[], scale = 2, padding = 40): HTMLCanv
     editing: null,
     editingCell: null,
     session: BLANK,
+    votes: null,
     showGrid: false,
     showAnchors: false,
   })

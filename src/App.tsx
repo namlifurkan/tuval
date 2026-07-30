@@ -8,6 +8,7 @@ import { FramesPanel } from './components/FramesPanel'
 import { FrameTitleEditor } from './components/FrameTitleEditor'
 import { Presentation } from './components/Presentation'
 import { SearchPanel } from './components/SearchPanel'
+import { SessionTools } from './components/SessionTools'
 import { TextEditor } from './components/TextEditor'
 import { Toolbar } from './components/Toolbar'
 import { TopBar } from './components/TopBar'
@@ -31,6 +32,7 @@ export default function App() {
           <CommentThread />
           <CommentsPanel />
           <SearchPanel />
+          <SessionTools />
           <FramesPanel />
           <FrameTitleEditor />
         </>

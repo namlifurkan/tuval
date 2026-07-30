@@ -11,6 +11,7 @@ import { me } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
+import { subscribeSession, voteSnapshot } from '../board/session'
 import { useItems } from '../board/useBoard'
 import type { Item, Vec } from '../board/types'
 
@@ -66,6 +67,7 @@ export function Canvas() {
         editing: s.editing?.id ?? null,
         editingCell: s.editing?.cell ?? null,
         session,
+        votes: voteSnapshot(),
         showGrid: s.showGrid,
         showAnchors: s.tool === 'select' || s.tool === 'connector',
       })
@@ -74,7 +76,8 @@ export function Canvas() {
     raf = requestAnimationFrame(loop)
 
     const unsub = useBoardStore.subscribe(requestRender)
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub() }
+    const unsubSession = subscribeSession(requestRender)
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubSession() }
   }, [])
 
   useEffect(() => {

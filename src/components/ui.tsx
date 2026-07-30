@@ -33,7 +33,7 @@ export function Popover({
   onClose: () => void
   children: ReactNode
   className?: string
-  anchor?: 'right' | 'top' | 'bottom' | 'topLeft'
+  anchor?: 'right' | 'top' | 'bottom' | 'topLeft' | 'bottomRight'
 }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -54,6 +54,7 @@ export function Popover({
     anchor === 'right' ? 'left-[calc(100%+10px)] top-0' :
     anchor === 'top' ? 'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2' :
     anchor === 'topLeft' ? 'bottom-[calc(100%+10px)] left-0' :
+    anchor === 'bottomRight' ? 'top-[calc(100%+10px)] right-0' :
     'top-[calc(100%+10px)] left-1/2 -translate-x-1/2'
   return (
     <div

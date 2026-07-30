@@ -192,7 +192,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 - [ ] Follow mode / spotlight
 - [ ] İmleç sohbeti
-- [ ] Oylama, zamanlayıcı, tahmin (estimation) araçları
+- [ ] Tahmin (estimation / planning poker) aracı
 - [ ] Versiyon geçmişi
 
 ### Çevresi
