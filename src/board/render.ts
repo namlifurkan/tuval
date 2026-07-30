@@ -570,7 +570,6 @@ export const quickHit = (cam: Camera, item: Item, screen: Vec): QuickSide | null
   return null
 }
 
-const HANDLE_SIZE = 9
 
 export function handleScreenRects(cam: Camera, box: Rect & { rotation: number }) {
   const out: { handle: Handle; x: number; y: number }[] = []
@@ -783,19 +782,35 @@ function outline(ctx: CanvasRenderingContext2D, cam: Camera, item: Item, color: 
 }
 
 function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { rotation: number }) {
+  const arm = 9
+  const edge = 7
   for (const h of handleScreenRects(cam, box)) {
-    const small = h.handle.length === 1
-    const w = small ? HANDLE_SIZE - 2 : HANDLE_SIZE
     ctx.save()
     ctx.translate(h.x, h.y)
     ctx.rotate(box.rotation)
-    ctx.fillStyle = '#FCFBF8'
+    ctx.lineCap = 'butt'
+
+    const path = new Path2D()
+    if (h.handle.length === 2) {
+      const sx = h.handle.includes('w') ? -1 : 1
+      const sy = h.handle.includes('n') ? -1 : 1
+      path.moveTo(sx * arm, 0)
+      path.lineTo(0, 0)
+      path.lineTo(0, sy * arm)
+    } else if (h.handle === 'n' || h.handle === 's') {
+      path.moveTo(-edge, 0)
+      path.lineTo(edge, 0)
+    } else {
+      path.moveTo(0, -edge)
+      path.lineTo(0, edge)
+    }
+
+    ctx.strokeStyle = 'rgba(252, 251, 248, 0.9)'
+    ctx.lineWidth = 4
+    ctx.stroke(path)
     ctx.strokeStyle = BRAND.selection
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.roundRect(-w / 2, -w / 2, w, w, 2)
-    ctx.fill()
-    ctx.stroke()
+    ctx.lineWidth = h.handle.length === 2 ? 2 : 1.5
+    ctx.stroke(path)
     ctx.restore()
   }
 }

@@ -1,40 +1,64 @@
-import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Printer, Radio, Search, Star, Trash2 } from 'lucide-react'
-import { COLOR, PRODUCT } from '../board/brand'
+import {
+  Clock, Download, Grid3x3, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
+} from 'lucide-react'
+import { PRODUCT } from '../board/brand'
 import { awareness, getItems, removeItems, room } from '../board/doc'
-import { me } from '../board/me'
 import { exportPng } from '../board/export'
+import { me } from '../board/me'
 import { printFrames } from '../board/print'
 import { requestRender, useBoardStore } from '../board/store'
+import { useItems } from '../board/useBoard'
 import { Collaborators } from './Collaborators'
 import { SessionTools } from './SessionTools'
 import { IconButton, Popover, usePopover } from './ui'
 
-export function TopBar() {
+function Caption() {
   const boardName = useBoardStore((s) => s.boardName)
+  const update = useBoardStore((s) => s.update)
+  const items = useItems()
+  const frames = items.filter((i) => i.type === 'frame').length
+
+  const parts = [
+    `${items.length} öğe`,
+    frames ? `${frames} frame` : null,
+    room,
+  ].filter(Boolean)
+
+  return (
+    <div className="min-w-0">
+      <input
+        value={boardName}
+        onChange={(e) => update({ boardName: e.target.value })}
+        spellCheck={false}
+        aria-label="Board adı"
+        className="w-[min(46vw,420px)] truncate bg-transparent text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
+      />
+      <p className="mt-0.5 flex items-center gap-1.5 text-[11px] leading-none text-[#8A867C]">
+        <span className="font-semibold uppercase tracking-[0.14em] text-[#C8452D]">{PRODUCT.name}</span>
+        <span aria-hidden>·</span>
+        {parts.join(' · ')}
+      </p>
+    </div>
+  )
+}
+
+export function TopBar() {
   const showGrid = useBoardStore((s) => s.showGrid)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
 
   return (
     <>
-      <div className="pointer-events-auto absolute left-4 top-4 z-40 flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
-          <div
-            className="grid h-9 w-9 place-items-center rounded-lg text-sm font-bold text-white"
-            style={{ background: COLOR.ink }}
-            title={PRODUCT.name}
-          >
-            {PRODUCT.mark}
-          </div>
-          <input
-            value={boardName}
-            onChange={(e) => update({ boardName: e.target.value })}
-            className="w-[170px] rounded-lg px-2 py-1.5 text-sm font-semibold text-[#141310] outline-none hover:bg-[#EFEBE2] focus:bg-[#EFEBE2]"
-          />
-          <IconButton title="Favorite"><Star size={17} strokeWidth={1.8} /></IconButton>
-          <div className="relative">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-[#F2EFE9] via-[#F2EFE9]/70 to-transparent"
+      />
+      <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
+        <div className="pointer-events-auto flex items-start gap-3">
+          <Caption />
+          <div className="relative pt-0.5">
             <IconButton title="Board menüsü" active={menu.open} onClick={menu.toggle}>
-              <ChevronDown size={17} strokeWidth={1.8} />
+              <MoreHorizontal size={18} strokeWidth={1.8} />
             </IconButton>
             <Popover open={menu.open} onClose={menu.close} anchor="bottom" className="w-[236px]">
               <button
@@ -46,16 +70,22 @@ export function TopBar() {
               </button>
               <button
                 type="button"
-                onClick={() => { exportPng(getItems(), boardName || 'board'); menu.close() }}
+                onClick={() => { update({ historyPanel: true }); menu.close() }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
-                <Download size={15} /> Board'u PNG indir
+                <Clock size={15} /> Sürüm geçmişi
+              </button>
+              <button
+                type="button"
+                onClick={() => { exportPng(getItems(), useBoardStore.getState().boardName || 'board'); menu.close() }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+              >
+                <Download size={15} /> PNG indir
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  const count = printFrames(getItems())
-                  if (!count) alert('PDF için en az bir frame gerekiyor.')
+                  if (!printFrames(getItems())) alert('PDF için en az bir frame gerekiyor.')
                   menu.close()
                 }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
@@ -87,20 +117,12 @@ export function TopBar() {
             </Popover>
           </div>
         </div>
-      </div>
 
-      <div className="pointer-events-auto absolute right-4 top-4 z-40 flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+        <div className="pointer-events-auto flex items-center gap-1.5">
           <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <SessionTools />
-          <IconButton
-            title="Sürüm geçmişi"
-            onClick={() => update({ historyPanel: !useBoardStore.getState().historyPanel })}
-          >
-            <Clock size={18} strokeWidth={1.8} />
-          </IconButton>
           <IconButton
             title="Herkesi kendi görüşüne çağır"
             onClick={() => {
@@ -110,31 +132,34 @@ export function TopBar() {
           >
             <Radio size={18} strokeWidth={1.8} />
           </IconButton>
+
+          <span className="mx-1 h-6 w-px bg-[#E2DED5]" aria-hidden />
+
           <Collaborators />
-        </div>
-        <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+
           <button
             type="button"
-            onClick={() => navigator.clipboard?.writeText(location.href)}
-            className="rounded-lg bg-[#C8452D] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+            onClick={() => {
+              navigator.clipboard?.writeText(location.href)
+              update({ presenting: null })
+            }}
+            className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:bg-[#EAE6DD]"
           >
-            Share
+            Bağlantıyı kopyala
           </button>
-          <IconButton
-            title="Present"
+          <button
+            type="button"
             onClick={() => {
               const frames = getItems().filter((i) => i.type === 'frame')
               if (frames.length) update({ presenting: 0, selection: [] })
+              else alert('Sunum için en az bir frame gerekiyor.')
             }}
+            className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
           >
-            <Play size={18} strokeWidth={1.8} />
-          </IconButton>
+            Sunum
+          </button>
         </div>
-      </div>
-
-      <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 text-[11px] font-medium text-[#8A867C]">
-        board: {room}
-      </div>
+      </header>
     </>
   )
 }
