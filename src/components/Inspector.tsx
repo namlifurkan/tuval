@@ -1,3 +1,4 @@
+import { labelInk, STATUS_LABELS } from '../board/labels'
 import { t } from '../i18n'
 import { LANGS } from '../board/code'
 import { codeHeight } from '../board/items'
@@ -74,6 +75,7 @@ export function Inspector() {
   const first = selected[0] as Item & Record<string, unknown>
   const textual = selected.filter((i) => 'text' in i && i.type !== 'code')
   const code = selected.length === 1 && selected[0].type === 'code' ? selected[0] : null
+  const stickies = selected.filter((i) => i.type === 'sticky')
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
 
@@ -172,6 +174,34 @@ export function Inspector() {
                   ${first.capEnd === c ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
               >{c}</button>
             ))}
+          </div>
+        </Section>
+      )}
+
+      {stickies.length > 0 && (
+        <Section title={t('Status')}>
+          <div className="flex flex-wrap gap-1">
+            {STATUS_LABELS.map((l) => {
+              const on = stickies.every((i) => i.type === 'sticky' && i.label === l.id)
+              return (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => patch({ label: on ? undefined : l.id }, (i) => i.type === 'sticky')}
+                  style={on ? { background: l.color, color: labelInk(l.color) } : { boxShadow: `inset 0 0 0 2px ${l.color}` }}
+                  className="rounded-md px-2 py-1 text-xs font-semibold"
+                >
+                  {t(l.id)}
+                </button>
+              )
+            })}
+            <button
+              type="button"
+              onClick={() => patch({ label: undefined }, (i) => i.type === 'sticky')}
+              className="rounded-md px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+            >
+              {t('None')}
+            </button>
           </div>
         </Section>
       )}

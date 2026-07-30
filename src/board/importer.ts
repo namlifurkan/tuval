@@ -6,6 +6,7 @@ import type { Item, Vec } from './types'
 interface Node {
   kind: 'sticky' | 'code' | 'table'
   text: string
+  label?: string
   lang?: string
   rows?: string[][]
 }
@@ -92,7 +93,11 @@ export function parseBrief(md: string): Parsed {
       while (i + 1 < lines.length && /^\s{2,}\S/.test(lines[i + 1]) && !/^\s*(?:[-*+]|\d+\.)\s/.test(lines[i + 1])) {
         body.push(lines[++i].trim())
       }
-      push({ kind: 'sticky', text: body.join('\n') })
+      const joined = body.join('\n')
+      const tagged = /^\[([^\]]{1,24})\]\s+([\s\S]*)$/.exec(joined)
+      push(tagged
+        ? { kind: 'sticky', text: tagged[2], label: tagged[1] }
+        : { kind: 'sticky', text: joined })
       continue
     }
 
@@ -156,7 +161,9 @@ export function briefToItems(md: string, origin: Vec): { items: Item[]; title: s
         table.cells = table.cells.map((row, r) => row.map((_, c) => rows[r]?.[c] ?? ''))
         item = table
       } else {
-        item = makeSticky(0, 0, FILLS[si % FILLS.length], node.text)
+        const sticky = makeSticky(0, 0, FILLS[si % FILLS.length], node.text)
+        if (node.label) sticky.label = node.label
+        item = sticky
       }
 
       item.x = x

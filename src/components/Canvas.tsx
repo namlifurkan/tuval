@@ -39,14 +39,29 @@ export function Canvas() {
     let raf = 0
     let size = { w: 0, h: 0 }
 
+    let refit = 0
     const resize = () => {
       const dpr = window.devicePixelRatio || 1
+      const was = size
       size = { w: wrap.clientWidth, h: wrap.clientHeight }
       canvas.width = Math.floor(size.w * dpr)
       canvas.height = Math.floor(size.h * dpr)
       canvas.style.width = `${size.w}px`
       canvas.style.height = `${size.h}px`
       requestRender()
+
+      // Refit after the viewport settles, so content stays visible when the window changes.
+      // Skip the first measurement and skip while a drag is in flight.
+      if (!was.w || !was.h) return
+      clearTimeout(refit)
+      refit = window.setTimeout(() => {
+        const store = useBoardStore.getState()
+        if (store.editing || store.presenting !== null || session.preview.size) return
+        const all = getItems()
+        if (!all.length) return
+        store.setCamera(fitRect(boxOf(all), size.w, size.h))
+        requestRender()
+      }, 180)
     }
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
@@ -78,7 +93,7 @@ export function Canvas() {
 
     const unsub = useBoardStore.subscribe(requestRender)
     const unsubMeta = subscribeMeta(requestRender)
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubMeta() }
+    return () => { cancelAnimationFrame(raf); clearTimeout(refit); ro.disconnect(); unsub(); unsubMeta() }
   }, [])
 
   useEffect(() => {

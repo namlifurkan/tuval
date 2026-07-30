@@ -8,6 +8,7 @@ import {
 import type { Handle } from './geometry'
 import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
 import { CODE_THEME, tokenize } from './code'
+import { labelColor, labelHeight, labelInk } from './labels'
 import { drawPaper } from './paper'
 import type { TextureId } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
@@ -140,10 +141,28 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
 
   if (s.editing === item.id) return
   const inset = Math.min(item.w, item.h) * 0.1
-  drawText(s, item, {
-    x: item.x + inset, y: item.y + inset,
-    w: item.w - inset * 2, h: item.h - inset * 2,
-  })
+  let top = item.y + inset
+  let room = item.h - inset * 2
+  if (item.label) {
+    const chipH = labelHeight(item.w, item.h)
+    const font = `700 ${chipH * 0.58}px "Instrument Sans", system-ui, sans-serif`
+    ctx.font = font
+    ctx.letterSpacing = `${chipH * 0.07}px`
+    const text = item.label.toUpperCase()
+    const chipW = Math.min(item.w - inset * 2, ctx.measureText(text).width + chipH * 0.9)
+    const chip = new Path2D()
+    chip.roundRect(item.x + inset, top, chipW, chipH, chipH * 0.28)
+    ctx.fillStyle = labelColor(item.label)
+    ctx.fill(chip)
+    ctx.fillStyle = labelInk(labelColor(item.label))
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(text, item.x + inset + chipH * 0.45, top + chipH * 0.55, chipW - chipH * 0.9)
+    ctx.letterSpacing = '0px'
+    top += chipH + chipH * 0.35
+    room -= chipH + chipH * 0.35
+  }
+  drawText(s, item, { x: item.x + inset, y: top, w: item.w - inset * 2, h: Math.max(room, 1) })
 }
 
 function drawShape(s: Scene, item: Item & { type: 'shape' }) {

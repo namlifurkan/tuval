@@ -50,6 +50,7 @@ How to interpret it:
 |---|---|---|
 | `## Heading` | a frame | a section, a column, a phase |
 | `- bullet` | a sticky note | one idea, one card, one task |
+| `- [Decision] bullet` | a sticky with a status chip | the author's state: Idea, Question, Doing, Blocked, Decision, Done |
 | fenced code | a code block | real source, quote it exactly |
 | pipe table | a table | structured data |
 | `## Flow` mermaid | connectors | dependency, sequence, causality |
@@ -101,14 +102,17 @@ Rules that matter:
 
 1. **One idea per bullet.** A bullet becomes a 228×228 sticky. A paragraph in a bullet becomes
    an unreadable sticky. Split it.
-2. **Frames are phases, not chapters.** 3–7 bullets per frame reads well; 30 does not.
-3. **Declare mermaid nodes before using them** — `n1["Label"]` on its own line. The label must
+2. **Prefix a status when it carries meaning:** `- [Blocked] Payment vendor contract`. Use only
+   `Idea`, `Question`, `Doing`, `Blocked`, `Decision`, `Done`. Omit it when the state is unknown;
+   do not label every bullet.
+3. **Frames are phases, not chapters.** 3–7 bullets per frame reads well; 30 does not.
+4. **Declare mermaid nodes before using them** — `n1["Label"]` on its own line. The label must
    repeat the bullet's opening words so the importer can match the arrow to the right sticky.
    Unmatched labels fall back to position order, which is usually wrong.
-4. **Only draw arrows that mean something.** Dependency, sequence, causality. Do not connect
+5. **Only draw arrows that mean something.** Dependency, sequence, causality. Do not connect
    every node to the next one just to fill the graph.
-5. **Do not invent `## Comments`.** Comments come from humans on the board.
-6. **Code blocks stay code.** Do not turn source into bullets; the canvas renders code blocks
+6. **Do not invent `## Comments`.** Comments come from humans on the board.
+7. **Code blocks stay code.** Do not turn source into bullets; the canvas renders code blocks
    with syntax colouring and line numbers.
 
 ## Round trip

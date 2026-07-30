@@ -7,6 +7,7 @@ export interface AgentNode {
   kind: string
   text: string
   color?: string
+  label?: string
   lang?: string
   rows?: string[][]
   url?: string
@@ -44,6 +45,7 @@ function toNode(item: Item): AgentNode {
     at: [Math.round(item.x), Math.round(item.y)],
   }
   if ('fill' in item && typeof item.fill === 'string' && item.fill !== 'transparent') node.color = item.fill
+  if (item.type === 'sticky' && item.label) node.label = item.label
   if (item.type === 'code') node.lang = item.lang
   if (item.type === 'table') node.rows = item.cells
   if (item.type === 'embed') node.url = item.url
@@ -163,7 +165,7 @@ export function graphToMarkdown(g: AgentGraph): string {
       const text = node.text.trim()
       if (!text) continue
       const lines = text.split('\n')
-      out.push(`- ${lines[0]}`)
+      out.push(`- ${node.label ? `[${node.label}] ` : ''}${lines[0]}`)
       for (const rest of lines.slice(1)) out.push(`  ${rest}`)
     }
     out.push('')

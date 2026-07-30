@@ -418,7 +418,11 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
       const c = { x: box.x + box.w / 2, y: box.y + box.h / 2 }
       drag = { kind: 'rotate', center: c, start: Math.atan2(p.y - c.y, p.x - c.x), snaps }
     } else {
-      drag = { kind: 'resize', handle: handle.handle, box, snaps, single: box.single }
+      // snapshotOf() pulls in a frame's children so a move carries them along. A resize must
+      // not: dragging a frame handle changes the frame's bounds, never its contents.
+      const selected = new Set(s.selection)
+      const own = snaps.filter((sn) => selected.has(sn.id))
+      drag = { kind: 'resize', handle: handle.handle, box, snaps: own, single: box.single }
     }
     return
   }

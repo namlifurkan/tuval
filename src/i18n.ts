@@ -264,6 +264,15 @@ const tr: Record<string, string> = {
   'Nothing to read yet': 'Okunacak bir şey yok',
   'connections': 'bağlantı',
   'Create': 'Oluştur',
+  // sticky status
+  'Status': 'Durum',
+  'Idea': 'Fikir',
+  'Question': 'Soru',
+  'Doing': 'Yapılıyor',
+  'Blocked': 'Engelli',
+  'Decision': 'Karar',
+  'Done': 'Bitti',
+  'None': 'Yok',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }
