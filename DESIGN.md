@@ -98,7 +98,20 @@ Gölge tek bir aileden gelir, sıcak siyaha kırıktır:
 - **Popover** her zaman bir tetikleyiciye çapalı, `pointerdown` dışarı ve `Escape` ile kapanır.
 - **Modal yok.** Onay gereken tek yer board temizleme; o da native `confirm`.
 - Seçim kroması: beyaz hale (`width+2`) + mürekkep kontur. Her dolgu üzerinde okunur.
-- Tutamaklar 9px kare, `surface` dolgu + mürekkep 1.5px kenar; kenar tutamakları 7px.
+
+## Tuval öğe dili
+
+Seçim ve düzenleme afordansları tek bir metafordan gelir: **matbaa provası**. Dolgulu mavi
+disk/kare yığını yerine mürekkep işaretleri.
+
+- **Tutamak = kesim işareti.** Köşelerde 9px L tick, kenarlarda 7px çubuk. Kağıt hale (4px,
+  `surface` %90) üstüne mürekkep kontur; her dolgu üzerinde okunur. Dolu kare yok.
+- **Hızlı ekleme = kağıt sekmesi.** Öğenin dört yanında 22px kare, `surface` dolgu, mürekkep
+  artı; öğeye doğru 8px'lik bir tick uzanır ve yönü o taşır. Daire + chevron kullanılmaz.
+- **Frame başlığı = duvar etiketi.** 11px bold, `0.13em` harf aralığı, büyük harf — üst bardaki
+  künye satırıyla aynı ses. Düzenleyici de aynı biçimde görünür.
+- **Marquee** pigment hairline + `%6` pigment yıkama. Seçim mürekkep, geçici jest pigment.
+- **Hover** mürekkep %30, çoklu seçim üyeleri mürekkep %45. Arayüzde tek bir mavi yoktur.
 
 ## AI slop kontrolü
 

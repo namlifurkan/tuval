@@ -129,12 +129,14 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
   ctx.strokeStyle = '#DDD8CD'
   ctx.setLineDash([])
   ctx.strokeRect(item.x, item.y, item.w, item.h)
-  const size = 13 / cam.z
+  const size = 11 / cam.z
   ctx.fillStyle = s.selection.has(item.id) ? BRAND.selection : '#8A867C'
-  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Instrument Sans' }, size)
+  ctx.font = fontString({ bold: true, italic: false, fontFamily: 'Instrument Sans' }, size)
+  ctx.letterSpacing = `${1.4 / cam.z}px`
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
-  ctx.fillText(item.title, item.x, item.y - 6 / cam.z)
+  ctx.fillText(item.title.toUpperCase(), item.x, item.y - 7 / cam.z)
+  ctx.letterSpacing = '0px'
 }
 
 function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
@@ -534,30 +536,34 @@ export function quickArrowScreens(cam: Camera, item: Item): { side: QuickSide; x
 export const QUICK_TYPES = new Set(['sticky', 'shape', 'text', 'image'])
 
 function drawQuickArrows(s: Scene, item: Item) {
-  const { ctx } = s
-  for (const a of quickArrowScreens(s.cam, item)) {
+  const { ctx, cam } = s
+  const c = toScreen(cam, item.x + item.w / 2, item.y + item.h / 2)
+  for (const a of quickArrowScreens(cam, item)) {
+    const len = Math.hypot(a.x - c.x, a.y - c.y) || 1
+    const dx = (a.x - c.x) / len, dy = (a.y - c.y) / len
+    ctx.save()
+    ctx.lineCap = 'butt'
+    ctx.strokeStyle = 'rgba(20,19,16,0.35)'
+    ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.arc(a.x, a.y, QUICK_R, 0, Math.PI * 2)
+    ctx.moveTo(a.x - dx * (QUICK_R + 9), a.y - dy * (QUICK_R + 9))
+    ctx.lineTo(a.x - dx * (QUICK_R + 1), a.y - dy * (QUICK_R + 1))
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.roundRect(a.x - QUICK_R, a.y - QUICK_R, QUICK_R * 2, QUICK_R * 2, 2)
     ctx.fillStyle = '#FCFBF8'
     ctx.fill()
-    ctx.strokeStyle = 'rgba(20,19,16,0.14)'
-    ctx.lineWidth = 1
+    ctx.strokeStyle = 'rgba(20,19,16,0.22)'
     ctx.stroke()
-    ctx.save()
-    ctx.translate(a.x, a.y)
-    ctx.rotate(
-      a.side === 'right' ? 0 : a.side === 'bottom' ? Math.PI / 2 : a.side === 'left' ? Math.PI : -Math.PI / 2,
-    )
+
     ctx.strokeStyle = BRAND.selection
-    ctx.lineWidth = 1.8
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
+    ctx.lineWidth = 1.6
     ctx.beginPath()
-    ctx.moveTo(-3.5, 0)
-    ctx.lineTo(3, 0)
-    ctx.moveTo(0.2, -3.2)
-    ctx.lineTo(3.4, 0)
-    ctx.lineTo(0.2, 3.2)
+    ctx.moveTo(a.x - 4, a.y)
+    ctx.lineTo(a.x + 4, a.y)
+    ctx.moveTo(a.x, a.y - 4)
+    ctx.lineTo(a.x, a.y + 4)
     ctx.stroke()
     ctx.restore()
   }
@@ -650,7 +656,7 @@ function drawOverlay(s: Scene) {
   if (s.hover && !s.selection.has(s.hover)) {
     const item = s.items.find((i) => i.id === s.hover)
     if (item && item.type !== 'connector' && item.type !== 'comment') {
-      outline(ctx, cam, item, 'rgba(66, 98, 255, 0.55)', 1.5)
+      outline(ctx, cam, item, 'rgba(20, 19, 16, 0.30)', 1.5)
     }
   }
 
@@ -685,7 +691,7 @@ function drawOverlay(s: Scene) {
   } else if (selected.length > 1) {
     for (const item of selected) {
       if (item.type === 'connector') continue
-      outline(ctx, cam, item, 'rgba(66, 98, 255, 0.7)', 1.5)
+      outline(ctx, cam, item, 'rgba(20, 19, 16, 0.45)', 1.5)
     }
     const box = boxOf(selected)
     const p = toScreen(cam, box.x, box.y)
@@ -722,8 +728,8 @@ function drawOverlay(s: Scene) {
   if (session.marquee) {
     const m = session.marquee
     const p = toScreen(cam, m.x, m.y)
-    ctx.fillStyle = 'rgba(66, 98, 255, 0.08)'
-    ctx.strokeStyle = BRAND.selection
+    ctx.fillStyle = 'rgba(200, 69, 45, 0.06)'
+    ctx.strokeStyle = BRAND.guide
     ctx.lineWidth = 1
     ctx.fillRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
     ctx.strokeRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
