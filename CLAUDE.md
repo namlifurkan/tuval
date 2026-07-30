@@ -190,8 +190,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 
 ### Çoklu kullanıcı
 
-- [ ] Follow mode / spotlight
-- [ ] İmleç sohbeti
+- [ ] Spotlight: herkesi kendi görüşüne çekme
 - [ ] Tahmin (estimation / planning poker) aracı
 - [ ] Versiyon geçmişi
 

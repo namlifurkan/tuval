@@ -751,6 +751,9 @@ function drawOverlay(s: Scene) {
     if (!user.cursor) continue
     const p = toScreen(cam, user.cursor.x, user.cursor.y)
     drawCursor(ctx, p, user.color, user.name)
+    if (user.chat && Date.now() - user.chat.at < 12000) {
+      drawChatBubble(ctx, p, user.color, user.chat.text)
+    }
   }
 }
 
@@ -825,6 +828,26 @@ function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.lineWidth = 2
   ctx.strokeStyle = BRAND.selection
   ctx.stroke()
+}
+
+function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, text: string) {
+  ctx.save()
+  ctx.font = '500 12px "Instrument Sans", system-ui, sans-serif'
+  const w = Math.min(260, ctx.measureText(text).width + 20)
+  const x = p.x + 12
+  const y = p.y + 36
+  ctx.beginPath()
+  ctx.roundRect(x, y, w, 26, 13)
+  ctx.fillStyle = '#FCFBF8'
+  ctx.fill()
+  ctx.strokeStyle = color
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+  ctx.fillStyle = '#141310'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(text.slice(0, 44), x + 10, y + 13.5)
+  ctx.restore()
 }
 
 function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: string) {

@@ -1,11 +1,15 @@
+import { Eye } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { awareness } from '../board/doc'
 import { initials, me } from '../board/me'
+import { requestRender, useBoardStore } from '../board/store'
 
 interface Peer { id: number; name: string; color: string }
 
 export function Collaborators() {
   const [peers, setPeers] = useState<Peer[]>([])
+  const following = useBoardStore((s) => s.following)
+  const update = useBoardStore((s) => s.update)
 
   useEffect(() => {
     const sync = () => {
@@ -28,14 +32,26 @@ export function Collaborators() {
   return (
     <div className="flex items-center pl-1">
       {shown.map((p, i) => (
-        <div
+        <button
           key={p.id}
-          title={p.id === -1 ? `${p.name} (sen)` : p.name}
-          className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#FCFBF8] text-[11px] font-bold text-white"
+          type="button"
+          disabled={p.id === -1}
+          title={p.id === -1 ? `${p.name} (sen)` : following === p.id ? `${p.name} takibini bırak` : `${p.name} kullanıcısını takip et`}
+          onClick={() => {
+            update({ following: following === p.id ? null : p.id })
+            requestRender()
+          }}
+          className={`relative grid h-8 w-8 place-items-center rounded-full border-2 text-[11px] font-bold text-white
+            ${following === p.id ? 'border-[#C8452D]' : 'border-[#FCFBF8]'}`}
           style={{ background: p.color, marginLeft: i ? -8 : 0, zIndex: 10 - i }}
         >
           {initials(p.name)}
-        </div>
+          {following === p.id && (
+            <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-[#C8452D]">
+              <Eye size={9} strokeWidth={3} className="text-white" />
+            </span>
+          )}
+        </button>
       ))}
       {extra > 0 && (
         <div

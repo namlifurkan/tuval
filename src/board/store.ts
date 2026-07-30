@@ -35,6 +35,8 @@ interface BoardState {
   commentsPanel: boolean
   renamingFrame: Id | null
   activeEmbed: Id | null
+  following: number | null
+  chatOpen: boolean
   dragging: boolean
 
   setCamera: (c: Camera | ((c: Camera) => Camera)) => void
@@ -74,6 +76,8 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   commentsPanel: false,
   renamingFrame: null,
   activeEmbed: null,
+  following: null,
+  chatOpen: false,
   dragging: false,
 
   setCamera: (c) => set((s) => ({ camera: typeof c === 'function' ? c(s.camera) : c })),
@@ -97,6 +101,7 @@ export interface RemoteUser {
   color: string
   cursor: Vec | null
   selection: Id[]
+  chat: { text: string; at: number } | null
 }
 
 export interface Session {

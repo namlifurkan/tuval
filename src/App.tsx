@@ -1,5 +1,7 @@
 import { Canvas } from './components/Canvas'
 import { CommentsPanel } from './components/CommentsPanel'
+import { CursorChat } from './components/CursorChat'
+import { FollowBanner } from './components/FollowBanner'
 import { CommentThread } from './components/CommentThread'
 import { ContextMenu } from './components/ContextMenu'
 import { ContextToolbar } from './components/ContextToolbar'
@@ -33,6 +35,8 @@ export default function App() {
           <CommentsPanel />
           <SearchPanel />
           <SessionTools />
+          <CursorChat />
+          <FollowBanner />
           <FramesPanel />
           <FrameTitleEditor />
         </>

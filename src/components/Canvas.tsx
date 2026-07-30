@@ -142,13 +142,19 @@ export function Canvas() {
       session.remote = states
         .filter(([id]) => id !== awareness.clientID)
         .map(([id, s]) => {
-          const st = s as { user?: { name: string; color: string }; cursor?: Vec; selection?: string[] }
+          const st = s as {
+            user?: { name: string; color: string }
+            cursor?: Vec
+            selection?: string[]
+            chat?: { text: string; at: number }
+          }
           return {
             id,
             name: st.user?.name ?? 'Guest',
-            color: st.user?.color ?? '#999',
+            color: st.user?.color ?? '#8A867C',
             cursor: st.cursor ?? null,
             selection: st.selection ?? [],
+            chat: st.chat ?? null,
           }
         })
       requestRender()
@@ -158,6 +164,29 @@ export function Canvas() {
   }, [])
 
   useEffect(() => useBoardStore.subscribe((s) => awareness.setLocalStateField('selection', s.selection)), [])
+
+  useEffect(() => {
+    let last = 0
+    return useBoardStore.subscribe((s) => {
+      const now = performance.now()
+      if (now - last < 100) return
+      last = now
+      awareness.setLocalStateField('camera', s.camera)
+    })
+  }, [])
+
+  useEffect(() => {
+    const apply = () => {
+      const { following, setCamera } = useBoardStore.getState()
+      if (following === null) return
+      const state = awareness.getStates().get(following) as { camera?: { x: number; y: number; z: number } } | undefined
+      if (!state?.camera) return
+      setCamera(state.camera)
+      requestRender()
+    }
+    awareness.on('change', apply)
+    return () => awareness.off('change', apply)
+  }, [])
 
   useEffect(() => {
     const isField = (t: EventTarget | null) =>
@@ -255,6 +284,11 @@ export function Canvas() {
           s.setCamera(fitRect(boxOf(sel), el.clientWidth, el.clientHeight))
         }
         if (e.code === 'Digit3') s.setCamera((c) => ({ ...c, z: 1 }))
+        return
+      }
+      if (!mod && e.key === '/') {
+        e.preventDefault()
+        s.update({ chatOpen: true })
         return
       }
       if (!mod && TOOL_KEYS[e.key.toLowerCase()]) s.setTool(TOOL_KEYS[e.key.toLowerCase()])
