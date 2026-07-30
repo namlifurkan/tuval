@@ -359,22 +359,43 @@ export function Canvas() {
   )
 }
 
-function readImage(file: File, p: Vec) {
-  const reader = new FileReader()
-  reader.onload = () => {
-    const src = reader.result as string
-    const img = new Image()
-    img.onload = () => {
-      const scale = Math.min(1, 600 / img.width)
-      const w = img.width * scale, h = img.height * scale
-      const item = makeImage(p.x - w / 2, p.y - h / 2, w, h, src)
-      item.naturalW = img.width
-      item.naturalH = img.height
-      createItems([item])
-      useBoardStore.getState().setSelection([item.id])
-      requestRender()
-    }
-    img.src = src
+const MAX_EDGE = 1600
+const KEEP_ORIGINAL_BYTES = 400_000
+
+// Images live inside the CRDT as data URLs, so every byte is replicated to every peer and
+// kept in IndexedDB and in version snapshots. Downscale before embedding.
+// TODO: upload to object storage and store a URL once the backend lands.
+async function encodeImage(file: File) {
+  const bitmap = await createImageBitmap(file)
+  const longest = Math.max(bitmap.width, bitmap.height)
+  if (file.size <= KEEP_ORIGINAL_BYTES && longest <= MAX_EDGE) {
+    const src = await new Promise<string>((done) => {
+      const reader = new FileReader()
+      reader.onload = () => done(reader.result as string)
+      reader.readAsDataURL(file)
+    })
+    return { src, width: bitmap.width, height: bitmap.height }
   }
-  reader.readAsDataURL(file)
+  const scale = Math.min(1, MAX_EDGE / longest)
+  const width = Math.round(bitmap.width * scale)
+  const height = Math.round(bitmap.height * scale)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, width, height)
+  bitmap.close()
+  return { src: canvas.toDataURL('image/webp', 0.82), width, height }
+}
+
+function readImage(file: File, p: Vec) {
+  encodeImage(file).then(({ src, width, height }) => {
+    const scale = Math.min(1, 600 / width)
+    const w = width * scale, h = height * scale
+    const item = makeImage(p.x - w / 2, p.y - h / 2, w, h, src)
+    item.naturalW = width
+    item.naturalH = height
+    createItems([item])
+    useBoardStore.getState().setSelection([item.id])
+    requestRender()
+  })
 }
