@@ -318,6 +318,22 @@ const tr: Record<string, string> = {
     '"{name}" herkes için silinsin mi? Geri alınamaz.',
   'Signed in: boards are saved to the cloud. Share the link to invite someone.':
     'Girişli: board\'lar buluta kaydediliyor. Davet için linki paylaş.',
+  // sharing
+  'Share': 'Paylaş',
+  'Copied': 'Kopyalandı',
+  'Invite': 'Davet et',
+  'Send invite': 'Daveti gönder',
+  'People': 'Kişiler',
+  'Member': 'Üye',
+  'Remove': 'Çıkar',
+  'editor': 'düzenleyen',
+  'viewer': 'görüntüleyen',
+  'owner': 'sahip',
+  'pending': 'bekliyor',
+  'Sign in to invite people. Right now this board only exists in your browser.':
+    'Davet için giriş yap. Şu an bu board yalnızca senin tarayıcında.',
+  'An invited address gets access the moment it signs in. Send them the link too.':
+    'Davet edilen adres giriş yaptığı anda erişim kazanır. Linki de yolla.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

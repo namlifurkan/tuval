@@ -100,3 +100,81 @@ export async function uploadImage(room: string, blob: Blob, ext: string): Promis
   if (error) return null
   return supabase.storage.from('board-images').getPublicUrl(path).data.publicUrl
 }
+
+export interface Member {
+  userId: string
+  email: string
+  role: 'editor' | 'viewer'
+  owner: boolean
+}
+
+export interface Invite {
+  email: string
+  role: 'editor' | 'viewer'
+}
+
+export async function claimInvites() {
+  if (!supabase || !getUser()) return
+  await supabase.rpc('claim_invites')
+}
+
+export async function listMembers(room: string): Promise<Member[]> {
+  const user = getUser()
+  if (!supabase || !user) return []
+  const board = await supabase.from('boards').select('owner').eq('id', room).maybeSingle()
+  const rows = await supabase.from('board_members').select('user_id, email, role').eq('board_id', room)
+  const ownerId = board.data?.owner as string | undefined
+  const out: Member[] = (rows.data ?? []).map((r) => ({
+    userId: r.user_id as string,
+    email: (r.email as string) ?? '',
+    role: r.role as 'editor' | 'viewer',
+    owner: r.user_id === ownerId,
+  }))
+  if (ownerId && !out.some((m) => m.userId === ownerId)) {
+    out.unshift({
+      userId: ownerId,
+      email: ownerId === user.id ? (user.email ?? '') : '',
+      role: 'editor',
+      owner: true,
+    })
+  }
+  return out
+}
+
+export async function listInvites(room: string): Promise<Invite[]> {
+  if (!supabase || !getUser()) return []
+  const { data } = await supabase.from('board_invites').select('email, role').eq('board_id', room)
+  return (data ?? []).map((r) => ({ email: r.email as string, role: r.role as 'editor' | 'viewer' }))
+}
+
+export async function invite(room: string, email: string, role: 'editor' | 'viewer') {
+  const user = getUser()
+  if (!supabase || !user) return 'not signed in'
+  const { error } = await supabase.from('board_invites').upsert({
+    board_id: room, email: email.trim().toLowerCase(), role, invited_by: user.id,
+  })
+  return error ? error.message : null
+}
+
+export async function revokeInvite(room: string, email: string) {
+  await supabase?.from('board_invites').delete().eq('board_id', room).eq('email', email)
+}
+
+export async function removeMember(room: string, userId: string) {
+  await supabase?.from('board_members').delete().eq('board_id', room).eq('user_id', userId)
+}
+
+export async function setMemberRole(room: string, userId: string, role: 'editor' | 'viewer') {
+  await supabase?.from('board_members').update({ role }).eq('board_id', room).eq('user_id', userId)
+}
+
+export async function myRole(room: string): Promise<'owner' | 'editor' | 'viewer' | null> {
+  const user = getUser()
+  if (!supabase || !user) return null
+  const board = await supabase.from('boards').select('owner').eq('id', room).maybeSingle()
+  if (!board.data) return null
+  if (board.data.owner === user.id) return 'owner'
+  const mine = await supabase
+    .from('board_members').select('role').eq('board_id', room).eq('user_id', user.id).maybeSingle()
+  return (mine.data?.role as 'editor' | 'viewer') ?? null
+}

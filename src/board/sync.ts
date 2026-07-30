@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
 import { getItems, room, ydoc } from './doc'
-import { claimBoard, pullSnapshot, pushSnapshot } from './cloud'
+import { claimBoard, claimInvites, pullSnapshot, pushSnapshot } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
 
@@ -43,6 +43,7 @@ function schedule() {
 async function restore() {
   if (restored || !getUser()) return
   restored = true
+  await claimInvites()
   const update = await pullSnapshot(room)
   if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
   dirty = true

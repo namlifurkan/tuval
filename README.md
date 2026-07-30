@@ -51,6 +51,11 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
 Sign-in is a magic link, so there are no passwords to store. Without the keys every control
 disappears and nothing changes: the board list stays local and images stay inline.
 
+Sharing is by email. The owner invites an address from the **Share** menu; the invite waits in
+`board_invites` until that address signs in, at which point it becomes a membership. So you can
+invite someone who has never opened Tuval. Roles are `editor` and `viewer`, enforced by row
+level security rather than by the interface.
+
 The document itself is still a Yjs CRDT. The snapshot is *merged* on open rather than
 assigned, so a board edited offline on two machines converges instead of one side winning.
 

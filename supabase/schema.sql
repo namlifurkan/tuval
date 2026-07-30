@@ -128,3 +128,65 @@ create policy images_read on storage.objects for select to public
 
 create policy images_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'board-images');
+
+-- Sharing ---------------------------------------------------------------------------------
+-- You invite by email, which may belong to somebody who has not signed up yet. The invite
+-- waits until that address signs in and then becomes a membership.
+
+alter table public.board_members add column if not exists email text;
+
+create table if not exists public.board_invites (
+  board_id    text not null references public.boards on delete cascade,
+  email       text not null,
+  role        text not null default 'editor' check (role in ('editor', 'viewer')),
+  invited_by  uuid references auth.users on delete set null,
+  created_at  timestamptz not null default now(),
+  primary key (board_id, email)
+);
+
+create index if not exists board_invites_email_idx on public.board_invites (lower(email));
+
+alter table public.board_invites enable row level security;
+
+drop policy if exists invites_owner on public.board_invites;
+drop policy if exists invites_mine  on public.board_invites;
+
+create policy invites_owner on public.board_invites for all to authenticated
+  using ((select public.owns_board(board_id)))
+  with check ((select public.owns_board(board_id)));
+
+create policy invites_mine on public.board_invites for select to authenticated
+  using (lower(email) = lower((select auth.jwt() ->> 'email')));
+
+-- Turns every invite addressed to the caller into a membership. Security definer because the
+-- caller has no rights on board_members for a board they are not a member of yet.
+create or replace function public.claim_invites()
+returns int
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  taken int;
+begin
+  with mine as (
+    select i.board_id, i.role, i.email
+    from public.board_invites i
+    where lower(i.email) = lower((select auth.jwt() ->> 'email'))
+  ), added as (
+    insert into public.board_members (board_id, user_id, role, email)
+    select m.board_id, (select auth.uid()), m.role, m.email from mine m
+    on conflict (board_id, user_id) do update set role = excluded.role
+    returning board_id
+  )
+  delete from public.board_invites i
+  where i.board_id in (select board_id from added)
+    and lower(i.email) = lower((select auth.jwt() ->> 'email'));
+
+  get diagnostics taken = row_count;
+  return taken;
+end;
+$$;
+
+revoke all on function public.claim_invites() from public;
+grant execute on function public.claim_invites() to authenticated;

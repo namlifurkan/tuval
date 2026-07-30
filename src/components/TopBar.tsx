@@ -13,6 +13,7 @@ import { readTexture } from '../board/paperPrefs'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import { Account } from './Account'
+import { Share } from './Share'
 import { Collaborators } from './Collaborators'
 import { HandoffMenu } from './HandoffMenu'
 import { IconButton, Popover, usePopover } from './ui'
@@ -188,16 +189,7 @@ export function TopBar() {
           <Collaborators />
           <Account />
 
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard?.writeText(location.href)
-              update({ presenting: null })
-            }}
-            className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:bg-[#EAE6DD]"
-          >
-            {t('Copy link')}
-          </button>
+          <Share />
           <button
             type="button"
             onClick={() => {
