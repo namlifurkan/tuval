@@ -26,10 +26,14 @@ import type { AnchorSide, Endpoint, Id, Item, Rect, Vec } from './types'
 
 type Snap = { id: Id; x: number; y: number; w: number; h: number; rotation: number; points?: number[] }
 
+// Connector bends and detached endpoints live in world coordinates, so they have to be
+// translated by hand when the items they hang off move.
+type WireSnap = { id: Id; bend: Vec | null; bends: Vec[]; from: Vec | null; to: Vec | null }
+
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; cam: Camera }
   | { kind: 'marquee'; origin: Vec; additive: boolean; base: Id[] }
-  | { kind: 'translate'; origin: Vec; snaps: Snap[]; others: Rect[]; moved: boolean; cloned: boolean }
+  | { kind: 'translate'; origin: Vec; snaps: Snap[]; wires: WireSnap[]; others: Rect[]; moved: boolean; cloned: boolean }
   | { kind: 'resize'; handle: Handle; box: Box; snaps: Snap[]; single: boolean }
   | { kind: 'rotate'; center: Vec; start: number; snaps: Snap[] }
   | { kind: 'create'; tool: Tool; origin: Vec; id: Id | null }
@@ -211,16 +215,37 @@ function snapshotOf(ids: Id[]): Snap[] {
   return out
 }
 
-function moveEndpointsFor(snaps: Snap[], dx: number, dy: number): [Id, Record<string, unknown>][] {
+function wireSnapsFor(snaps: Snap[]): WireSnap[] {
   const ids = new Set(snaps.map((s) => s.id))
-  const out: [Id, Record<string, unknown>][] = []
+  const out: WireSnap[] = []
   for (const c of connectorsFor(ids)) {
     if (c.type !== 'connector') continue
-    const both = ids.has(c.from.itemId ?? '') && ids.has(c.to.itemId ?? '')
-    if (!both) continue
-    void dx; void dy
+    const fromMoves = c.from.itemId ? ids.has(c.from.itemId) : false
+    const toMoves = c.to.itemId ? ids.has(c.to.itemId) : false
+    // The whole wire travels only when both ends do; otherwise it should stretch.
+    if (!fromMoves || !toMoves) continue
+    if (!c.bend && !c.bends.length && c.from.itemId && c.to.itemId) continue
+    out.push({
+      id: c.id,
+      bend: c.bend ? { ...c.bend } : null,
+      bends: c.bends.map((b) => ({ ...b })),
+      from: c.from.itemId ? null : { x: c.from.x, y: c.from.y },
+      to: c.to.itemId ? null : { x: c.to.x, y: c.to.y },
+    })
   }
   return out
+}
+
+function moveWires(wires: WireSnap[], dx: number, dy: number): [Id, Record<string, unknown>][] {
+  const shift = (v: Vec) => ({ x: v.x + dx, y: v.y + dy })
+  return wires.map((w) => {
+    const patch: Record<string, unknown> = {}
+    if (w.bend) patch.bend = shift(w.bend)
+    if (w.bends.length) patch.bends = w.bends.map(shift)
+    if (w.from) patch.from = { itemId: null, anchor: null, ...shift(w.from) }
+    if (w.to) patch.to = { itemId: null, anchor: null, ...shift(w.to) }
+    return [w.id, patch] as [Id, Record<string, unknown>]
+  })
 }
 
 let lastFlush = 0
@@ -409,7 +434,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     s.update({ openComment: hovered.id })
     drag = {
       kind: 'translate', origin: p,
-      snaps: snapshotOf([hovered.id]), others: [], moved: false, cloned: false,
+      snaps: snapshotOf([hovered.id]), wires: [], others: [], moved: false, cloned: false,
     }
     return
   }
@@ -450,7 +475,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   const others = getItems()
     .filter((i) => !movingIds.has(i.id) && i.type !== 'connector')
     .map(aabb)
-  drag = { kind: 'translate', origin: p, snaps, others, moved: false, cloned: e.altKey }
+  drag = { kind: 'translate', origin: p, snaps, wires: wireSnapsFor(snaps), others, moved: false, cloned: e.altKey }
 }
 
 export function pointerMove(e: PointerEvent, screen: Vec) {
@@ -555,7 +580,10 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
           c.x >= f.x && c.x <= f.x + f.w && c.y >= f.y && c.y <= f.y + f.h,
       )
       session.dropFrame = frame?.id ?? null
-      stage(drag.snaps.map((sn) => [sn.id, { x: sn.x + dx, y: sn.y + dy }]))
+      stage([
+        ...drag.snaps.map((sn) => [sn.id, { x: sn.x + dx, y: sn.y + dy }] as [Id, Record<string, unknown>]),
+        ...moveWires(drag.wires, dx, dy),
+      ])
       break
     }
     case 'resize': {
@@ -1056,4 +1084,3 @@ export function reorder(dir: 'front' | 'back' | 'forward' | 'backward') {
 export const anchorScreen = (item: Item, side: AnchorSide, c: Camera) =>
   toScreen(c, anchorPoint(item, side).x, anchorPoint(item, side).y)
 
-void moveEndpointsFor

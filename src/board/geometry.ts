@@ -330,6 +330,10 @@ const NORMALS: Record<AnchorSide, Vec> = {
   top: { x: 0, y: -1 }, bottom: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 },
 }
 
+// A doc can carry an anchor this build does not know: an older schema, a newer peer, an
+// import. Never let one unknown value take the whole render down.
+const normalOf = (side: AnchorSide | null): Vec | null => (side ? NORMALS[side] ?? null : null)
+
 export interface Ends { a: Vec; b: Vec }
 
 export function resolveConnector(
@@ -415,7 +419,7 @@ export function connectorPath(item: Item & { type: 'connector' }, ends: Ends): V
   }
   if (item.shape === 'straight') return [a, b]
   if (item.shape === 'elbow') {
-    const dir = item.from.anchor ? NORMALS[item.from.anchor] : null
+    const dir = normalOf(item.from.anchor)
     if (dir && dir.y !== 0) {
       const my = (a.y + b.y) / 2
       return [a, { x: a.x, y: my }, { x: b.x, y: my }, b]
@@ -436,8 +440,8 @@ export const bendControl = (a: Vec, b: Vec, through: Vec): Vec => ({
 
 export function curveControls(item: Item & { type: 'connector' }, a: Vec, b: Vec): [Vec, Vec] {
   const d = Math.max(40, Math.hypot(b.x - a.x, b.y - a.y) * 0.4)
-  const na = item.from.anchor ? NORMALS[item.from.anchor] : { x: Math.sign(b.x - a.x) || 1, y: 0 }
-  const nb = item.to.anchor ? NORMALS[item.to.anchor] : { x: Math.sign(a.x - b.x) || -1, y: 0 }
+  const na = normalOf(item.from.anchor) ?? { x: Math.sign(b.x - a.x) || 1, y: 0 }
+  const nb = normalOf(item.to.anchor) ?? { x: Math.sign(a.x - b.x) || -1, y: 0 }
   return [
     { x: a.x + na.x * d, y: a.y + na.y * d },
     { x: b.x + nb.x * d, y: b.y + nb.y * d },
