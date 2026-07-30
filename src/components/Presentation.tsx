@@ -49,27 +49,27 @@ export function Presentation() {
           type="button"
           disabled={presenting === 0}
           onClick={() => update({ presenting: presenting - 1 })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#F1F1F3] disabled:opacity-30"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2] disabled:opacity-30"
         >
           <ChevronLeft size={19} />
         </button>
-        <span className="min-w-[132px] px-2 text-center text-sm font-semibold text-[#050038]">
+        <span className="min-w-[132px] px-2 text-center text-sm font-semibold text-[#141310]">
           {frame ? frame.title : 'Frame yok'}
-          <span className="ml-2 text-[#9B9BAB]">{presenting + 1}/{frames.length}</span>
+          <span className="ml-2 text-[#8A867C]">{presenting + 1}/{frames.length}</span>
         </span>
         <button
           type="button"
           disabled={presenting >= frames.length - 1}
           onClick={() => update({ presenting: presenting + 1 })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#F1F1F3] disabled:opacity-30"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2] disabled:opacity-30"
         >
           <ChevronRight size={19} />
         </button>
-        <div className="mx-1 h-6 w-px bg-[#E6E6EB]" />
+        <div className="mx-1 h-6 w-px bg-[#E2DED5]" />
         <button
           type="button"
           onClick={() => update({ presenting: null })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]"
           title="Çıkış — Esc"
         >
           <X size={19} />

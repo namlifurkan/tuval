@@ -14,7 +14,7 @@ function Thumb({ frame }: { frame: FrameItem }) {
   const inside = items.filter((i) => i.id === frame.id || contains(frame, aabb(i)))
   const canvas = renderToCanvas(inside, 0.12, 0)
   return (
-    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-[#E6E6EB] bg-white">
+    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-[#E2DED5] bg-white">
       {canvas && (
         <img
           src={canvas.toDataURL()}
@@ -47,8 +47,8 @@ export function FramesPanel() {
 
   return (
     <div className="absolute left-[76px] top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-white shadow-[0_8px_28px_rgba(9,9,20,0.16)]">
-      <div className="flex items-center justify-between border-b border-[#EDEDF2] px-3 py-2">
-        <span className="text-xs font-semibold text-[#050038]">Frame'ler ({frames.length})</span>
+      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
+        <span className="text-xs font-semibold text-[#141310]">Frame'ler ({frames.length})</span>
         <div className="flex items-center gap-0.5">
           <IconButton
             title="Sunumu başlat"
@@ -64,16 +64,16 @@ export function FramesPanel() {
 
       <div className="flex-1 overflow-y-auto p-1.5">
         {frames.length === 0 && (
-          <p className="px-2 py-4 text-center text-xs text-[#9B9BAB]">
+          <p className="px-2 py-4 text-center text-xs text-[#8A867C]">
             Henüz frame yok. Sol araç çubuğundaki frame aracını kullan.
           </p>
         )}
         {frames.map((frame, i) => (
           <div
             key={frame.id}
-            className="group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-[#F5F5F7]"
+            className="group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-[#F2EFE9]"
           >
-            <span className="w-4 shrink-0 text-center text-[11px] font-semibold text-[#9B9BAB]">{i + 1}</span>
+            <span className="w-4 shrink-0 text-center text-[11px] font-semibold text-[#8A867C]">{i + 1}</span>
             <button type="button" onClick={() => jump(frame)} className="shrink-0">
               <Thumb frame={frame} />
             </button>
@@ -88,14 +88,14 @@ export function FramesPanel() {
                     if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                     if (e.key === 'Escape') setRenaming(null)
                   }}
-                  className="w-full rounded border border-[#4262FF] px-1 py-0.5 text-xs outline-none"
+                  className="w-full rounded border border-[#C8452D] px-1 py-0.5 text-xs outline-none"
                 />
               ) : (
                 <button
                   type="button"
                   onDoubleClick={() => setRenaming(frame.id)}
                   onClick={() => jump(frame)}
-                  className="block w-full truncate text-left text-xs font-medium text-[#050038]"
+                  className="block w-full truncate text-left text-xs font-medium text-[#141310]"
                   title="Çift tıkla: yeniden adlandır"
                 >
                   {frame.title}

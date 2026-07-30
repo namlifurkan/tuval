@@ -45,7 +45,7 @@ export function ZoomControls() {
           <button
             type="button"
             onClick={zoomPop.toggle}
-            className="min-w-[54px] rounded-lg px-2 py-1.5 text-sm font-semibold tabular-nums text-[#050038] hover:bg-[#F1F1F3]"
+            className="min-w-[54px] rounded-lg px-2 py-1.5 text-sm font-semibold tabular-nums text-[#141310] hover:bg-[#EFEBE2]"
           >
             {Math.round(camera.z * 100)}%
           </button>
@@ -53,9 +53,9 @@ export function ZoomControls() {
             <button
               type="button"
               onClick={() => { fit(); zoomPop.close() }}
-              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
             >
-              <span>İçeriğe sığdır</span><span className="text-xs text-[#9B9BAB]">⇧1</span>
+              <span>İçeriğe sığdır</span><span className="text-xs text-[#8A867C]">⇧1</span>
             </button>
             <button
               type="button"
@@ -66,30 +66,30 @@ export function ZoomControls() {
                 if (index.length) setCamera(fitRect(boxOf(index), el.clientWidth, el.clientHeight))
                 requestRender(); zoomPop.close()
               }}
-              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3] disabled:opacity-35"
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2] disabled:opacity-35"
             >
-              <span>Seçime yakınlaş</span><span className="text-xs text-[#9B9BAB]">⇧2</span>
+              <span>Seçime yakınlaş</span><span className="text-xs text-[#8A867C]">⇧2</span>
             </button>
-            <div className="my-1 h-px bg-[#EDEDF2]" />
+            <div className="my-1 h-px bg-[#EAE6DD]" />
             {[0.5, 1, 2, 4].map((z) => (
               <button
                 key={z}
                 type="button"
                 onClick={() => { setCamera(zoomAt(camera, innerWidth / 2, innerHeight / 2, z)); requestRender(); zoomPop.close() }}
-                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <span>{z * 100}%</span>
-                {z === 1 && <span className="text-xs text-[#9B9BAB]">⇧3</span>}
+                {z === 1 && <span className="text-xs text-[#8A867C]">⇧3</span>}
               </button>
             ))}
-            <div className="my-1 h-px bg-[#EDEDF2]" />
+            <div className="my-1 h-px bg-[#EAE6DD]" />
             <button
               type="button"
               onClick={() => { update({ showGrid: !showGrid }); requestRender() }}
-              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
             >
               <span>Izgara</span>
-              <span className="text-xs text-[#9B9BAB]">{showGrid ? 'Açık' : 'Kapalı'}</span>
+              <span className="text-xs text-[#8A867C]">{showGrid ? 'Açık' : 'Kapalı'}</span>
             </button>
           </Popover>
         </div>

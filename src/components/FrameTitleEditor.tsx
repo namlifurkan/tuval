@@ -28,7 +28,7 @@ export function FrameTitleEditor() {
         if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
         if (e.key === 'Escape') close()
       }}
-      className="absolute z-40 rounded border border-[#4262FF] bg-white px-1 outline-none"
+      className="absolute z-40 rounded border border-[#C8452D] bg-white px-1 outline-none"
       style={{
         left: p.x,
         top: p.y - 13 * camera.z - 8,

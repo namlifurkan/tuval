@@ -1,6 +1,10 @@
-# Miro Clone
+# Tuval
 
-Sonsuz canvas whiteboard. Canvas 2D renderer + Yjs CRDT.
+Açık kaynak sonsuz tuval. Canvas 2D renderer + Yjs CRDT.
+
+Miro, FigJam ve benzeri araçlara açık kaynak bir alternatif. Kod, tasarım ve marka
+tamamen kendimize ait; hiçbir ticari üründen görsel kimlik veya varlık kopyalanmamıştır.
+Ürün vizyonu ve çalışma kuralları için [CLAUDE.md](CLAUDE.md).
 
 ## Çalıştırma
 

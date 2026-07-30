@@ -43,7 +43,7 @@ export interface Scene {
 export function render(s: Scene) {
   const { ctx, cam, width, height, dpr } = s
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  ctx.fillStyle = '#F7F7F8'
+  ctx.fillStyle = '#F2EFE9'
   ctx.fillRect(0, 0, width, height)
   if (s.showGrid) drawGrid(s)
 
@@ -71,7 +71,7 @@ function drawGrid(s: Scene) {
   const gap = step * cam.z
   const alpha = Math.min(1, (gap - 12) / 18)
   if (alpha <= 0) return
-  ctx.fillStyle = `rgba(9, 9, 20, ${0.14 * alpha})`
+  ctx.fillStyle = `rgba(20, 19, 16, ${0.16 * alpha})`
   const size = cam.z > 2 ? 2 : 1.6
   for (let x = start.x; x < width + gap; x += gap) {
     for (let y = start.y; y < height + gap; y += gap) {
@@ -120,12 +120,12 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
   ctx.fillStyle = item.fill
   ctx.fillRect(item.x, item.y, item.w, item.h)
   ctx.lineWidth = 1 / cam.z
-  ctx.strokeStyle = '#D8D8DE'
+  ctx.strokeStyle = '#DDD8CD'
   ctx.setLineDash([])
   ctx.strokeRect(item.x, item.y, item.w, item.h)
   const size = 13 / cam.z
-  ctx.fillStyle = s.selection.has(item.id) ? BRAND.blue : '#7A7A8C'
-  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Open Sans' }, size)
+  ctx.fillStyle = s.selection.has(item.id) ? BRAND.selection : '#8A867C'
+  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Instrument Sans' }, size)
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
   ctx.fillText(item.title, item.x, item.y - 6 / cam.z)
@@ -134,7 +134,7 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
 function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   const { ctx } = s
   ctx.save()
-  ctx.shadowColor = 'rgba(9, 9, 20, 0.16)'
+  ctx.shadowColor = 'rgba(20, 19, 16, 0.18)'
   ctx.shadowBlur = 6
   ctx.shadowOffsetY = 3
   ctx.fillStyle = item.fill
@@ -371,7 +371,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.lineTo(c.x + PIN_R * 0.2, c.y + PIN_R * 0.92)
   ctx.closePath()
   ctx.fillStyle = '#FFFFFF'
-  ctx.strokeStyle = selected ? BRAND.blue : 'rgba(9,9,20,0.16)'
+  ctx.strokeStyle = selected ? BRAND.selection : 'rgba(9,9,20,0.16)'
   ctx.lineWidth = selected ? 2 : 1
   ctx.fill()
   ctx.stroke()
@@ -386,7 +386,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.arc(c.x, c.y, PIN_R - 4, 0, Math.PI * 2)
   ctx.fill()
   ctx.fillStyle = '#FFFFFF'
-  ctx.font = '700 11px "Open Sans", system-ui, sans-serif'
+  ctx.font = '700 11px "Instrument Sans", system-ui, sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(
@@ -431,7 +431,7 @@ function drawQuickArrows(s: Scene, item: Item) {
     ctx.rotate(
       a.side === 'right' ? 0 : a.side === 'bottom' ? Math.PI / 2 : a.side === 'left' ? Math.PI : -Math.PI / 2,
     )
-    ctx.strokeStyle = BRAND.blue
+    ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 1.8
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
@@ -481,7 +481,7 @@ function drawOverlay(s: Scene) {
     const frame = s.items.find((i) => i.id === session.dropFrame)
     if (frame) {
       const p = toScreen(cam, frame.x, frame.y)
-      ctx.strokeStyle = BRAND.blue
+      ctx.strokeStyle = BRAND.selection
       ctx.lineWidth = 2
       ctx.setLineDash([])
       ctx.strokeRect(p.x, p.y, frame.w * cam.z, frame.h * cam.z)
@@ -533,7 +533,7 @@ function drawOverlay(s: Scene) {
       dot(ctx, sm.x, sm.y, 4.5)
       ctx.globalAlpha = 1
     } else {
-      outline(ctx, cam, item, BRAND.blue, 2)
+      outline(ctx, cam, item, BRAND.selection, 2)
       if (item.locked) drawLockBadge(ctx, cam, item)
       else {
         drawHandles(ctx, cam, item)
@@ -547,7 +547,7 @@ function drawOverlay(s: Scene) {
     }
     const box = boxOf(selected)
     const p = toScreen(cam, box.x, box.y)
-    ctx.strokeStyle = BRAND.blue
+    ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 2
     ctx.strokeRect(p.x, p.y, box.w * cam.z, box.h * cam.z)
     drawHandles(ctx, cam, { ...box, rotation: 0 })
@@ -566,7 +566,7 @@ function drawOverlay(s: Scene) {
   if (session.connectorDraft) {
     const a = toScreen(cam, session.connectorDraft.from.x, session.connectorDraft.from.y)
     const b = toScreen(cam, session.connectorDraft.to.x, session.connectorDraft.to.y)
-    ctx.strokeStyle = BRAND.blue
+    ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 2
     ctx.setLineDash([6, 4])
     ctx.beginPath()
@@ -581,7 +581,7 @@ function drawOverlay(s: Scene) {
     const m = session.marquee
     const p = toScreen(cam, m.x, m.y)
     ctx.fillStyle = 'rgba(66, 98, 255, 0.08)'
-    ctx.strokeStyle = BRAND.blue
+    ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 1
     ctx.fillRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
     ctx.strokeRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
@@ -591,11 +591,11 @@ function drawOverlay(s: Scene) {
     const box = selected.length ? boxOf(selected) : null
     if (box) {
       const at = toScreen(cam, box.x + box.w / 2, box.y + box.h)
-      ctx.font = '600 12px "Open Sans", system-ui, sans-serif'
+      ctx.font = '600 12px "Instrument Sans", system-ui, sans-serif'
       const w = ctx.measureText(session.badge).width + 16
       ctx.beginPath()
       ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
-      ctx.fillStyle = BRAND.blue
+      ctx.fillStyle = BRAND.selection
       ctx.fill()
       ctx.fillStyle = '#FFFFFF'
       ctx.textAlign = 'center'
@@ -624,12 +624,15 @@ export function boxOf(items: Item[]): Rect {
 function outline(ctx: CanvasRenderingContext2D, cam: Camera, item: Item, color: string, width: number) {
   if (item.type === 'connector') return
   const pts = corners(item).map((p) => toScreen(cam, p.x, p.y))
-  ctx.strokeStyle = color
-  ctx.lineWidth = width
   ctx.setLineDash([])
   ctx.beginPath()
   pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)))
   ctx.closePath()
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'
+  ctx.lineWidth = width + 2
+  ctx.stroke()
+  ctx.strokeStyle = color
+  ctx.lineWidth = width
   ctx.stroke()
 }
 
@@ -641,7 +644,7 @@ function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { r
     ctx.translate(h.x, h.y)
     ctx.rotate(box.rotation)
     ctx.fillStyle = '#FFFFFF'
-    ctx.strokeStyle = BRAND.blue
+    ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.roundRect(-w / 2, -w / 2, w, w, 2)
@@ -657,7 +660,7 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
   ctx.translate(p.x + 2, p.y - 2)
   ctx.beginPath()
   ctx.arc(0, 0, 11, 0, Math.PI * 2)
-  ctx.fillStyle = BRAND.blue
+  ctx.fillStyle = BRAND.selection
   ctx.fill()
   ctx.strokeStyle = '#FFFFFF'
   ctx.lineWidth = 1.6
@@ -677,7 +680,7 @@ function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.fillStyle = '#FFFFFF'
   ctx.fill()
   ctx.lineWidth = 2
-  ctx.strokeStyle = BRAND.blue
+  ctx.strokeStyle = BRAND.selection
   ctx.stroke()
 }
 
@@ -695,7 +698,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.lineWidth = 1.4
   ctx.fill()
   ctx.stroke()
-  ctx.font = '600 11px "Open Sans", system-ui, sans-serif'
+  ctx.font = '600 11px "Instrument Sans", system-ui, sans-serif'
   const w = ctx.measureText(name).width
   ctx.beginPath()
   ctx.roundRect(12, 12, w + 14, 20, 10)

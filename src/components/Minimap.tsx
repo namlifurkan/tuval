@@ -33,11 +33,11 @@ export function Minimap() {
       const r = aabb(item)
       ctx.fillStyle =
         item.type === 'sticky' ? item.fill :
-        item.type === 'frame' ? '#EDEDF2' :
+        item.type === 'frame' ? '#EAE6DD' :
         item.type === 'shape' ? (item.fill === 'transparent' ? '#C9C9D4' : item.fill) : '#C9C9D4'
       ctx.fillRect(ox + r.x * scale, oy + r.y * scale, Math.max(1.5, r.w * scale), Math.max(1.5, r.h * scale))
     }
-    ctx.strokeStyle = '#4262FF'
+    ctx.strokeStyle = '#C8452D'
     ctx.lineWidth = 1.5
     ctx.strokeRect(ox + view.x * scale, oy + view.y * scale, view.w * scale, view.h * scale)
 

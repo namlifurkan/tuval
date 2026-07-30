@@ -15,7 +15,7 @@ import { useBoardStore } from './board/store'
 export default function App() {
   const presenting = useBoardStore((s) => s.presenting)
   return (
-    <div className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F7F7F8] text-[#050038]">
+    <div className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
       <Canvas />
       <TextEditor />
       {presenting === null && (

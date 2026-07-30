@@ -77,17 +77,17 @@ export function Toolbar() {
             <LayoutTemplate size={20} strokeWidth={1.8} />
           </IconButton>
           <Popover open={templatePop.open} onClose={templatePop.close} className="w-[268px]">
-            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Şablonlar</div>
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Şablonlar</div>
             <div className="flex flex-col gap-0.5">
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => { insert(t.build(viewportCenter())); templatePop.close() }}
-                  className="rounded-lg px-2.5 py-2 text-left hover:bg-[#F1F1F3]"
+                  className="rounded-lg px-2.5 py-2 text-left hover:bg-[#EFEBE2]"
                 >
-                  <div className="text-sm font-semibold text-[#050038]">{t.name}</div>
-                  <div className="text-xs text-[#8A8A9B]">{t.description}</div>
+                  <div className="text-sm font-semibold text-[#141310]">{t.name}</div>
+                  <div className="text-xs text-[#8A867C]">{t.description}</div>
                 </button>
               ))}
             </div>
@@ -107,14 +107,14 @@ export function Toolbar() {
               void e
             }}
           >
-            <StickyNote size={20} strokeWidth={1.8} style={{ color: tool === 'sticky' ? undefined : '#050038' }} />
+            <StickyNote size={20} strokeWidth={1.8} style={{ color: tool === 'sticky' ? undefined : '#141310' }} />
             <span
               className="absolute bottom-1 right-1 h-2 w-2 rounded-[2px] border border-black/10"
               style={{ background: stickyFill }}
             />
           </IconButton>
           <Popover open={stickyPop.open} onClose={stickyPop.close} className="w-[228px]">
-            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Sticky note color</div>
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Sticky note color</div>
             <ColorGrid
               colors={STICKY_COLORS}
               value={stickyFill}
@@ -132,7 +132,7 @@ export function Toolbar() {
             <ShapeGlyph kind={shape.kind} />
           </IconButton>
           <Popover open={shapePop.open} onClose={shapePop.close} className="w-[268px]">
-            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Shapes</div>
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Shapes</div>
             <div className="grid grid-cols-6 gap-1">
               {SHAPE_LIST.map((k) => (
                 <button
@@ -140,8 +140,8 @@ export function Toolbar() {
                   type="button"
                   title={k}
                   onClick={() => { update({ shape: { ...shape, kind: k } }); setTool('shape'); shapePop.close() }}
-                  className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-[#F1F1F3]
-                    ${shape.kind === k ? 'bg-[#E8ECFF] text-[#4262FF]' : 'text-[#050038]'}`}
+                  className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]
+                    ${shape.kind === k ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310]'}`}
                 >
                   <ShapeGlyph kind={k} size={22} />
                 </button>
@@ -169,17 +169,17 @@ export function Toolbar() {
               <button
                 type="button"
                 onClick={() => update({ pen: { ...pen, highlighter: false, eraser: false } })}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
               >Kalem</button>
               <button
                 type="button"
                 onClick={() => update({ pen: { ...pen, highlighter: true, eraser: false, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
               >Marker</button>
               <button
                 type="button"
                 onClick={() => update({ pen: { ...pen, eraser: true } })}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
               >Silgi</button>
             </div>
             <div className="mb-2 flex items-center gap-2 px-1">
@@ -190,7 +190,7 @@ export function Toolbar() {
                 max={40}
                 value={pen.strokeWidth}
                 onChange={(e) => update({ pen: { ...pen, strokeWidth: +e.target.value } })}
-                className="flex-1 accent-[#4262FF]"
+                className="flex-1 accent-[#C8452D]"
               />
               <span className="w-6 text-right text-xs tabular-nums text-[#585858]">{pen.strokeWidth}</span>
             </div>
@@ -218,11 +218,11 @@ export function Toolbar() {
             <button
               type="button"
               onClick={() => { update({ framesPanel: true }); framePop.close() }}
-              className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-[#4262FF] hover:bg-[#F1F1F3]"
+              className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
             >
               Frame panelini aç
             </button>
-            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Frame boyutu</div>
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Frame boyutu</div>
             <div className="flex flex-col gap-0.5">
               {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(
                 ([label, w, h]) => (
@@ -235,10 +235,10 @@ export function Toolbar() {
                       insert([makeFrame(c.x - w / 2, c.y - h / 2, w, h, `Frame ${n}`)])
                       framePop.close()
                     }}
-                    className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                    className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
                   >
-                    <span className="font-medium text-[#050038]">{label}</span>
-                    <span className="text-xs text-[#9B9BAB]">{w}×{h}</span>
+                    <span className="font-medium text-[#141310]">{label}</span>
+                    <span className="text-xs text-[#8A867C]">{w}×{h}</span>
                   </button>
                 ),
               )}

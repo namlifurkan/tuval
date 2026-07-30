@@ -39,7 +39,7 @@ export function Collaborators() {
       ))}
       {extra > 0 && (
         <div
-          className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#EDEDF2] text-[11px] font-bold text-[#585868]"
+          className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
           style={{ marginLeft: -8 }}
         >
           +{extra}

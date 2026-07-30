@@ -17,8 +17,8 @@ export function IconButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`relative grid h-9 w-9 place-items-center rounded-lg text-[#050038] transition-colors
-        ${active ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}
+      className={`relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-colors
+        ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}
         ${disabled ? 'cursor-not-allowed opacity-35' : ''} ${className}`}
     >
       {children}
@@ -83,11 +83,11 @@ export function ColorGrid({
           onClick={() => onPick(c)}
           title={c}
           className={`h-6 w-6 rounded-md border transition-transform hover:scale-110
-            ${value === c ? 'ring-2 ring-[#4262FF] ring-offset-1' : ''}
-            ${c === 'transparent' ? 'border-dashed border-[#C3C2CF]' : 'border-black/10'}`}
+            ${value === c ? 'ring-2 ring-[#C8452D] ring-offset-1' : ''}
+            ${c === 'transparent' ? 'border-dashed border-[#C6C2B6]' : 'border-black/10'}`}
           style={{
             background: c === 'transparent'
-              ? 'repeating-conic-gradient(#EDEDF0 0% 25%, #fff 0% 50%) 50%/8px 8px'
+              ? 'repeating-conic-gradient(#EAE6DD 0% 25%, #fff 0% 50%) 50%/8px 8px'
               : c,
           }}
         />
@@ -99,8 +99,8 @@ export function ColorGrid({
 export function HexInput({ value, onPick }: { value?: string; onPick: (c: string) => void }) {
   const [hex, setHex] = useState(value && value.startsWith('#') ? value : '#')
   return (
-    <div className="mt-2 flex items-center gap-1.5 border-t border-[#EDEDF2] pt-2">
-      <span className="text-xs font-semibold text-[#8A8A9B]">Hex</span>
+    <div className="mt-2 flex items-center gap-1.5 border-t border-[#EAE6DD] pt-2">
+      <span className="text-xs font-semibold text-[#8A867C]">Hex</span>
       <input
         value={hex}
         onChange={(e) => {
@@ -109,13 +109,13 @@ export function HexInput({ value, onPick }: { value?: string; onPick: (c: string
           if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) onPick(v)
         }}
         spellCheck={false}
-        className="w-full rounded-lg border border-[#E6E6EB] px-2 py-1 font-mono text-xs outline-none focus:border-[#4262FF]"
+        className="w-full rounded-lg border border-[#E2DED5] px-2 py-1 font-mono text-xs outline-none focus:border-[#C8452D]"
       />
       <input
         type="color"
         value={/^#([0-9a-f]{6})$/i.test(hex) ? hex : '#ffffff'}
         onChange={(e) => { setHex(e.target.value); onPick(e.target.value) }}
-        className="h-7 w-8 cursor-pointer rounded-md border border-[#E6E6EB] bg-white p-0.5"
+        className="h-7 w-8 cursor-pointer rounded-md border border-[#E2DED5] bg-white p-0.5"
       />
     </div>
   )
@@ -126,4 +126,4 @@ export function usePopover() {
   return { open, setOpen, toggle: () => setOpen((o) => !o), close: () => setOpen(false) }
 }
 
-export const Divider = () => <div className="mx-1 h-6 w-px shrink-0 bg-[#E6E6EB]" />
+export const Divider = () => <div className="mx-1 h-6 w-px shrink-0 bg-[#E2DED5]" />

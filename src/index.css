@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Open Sans', system-ui, sans-serif;
-  --color-ink: #050038;
-  --color-brand: #4262ff;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --color-ink: #141310;
+  --color-pigment: #c8452d;
 }
 
 html,
@@ -15,7 +15,7 @@ body,
 }
 
 body {
-  font-family: 'Open Sans', system-ui, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 

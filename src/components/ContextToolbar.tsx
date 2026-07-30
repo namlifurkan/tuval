@@ -84,7 +84,7 @@ export function ContextToolbar() {
                   type="range" min={10} max={100}
                   value={Math.round(((first.opacity as number) ?? 1) * 100)}
                   onChange={(e) => patch({ opacity: +e.target.value / 100 })}
-                  className="flex-1 accent-[#4262FF]"
+                  className="flex-1 accent-[#C8452D]"
                 />
               </div>
             </Popover>
@@ -94,7 +94,7 @@ export function ContextToolbar() {
         {(has(selected, 'shape') || has(selected, 'connector') || has(selected, 'draw')) && (
           <div className="relative">
             <IconButton title="Line color" onClick={strokePop.toggle}>
-              <PenLine size={18} strokeWidth={1.8} style={{ color: (first.stroke as string) ?? '#1A1A1A' }} />
+              <PenLine size={18} strokeWidth={1.8} style={{ color: (first.stroke as string) ?? '#141310' }} />
             </IconButton>
             <Popover open={strokePop.open} onClose={strokePop.close} anchor="bottom" className="w-[212px]">
               <ColorGrid
@@ -109,7 +109,7 @@ export function ContextToolbar() {
                   type="range" min={1} max={24}
                   value={(first.strokeWidth as number) ?? 2}
                   onChange={(e) => patch({ strokeWidth: +e.target.value })}
-                  className="flex-1 accent-[#4262FF]"
+                  className="flex-1 accent-[#C8452D]"
                 />
               </div>
               <div className="mt-2 flex gap-1">
@@ -119,7 +119,7 @@ export function ContextToolbar() {
                     type="button"
                     onClick={() => patch({ strokeStyle: st })}
                     className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                      ${first.strokeStyle === st ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                      ${first.strokeStyle === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
                   >{st}</button>
                 ))}
               </div>
@@ -133,7 +133,7 @@ export function ContextToolbar() {
               <ArrowRight size={19} strokeWidth={1.8} />
             </IconButton>
             <Popover open={linePop.open} onClose={linePop.close} anchor="bottom" className="w-[236px]">
-              <div className="mb-1 px-1 text-xs font-semibold text-[#050038]">Shape</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Shape</div>
               <div className="mb-2 flex gap-1">
                 {(['straight', 'elbow', 'curved'] as ConnectorShape[]).map((sh) => (
                   <button
@@ -141,11 +141,11 @@ export function ContextToolbar() {
                     type="button"
                     onClick={() => patch({ shape: sh }, (i) => i.type === 'connector')}
                     className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                      ${first.shape === sh ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                      ${first.shape === sh ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
                   >{sh}</button>
                 ))}
               </div>
-              <div className="mb-1 px-1 text-xs font-semibold text-[#050038]">Endpoints</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Endpoints</div>
               <div className="flex gap-1">
                 {(['none', 'arrow', 'triangle', 'circle', 'diamond'] as Cap[]).map((c) => (
                   <button
@@ -153,7 +153,7 @@ export function ContextToolbar() {
                     type="button"
                     onClick={() => patch({ capEnd: c }, (i) => i.type === 'connector')}
                     className={`flex-1 rounded-lg px-1 py-1.5 text-[10px] font-semibold capitalize
-                      ${first.capEnd === c ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                      ${first.capEnd === c ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
                   >{c}</button>
                 ))}
               </div>
@@ -173,7 +173,7 @@ export function ContextToolbar() {
                   <select
                     value={(first.fontSize as number) ?? 24}
                     onChange={(e) => patch({ fontSize: +e.target.value, autoFit: false })}
-                    className="w-full rounded-lg border border-[#E6E6EB] px-2 py-1.5 text-sm"
+                    className="w-full rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm"
                   >
                     {FONT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -219,7 +219,7 @@ export function ContextToolbar() {
                 <LayoutGrid size={18} strokeWidth={1.8} />
               </IconButton>
               <Popover open={alignPop.open} onClose={alignPop.close} anchor="bottom" className="w-[212px]">
-                <div className="mb-1 px-1 text-xs font-semibold text-[#050038]">Hizala</div>
+                <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">Hizala</div>
                 <div className="grid grid-cols-6 gap-0.5">
                   {ALIGNMENTS.map(([mode, Icon, label]) => (
                     <button
@@ -227,19 +227,19 @@ export function ContextToolbar() {
                       type="button"
                       title={label}
                       onClick={() => { alignSelection(mode); requestRender() }}
-                      className="grid h-8 w-8 place-items-center rounded-lg text-[#050038] hover:bg-[#F1F1F3]"
+                      className="grid h-8 w-8 place-items-center rounded-lg text-[#141310] hover:bg-[#EFEBE2]"
                     >
                       <Icon size={17} strokeWidth={1.8} />
                     </button>
                   ))}
                 </div>
-                <div className="mb-1 mt-2 px-1 text-xs font-semibold text-[#050038]">Dağıt</div>
+                <div className="mb-1 mt-2 px-1 text-xs font-semibold text-[#141310]">Dağıt</div>
                 <div className="flex gap-0.5">
                   <button
                     type="button"
                     title="Yatayda eşit dağıt"
                     onClick={() => { distributeSelection('h'); requestRender() }}
-                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#EFEBE2]"
                   >
                     <AlignHorizontalDistributeCenter size={17} strokeWidth={1.8} />
                   </button>
@@ -247,7 +247,7 @@ export function ContextToolbar() {
                     type="button"
                     title="Dikeyde eşit dağıt"
                     onClick={() => { distributeSelection('v'); requestRender() }}
-                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#EFEBE2]"
                   >
                     <AlignVerticalDistributeCenter size={17} strokeWidth={1.8} />
                   </button>
@@ -255,7 +255,7 @@ export function ContextToolbar() {
                     type="button"
                     title="Izgaraya diz"
                     onClick={() => { arrangeInGrid(); requestRender() }}
-                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#EFEBE2]"
                   >
                     <Grid3x3 size={17} strokeWidth={1.8} />
                   </button>

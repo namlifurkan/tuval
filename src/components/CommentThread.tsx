@@ -54,8 +54,8 @@ export function CommentThread() {
       onPointerDown={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between border-b border-[#EDEDF2] px-3 py-2">
-        <span className="text-xs font-semibold text-[#8A8A9B]">
+      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
+        <span className="text-xs font-semibold text-[#8A867C]">
           {item.replies.length ? `${item.replies.length} yorum` : 'Yeni yorum'}
         </span>
         <div className="flex items-center gap-1">
@@ -63,7 +63,7 @@ export function CommentThread() {
             type="button"
             title={item.resolved ? 'Yeniden aç' : 'Çözüldü olarak işaretle'}
             onClick={() => { patchItem(item.id, { resolved: !item.resolved }); requestRender() }}
-            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-[#F1F1F3]'}`}
+            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-[#EFEBE2]'}`}
           >
             <Check size={15} strokeWidth={2.2} />
           </button>
@@ -89,16 +89,16 @@ export function CommentThread() {
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-xs font-semibold text-[#050038]">{r.author}</span>
-                <span className="text-[10px] text-[#9B9BAB]">{timeAgo(r.at)}</span>
+                <span className="text-xs font-semibold text-[#141310]">{r.author}</span>
+                <span className="text-[10px] text-[#8A867C]">{timeAgo(r.at)}</span>
               </div>
-              <p className="whitespace-pre-wrap break-words text-sm text-[#31313D]">{r.text}</p>
+              <p className="whitespace-pre-wrap break-words text-sm text-[#2E2B26]">{r.text}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex items-end gap-2 border-t border-[#EDEDF2] p-2">
+      <div className="flex items-end gap-2 border-t border-[#EAE6DD] p-2">
         <div
           className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
           style={{ background: me.color }}
@@ -116,13 +116,13 @@ export function CommentThread() {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
             if (e.key === 'Escape') close()
           }}
-          className="max-h-24 min-h-[30px] flex-1 resize-none rounded-lg bg-[#F5F5F7] px-2.5 py-1.5 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-[#4262FF]"
+          className="max-h-24 min-h-[30px] flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-[#C8452D]"
         />
         <button
           type="button"
           onClick={submit}
           disabled={!draft.trim()}
-          className="rounded-lg bg-[#4262FF] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
+          className="rounded-lg bg-[#C8452D] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
         >
           Gönder
         </button>

@@ -1,4 +1,5 @@
 import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Search, Star, Trash2 } from 'lucide-react'
+import { COLOR, PRODUCT } from '../board/brand'
 import { getItems, removeItems, room } from '../board/doc'
 import { exportPng } from '../board/export'
 import { requestRender, useBoardStore } from '../board/store'
@@ -15,13 +16,17 @@ export function TopBar() {
     <>
       <div className="pointer-events-auto absolute left-4 top-4 z-40 flex items-center gap-2">
         <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#FFD02F] text-sm font-black text-[#050038]">
-            m
+          <div
+            className="grid h-9 w-9 place-items-center rounded-lg text-sm font-bold text-white"
+            style={{ background: COLOR.ink }}
+            title={PRODUCT.name}
+          >
+            {PRODUCT.mark}
           </div>
           <input
             value={boardName}
             onChange={(e) => update({ boardName: e.target.value })}
-            className="w-[170px] rounded-lg px-2 py-1.5 text-sm font-semibold text-[#050038] outline-none hover:bg-[#F1F1F3] focus:bg-[#F1F1F3]"
+            className="w-[170px] rounded-lg px-2 py-1.5 text-sm font-semibold text-[#141310] outline-none hover:bg-[#EFEBE2] focus:bg-[#EFEBE2]"
           />
           <IconButton title="Favorite"><Star size={17} strokeWidth={1.8} /></IconButton>
           <div className="relative">
@@ -32,26 +37,26 @@ export function TopBar() {
               <button
                 type="button"
                 onClick={() => { update({ framesPanel: true }); menu.close() }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <Layers size={15} /> Frame paneli
               </button>
               <button
                 type="button"
                 onClick={() => { exportPng(getItems(), boardName || 'board'); menu.close() }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <Download size={15} /> Board'u PNG indir
               </button>
               <button
                 type="button"
                 onClick={() => { update({ showGrid: !showGrid }); requestRender() }}
-                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <span className="flex items-center gap-2"><Grid3x3 size={15} /> Izgara</span>
-                <span className="text-xs text-[#9B9BAB]">{showGrid ? 'Açık' : 'Kapalı'}</span>
+                <span className="text-xs text-[#8A867C]">{showGrid ? 'Açık' : 'Kapalı'}</span>
               </button>
-              <div className="my-1 h-px bg-[#EDEDF2]" />
+              <div className="my-1 h-px bg-[#EAE6DD]" />
               <button
                 type="button"
                 onClick={() => {
@@ -82,7 +87,7 @@ export function TopBar() {
           <button
             type="button"
             onClick={() => navigator.clipboard?.writeText(location.href)}
-            className="rounded-lg bg-[#4262FF] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3450E0]"
+            className="rounded-lg bg-[#C8452D] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
           >
             Share
           </button>
@@ -98,7 +103,7 @@ export function TopBar() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 text-[11px] font-medium text-[#8A8A9B]">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 text-[11px] font-medium text-[#8A867C]">
         board: {room}
       </div>
     </>

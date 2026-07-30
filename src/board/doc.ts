@@ -11,7 +11,7 @@ export const ydoc = new Y.Doc()
 export const yitems = ydoc.getMap<Y.Map<unknown>>('items')
 export const ymeta = ydoc.getMap<unknown>('meta')
 export const undoManager = new Y.UndoManager([yitems, ymeta], { captureTimeout: 350 })
-export const persistence = new IndexeddbPersistence(`miroclone:${room}`, ydoc)
+export const persistence = new IndexeddbPersistence(`tuval:${room}`, ydoc)
 
 const collabUrl = import.meta.env.VITE_COLLAB_URL as string | undefined
 export const provider = collabUrl ? new WebsocketProvider(collabUrl, room, ydoc) : null

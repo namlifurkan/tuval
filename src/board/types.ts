@@ -129,28 +129,28 @@ export interface Rect { x: number; y: number; w: number; h: number }
 export interface Vec { x: number; y: number }
 
 export const STICKY_COLORS = [
-  '#FFF9B1', '#F5D128', '#FF9D48', '#F16C7F', '#FFCEE0', '#EA94BB',
-  '#D5F692', '#D0E17A', '#93D275', '#67C6C0', '#A6CCF5', '#7B92FF',
-  '#B5A6E5', '#F5F6F8', '#D0D0D0', '#1A1A1A',
+  '#F0E3B0', '#E8C55A', '#DE9A4E', '#C8664A', '#E7B7B4', '#B9718A',
+  '#CBD79A', '#8FA96B', '#5E9A8A', '#7FA5BE', '#3E5C93', '#8A7FB0',
+  '#EFEDE6', '#C6C2B6', '#8A867C', '#1F1D1A',
 ] as const
 
 export const SHAPE_FILLS = [
-  '#FFFFFF', '#FFF9B1', '#F5D128', '#FF9D48', '#F16C7F', '#FFCEE0',
-  '#D5F692', '#93D275', '#67C6C0', '#A6CCF5', '#4262FF', '#B5A6E5',
-  '#F5F6F8', '#9B9B9B', '#1A1A1A', 'transparent',
+  '#FFFFFF', '#F0E3B0', '#E8C55A', '#DE9A4E', '#C8664A', '#E7B7B4',
+  '#CBD79A', '#8FA96B', '#5E9A8A', '#7FA5BE', '#3E5C93', '#8A7FB0',
+  '#EFEDE6', '#C6C2B6', '#1F1D1A', 'transparent',
 ] as const
 
 export const LINE_COLORS = [
-  '#1A1A1A', '#9B9B9B', '#4262FF', '#67C6C0', '#93D275', '#F5D128',
-  '#FF9D48', '#F16C7F', '#EA94BB', '#B5A6E5', '#FFFFFF', 'transparent',
+  '#1F1D1A', '#8A867C', '#3E5C93', '#5E9A8A', '#8FA96B', '#E8C55A',
+  '#DE9A4E', '#C8452D', '#B9718A', '#8A7FB0', '#FFFFFF', 'transparent',
 ] as const
 
 export const FONT_SIZES = [8, 10, 11, 12, 14, 18, 24, 29, 36, 48, 59, 72, 98, 144, 190, 288]
 
 export const DEFAULT_TEXT_STYLE: TextStyle = {
   fontSize: 24,
-  fontFamily: 'Open Sans',
-  textColor: '#1A1A1A',
+  fontFamily: 'Instrument Sans',
+  textColor: '#1F1D1A',
   align: 'center',
   valign: 'middle',
   bold: false,
@@ -161,8 +161,8 @@ export const DEFAULT_TEXT_STYLE: TextStyle = {
 }
 
 export const BRAND = {
-  blue: '#4262FF',
-  ink: '#050038',
-  guide: '#FF3B6B',
-  hover: '#4262FF',
+  selection: '#141310',
+  ink: '#141310',
+  guide: '#C8452D',
+  pigment: '#C8452D',
 }

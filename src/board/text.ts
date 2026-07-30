@@ -6,7 +6,7 @@ const cache = new Map<string, string[]>()
 export const LINE_HEIGHT = 1.28
 
 export function fontString(style: Pick<TextStyle, 'bold' | 'italic' | 'fontFamily'>, size: number) {
-  return `${style.italic ? 'italic ' : ''}${style.bold ? 700 : 400} ${size}px "${style.fontFamily}", "Open Sans", system-ui, sans-serif`
+  return `${style.italic ? 'italic ' : ''}${style.bold ? 700 : 400} ${size}px "${style.fontFamily}", "Instrument Sans", system-ui, sans-serif`
 }
 
 export function measureWidth(text: string, font: string) {

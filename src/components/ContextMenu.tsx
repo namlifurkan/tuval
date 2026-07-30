@@ -97,15 +97,15 @@ export function ContextMenu() {
       >
         {entries.map((e) => (
           <div key={e.label}>
-            {e.divider && <div className="my-1 h-px bg-[#EDEDF2]" />}
+            {e.divider && <div className="my-1 h-px bg-[#EAE6DD]" />}
             <button
               type="button"
               onClick={() => { e.run(); close() }}
               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm
-                ${e.danger ? 'text-[#DC2626] hover:bg-[#FEF2F2]' : 'text-[#050038] hover:bg-[#F1F1F3]'}`}
+                ${e.danger ? 'text-[#DC2626] hover:bg-[#FEF2F2]' : 'text-[#141310] hover:bg-[#EFEBE2]'}`}
             >
               <span>{e.label}</span>
-              {e.shortcut && <span className="ml-6 text-xs text-[#9B9BAB]">{e.shortcut}</span>}
+              {e.shortcut && <span className="ml-6 text-xs text-[#8A867C]">{e.shortcut}</span>}
             </button>
           </div>
         ))}

@@ -45,7 +45,7 @@ export function SearchPanel() {
   return (
     <div className="absolute left-1/2 top-4 z-50 w-[420px] -translate-x-1/2 overflow-hidden rounded-xl border border-black/5 bg-white shadow-[0_8px_28px_rgba(9,9,20,0.18)]">
       <div className="flex items-center gap-2 px-3 py-2.5">
-        <Search size={17} className="shrink-0 text-[#8A8A9B]" />
+        <Search size={17} className="shrink-0 text-[#8A867C]" />
         <input
           ref={ref}
           value={query}
@@ -56,33 +56,33 @@ export function SearchPanel() {
             if (e.key === 'Enter' && hits[0]) jump(hits[0])
           }}
           placeholder="Board içinde ara…"
-          className="flex-1 text-sm outline-none placeholder:text-[#9B9BAB]"
+          className="flex-1 text-sm outline-none placeholder:text-[#8A867C]"
         />
         <button
           type="button"
           onClick={() => update({ searchOpen: false })}
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-[#F1F1F3]"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-[#EFEBE2]"
         >
           <X size={15} />
         </button>
       </div>
 
       {q && (
-        <div className="max-h-[320px] overflow-y-auto border-t border-[#EDEDF2] p-1">
+        <div className="max-h-[320px] overflow-y-auto border-t border-[#EAE6DD] p-1">
           {hits.length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-[#9B9BAB]">Sonuç yok</div>
+            <div className="px-3 py-4 text-center text-sm text-[#8A867C]">Sonuç yok</div>
           )}
           {hits.map((i) => (
             <button
               key={i.id}
               type="button"
               onClick={() => jump(i)}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left hover:bg-[#F1F1F3]"
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left hover:bg-[#EFEBE2]"
             >
-              <span className="shrink-0 rounded-md bg-[#EDEDF2] px-1.5 py-0.5 text-[10px] font-semibold text-[#585868]">
+              <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A463E]">
                 {TYPE_LABEL[i.type] ?? i.type}
               </span>
-              <span className="truncate text-sm text-[#050038]">{textOf(i)}</span>
+              <span className="truncate text-sm text-[#141310]">{textOf(i)}</span>
             </button>
           ))}
         </div>
