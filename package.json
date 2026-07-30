@@ -3,14 +3,19 @@
   "version": "0.1.0",
   "description": "Açık kaynak sonsuz tuval — Canvas 2D + Yjs CRDT",
   "license": "AGPL-3.0-or-later",
-  "repository": { "type": "git", "url": "" },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "collab": "HOST=0.0.0.0 PORT=1234 node node_modules/y-websocket/bin/server.cjs"
+    "collab": "HOST=0.0.0.0 PORT=1234 node node_modules/y-websocket/bin/server.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
@@ -30,9 +35,12 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^30.0.1",
     "oxlint": "^1.75.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.2.0"
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
   }
 }

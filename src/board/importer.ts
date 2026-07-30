@@ -1,4 +1,4 @@
-import { boardPeople } from './people'
+import { personNamed } from './people'
 import { codeHeight, makeCode, makeConnector, makeFrame, makeSticky, makeTable, STICKY_SIZE } from './items'
 import { PIGMENTS } from './brand'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -190,13 +190,7 @@ export function briefToItems(md: string, origin: Vec): { items: Item[]; title: s
     const frameW = innerW + FRAME_PAD * 2
     const frameH = innerH + FRAME_PAD * 2
     const frame = makeFrame(cursorX, origin.y, frameW, frameH, section.title || `Frame ${si + 1}`)
-    if (section.owners?.length) {
-      const pool = boardPeople()
-      const crew = section.owners
-        .map((name) => pool.find((p) => p.name.toLowerCase() === name.toLowerCase()))
-        .filter((p): p is NonNullable<typeof p> => !!p)
-      if (crew.length) frame.assignees = crew
-    }
+    if (section.owners?.length) frame.assignees = section.owners.map(personNamed)
     items.push(frame)
 
     for (const p of placed) {

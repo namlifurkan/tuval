@@ -113,11 +113,17 @@ and register it in `CATALOG` and `LANGS`.
 ## Verifying changes
 
 ```bash
-npx tsc -b --noEmit && npx vite build
+npx tsc -b --noEmit && npm test && npm run build
 ```
 
 `npx tsc --noEmit` without `-b` checks nothing here: the root `tsconfig.json` is a solution
 file with `"files": []`. It exits successfully and hides every error.
+
+Tests cover the pure core: geometry (resize, snapping, connector bounds, frame title hit
+area), the Markdown importer and the agent export including their round trip, the syntax
+tokenizer, status labels, the board registry and camera memory. Rendering and pointer
+handling are not covered; those are verified in the browser. CI runs the same four commands
+on every push and pull request.
 
 ## License
 

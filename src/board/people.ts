@@ -21,6 +21,20 @@ export function boardPeople(): Assignee[] {
   return [...byId.values()]
 }
 
+const GUEST_COLORS = ['#C8452D', '#3E5C93', '#5E9A8A', '#8A7FB0', '#DE9A4E', '#B9718A']
+
+// A name from an imported brief may belong to someone this browser has never seen. Keep it as
+// a person rather than dropping it: losing an owner on the way in is worse than a stub.
+export function personNamed(name: string): Assignee {
+  const trimmed = name.trim()
+  const key = trimmed.toLowerCase()
+  const known = boardPeople().find((p) => p.name.toLowerCase() === key)
+  if (known) return known
+  let hash = 0
+  for (const ch of key) hash = (hash * 31 + ch.charCodeAt(0)) % 997
+  return { id: `name:${key}`, name: trimmed, color: GUEST_COLORS[hash % GUEST_COLORS.length] }
+}
+
 export const isAssigned = (list: Assignee[] | undefined, id: Id) =>
   (list ?? []).some((a) => a.id === id)
 
