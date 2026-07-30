@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import type { CSSProperties, ReactNode } from 'react'
 
 export function IconButton({
   active, title, onClick, children, disabled, className = '',
@@ -36,10 +37,22 @@ export function Popover({
   anchor?: 'right' | 'top' | 'bottom' | 'topLeft' | 'bottomRight'
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const holder = useRef<HTMLSpanElement>(null)
+  const [rect, setRect] = useState<DOMRect | null>(null)
+
+  useLayoutEffect(() => {
+    if (!open) return setRect(null)
+    const trigger = holder.current?.parentElement
+    if (trigger) setRect(trigger.getBoundingClientRect())
+  }, [open])
+
   useEffect(() => {
     if (!open) return
     const onDown = (e: PointerEvent) => {
-      if (!ref.current?.contains(e.target as Node)) onClose()
+      const target = e.target as Node
+      if (ref.current?.contains(target)) return
+      if (holder.current?.parentElement?.contains(target)) return
+      onClose()
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('pointerdown', onDown, true)
@@ -49,21 +62,41 @@ export function Popover({
       window.removeEventListener('keydown', onKey)
     }
   }, [open, onClose])
-  if (!open) return null
-  const pos =
-    anchor === 'right' ? 'left-[calc(100%+10px)] top-0' :
-    anchor === 'top' ? 'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2' :
-    anchor === 'topLeft' ? 'bottom-[calc(100%+10px)] left-0' :
-    anchor === 'bottomRight' ? 'top-[calc(100%+10px)] right-0' :
-    'top-[calc(100%+10px)] left-1/2 -translate-x-1/2'
+
+  const style = (): CSSProperties => {
+    if (!rect) return { visibility: 'hidden' }
+    const gap = 10
+    switch (anchor) {
+      case 'right':
+        return { left: rect.right + gap, top: rect.top }
+      case 'top':
+        return { bottom: window.innerHeight - rect.top + gap, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
+      case 'topLeft':
+        return { bottom: window.innerHeight - rect.top + gap, left: rect.left }
+      case 'bottomRight':
+        return { top: rect.bottom + gap, right: window.innerWidth - rect.right }
+      default:
+        return { top: rect.bottom + gap, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
+    }
+  }
+
+  if (!open) return <span ref={holder} className="hidden" />
+
   return (
-    <div
-      ref={ref}
-      onPointerDown={(e) => e.stopPropagation()}
-      className={`absolute z-50 rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[0_8px_28px_rgba(9,9,20,0.16)] ${pos} ${className}`}
-    >
-      {children}
-    </div>
+    <>
+      <span ref={holder} className="hidden" />
+      {createPortal(
+        <div
+          ref={ref}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={style()}
+          className={`fixed z-[70] max-h-[80vh] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[0_8px_28px_rgba(20,19,16,0.18)] ${className}`}
+        >
+          {children}
+        </div>,
+        document.body,
+      )}
+    </>
   )
 }
 

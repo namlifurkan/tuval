@@ -1,0 +1,96 @@
+export type DockItemId =
+  | 'undo' | 'redo' | 'select' | 'sticky' | 'text' | 'shape' | 'connector' | 'pen'
+  | 'table' | 'mindmap' | 'frame' | 'comment' | 'templates' | 'image' | 'more'
+  | 'minimap' | 'fit' | 'zoom'
+
+export const DOCK_LABELS: Record<DockItemId, string> = {
+  undo: 'Geri al', redo: 'İleri al', select: 'Seç', sticky: 'Sticky', text: 'Metin',
+  shape: 'Şekil', connector: 'Bağlantı', pen: 'Kalem', table: 'Tablo', mindmap: 'Zihin haritası',
+  frame: 'Frame', comment: 'Yorum', templates: 'Şablonlar', image: 'Görsel', more: 'Daha fazla',
+  minimap: 'Minimap', fit: 'İçeriğe sığdır', zoom: 'Zoom',
+}
+
+export const DEFAULT_ORDER: DockItemId[] = [
+  'undo', 'redo', 'select', 'sticky', 'text', 'shape', 'connector', 'pen',
+  'table', 'mindmap', 'frame', 'comment', 'templates', 'image', 'more',
+  'minimap', 'fit', 'zoom',
+]
+
+export type DockSize = 'sm' | 'md' | 'lg'
+
+export interface DockPrefs {
+  order: DockItemId[]
+  hidden: DockItemId[]
+  size: DockSize
+  magnify: boolean
+}
+
+export const SIZE_PX: Record<DockSize, number> = { sm: 32, md: 38, lg: 46 }
+
+const KEY = 'tuval:dock'
+
+const DEFAULTS: DockPrefs = { order: DEFAULT_ORDER, hidden: [], size: 'md', magnify: true }
+
+function load(): DockPrefs {
+  try {
+    const raw = localStorage.getItem(KEY)
+    if (!raw) return { ...DEFAULTS }
+    const parsed = JSON.parse(raw) as Partial<DockPrefs>
+    const order = (parsed.order ?? DEFAULT_ORDER).filter((id) => DEFAULT_ORDER.includes(id))
+    for (const id of DEFAULT_ORDER) if (!order.includes(id)) order.push(id)
+    return {
+      order,
+      hidden: (parsed.hidden ?? []).filter((id) => DEFAULT_ORDER.includes(id)),
+      size: parsed.size ?? 'md',
+      magnify: parsed.magnify ?? true,
+    }
+  } catch {
+    return { ...DEFAULTS }
+  }
+}
+
+let prefs = load()
+let visible: DockItemId[] = prefs.order.filter((id) => !prefs.hidden.includes(id))
+const listeners = new Set<() => void>()
+
+export const getDockPrefs = (): DockPrefs => prefs
+
+export function subscribeDock(fn: () => void) {
+  listeners.add(fn)
+  return () => { listeners.delete(fn) }
+}
+
+function commit(next: DockPrefs) {
+  prefs = next
+  visible = next.order.filter((id) => !next.hidden.includes(id))
+  try { localStorage.setItem(KEY, JSON.stringify(next)) } catch { /* ignore */ }
+  listeners.forEach((l) => l())
+}
+
+export function setDockSize(size: DockSize) {
+  commit({ ...prefs, size })
+}
+
+export function setMagnify(magnify: boolean) {
+  commit({ ...prefs, magnify })
+}
+
+export function toggleDockItem(id: DockItemId) {
+  const hidden = prefs.hidden.includes(id)
+    ? prefs.hidden.filter((x) => x !== id)
+    : [...prefs.hidden, id]
+  commit({ ...prefs, hidden })
+}
+
+export function moveDockItem(id: DockItemId, before: DockItemId | null) {
+  const order = prefs.order.filter((x) => x !== id)
+  const at = before ? order.indexOf(before) : order.length
+  order.splice(at < 0 ? order.length : at, 0, id)
+  commit({ ...prefs, order })
+}
+
+export function resetDock() {
+  commit({ ...DEFAULTS, order: [...DEFAULT_ORDER] })
+}
+
+export const visibleDockItems = (): DockItemId[] => visible

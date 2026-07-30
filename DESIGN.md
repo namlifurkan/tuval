@@ -64,7 +64,9 @@ Kroma dört yüzeye ayrılır, her birinin tek bir işi var:
   sürüm geçmişi, çağrı, katılımcılar, paylaş, sunum. Tek grup, ayrı yüzen ada yok.
 - **Alt dock (orta)** — araçlar. Geri/ileri al · araç paleti · minimap, sığdır, zoom. Board'lar
   geniş olduğu için yatay alan yenmez; projeksiyonda izleyicinin baktığı üst-orta bölge boş kalır.
-  Dar ekranda zoom kümesi gizlenir (tekerlek, klavye ve minimap zaten var), dock viewport'u aşmaz.
+  macOS Dock davranışı: imlece yaklaşan ikonlar Gauss eğrisiyle büyüyüp yukarı kalkar (1.0→1.5),
+  araçlar sürüklenerek sıralanır, ayarlardan gizlenir, boyut S/M/L seçilir. Tercihler kişiseldir,
+  board dokümanına değil `localStorage`'a yazılır. `prefers-reduced-motion` büyüteci kapatır.
 - **Sağ inspector** — seçim özellikleri. Dikey, etiketli bölümler. Seçimin **üstünü kapatmaz**;
   bu bilinçli bir tercih: yüzen seçim çubuğu tam da incelediğin şeyi gizler.
 - **Tuval** — geri kalan her şey.
