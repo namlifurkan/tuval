@@ -301,6 +301,9 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   downAt = performance.now()
   didDrag = false
   drag = null
+  // A lost pointerup can leave this flag set, and the inspector stays hidden for good.
+  // Any fresh press means no drag is in flight, so heal it here.
+  if (s.dragging) s.update({ dragging: false })
 
   if (e.button === 1 || s.tool === 'hand' || session.spaceDown) {
     drag = { kind: 'pan', sx: screen.x, sy: screen.y, cam: { ...s.camera } }
@@ -711,6 +714,7 @@ export function pointerUp(_e: PointerEvent, screen: Vec) {
     if (pointers.size < 2) {
       gesture = null
       session.cursor = 'default'
+      if (s.dragging) s.update({ dragging: false })
       requestRender()
     }
     return

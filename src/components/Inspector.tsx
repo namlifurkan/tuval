@@ -70,10 +70,11 @@ export function Inspector() {
   const selected = useSelectedItems()
   const dockSide = useSyncExternalStore(subscribeDock, readDockSide, readDockSide)
   const showMinimap = useBoardStore((s) => s.showMinimap)
-  const editing = useBoardStore((s) => s.editing)
   const dragging = useBoardStore((s) => s.dragging)
 
-  if (!selected.length || editing || dragging) return null
+  // The panel stays up while text is being edited: changing fill or font size mid-sentence is
+  // the common case, and hiding it read as "the panel does not open when I add something".
+  if (!selected.length || dragging) return null
   if (selected.every((i) => i.type === 'comment')) return null
 
   const first = selected[0] as Item & Record<string, unknown>
