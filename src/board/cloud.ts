@@ -28,13 +28,24 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
   })
 }
 
-export async function claimBoard(room: string, name: string) {
+// Never re-send owner on an existing row: a board shared with you belongs to someone else,
+// and an upsert would try to take it over and be refused by the update policy.
+export async function claimBoard(room: string, name: string): Promise<string | null> {
   const user = getUser()
-  if (!supabase || !user) return
-  await table()?.upsert(
-    { id: room, owner: user.id, name, updated_at: new Date().toISOString() },
-    { onConflict: 'id', ignoreDuplicates: false },
-  )
+  if (!supabase || !user) return null
+
+  const touch = await supabase
+    .from('boards')
+    .update({ name, updated_at: new Date().toISOString() })
+    .eq('id', room)
+    .select('id')
+  if (touch.data?.length) return null
+  if (touch.error) return touch.error.message
+
+  const created = await supabase
+    .from('boards')
+    .insert({ id: room, owner: user.id, name })
+  return created.error ? created.error.message : null
 }
 
 export async function renameCloudBoard(room: string, name: string) {
@@ -47,16 +58,18 @@ export async function deleteCloudBoard(room: string) {
   await table()?.delete().eq('id', room)
 }
 
-export async function pushSnapshot(room: string, doc: Uint8Array, items: number, frames: number) {
-  if (!supabase || !getUser()) return
-  await supabase.from('board_snapshots').upsert({
+export async function pushSnapshot(
+  room: string, doc: Uint8Array, items: number, frames: number,
+): Promise<string | null> {
+  if (!supabase || !getUser()) return null
+  const { error } = await supabase.from('board_snapshots').upsert({
     board_id: room,
     doc: `\\x${[...doc].map((b) => b.toString(16).padStart(2, '0')).join('')}`,
     items,
     frames,
     updated_at: new Date().toISOString(),
   })
-  await table()?.update({ updated_at: new Date().toISOString() }).eq('id', room)
+  return error ? error.message : null
 }
 
 const HEX = /^\\x/

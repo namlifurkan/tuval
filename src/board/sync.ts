@@ -18,14 +18,18 @@ const counts = () => {
   }
 }
 
+let lastError: string | null = null
+export const cloudError = () => lastError
+
 async function save() {
   timer = 0
   if (!dirty || !getUser()) return
   dirty = false
   const { items, frames } = counts()
   const name = (getMeta().name as string) ?? ''
-  await claimBoard(room, name)
-  await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames)
+  lastError = await claimBoard(room, name)
+    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames)
+  if (lastError) console.warn('[tuval] cloud save failed:', lastError)
 }
 
 function schedule() {
@@ -41,7 +45,8 @@ async function restore() {
   restored = true
   const update = await pullSnapshot(room)
   if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
-  schedule()
+  dirty = true
+  void save()
 }
 
 export function startCloudSync() {

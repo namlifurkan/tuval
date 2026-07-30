@@ -37,27 +37,30 @@ alter table public.board_snapshots  enable row level security;
 create or replace function public.can_read_board(board text)
 returns boolean
 language sql
+stable
 security definer
-set search_path = public
+set search_path = ''
 as $$
   select exists (
-    select 1 from public.boards b where b.id = board and b.owner = auth.uid()
+    select 1 from public.boards b where b.id = board and b.owner = (select auth.uid())
   ) or exists (
-    select 1 from public.board_members m where m.board_id = board and m.user_id = auth.uid()
+    select 1 from public.board_members m
+    where m.board_id = board and m.user_id = (select auth.uid())
   );
 $$;
 
 create or replace function public.can_write_board(board text)
 returns boolean
 language sql
+stable
 security definer
-set search_path = public
+set search_path = ''
 as $$
   select exists (
-    select 1 from public.boards b where b.id = board and b.owner = auth.uid()
+    select 1 from public.boards b where b.id = board and b.owner = (select auth.uid())
   ) or exists (
     select 1 from public.board_members m
-    where m.board_id = board and m.user_id = auth.uid() and m.role = 'editor'
+    where m.board_id = board and m.user_id = (select auth.uid()) and m.role = 'editor'
   );
 $$;
 
@@ -66,26 +69,50 @@ drop policy if exists boards_insert on public.boards;
 drop policy if exists boards_update on public.boards;
 drop policy if exists boards_delete on public.boards;
 
-create policy boards_read   on public.boards for select using (public.can_read_board(id));
-create policy boards_insert on public.boards for insert with check (owner = auth.uid());
-create policy boards_update on public.boards for update using (public.can_write_board(id));
-create policy boards_delete on public.boards for delete using (owner = auth.uid());
+create policy boards_read on public.boards for select to authenticated
+  using ((select public.can_read_board(id)));
+
+create policy boards_insert on public.boards for insert to authenticated
+  with check (owner = (select auth.uid()));
+
+create policy boards_update on public.boards for update to authenticated
+  using ((select public.can_write_board(id)))
+  with check ((select public.can_write_board(id)));
+
+create policy boards_delete on public.boards for delete to authenticated
+  using (owner = (select auth.uid()));
+
+create or replace function public.owns_board(board text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.boards b where b.id = board and b.owner = (select auth.uid())
+  );
+$$;
 
 drop policy if exists members_read   on public.board_members;
 drop policy if exists members_write  on public.board_members;
 
-create policy members_read  on public.board_members for select using (public.can_read_board(board_id));
-create policy members_write on public.board_members for all
-  using (exists (select 1 from public.boards b where b.id = board_id and b.owner = auth.uid()))
-  with check (exists (select 1 from public.boards b where b.id = board_id and b.owner = auth.uid()));
+create policy members_read on public.board_members for select to authenticated
+  using ((select public.can_read_board(board_id)));
+
+create policy members_write on public.board_members for all to authenticated
+  using ((select public.owns_board(board_id)))
+  with check ((select public.owns_board(board_id)));
 
 drop policy if exists snapshots_read  on public.board_snapshots;
 drop policy if exists snapshots_write on public.board_snapshots;
 
-create policy snapshots_read  on public.board_snapshots for select using (public.can_read_board(board_id));
-create policy snapshots_write on public.board_snapshots for all
-  using (public.can_write_board(board_id))
-  with check (public.can_write_board(board_id));
+create policy snapshots_read on public.board_snapshots for select to authenticated
+  using ((select public.can_read_board(board_id)));
+
+create policy snapshots_write on public.board_snapshots for all to authenticated
+  using ((select public.can_write_board(board_id)))
+  with check ((select public.can_write_board(board_id)));
 
 -- Images referenced by items. Public read keeps <img> and canvas drawing simple; writes are
 -- restricted to signed-in users.
@@ -96,7 +123,7 @@ on conflict (id) do nothing;
 drop policy if exists images_read   on storage.objects;
 drop policy if exists images_insert on storage.objects;
 
-create policy images_read on storage.objects for select
+create policy images_read on storage.objects for select to public
   using (bucket_id = 'board-images');
 
 create policy images_insert on storage.objects for insert to authenticated
