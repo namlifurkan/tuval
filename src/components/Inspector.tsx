@@ -63,6 +63,7 @@ function Chip({
 export function Inspector() {
   const selected = useSelectedItems()
   const dockSide = useSyncExternalStore(subscribeDock, readDockSide, readDockSide)
+  const showMinimap = useBoardStore((s) => s.showMinimap)
   const editing = useBoardStore((s) => s.editing)
   const dragging = useBoardStore((s) => s.dragging)
 
@@ -84,8 +85,11 @@ export function Inspector() {
 
   return (
     <aside
-      style={{ right: dockSide === 'right' ? SIZE_PX[getDockPrefs().size] + 44 : 16 }}
-      className="pointer-events-auto absolute top-[76px] z-30 flex max-h-[calc(100dvh-190px)] w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      style={{
+        right: dockSide === 'right' ? SIZE_PX[getDockPrefs().size] + 44 : 16,
+        maxHeight: `calc(100dvh - ${76 + (showMinimap && dockSide !== 'right' ? 232 : 114)}px)`,
+      }}
+      className="pointer-events-auto absolute top-[76px] z-30 flex w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <header className="flex items-baseline justify-between border-b border-[#EAE6DD] px-3 py-2.5">
         <span className="text-sm font-semibold text-[#141310]">
           {selected.length === 1 ? TYPE_LABEL[selected[0].type] ?? selected[0].type : `${selected.length} öğe`}
