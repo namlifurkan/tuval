@@ -1,6 +1,7 @@
 import {
   Clock, Download, Grid3x3, Layers, MoreHorizontal, Printer, Radio, Search, Trash2,
 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { PRODUCT } from '../board/brand'
 import { awareness, getItems, removeItems, room } from '../board/doc'
 import { exportPng } from '../board/export'
@@ -12,7 +13,7 @@ import { Collaborators } from './Collaborators'
 import { SessionTools } from './SessionTools'
 import { IconButton, Popover, usePopover } from './ui'
 
-function Caption() {
+function Caption({ children }: { children: ReactNode }) {
   const boardName = useBoardStore((s) => s.boardName)
   const update = useBoardStore((s) => s.update)
   const items = useItems()
@@ -26,14 +27,17 @@ function Caption() {
 
   return (
     <div className="min-w-0">
-      <input
-        value={boardName}
-        onChange={(e) => update({ boardName: e.target.value })}
-        spellCheck={false}
-        aria-label="Board adı"
-        className="w-[min(46vw,420px)] truncate bg-transparent text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
-      />
-      <p className="mt-0.5 flex items-center gap-1.5 text-[11px] leading-none text-[#8A867C]">
+      <div className="flex items-center gap-1">
+        <input
+          value={boardName}
+          onChange={(e) => update({ boardName: e.target.value })}
+          spellCheck={false}
+          aria-label="Board adı"
+          className="w-auto min-w-[8ch] max-w-[min(40vw,380px)] truncate bg-transparent field-sizing-content text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
+        />
+        {children}
+      </div>
+      <p className="mt-0.5 flex items-center gap-1.5 whitespace-nowrap text-[11px] leading-none text-[#8A867C]">
         <span className="font-semibold uppercase tracking-[0.14em] text-[#C8452D]">{PRODUCT.name}</span>
         <span aria-hidden>·</span>
         {parts.join(' · ')}
@@ -54,9 +58,9 @@ export function TopBar() {
         className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-[#F2EFE9] via-[#F2EFE9]/70 to-transparent"
       />
       <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
-        <div className="pointer-events-auto flex items-start gap-3">
-          <Caption />
-          <div className="relative pt-0.5">
+        <div className="pointer-events-auto min-w-0">
+          <Caption>
+          <div className="relative">
             <IconButton title="Board menüsü" active={menu.open} onClick={menu.toggle}>
               <MoreHorizontal size={18} strokeWidth={1.8} />
             </IconButton>
@@ -116,6 +120,7 @@ export function TopBar() {
               </button>
             </Popover>
           </div>
+          </Caption>
         </div>
 
         <div className="pointer-events-auto flex items-center gap-1.5">
