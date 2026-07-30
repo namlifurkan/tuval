@@ -77,12 +77,18 @@ olarak kullanılmadı. Araç paleti, zoom, minimap gibi öğeler kategori konvan
 
 ## Yükseklik ve kenar
 
-Gölge tek bir aileden gelir, sıcak siyaha kırıktır:
+**Bulanık gölge yok.** Yüzen yuvarlak kartlar + yumuşak gölge, kategori refleksinin ta kendisi:
+her tuval aracı böyle görünür. Yükseklik burada baskı dilinden gelir — sert kayma, blur sıfır:
 
-- Panel/toolbar: `0 4px 16px rgba(20,19,16,0.12)` + `1px` `rgba(0,0,0,0.05)` kenar
-- Popover/menü: `0 8px 28px rgba(20,19,16,0.16–0.18)`
-- Sticky (tuvalde): `blur 6, offsetY 3, rgba(20,19,16,0.18)` — kağıdın masadan kalkması
-- Yarıçap: arayüzde 8px (`rounded-lg`), kapsayıcıda 12px (`rounded-xl`), araç çubuğunda 16px
+- Panel/toolbar: `2px 2px 0 rgba(20,19,16,0.07)` + `1px` hairline kenar
+- Popover/menü: `3px 3px 0 rgba(20,19,16,0.09)`
+- Buton hover/aktif: `1px 1px 0 rgba(20,19,16,0.10)`
+- Sticky (tuvalde): `min(w,h)*0.022` sert kayma, mürekkep %10
+
+**Yarıçap neredeyse sıfır.** Tailwind ölçeği `@theme` içinde tek yerden eziliyor:
+`sm 1px · md/lg 2px · xl/2xl 3px`. Yuvarlak (`rounded-full`) rozet, avatar ve pin'lerde de
+kullanılmaz — katılımcı çipi, yorum pini, bağlayıcı uç tutamağı ve oy rozeti **karedir**.
+Sebep: daire dostane-uygulama sesi, kare matbaa sesi.
 
 ## Hareket
 

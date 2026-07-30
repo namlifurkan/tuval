@@ -163,8 +163,8 @@ export function Dock() {
       style={{ width: unit, height: unit }}
       className={`tap-target grid place-items-center rounded-xl transition-[background-color,box-shadow] duration-150
         ${active
-          ? 'bg-[#F7E9E4] text-[#C8452D] shadow-[0_1px_3px_rgba(20,19,16,0.14)] ring-1 ring-[#C8452D]/25'
-          : 'text-[#141310] hover:bg-[#EAE6DD] hover:shadow-[0_1px_3px_rgba(20,19,16,0.12)] hover:ring-1 hover:ring-black/[0.07]'}`}
+          ? 'bg-[#F7E9E4] text-[#C8452D] shadow-[1px_1px_0_rgba(20,19,16,0.10)] ring-1 ring-[#C8452D]/25'
+          : 'text-[#141310] hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]'}`}
     >
       {icon}
     </button>
@@ -368,7 +368,7 @@ export function Dock() {
               type="button"
               onClick={zoomPop.toggle}
               style={{ height: unit }}
-              className="min-w-[50px] rounded-lg px-1 text-sm font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[0_1px_3px_rgba(20,19,16,0.12)] hover:ring-1 hover:ring-black/[0.07]"
+              className="min-w-[50px] rounded-lg px-1 text-sm font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]"
             >
               {Math.round(camera.z * 100)}%
             </button>
@@ -403,7 +403,7 @@ export function Dock() {
       <div
         aria-hidden
         style={{ height: unit + 12 }}
-        className="absolute inset-x-0 bottom-0 rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[0_6px_24px_rgba(20,19,16,0.14)]"
+        className="absolute inset-x-0 bottom-0 rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
       />
       <div
         ref={barRef}

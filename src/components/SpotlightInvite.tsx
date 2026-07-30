@@ -30,7 +30,7 @@ export function SpotlightInvite() {
   if (!invite || following === invite.id) return null
 
   return (
-    <div className="pointer-events-auto absolute bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-black/5 bg-[#FCFBF8] px-3 py-2 shadow-[0_8px_28px_rgba(20,19,16,0.18)]">
+    <div className="pointer-events-auto absolute bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-black/5 bg-[#FCFBF8] px-3 py-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <Radio size={16} strokeWidth={2} className="text-[#C8452D]" />
       <span className="text-sm text-[#141310]">
         <strong>{invite.name}</strong> herkesi kendi görüşüne çağırıyor

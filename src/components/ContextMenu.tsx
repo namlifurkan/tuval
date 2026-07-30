@@ -99,7 +99,7 @@ export function ContextMenu() {
     <>
       <div className="fixed inset-0 z-[60]" onPointerDown={close} onContextMenu={(e) => { e.preventDefault(); close() }} />
       <div
-        className="absolute z-[61] min-w-[212px] rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_8px_28px_rgba(9,9,20,0.18)]"
+        className="absolute z-[61] min-w-[212px] rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
         style={{ left: menu.x, top: menu.y }}
       >
         {entries.map((e) => (

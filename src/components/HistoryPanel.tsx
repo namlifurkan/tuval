@@ -26,7 +26,7 @@ export function HistoryPanel() {
   if (!open) return null
 
   return (
-    <div className="absolute right-4 top-[76px] z-40 flex max-h-[calc(100dvh-160px)] w-[280px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(20,19,16,0.16)]">
+    <div className="absolute right-4 top-[76px] z-40 flex max-h-[calc(100dvh-160px)] w-[280px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-[#141310]">
           <History size={14} strokeWidth={2} />

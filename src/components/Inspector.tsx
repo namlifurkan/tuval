@@ -74,7 +74,7 @@ export function Inspector() {
   }
 
   return (
-    <aside className="pointer-events-auto absolute right-4 top-[76px] z-30 flex max-h-[calc(100dvh-190px)] w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_6px_24px_rgba(20,19,16,0.14)]">
+    <aside className="pointer-events-auto absolute right-4 top-[76px] z-30 flex max-h-[calc(100dvh-190px)] w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <header className="flex items-baseline justify-between border-b border-[#EAE6DD] px-3 py-2.5">
         <span className="text-sm font-semibold text-[#141310]">
           {selected.length === 1 ? TYPE_LABEL[selected[0].type] ?? selected[0].type : `${selected.length} öğe`}

@@ -366,7 +366,7 @@ function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {
   const { ctx, cam } = s
   ctx.fillStyle = '#EBE7DE'
   ctx.beginPath()
-  ctx.roundRect(item.x, item.y, item.w, item.h, 10)
+  ctx.roundRect(item.x, item.y, item.w, item.h, 3)
   ctx.fill()
   ctx.strokeStyle = '#DDD8CD'
   ctx.lineWidth = 1 / cam.z
@@ -512,15 +512,13 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.fill()
   ctx.stroke()
   ctx.beginPath()
-  ctx.arc(c.x, c.y, PIN_R, 0, Math.PI * 2)
+  ctx.rect(c.x - PIN_R, c.y - PIN_R, PIN_R * 2, PIN_R * 2)
   ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.stroke()
   const first = item.replies[0]
   ctx.fillStyle = first?.color ?? '#8A867C'
-  ctx.beginPath()
-  ctx.arc(c.x, c.y, PIN_R - 4, 0, Math.PI * 2)
-  ctx.fill()
+  ctx.fillRect(c.x - PIN_R + 4, c.y - PIN_R + 4, (PIN_R - 4) * 2, (PIN_R - 4) * 2)
   ctx.fillStyle = '#FCFBF8'
   ctx.font = '700 11px "Instrument Sans", system-ui, sans-serif'
   ctx.textAlign = 'center'
@@ -654,13 +652,11 @@ function drawOverlay(s: Scene) {
       const count = s.votes.get(item.id)
       if (!count) continue
       const at = toScreen(cam, item.x + item.w, item.y)
-      ctx.beginPath()
-      ctx.arc(at.x - 6, at.y + 6, 13, 0, Math.PI * 2)
       ctx.fillStyle = BRAND.pigment
-      ctx.fill()
+      ctx.fillRect(at.x - 19, at.y - 7, 26, 26)
       ctx.strokeStyle = '#FCFBF8'
       ctx.lineWidth = 2
-      ctx.stroke()
+      ctx.strokeRect(at.x - 19, at.y - 7, 26, 26)
       ctx.fillStyle = '#FCFBF8'
       ctx.font = '700 12px "Instrument Sans", system-ui, sans-serif'
       ctx.textAlign = 'center'
@@ -759,7 +755,7 @@ function drawOverlay(s: Scene) {
       ctx.font = '600 12px "Instrument Sans", system-ui, sans-serif'
       const w = ctx.measureText(session.badge).width + 16
       ctx.beginPath()
-      ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
+      ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 2)
       ctx.fillStyle = BRAND.selection
       ctx.fill()
       ctx.fillStyle = '#FCFBF8'
@@ -859,13 +855,11 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
 }
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.beginPath()
-  ctx.arc(x, y, r, 0, Math.PI * 2)
   ctx.fillStyle = '#FCFBF8'
-  ctx.fill()
-  ctx.lineWidth = 2
+  ctx.fillRect(x - r, y - r, r * 2, r * 2)
+  ctx.lineWidth = 1.6
   ctx.strokeStyle = BRAND.selection
-  ctx.stroke()
+  ctx.strokeRect(x - r, y - r, r * 2, r * 2)
 }
 
 function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, text: string) {
@@ -875,7 +869,7 @@ function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, te
   const x = p.x + 12
   const y = p.y + 36
   ctx.beginPath()
-  ctx.roundRect(x, y, w, 26, 13)
+  ctx.roundRect(x, y, w, 26, 2)
   ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.strokeStyle = color
@@ -905,7 +899,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.font = '600 11px "Instrument Sans", system-ui, sans-serif'
   const w = ctx.measureText(name).width
   ctx.beginPath()
-  ctx.roundRect(12, 12, w + 14, 20, 10)
+  ctx.roundRect(12, 12, w + 14, 20, 2)
   ctx.fillStyle = color
   ctx.fill()
   ctx.fillStyle = '#FCFBF8'

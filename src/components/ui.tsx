@@ -92,7 +92,7 @@ export function Popover({
           ref={ref}
           onPointerDown={(e) => e.stopPropagation()}
           style={style()}
-          className={`fixed z-[70] max-h-[80vh] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[0_8px_28px_rgba(20,19,16,0.18)] ${className}`}
+          className={`fixed z-[70] max-h-[80vh] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)] ${className}`}
         >
           {children}
         </div>,

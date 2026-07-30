@@ -41,13 +41,13 @@ export function Collaborators() {
             update({ following: following === p.id ? null : p.id })
             requestRender()
           }}
-          className={`relative grid h-8 w-8 place-items-center rounded-full border-2 text-[11px] font-bold text-white
+          className={`relative grid h-8 w-8 place-items-center rounded-[2px] border-2 text-[11px] font-bold text-white
             ${following === p.id ? 'border-[#C8452D]' : 'border-[#FCFBF8]'}`}
           style={{ background: p.color, marginLeft: i ? -8 : 0, zIndex: 10 - i }}
         >
           {initials(p.name)}
           {following === p.id && (
-            <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-[#C8452D]">
+            <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-[2px] bg-[#C8452D]">
               <Eye size={9} strokeWidth={3} className="text-white" />
             </span>
           )}
@@ -55,7 +55,7 @@ export function Collaborators() {
       ))}
       {extra > 0 && (
         <div
-          className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#FCFBF8] bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
+          className="grid h-8 w-8 place-items-center rounded-[2px] border-2 border-[#FCFBF8] bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
           style={{ marginLeft: -8 }}
         >
           +{extra}

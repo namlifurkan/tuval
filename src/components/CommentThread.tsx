@@ -82,7 +82,7 @@ export function CommentThread() {
 
   return (
     <div
-      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.18)]"
+      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
       style={{ left: pin.x + 24, top: Math.max(12, pin.y - 20) }}
       onPointerDown={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
@@ -115,7 +115,7 @@ export function CommentThread() {
         {item.replies.map((r) => (
           <div key={r.id} className="mb-3 flex gap-2 last:mb-0">
             <div
-              className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
+              className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-[2px] text-[10px] font-bold text-white"
               style={{ background: r.color }}
             >
               {initials(r.author)}
@@ -147,7 +147,7 @@ export function CommentThread() {
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-[#EFEBE2]"
             >
               <span
-                className="grid h-5 w-5 place-items-center rounded-full text-[9px] font-bold text-white"
+                className="grid h-5 w-5 place-items-center rounded-[2px] text-[9px] font-bold text-white"
                 style={{ background: name === me.name ? me.color : '#8A867C' }}
               >
                 {initials(name)}
@@ -160,7 +160,7 @@ export function CommentThread() {
 
       <div className="flex items-end gap-2 border-t border-[#EAE6DD] p-2">
         <div
-          className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
+          className="grid h-6 w-6 shrink-0 place-items-center rounded-[2px] text-[10px] font-bold text-white"
           style={{ background: me.color }}
         >
           {initials(me.name)}

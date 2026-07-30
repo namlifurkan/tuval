@@ -33,7 +33,7 @@ export function CursorChat() {
 
   return (
     <div
-      className="absolute z-50 flex items-center gap-2 rounded-full border-2 bg-[#FCFBF8] px-3 py-1.5 shadow-[0_4px_16px_rgba(20,19,16,0.16)]"
+      className="absolute z-50 flex items-center gap-2 rounded-[2px] border-2 bg-[#FCFBF8] px-3 py-1.5 shadow-[2px_2px_0_rgba(20,19,16,0.07)]"
       style={{ left: at.x + 12, top: at.y + 36, borderColor: me.color }}
     >
       <input

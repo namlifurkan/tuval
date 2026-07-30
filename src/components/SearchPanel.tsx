@@ -43,7 +43,7 @@ export function SearchPanel() {
   }
 
   return (
-    <div className="absolute left-1/2 top-4 z-50 w-[420px] -translate-x-1/2 overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.18)]">
+    <div className="absolute left-1/2 top-4 z-50 w-[420px] -translate-x-1/2 overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center gap-2 px-3 py-2.5">
         <Search size={17} className="shrink-0 text-[#8A867C]" />
         <input
