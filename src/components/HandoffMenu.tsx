@@ -1,7 +1,7 @@
 import { t } from '../i18n'
 import { useState } from 'react'
 import { boardToGraph, download, graphToPrompt } from '../board/agent'
-import { getItems } from '../board/doc'
+import { getItems, getMeta } from '../board/doc'
 import { useBoardStore } from '../board/store'
 import { Spark } from './icons'
 import { IconButton, Popover, usePopover } from './ui'
@@ -21,7 +21,7 @@ export function HandoffMenu() {
   const build = () => {
     const all = getItems()
     const picked = selection.length ? all.filter((i) => selection.includes(i.id)) : all
-    const name = useBoardStore.getState().boardName || t('Untitled board')
+    const name = (getMeta().name as string) || t('Untitled board')
     return {
       name,
       graph: boardToGraph(picked, name, selection.length ? 'selection' : 'board'),

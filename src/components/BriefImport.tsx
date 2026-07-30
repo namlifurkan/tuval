@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { fitRect } from '../board/camera'
-import { createItems } from '../board/doc'
+import { createItems, getMeta, setMeta } from '../board/doc'
 import { briefToItems, parseBrief } from '../board/importer'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
@@ -55,7 +55,7 @@ export function BriefImport() {
     const { items, title } = briefToItems(text, origin)
     if (!items.length) return
     createItems(items)
-    if (title && !useBoardStore.getState().boardName) update({ boardName: title })
+    if (title && !getMeta().name) setMeta('name', title)
     setCamera(fitRect(boxOf(items), el.clientWidth, el.clientHeight))
     setSelection([])
     update({ briefOpen: false })

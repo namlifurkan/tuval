@@ -17,8 +17,7 @@ import { HandoffMenu } from './HandoffMenu'
 import { IconButton, Popover, usePopover } from './ui'
 
 function Caption({ children }: { children: ReactNode }) {
-  const boardName = useBoardStore((s) => s.boardName)
-  const update = useBoardStore((s) => s.update)
+  const boardName = useSyncExternalStore(subscribeMeta, readName, readName)
   const items = useItems()
   const frames = items.filter((i) => i.type === 'frame').length
 
@@ -34,7 +33,7 @@ function Caption({ children }: { children: ReactNode }) {
         <input
           value={boardName}
           placeholder={t('Untitled board')}
-          onChange={(e) => update({ boardName: e.target.value })}
+          onChange={(e) => setMeta('name', e.target.value)}
           spellCheck={false}
           aria-label={t('Board name')}
           className="w-auto min-w-[8ch] max-w-[min(40vw,380px)] truncate bg-transparent field-sizing-content text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
@@ -51,6 +50,7 @@ function Caption({ children }: { children: ReactNode }) {
 }
 
 const readSurface = () => (getMeta().surface as string) ?? 'paper'
+const readName = () => (getMeta().name as string) ?? ''
 
 export function TopBar() {
   const surface = useSyncExternalStore(subscribeMeta, readSurface, readSurface)
@@ -94,7 +94,7 @@ export function TopBar() {
               </button>
               <button
                 type="button"
-                onClick={() => { exportPng(getItems(), useBoardStore.getState().boardName || 'board'); menu.close() }}
+                onClick={() => { exportPng(getItems(), readName() || 'board'); menu.close() }}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
               >
                 <Download size={15} /> {t('Download PNG')}
