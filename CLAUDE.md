@@ -187,7 +187,6 @@ buradan silinir. Sıra öncelik sırasıdır.
 - [ ] Connector üzerinde birden çok etiket
 - [ ] Embed: video, iframe, harici doküman
 - [ ] Emoji ve reaksiyon
-- [ ] Dokunmatik: tablet ve trackpad jestlerinin tam desteği
 - [ ] Frame panelinde sürükleyerek sıralama, sunumda geçişler
 - [ ] PDF dışa aktarma ve çoklu frame dışa aktarma
 - [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u

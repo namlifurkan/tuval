@@ -40,6 +40,17 @@ type Drag =
   | { kind: 'erase' }
   | { kind: 'tableTrack'; id: Id; axis: 'col' | 'row'; index: number }
 
+const pointers = new Map<number, Vec>()
+let gesture: { dist: number; mid: Vec; cam: Camera } | null = null
+
+const pointerPair = (): [Vec, Vec] | null => {
+  const list = [...pointers.values()]
+  return list.length >= 2 ? [list[0], list[1]] : null
+}
+
+const spanOf = (a: Vec, b: Vec) => Math.hypot(b.x - a.x, b.y - a.y)
+const midOf = (a: Vec, b: Vec): Vec => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
+
 let drag: Drag | null = null
 let lastPointer: Vec = { x: 0, y: 0 }
 let downAt = 0
@@ -248,6 +259,14 @@ export function cancelDrag() {
 
 export function pointerDown(e: PointerEvent, screen: Vec) {
   const s = store()
+  pointers.set(e.pointerId, screen)
+  const pair = pointerPair()
+  if (pair) {
+    cancelDrag()
+    gesture = { dist: spanOf(pair[0], pair[1]), mid: midOf(pair[0], pair[1]), cam: { ...s.camera } }
+    session.cursor = 'grabbing'
+    return
+  }
   const p = toBoard(s.camera, screen.x, screen.y)
   lastPointer = p
   downAt = performance.now()
@@ -434,6 +453,20 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
 
 export function pointerMove(e: PointerEvent, screen: Vec) {
   const s = store()
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, screen)
+  const pair = pointerPair()
+  if (gesture && pair) {
+    const dist = spanOf(pair[0], pair[1])
+    const mid = midOf(pair[0], pair[1])
+    const zoomed = zoomAt(gesture.cam, gesture.mid.x, gesture.mid.y, gesture.cam.z * (dist / gesture.dist))
+    s.setCamera({
+      z: zoomed.z,
+      x: zoomed.x - (mid.x - gesture.mid.x) / zoomed.z,
+      y: zoomed.y - (mid.y - gesture.mid.y) / zoomed.z,
+    })
+    requestRender()
+    return
+  }
   const p = toBoard(s.camera, screen.x, screen.y)
   lastPointer = p
 
@@ -617,6 +650,15 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
 
 export function pointerUp(_e: PointerEvent, screen: Vec) {
   const s = store()
+  pointers.delete(_e.pointerId)
+  if (gesture) {
+    if (pointers.size < 2) {
+      gesture = null
+      session.cursor = 'default'
+      requestRender()
+    }
+    return
+  }
   const p = toBoard(s.camera, screen.x, screen.y)
   const quick = performance.now() - downAt < 250 && !didDrag
   flushPreview()

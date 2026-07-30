@@ -17,7 +17,7 @@ export function IconButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-colors
+      className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-colors
         ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}
         ${disabled ? 'cursor-not-allowed opacity-35' : ''} ${className}`}
     >

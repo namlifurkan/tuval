@@ -23,3 +23,10 @@ input,
 textarea {
   font-family: inherit;
 }
+
+@media (pointer: coarse) {
+  .tap-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

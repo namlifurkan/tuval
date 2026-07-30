@@ -84,8 +84,8 @@ export function Canvas() {
       return { x: e.clientX - r.left, y: e.clientY - r.top }
     }
     const down = (e: PointerEvent) => {
-      canvas.setPointerCapture(e.pointerId)
       pointerDown(e, rel(e))
+      try { canvas.setPointerCapture(e.pointerId) } catch { /* synthetic or stale pointer */ }
     }
     const move = (e: PointerEvent) => {
       const p = rel(e)
@@ -95,7 +95,9 @@ export function Canvas() {
     }
     const up = (e: PointerEvent) => {
       pointerUp(e, rel(e))
-      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId)
+      try {
+        if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId)
+      } catch { /* ignore */ }
     }
     const dbl = (e: MouseEvent) => doubleClick(rel(e))
     const onWheel = (e: WheelEvent) => { e.preventDefault(); wheel(e, rel(e)) }
@@ -113,6 +115,7 @@ export function Canvas() {
     canvas.addEventListener('pointermove', move)
     canvas.addEventListener('pointerup', up)
     canvas.addEventListener('pointercancel', up)
+    canvas.addEventListener('pointerleave', (e) => { if (e.buttons === 0) up(e) })
     canvas.addEventListener('dblclick', dbl)
     canvas.addEventListener('wheel', onWheel, { passive: false })
     canvas.addEventListener('contextmenu', menu)
