@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { surfaceColor } from '../board/brand'
 import { readTexture } from '../board/paperPrefs'
 import { touchBoard } from '../board/boards'
+import { uploadImage } from '../board/cloud'
+import { getUser } from '../board/supabase'
 import { flushCamera, saveCamera } from '../board/viewport'
 import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, undoManager } from '../board/doc'
@@ -434,7 +436,7 @@ async function encodeImage(file: File) {
       reader.onload = () => done(reader.result as string)
       reader.readAsDataURL(file)
     })
-    return { src, width: bitmap.width, height: bitmap.height }
+    return { src, width: bitmap.width, height: bitmap.height, blob: file as Blob }
   }
   const scale = Math.min(1, MAX_EDGE / longest)
   const width = Math.round(bitmap.width * scale)
@@ -444,14 +446,22 @@ async function encodeImage(file: File) {
   canvas.height = height
   canvas.getContext('2d')?.drawImage(bitmap, 0, 0, width, height)
   bitmap.close()
-  return { src: canvas.toDataURL('image/webp', 0.82), width, height }
+  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, 'image/webp', 0.82))
+  return { src: canvas.toDataURL('image/webp', 0.82), width, height, blob }
+}
+
+async function hostImage(src: string, blob: Blob | null) {
+  if (!blob || !getUser()) return src
+  const ext = blob.type.split('/')[1] || 'webp'
+  return (await uploadImage(room, blob, ext)) ?? src
 }
 
 function readImage(file: File, p: Vec) {
-  encodeImage(file).then(({ src, width, height }) => {
+  encodeImage(file).then(async ({ src, width, height, blob }) => {
+    const hosted = await hostImage(src, blob)
     const scale = Math.min(1, 600 / width)
     const w = width * scale, h = height * scale
-    const item = makeImage(p.x - w / 2, p.y - h / 2, w, h, src)
+    const item = makeImage(p.x - w / 2, p.y - h / 2, w, h, hosted)
     item.naturalW = width
     item.naturalH = height
     createItems([item])

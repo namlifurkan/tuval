@@ -12,6 +12,7 @@ import { TEXTURES } from '../board/paper'
 import { readTexture } from '../board/paperPrefs'
 import { requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
+import { Account } from './Account'
 import { Collaborators } from './Collaborators'
 import { HandoffMenu } from './HandoffMenu'
 import { IconButton, Popover, usePopover } from './ui'
@@ -185,6 +186,7 @@ export function TopBar() {
           <span className="mx-1 h-6 w-px bg-[#E2DED5]" aria-hidden />
 
           <Collaborators />
+          <Account />
 
           <button
             type="button"

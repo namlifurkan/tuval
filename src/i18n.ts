@@ -302,6 +302,22 @@ const tr: Record<string, string> = {
   'Sticky colour': 'Sticky rengi',
   'Emoji': 'Emoji',
   'Hex': 'Hex',
+  // account
+  'Sign in': 'Giriş yap',
+  'Sign out': 'Çıkış yap',
+  'Send link': 'Bağlantı gönder',
+  'Sending…': 'Gönderiliyor…',
+  'Check {email} for a sign-in link.': 'Giriş bağlantısı için {email} adresine bak.',
+  'Your boards are saved to the cloud and reachable from any device.':
+    'Board\'ların buluta kaydediliyor ve her cihazdan erişilebiliyor.',
+  'No password. You get a link by email. Without signing in Tuval keeps working, but boards stay in this browser only.':
+    'Parola yok, e-postana bir bağlantı gelir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
+  'Cloud': 'Bulut',
+  'This browser': 'Bu tarayıcı',
+  'Delete "{name}" for everyone? This cannot be undone.':
+    '"{name}" herkes için silinsin mi? Geri alınamaz.',
+  'Signed in: boards are saved to the cloud. Share the link to invite someone.':
+    'Girişli: board\'lar buluta kaydediliyor. Davet için linki paylaş.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

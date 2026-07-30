@@ -4,8 +4,11 @@ import {
   currentRoom, discoverBoards, forgetBoard, getBoards, newRoom, openBoard, subscribeBoards,
   touchBoard,
 } from '../board/boards'
+import { deleteCloudBoard, listCloudBoards } from '../board/cloud'
+import { getUser, subscribeAuth } from '../board/supabase'
 import { requestRender, useBoardStore } from '../board/store'
 import { t } from '../i18n'
+import type { BoardEntry } from '../board/boards'
 
 function when(at: number) {
   if (!at) return t('never opened')
@@ -19,11 +22,20 @@ function when(at: number) {
 export function BoardsPanel() {
   const open = useBoardStore((s) => s.boardsPanel)
   const update = useBoardStore((s) => s.update)
-  const boards = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
+  const local = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
+  const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
+  const [cloud, setCloud] = useState<BoardEntry[]>([])
   const [query, setQuery] = useState('')
 
   useEffect(() => { if (open) void discoverBoards() }, [open])
+  useEffect(() => {
+    if (!open || !user) { setCloud([]); return }
+    void listCloudBoards().then(setCloud)
+  }, [open, user])
   if (!open) return null
+
+  const cloudRooms = new Set(cloud.map((b) => b.room))
+  const boards = [...cloud, ...local.filter((b) => !cloudRooms.has(b.room))]
 
   const here = currentRoom()
   const q = query.trim().toLowerCase()
@@ -92,6 +104,7 @@ export function BoardsPanel() {
                 {b.items} {t(b.items === 1 ? 'item' : 'items')}
                 {b.frames ? ` · ${b.frames} ${t(b.frames === 1 ? 'frame' : 'frames')}` : ''}
                 {' · '}{when(b.opened)}
+                {user && (cloudRooms.has(b.room) ? ` · ${t('Cloud')}` : ` · ${t('This browser')}`)}
               </div>
             </button>
             <button
@@ -99,8 +112,16 @@ export function BoardsPanel() {
               title={t('Delete board')}
               onClick={() => {
                 if (b.room === here) { alert(t('Open another board before deleting this one.')); return }
-                if (confirm(t('Delete "{name}" from this browser? This cannot be undone.', { name: b.name || t('Untitled board') }))) {
+                const inCloud = cloudRooms.has(b.room)
+                const question = inCloud
+                  ? t('Delete "{name}" for everyone? This cannot be undone.', { name: b.name || t('Untitled board') })
+                  : t('Delete "{name}" from this browser? This cannot be undone.', { name: b.name || t('Untitled board') })
+                if (confirm(question)) {
                   forgetBoard(b.room)
+                  if (inCloud) {
+                    void deleteCloudBoard(b.room).then(() => listCloudBoards().then(setCloud))
+                    setCloud((list) => list.filter((x) => x.room !== b.room))
+                  }
                 }
               }}
               className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
@@ -112,7 +133,9 @@ export function BoardsPanel() {
       </div>
 
       <p className="border-t border-[#EAE6DD] px-3 py-2 text-[11px] leading-snug text-[#8A867C]">
-        {t('Boards live in this browser. Share the link to let someone else open one.')}
+        {user
+          ? t('Signed in: boards are saved to the cloud. Share the link to invite someone.')
+          : t('Boards live in this browser. Share the link to let someone else open one.')}
       </p>
     </aside>
   )

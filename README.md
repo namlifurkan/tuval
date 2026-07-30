@@ -32,6 +32,28 @@ a forgotten link. The list is per-browser: share the URL for someone else to ope
 
 Your camera is remembered per board, so a refresh puts you back where you were.
 
+## Cloud (optional)
+
+Tuval is local-first and needs no backend. Add Supabase and boards leave the browser:
+accounts, a board list shared across devices, images in object storage, and a document
+snapshot kept server side.
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor. It creates the tables,
+   the row level security policies and the image bucket.
+3. Put the project URL and anon key in `.env.local`:
+
+```bash
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+```
+
+Sign-in is a magic link, so there are no passwords to store. Without the keys every control
+disappears and nothing changes: the board list stays local and images stay inline.
+
+The document itself is still a Yjs CRDT. The snapshot is *merged* on open rather than
+assigned, so a board edited offline on two machines converges instead of one side winning.
+
 ## Agent skill
 
 `skills/tuval-board/SKILL.md` teaches a coding agent both directions of the format: how to read

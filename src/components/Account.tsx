@@ -1,0 +1,107 @@
+import { useState, useSyncExternalStore } from 'react'
+import { cloudEnabled, displayName, getUser, signIn, signOut, subscribeAuth } from '../board/supabase'
+import { t } from '../i18n'
+import { IconButton, Popover, usePopover } from './ui'
+import { Spark } from './icons'
+
+const readUser = () => getUser()
+
+export function Account() {
+  const user = useSyncExternalStore(subscribeAuth, readUser, readUser)
+  const pop = usePopover()
+  const [email, setEmail] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [reason, setReason] = useState('')
+
+  if (!cloudEnabled) return null
+
+  const send = async () => {
+    if (!email.trim()) return
+    setState('sending')
+    try {
+      await signIn(email.trim())
+      setState('sent')
+    } catch (e) {
+      setReason(e instanceof Error ? e.message : String(e))
+      setState('error')
+    }
+  }
+
+  const initial = (user?.email ?? '?')[0].toUpperCase()
+
+  return (
+    <div className="relative">
+      {user ? (
+        <button
+          type="button"
+          title={user.email}
+          onClick={pop.toggle}
+          className="grid h-8 w-8 place-items-center rounded-md bg-[#3E5C93] text-[11px] font-bold text-white"
+        >
+          {initial}
+        </button>
+      ) : (
+        <IconButton title={t('Sign in')} active={pop.open} onClick={pop.toggle}>
+          <Spark size={18} />
+        </IconButton>
+      )}
+
+      <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[268px]">
+        {user ? (
+          <>
+            <div className="px-2.5 pb-2 pt-1">
+              <div className="text-sm font-semibold text-[#141310]">{displayName(user.email)}</div>
+              <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
+            </div>
+            <div className="my-1 h-px bg-[#EAE6DD]" />
+            <p className="px-2.5 pb-2 text-[11px] leading-snug text-[#8A867C]">
+              {t('Your boards are saved to the cloud and reachable from any device.')}
+            </p>
+            <button
+              type="button"
+              onClick={() => { void signOut(); pop.close() }}
+              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+            >
+              {t('Sign out')}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Sign in')}</div>
+            {state === 'sent' ? (
+              <p className="px-2.5 pb-2 text-sm leading-snug text-[#141310]">
+                {t('Check {email} for a sign-in link.', { email })}
+              </p>
+            ) : (
+              <>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void send() }}
+                  type="email"
+                  placeholder="you@company.com"
+                  spellCheck={false}
+                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+                />
+                <button
+                  type="button"
+                  disabled={state === 'sending' || !email.trim()}
+                  onClick={() => void send()}
+                  className="mx-1 w-[calc(100%-8px)] rounded-lg bg-[#C8452D] px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
+                >
+                  {state === 'sending' ? t('Sending…') : t('Send link')}
+                </button>
+              </>
+            )}
+            {state === 'error' && (
+              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#DC2626]">{reason}</p>
+            )}
+            <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
+              {t('No password. You get a link by email. Without signing in Tuval keeps working, but boards stay in this browser only.')}
+            </p>
+          </>
+        )}
+      </Popover>
+    </div>
+  )
+}
