@@ -75,13 +75,20 @@ function drawGrid(s: Scene) {
   const gap = step * cam.z
   const alpha = Math.min(1, (gap - 12) / 18)
   if (alpha <= 0) return
-  ctx.fillStyle = `rgba(20, 19, 16, ${0.16 * alpha})`
-  const size = cam.z > 2 ? 2 : 1.6
+  const arm = Math.min(3, 1.6 + gap / 40)
+  const marks = new Path2D()
   for (let x = start.x; x < width + gap; x += gap) {
     for (let y = start.y; y < height + gap; y += gap) {
-      ctx.fillRect(x - size / 2, y - size / 2, size, size)
+      marks.moveTo(x - arm, y)
+      marks.lineTo(x + arm, y)
+      marks.moveTo(x, y - arm)
+      marks.lineTo(x, y + arm)
     }
   }
+  ctx.strokeStyle = `rgba(20, 19, 16, ${0.2 * alpha})`
+  ctx.lineWidth = 1
+  ctx.lineCap = 'butt'
+  ctx.stroke(marks)
 }
 
 function withTransform(ctx: CanvasRenderingContext2D, item: Item, fn: () => void) {
@@ -142,9 +149,9 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
 function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   const { ctx } = s
   ctx.save()
-  ctx.shadowColor = 'rgba(20, 19, 16, 0.18)'
-  ctx.shadowBlur = 6
-  ctx.shadowOffsetY = 3
+  const off = Math.min(item.w, item.h) * 0.022
+  ctx.fillStyle = 'rgba(20, 19, 16, 0.10)'
+  ctx.fillRect(item.x + off, item.y + off, item.w, item.h)
   ctx.fillStyle = item.fill
   ctx.fillRect(item.x, item.y, item.w, item.h)
   ctx.restore()

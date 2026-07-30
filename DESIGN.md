@@ -112,6 +112,20 @@ disk/kare yığını yerine mürekkep işaretleri.
   künye satırıyla aynı ses. Düzenleyici de aynı biçimde görünür.
 - **Marquee** pigment hairline + `%6` pigment yıkama. Seçim mürekkep, geçici jest pigment.
 - **Hover** mürekkep %30, çoklu seçim üyeleri mürekkep %45. Arayüzde tek bir mavi yoktur.
+- **Zemin = tescil işaretleri.** Nokta ızgarası yerine 25 birimde bir küçük artı; matbaa
+  registration mark'ı. Yakınlaştıkça kol uzunluğu 1.6→3px, alfa aynı eğriyle sönümlenir.
+- **Sticky gölgesi bulanık değil.** `min(w,h)*0.022` kadar sert kaydırılmış mürekkep %10 dikdörtgen —
+  serigrafi kayması. Blur'lu drop shadow kullanılmaz.
+
+### İkon ailesi
+
+Araç ikonları `src/components/icons.tsx` içinde elle yazılmış SVG path'lerdir. Kural: 24 viewBox,
+1.4px kontur, **butt cap, miter join**, dolgu yok. Yuvarlatılmış köşe ve dostane balon biçimi yok;
+dil teknik resim. Frame ikonu doğrudan seçim kesim işaretleridir, kalem bir divit ucu, "daha fazla"
+üç nokta değil üç kare.
+
+Panel ve menülerdeki yardımcı ikonlar lucide kalır (indir, yazdır, saat, çöp — evrensel glifler),
+ama `svg.lucide` kuralıyla aynı çizim diline zorlanır: square cap, miter join, 1.5px.
 
 ## AI slop kontrolü
 

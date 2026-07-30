@@ -24,6 +24,12 @@ textarea {
   font-family: inherit;
 }
 
+svg.lucide {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 1.5;
+}
+
 @media (pointer: coarse) {
   .tap-target {
     min-width: 44px;

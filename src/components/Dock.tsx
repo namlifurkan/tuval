@@ -1,8 +1,4 @@
-import {
-  Eraser, Frame, Highlighter, Image as ImageIcon, LayoutTemplate, Map as MapIcon, Maximize2,
-  MessageSquare, Minus, MoreHorizontal, MousePointer2, Pen, Plus, Redo2, RotateCcw, Settings2,
-  Spline, StickyNote, Table2, Type, Undo2, Workflow,
-} from 'lucide-react'
+import { Minus, Plus, Redo2, RotateCcw, Settings2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { clampZoom, fitRect, zoomAt } from '../board/camera'
@@ -19,6 +15,10 @@ import { TEMPLATES } from '../board/templates'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { LINE_COLORS, STICKY_COLORS, type ShapeKind } from '../board/types'
+import {
+  Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
+  Nib, Select, Sticky, TableTool, Templates, TextTool,
+} from './icons'
 import { ColorGrid, IconButton, Popover, usePopover } from './ui'
 
 const EMOJI = [
@@ -174,27 +174,27 @@ export function Dock() {
     switch (id) {
       case 'undo': return button('Geri al — ⌘Z', false, () => undoManager.undo(), <Undo2 size={glyph} strokeWidth={1.8} />)
       case 'redo': return button('İleri al — ⌘⇧Z', false, () => undoManager.redo(), <Redo2 size={glyph} strokeWidth={1.8} />)
-      case 'select': return button('Seç — V', tool === 'select', pick('select'), <MousePointer2 size={glyph} strokeWidth={1.8} />)
-      case 'text': return button('Metin — T', tool === 'text', pick('text'), <Type size={glyph} strokeWidth={1.8} />)
-      case 'connector': return button('Bağlantı — L', tool === 'connector', pick('connector'), <Spline size={glyph} strokeWidth={1.8} />)
-      case 'table': return button('Tablo', tool === 'table', pick('table'), <Table2 size={glyph} strokeWidth={1.8} />)
-      case 'mindmap': return button('Zihin haritası', tool === 'mindmap', pick('mindmap'), <Workflow size={glyph} strokeWidth={1.8} />)
-      case 'image': return button('Görsel yükle', false, () => fileRef.current?.click(), <ImageIcon size={glyph} strokeWidth={1.8} />)
-      case 'minimap': return button('Minimap', showMinimap, () => update({ showMinimap: !showMinimap }), <MapIcon size={glyph} strokeWidth={1.8} />)
-      case 'fit': return button('İçeriğe sığdır — ⇧1', false, fitAll, <Maximize2 size={glyph - 1} strokeWidth={1.8} />)
+      case 'select': return button('Seç — V', tool === 'select', pick('select'), <Select size={glyph} />)
+      case 'text': return button('Metin — T', tool === 'text', pick('text'), <TextTool size={glyph} />)
+      case 'connector': return button('Bağlantı — L', tool === 'connector', pick('connector'), <Connector size={glyph} />)
+      case 'table': return button('Tablo', tool === 'table', pick('table'), <TableTool size={glyph} />)
+      case 'mindmap': return button('Zihin haritası', tool === 'mindmap', pick('mindmap'), <Mindmap size={glyph} />)
+      case 'image': return button('Görsel yükle', false, () => fileRef.current?.click(), <ImageTool size={glyph} />)
+      case 'minimap': return button('Minimap', showMinimap, () => update({ showMinimap: !showMinimap }), <Minimap size={glyph} />)
+      case 'fit': return button('İçeriğe sığdır — ⇧1', false, fitAll, <Fit size={glyph - 1} />)
       case 'comment':
         return button('Yorum — C', tool === 'comment', () => {
           if (tool === 'comment') update({ commentsPanel: !useBoardStore.getState().commentsPanel })
           else setTool('comment')
           requestRender()
-        }, <MessageSquare size={glyph} strokeWidth={1.8} />)
+        }, <Comment size={glyph} />)
 
       case 'sticky':
         return (
           <div className="relative">
             {button('Sticky — N', tool === 'sticky', () => (tool === 'sticky' ? stickyPop.toggle() : setTool('sticky')),
               <span className="relative grid place-items-center">
-                <StickyNote size={glyph} strokeWidth={1.8} />
+                <Sticky size={glyph} />
                 <span className="absolute -bottom-1.5 -right-1.5 h-2 w-2 rounded-[2px] border border-black/10" style={{ background: stickyFill }} />
               </span>)}
             <Popover open={stickyPop.open} onClose={stickyPop.close} anchor="top" className="w-[228px]">
@@ -236,9 +236,9 @@ export function Dock() {
         return (
           <div className="relative">
             {button('Kalem — P', tool === 'pen', () => (tool === 'pen' ? penPop.toggle() : setTool('pen')),
-              pen.eraser ? <Eraser size={glyph} strokeWidth={1.8} />
-                : pen.highlighter ? <Highlighter size={glyph} strokeWidth={1.8} />
-                : <Pen size={glyph} strokeWidth={1.8} />)}
+              pen.eraser ? <EraserTool size={glyph} />
+                : pen.highlighter ? <Highlight size={glyph} />
+                : <Nib size={glyph} />)}
             <Popover open={penPop.open} onClose={penPop.close} anchor="top" className="w-[212px]">
               <div className="mb-2 flex gap-1">
                 <button
@@ -274,7 +274,7 @@ export function Dock() {
       case 'frame':
         return (
           <div className="relative">
-            {button('Frame — F', tool === 'frame', () => (tool === 'frame' ? framePop.toggle() : setTool('frame')), <Frame size={glyph} strokeWidth={1.8} />)}
+            {button('Frame — F', tool === 'frame', () => (tool === 'frame' ? framePop.toggle() : setTool('frame')), <FrameTool size={glyph} />)}
             <Popover open={framePop.open} onClose={framePop.close} anchor="top" className="w-[212px]">
               <button
                 type="button"
@@ -305,7 +305,7 @@ export function Dock() {
       case 'templates':
         return (
           <div className="relative">
-            {button('Şablonlar', templatePop.open, templatePop.toggle, <LayoutTemplate size={glyph} strokeWidth={1.8} />)}
+            {button('Şablonlar', templatePop.open, templatePop.toggle, <Templates size={glyph} />)}
             <Popover open={templatePop.open} onClose={templatePop.close} anchor="top" className="w-[268px]">
               <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Şablonlar</div>
               {TEMPLATES.map((t) => (
@@ -326,7 +326,7 @@ export function Dock() {
       case 'more':
         return (
           <div className="relative">
-            {button('Daha fazla', morePop.open, morePop.toggle, <MoreHorizontal size={glyph} strokeWidth={1.8} />)}
+            {button('Daha fazla', morePop.open, morePop.toggle, <More size={glyph} />)}
             <Popover open={morePop.open} onClose={morePop.close} anchor="top" className="w-[268px]">
               <button
                 type="button"
