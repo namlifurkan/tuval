@@ -252,6 +252,12 @@ function drawCap(ctx: CanvasRenderingContext2D, cap: Cap, at: Vec, dir: Vec, wid
   ctx.restore()
 }
 
+export function connectorMid(item: Item & { type: 'connector' }): Vec {
+  if (item.bend) return item.bend
+  const pts = connectorPath(item, resolveEndpoint)
+  return pts[Math.floor(pts.length / 2)]
+}
+
 export function connectorGeometry(item: Item & { type: 'connector' }) {
   const a = resolveEndpoint(item.from)
   const b = resolveEndpoint(item.to)
@@ -265,7 +271,10 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   const startTrim = capLength(item.capStart, item.strokeWidth)
   const endTrim = capLength(item.capEnd, item.strokeWidth)
 
-  if (item.shape === 'curved') {
+  if (item.shape === 'curved' && item.bend) {
+    path.moveTo(a.x, a.y)
+    path.quadraticCurveTo(item.bend.x, item.bend.y, b.x, b.y)
+  } else if (item.shape === 'curved') {
     const [c1, c2] = curveControls(item, a, b)
     path.moveTo(a.x, a.y)
     path.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y)
@@ -306,6 +315,16 @@ function drawText(s: Scene, item: Item & TextStyle & { text: string }, box: Rect
   if (!item.text) return
   const { ctx } = s
   const layout = layoutText(item.text, box.w, box.h, item)
+  if (layout.fontSize * s.cam.z < 3.5) {
+    ctx.fillStyle = item.textColor
+    ctx.globalAlpha = 0.35
+    const rows = Math.min(layout.lines.length, Math.floor(box.h / layout.lineHeight))
+    for (let i = 0; i < rows; i++) {
+      ctx.fillRect(box.x, box.y + i * layout.lineHeight, box.w * 0.86, layout.fontSize * 0.62)
+    }
+    ctx.globalAlpha = 1
+    return
+  }
   ctx.font = fontString(item, layout.fontSize)
   ctx.fillStyle = item.textColor
   ctx.textBaseline = 'middle'
@@ -507,6 +526,11 @@ function drawOverlay(s: Scene) {
         const sp = toScreen(cam, p.x, p.y)
         dot(ctx, sp.x, sp.y, 5)
       }
+      const mid = connectorMid(item)
+      const sm = toScreen(cam, mid.x, mid.y)
+      ctx.globalAlpha = item.bend ? 1 : 0.55
+      dot(ctx, sm.x, sm.y, 4.5)
+      ctx.globalAlpha = 1
     } else {
       outline(ctx, cam, item, BRAND.blue, 2)
       if (item.locked) drawLockBadge(ctx, cam, item)

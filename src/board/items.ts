@@ -103,6 +103,7 @@ export function makeConnector(
     from,
     to,
     text: '',
+    bend: null,
     ...DEFAULT_TEXT_STYLE,
     fontSize: 14,
     ...opts,

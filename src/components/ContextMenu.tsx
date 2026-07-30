@@ -43,6 +43,14 @@ export function ContextMenu() {
       hidden: items.length !== 1 || items[0].type !== 'frame',
     },
     {
+      label: 'Kırılmayı sıfırla',
+      run: () => {
+        patchItems(selection.map((id) => [id, { bend: null }] as [Id, Record<string, unknown>]))
+        requestRender()
+      },
+      hidden: !items.some((i) => i.type === 'connector' && i.bend),
+    },
+    {
       label: 'PNG olarak dışa aktar',
       run: () => exportPng(items, items.length === 1 && items[0].type === 'frame' ? items[0].title : 'secim'),
       hidden: !items.length,

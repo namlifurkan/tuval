@@ -13,7 +13,8 @@ import {
   makeText, resolveEndpoint, STICKY_SIZE,
 } from './items'
 import {
-  boxOf, commentPinScreen, connectorGeometry, handleScreenRects, PIN_R, quickHit, QUICK_TYPES,
+  boxOf, commentPinScreen, connectorGeometry, connectorMid, handleScreenRects, PIN_R, quickHit,
+  QUICK_TYPES,
 } from './render'
 import { requestRender, session, useBoardStore } from './store'
 import type { Tool } from './store'
@@ -31,6 +32,7 @@ type Drag =
   | { kind: 'draw'; pts: number[][] }
   | { kind: 'connect'; from: Endpoint; to: Vec; targetId: Id | null; targetSide: AnchorSide | null }
   | { kind: 'endpoint'; id: Id; which: 'from' | 'to' }
+  | { kind: 'bend'; id: Id }
   | { kind: 'erase' }
 
 let drag: Drag | null = null
@@ -293,6 +295,12 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
         drag = { kind: 'endpoint', id: only.id, which: 'to' }
         return
       }
+      const mid = connectorMid(only)
+      const sm = toScreen(s.camera, mid.x, mid.y)
+      if (Math.hypot(sm.x - screen.x, sm.y - screen.y) <= 9) {
+        drag = { kind: 'bend', id: only.id }
+        return
+      }
     }
     if (only && QUICK_TYPES.has(only.type) && !only.locked) {
       const side = quickHit(s.camera, only, screen)
@@ -506,6 +514,10 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
         target: drag.targetId,
       }
       s.setHover(drag.targetId)
+      break
+    }
+    case 'bend': {
+      patchItems([[drag.id, { bend: { x: p.x, y: p.y } }]])
       break
     }
     case 'erase': {

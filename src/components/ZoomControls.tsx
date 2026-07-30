@@ -4,13 +4,16 @@ import { getItems } from '../board/doc'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import { Minimap } from './Minimap'
-import { IconButton } from './ui'
+import { IconButton, Popover, usePopover } from './ui'
 
 export function ZoomControls() {
   const camera = useBoardStore((s) => s.camera)
   const setCamera = useBoardStore((s) => s.setCamera)
   const showMinimap = useBoardStore((s) => s.showMinimap)
+  const showGrid = useBoardStore((s) => s.showGrid)
+  const selection = useBoardStore((s) => s.selection)
   const update = useBoardStore((s) => s.update)
+  const zoomPop = usePopover()
 
   const step = (factor: number) => {
     const el = document.querySelector('canvas')!
@@ -38,14 +41,58 @@ export function ZoomControls() {
         <IconButton title="Zoom out" onClick={() => step(1 / 1.2)}>
           <Minus size={18} strokeWidth={2} />
         </IconButton>
-        <button
-          type="button"
-          onDoubleClick={() => { setCamera({ ...camera, z: 1 }); requestRender() }}
-          className="min-w-[54px] rounded-lg px-2 py-1.5 text-sm font-semibold tabular-nums text-[#050038] hover:bg-[#F1F1F3]"
-          title="Double-click for 100%"
-        >
-          {Math.round(camera.z * 100)}%
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={zoomPop.toggle}
+            className="min-w-[54px] rounded-lg px-2 py-1.5 text-sm font-semibold tabular-nums text-[#050038] hover:bg-[#F1F1F3]"
+          >
+            {Math.round(camera.z * 100)}%
+          </button>
+          <Popover open={zoomPop.open} onClose={zoomPop.close} anchor="topLeft" className="w-[214px]">
+            <button
+              type="button"
+              onClick={() => { fit(); zoomPop.close() }}
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+            >
+              <span>İçeriğe sığdır</span><span className="text-xs text-[#9B9BAB]">⇧1</span>
+            </button>
+            <button
+              type="button"
+              disabled={!selection.length}
+              onClick={() => {
+                const el = document.querySelector('canvas')!
+                const index = getItems().filter((i) => selection.includes(i.id))
+                if (index.length) setCamera(fitRect(boxOf(index), el.clientWidth, el.clientHeight))
+                requestRender(); zoomPop.close()
+              }}
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3] disabled:opacity-35"
+            >
+              <span>Seçime yakınlaş</span><span className="text-xs text-[#9B9BAB]">⇧2</span>
+            </button>
+            <div className="my-1 h-px bg-[#EDEDF2]" />
+            {[0.5, 1, 2, 4].map((z) => (
+              <button
+                key={z}
+                type="button"
+                onClick={() => { setCamera(zoomAt(camera, innerWidth / 2, innerHeight / 2, z)); requestRender(); zoomPop.close() }}
+                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              >
+                <span>{z * 100}%</span>
+                {z === 1 && <span className="text-xs text-[#9B9BAB]">⇧3</span>}
+              </button>
+            ))}
+            <div className="my-1 h-px bg-[#EDEDF2]" />
+            <button
+              type="button"
+              onClick={() => { update({ showGrid: !showGrid }); requestRender() }}
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+            >
+              <span>Izgara</span>
+              <span className="text-xs text-[#9B9BAB]">{showGrid ? 'Açık' : 'Kapalı'}</span>
+            </button>
+          </Popover>
+        </div>
         <IconButton title="Zoom in" onClick={() => step(1.2)}>
           <Plus size={18} strokeWidth={2} />
         </IconButton>

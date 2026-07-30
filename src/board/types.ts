@@ -116,6 +116,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
   capStart: Cap
   capEnd: Cap
   text: string
+  bend: Vec | null
 }
 
 export type Item =

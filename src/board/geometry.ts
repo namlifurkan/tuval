@@ -314,6 +314,21 @@ export function connectorBounds(
 
 export function connectorPath(item: Item & { type: 'connector' }, resolve: (e: Endpoint) => Vec): Vec[] {
   const a = resolve(item.from), b = resolve(item.to)
+  if (item.bend) {
+    const m = item.bend
+    if (item.shape === 'curved') {
+      const out: Vec[] = []
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24, u = 1 - t
+        out.push({
+          x: u * u * a.x + 2 * u * t * m.x + t * t * b.x,
+          y: u * u * a.y + 2 * u * t * m.y + t * t * b.y,
+        })
+      }
+      return out
+    }
+    return [a, m, b]
+  }
   if (item.shape === 'straight') return [a, b]
   if (item.shape === 'elbow') {
     const dir = item.from.anchor ? NORMALS[item.from.anchor] : null

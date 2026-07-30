@@ -1,11 +1,15 @@
-import { ChevronDown, Clock, Play, Search, Star, Users } from 'lucide-react'
-import { getItems, room } from '../board/doc'
-import { useBoardStore } from '../board/store'
-import { IconButton } from './ui'
+import { ChevronDown, Clock, Download, Grid3x3, Layers, Play, Search, Star, Trash2 } from 'lucide-react'
+import { getItems, removeItems, room } from '../board/doc'
+import { exportPng } from '../board/export'
+import { requestRender, useBoardStore } from '../board/store'
+import { Collaborators } from './Collaborators'
+import { IconButton, Popover, usePopover } from './ui'
 
 export function TopBar() {
   const boardName = useBoardStore((s) => s.boardName)
+  const showGrid = useBoardStore((s) => s.showGrid)
   const update = useBoardStore((s) => s.update)
+  const menu = usePopover()
 
   return (
     <>
@@ -20,7 +24,49 @@ export function TopBar() {
             className="w-[170px] rounded-lg px-2 py-1.5 text-sm font-semibold text-[#050038] outline-none hover:bg-[#F1F1F3] focus:bg-[#F1F1F3]"
           />
           <IconButton title="Favorite"><Star size={17} strokeWidth={1.8} /></IconButton>
-          <IconButton title="Board menu"><ChevronDown size={17} strokeWidth={1.8} /></IconButton>
+          <div className="relative">
+            <IconButton title="Board menüsü" active={menu.open} onClick={menu.toggle}>
+              <ChevronDown size={17} strokeWidth={1.8} />
+            </IconButton>
+            <Popover open={menu.open} onClose={menu.close} anchor="bottom" className="w-[236px]">
+              <button
+                type="button"
+                onClick={() => { update({ framesPanel: true }); menu.close() }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              >
+                <Layers size={15} /> Frame paneli
+              </button>
+              <button
+                type="button"
+                onClick={() => { exportPng(getItems(), boardName || 'board'); menu.close() }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              >
+                <Download size={15} /> Board'u PNG indir
+              </button>
+              <button
+                type="button"
+                onClick={() => { update({ showGrid: !showGrid }); requestRender() }}
+                className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+              >
+                <span className="flex items-center gap-2"><Grid3x3 size={15} /> Izgara</span>
+                <span className="text-xs text-[#9B9BAB]">{showGrid ? 'Açık' : 'Kapalı'}</span>
+              </button>
+              <div className="my-1 h-px bg-[#EDEDF2]" />
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Board\'daki her şey silinsin mi?')) {
+                    removeItems(getItems().map((i) => i.id))
+                    requestRender()
+                  }
+                  menu.close()
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#DC2626] hover:bg-[#FEF2F2]"
+              >
+                <Trash2 size={15} /> Board'u temizle
+              </button>
+            </Popover>
+          </div>
         </div>
       </div>
 
@@ -30,7 +76,7 @@ export function TopBar() {
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton title="Activity"><Clock size={18} strokeWidth={1.8} /></IconButton>
-          <IconButton title="Collaborators"><Users size={18} strokeWidth={1.8} /></IconButton>
+          <Collaborators />
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
           <button
