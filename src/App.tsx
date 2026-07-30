@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { getLang, subscribeLang } from './i18n'
 import { Canvas } from './components/Canvas'
+import { BriefImport } from './components/BriefImport'
 import { CommentsPanel } from './components/CommentsPanel'
 import { CursorChat } from './components/CursorChat'
 import { FollowBanner } from './components/FollowBanner'
@@ -56,6 +57,7 @@ export default function App() {
           <MinimapCorner />
           <ContextMenu />
           <CommentThread />
+          <BriefImport />
           <CommentsPanel />
           <SearchPanel />
           <CursorChat />

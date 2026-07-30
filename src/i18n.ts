@@ -256,6 +256,14 @@ const tr: Record<string, string> = {
   // agent brief
   'The content below was exported from an infinite canvas board. Frames are sections, bullets are items on the canvas (reading order: top to bottom, left to right), and the mermaid graph under "Flow" represents the arrows between items. First summarise in one paragraph what is being asked for, then break it into concrete steps.':
     'Aşağıdaki içerik bir sonsuz tuval board\'ından dışa aktarıldı. Frame\'ler bölüm, madde işaretleri tuvaldeki öğeler (okuma sırası: yukarıdan aşağı, soldan sağa), "Akış" bölümündeki mermaid grafiği öğeler arasındaki okları temsil eder. Önce ne yapılmak istendiğini bir paragrafta özetle, sonra somut adımlara dök.',
+  // brief import
+  'Build a board from a brief': 'Brief\'ten board oluştur',
+  'Paste Markdown or JSON here. Headings become frames, bullets become stickies, fenced code becomes code blocks, a mermaid flow becomes connectors.':
+    'Markdown veya JSON yapıştır. Başlıklar frame, maddeler sticky, fenced code kod bloğu, mermaid akışı bağlantı olur.',
+  'Paste an example': 'Örnek yapıştır',
+  'Nothing to read yet': 'Okunacak bir şey yok',
+  'connections': 'bağlantı',
+  'Create': 'Oluştur',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

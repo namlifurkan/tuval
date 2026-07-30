@@ -71,9 +71,9 @@ Kroma dört yüzeye ayrılır, her birinin tek bir işi var:
   bu bilinçli bir tercih: yüzen seçim çubuğu tam da incelediğin şeyi gizler.
 - **Tuval** — geri kalan her şey.
 
-Miro'nun sol dikey rail + seçim üstü yüzen çubuk + sağ alt zoom/minimap kümesi düzeni bilinçli
-olarak kullanılmadı. Araç paleti, zoom, minimap gibi öğeler kategori konvansiyonudur ve korunur;
-**onların yerleşimi** bize ait.
+Kategorinin alışılmış düzeni — sol dikey araç rail'i, seçimin üstünde yüzen biçim çubuğu, sağ
+altta zoom/minimap kümesi — bilinçli olarak kullanılmadı. Araç paleti, zoom ve minimap kategori
+konvansiyonudur ve korunur; **onların yerleşimi** bize ait.
 
 ## Yükseklik ve kenar
 
@@ -153,6 +153,6 @@ ama `svg.lucide` kuralıyla aynı çizim diline zorlanır: square cap, miter joi
 Bu tasarım şu refleksleri kasten reddeder:
 
 - Kategori refleksi: "beyaz tahta aracı → elektrik mavisi + oyuncul yuvarlaklık"
-- İkinci derece refleks: "Miro olmasın → o zaman koyu Figma estetiği"
+- İkinci derece refleks: "beyaz tahta klişesi olmasın → o zaman koyu editör estetiği"
 - Yasaklar: yan şerit kenarlık, gradyan metin, dekoratif cam, kahraman-metrik bloğu, aynı
   boyutta ikon-başlık-metin kart ızgarası, ilk çare modal

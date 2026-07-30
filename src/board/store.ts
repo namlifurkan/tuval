@@ -30,6 +30,7 @@ interface BoardState {
   openComment: Id | null
   presenting: number | null
   searchOpen: boolean
+  briefOpen: boolean
   framesPanel: boolean
   commentsPanel: boolean
   renamingFrame: Id | null
@@ -71,6 +72,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   openComment: null,
   presenting: null,
   searchOpen: false,
+  briefOpen: false,
   framesPanel: false,
   commentsPanel: false,
   renamingFrame: null,

@@ -86,6 +86,16 @@ export function HandoffMenu() {
 
         <button
           type="button"
+          onClick={() => { useBoardStore.getState().update({ briefOpen: true }); pop.close() }}
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold hover:bg-[#EFEBE2]"
+        >
+          {t('Build a board from a brief')}
+        </button>
+
+        <div className="my-1 h-px bg-[#EAE6DD]" />
+
+        <button
+          type="button"
           onClick={() => { copyPrompt(); pop.close() }}
           className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
         >

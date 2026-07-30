@@ -5,7 +5,7 @@ Open source infinite canvas. Canvas 2D renderer + Yjs CRDT, local-first, self-ho
 An open alternative to Miro, FigJam and the like. All code, design and branding are our own;
 no visual identity or asset is copied from any commercial product.
 
-[Türkçe README](README.tr.md) · [Product notes](CLAUDE.md) · [Design system](DESIGN.md)
+[Türkçe README](README.tr.md) · [Design system](DESIGN.md)
 
 ## Why
 
@@ -18,6 +18,21 @@ graph — frames become sections, connectors become directed edges, comments att
 item, code blocks stay fenced code — and exported as a prompt, Markdown or JSON that a coding
 agent can actually act on. Spatial layout is resolved into reading order, so the output is not
 a screenshot but a brief.
+
+The loop closes: paste an agent's Markdown back into **Build a board from a brief** and headings
+become frames, bullets become stickies, fenced code becomes code blocks and a mermaid flow
+becomes connectors.
+
+## Agent skill
+
+`skills/tuval-board/SKILL.md` teaches a coding agent both directions of the format: how to read
+a board export and how to write Markdown that Tuval can rebuild into a board. Install it with
+
+```bash
+npx skills add <owner>/<repo>@tuval-board
+```
+
+or copy the file into your agent's skills directory.
 
 ## Run
 

@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Internal working docs — product strategy, agent instructions, local tooling
+CLAUDE.md
+PRODUCT.md
+.claude/
