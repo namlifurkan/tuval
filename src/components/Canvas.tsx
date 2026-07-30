@@ -424,9 +424,9 @@ export function Canvas() {
 const MAX_EDGE = 1600
 const KEEP_ORIGINAL_BYTES = 400_000
 
-// Images live inside the CRDT as data URLs, so every byte is replicated to every peer and
-// kept in IndexedDB and in version snapshots. Downscale before embedding.
-// TODO: upload to object storage and store a URL once the backend lands.
+// Signed in, an image goes to object storage and the item keeps a URL. Without a backend it
+// stays inline as a data URL, so it is downscaled first: every byte would otherwise replicate
+// to every peer and sit in IndexedDB and in each version snapshot.
 async function encodeImage(file: File) {
   const bitmap = await createImageBitmap(file)
   const longest = Math.max(bitmap.width, bitmap.height)
