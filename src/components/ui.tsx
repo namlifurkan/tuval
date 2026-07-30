@@ -96,6 +96,31 @@ export function ColorGrid({
   )
 }
 
+export function HexInput({ value, onPick }: { value?: string; onPick: (c: string) => void }) {
+  const [hex, setHex] = useState(value && value.startsWith('#') ? value : '#')
+  return (
+    <div className="mt-2 flex items-center gap-1.5 border-t border-[#EDEDF2] pt-2">
+      <span className="text-xs font-semibold text-[#8A8A9B]">Hex</span>
+      <input
+        value={hex}
+        onChange={(e) => {
+          const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`
+          setHex(v)
+          if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) onPick(v)
+        }}
+        spellCheck={false}
+        className="w-full rounded-lg border border-[#E6E6EB] px-2 py-1 font-mono text-xs outline-none focus:border-[#4262FF]"
+      />
+      <input
+        type="color"
+        value={/^#([0-9a-f]{6})$/i.test(hex) ? hex : '#ffffff'}
+        onChange={(e) => { setHex(e.target.value); onPick(e.target.value) }}
+        className="h-7 w-8 cursor-pointer rounded-md border border-[#E6E6EB] bg-white p-0.5"
+      />
+    </div>
+  )
+}
+
 export function usePopover() {
   const [open, setOpen] = useState(false)
   return { open, setOpen, toggle: () => setOpen((o) => !o), close: () => setOpen(false) }

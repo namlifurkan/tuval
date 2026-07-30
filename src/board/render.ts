@@ -492,7 +492,8 @@ function drawOverlay(s: Scene) {
       }
     } else {
       outline(ctx, cam, item, BRAND.blue, 2)
-      if (!item.locked) {
+      if (item.locked) drawLockBadge(ctx, cam, item)
+      else {
         drawHandles(ctx, cam, item)
         if (QUICK_TYPES.has(item.type)) drawQuickArrows(s, item)
       }
@@ -589,6 +590,26 @@ function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { r
     ctx.stroke()
     ctx.restore()
   }
+}
+
+function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
+  const p = toScreen(cam, item.x + item.w, item.y)
+  ctx.save()
+  ctx.translate(p.x + 2, p.y - 2)
+  ctx.beginPath()
+  ctx.arc(0, 0, 11, 0, Math.PI * 2)
+  ctx.fillStyle = BRAND.blue
+  ctx.fill()
+  ctx.strokeStyle = '#FFFFFF'
+  ctx.lineWidth = 1.6
+  ctx.beginPath()
+  ctx.arc(0, -1.6, 3.1, Math.PI, 0)
+  ctx.stroke()
+  ctx.fillStyle = '#FFFFFF'
+  ctx.beginPath()
+  ctx.roundRect(-4.4, -1.6, 8.8, 6.6, 1.6)
+  ctx.fill()
+  ctx.restore()
 }
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {

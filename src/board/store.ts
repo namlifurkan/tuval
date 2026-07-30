@@ -29,6 +29,7 @@ interface BoardState {
   menu: { x: number; y: number } | null
   openComment: Id | null
   presenting: number | null
+  searchOpen: boolean
 
   setCamera: (c: Camera | ((c: Camera) => Camera)) => void
   setTool: (t: Tool, remember?: boolean) => void
@@ -62,6 +63,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   menu: null,
   openComment: null,
   presenting: null,
+  searchOpen: false,
 
   setCamera: (c) => set((s) => ({ camera: typeof c === 'function' ? c(s.camera) : c })),
   setTool: (tool, remember) =>
@@ -114,4 +116,8 @@ export const consumeDirty = () => {
   const d = dirty
   dirty = false
   return d
+}
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => import.meta.hot!.invalidate())
 }

@@ -113,6 +113,10 @@ export function connectorsFor(ids: Set<Id>): Item[] {
   )
 }
 
+if (import.meta.hot) {
+  import.meta.hot.accept(() => import.meta.hot!.invalidate())
+}
+
 export function transact(fn: () => void) {
   ydoc.transact(fn)
 }

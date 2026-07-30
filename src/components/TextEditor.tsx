@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { toScreen } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
+import { connectorGeometry } from '../board/render'
 import { textInsetFor } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
 import { fontString, layoutText, LINE_HEIGHT, wrapText } from '../board/text'
@@ -8,6 +9,11 @@ import { useItemIndex } from '../board/useBoard'
 import type { Item, TextStyle } from '../board/types'
 
 function textBox(item: Item) {
+  if (item.type === 'connector') {
+    const { a, b } = connectorGeometry(item)
+    const w = 240
+    return { x: (a.x + b.x) / 2 - w / 2, y: (a.y + b.y) / 2 - item.fontSize, w, h: item.fontSize * 2 }
+  }
   if (item.type === 'sticky') {
     const inset = Math.min(item.w, item.h) * 0.1
     return { x: item.x + inset, y: item.y + inset, w: item.w - inset * 2, h: item.h - inset * 2 }

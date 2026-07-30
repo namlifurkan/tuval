@@ -1,6 +1,7 @@
 import { getIndex, getItems, patchItems } from '../board/doc'
 import {
-  deleteSelection, duplicateSelection, groupSelection, reorder, ungroupSelection,
+  arrangeInGrid, copyStyle, deleteSelection, duplicateSelection, groupSelection, hasStyleClipboard,
+  pasteStyle, reorder, ungroupSelection,
 } from '../board/interaction'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Id } from '../board/types'
@@ -34,6 +35,19 @@ export function ContextMenu() {
       shortcut: grouped ? '⌘⇧G' : '⌘G',
       run: () => (grouped ? ungroupSelection() : groupSelection()),
       hidden: items.length < 2 && !grouped,
+    },
+    { label: 'Stili kopyala', shortcut: '⌘⌥C', run: () => copyStyle(), hidden: !items.length },
+    {
+      label: 'Stili yapıştır',
+      shortcut: '⌘⌥V',
+      run: () => { pasteStyle(); requestRender() },
+      hidden: !items.length || !hasStyleClipboard(),
+    },
+    {
+      label: 'Izgaraya diz',
+      run: () => { arrangeInGrid(); requestRender() },
+      hidden: items.length < 2,
+      divider: true,
     },
     { label: 'Bring to front', shortcut: '⌘⇧]', run: () => reorder('front'), hidden: !items.length, divider: true },
     { label: 'Send to back', shortcut: '⌘⇧[', run: () => reorder('back'), hidden: !items.length },

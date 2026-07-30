@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react'
 import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, undoManager } from '../board/doc'
 import {
-  contextMenuAt, deleteSelection, doubleClick, duplicateSelection, getPointer, groupSelection,
-  nudge, pointerDown, pointerMove, pointerUp, quickCreateFromSelection, reorder, ungroupSelection,
-  wheel,
+  cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
+  groupSelection, nudge, pasteStyle, pointerDown, pointerMove, pointerUp, quickCreateFromSelection,
+  reorder, ungroupSelection, wheel,
 } from '../board/interaction'
 import { cloneItems, makeImage, makeSticky, makeText } from '../board/items'
 import { me } from '../board/me'
@@ -93,8 +93,8 @@ export function Canvas() {
       awareness.setLocalStateField('cursor', { x: b.x, y: b.y })
     }
     const up = (e: PointerEvent) => {
-      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId)
       pointerUp(e, rel(e))
+      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId)
     }
     const dbl = (e: MouseEvent) => doubleClick(rel(e))
     const onWheel = (e: WheelEvent) => { e.preventDefault(); wheel(e, rel(e)) }
@@ -105,6 +105,9 @@ export function Canvas() {
       useBoardStore.getState().update({ menu: { x: p.x, y: p.y } })
     }
 
+    const abandon = () => cancelDrag()
+    window.addEventListener('blur', abandon)
+    canvas.addEventListener('lostpointercapture', abandon)
     canvas.addEventListener('pointerdown', down)
     canvas.addEventListener('pointermove', move)
     canvas.addEventListener('pointerup', up)
@@ -113,6 +116,8 @@ export function Canvas() {
     canvas.addEventListener('wheel', onWheel, { passive: false })
     canvas.addEventListener('contextmenu', menu)
     return () => {
+      window.removeEventListener('blur', abandon)
+      canvas.removeEventListener('lostpointercapture', abandon)
       canvas.removeEventListener('pointerdown', down)
       canvas.removeEventListener('pointermove', move)
       canvas.removeEventListener('pointerup', up)
@@ -176,6 +181,13 @@ export function Canvas() {
       if (mod && e.key.toLowerCase() === 'd') {
         e.preventDefault()
         duplicateSelection()
+        return
+      }
+      if (mod && e.altKey && e.code === 'KeyC') { e.preventDefault(); copyStyle(); return }
+      if (mod && e.altKey && e.code === 'KeyV') { e.preventDefault(); pasteStyle(); return }
+      if (mod && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        s.update({ searchOpen: !s.searchOpen })
         return
       }
       if (mod && (e.key === 'c' || e.key === 'x')) {

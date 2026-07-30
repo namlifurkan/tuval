@@ -1,16 +1,31 @@
 import {
-  AlignCenter, AlignLeft, AlignRight, ArrowRight, Bold, Copy, Italic, Lock, MoveDown, MoveUp,
-  Palette, PenLine, Strikethrough, Trash2, Type, Underline, Unlock,
+  AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical,
+  AlignHorizontalDistributeCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight,
+  AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowRight, Bold,
+  Copy, Grid3x3, Italic, LayoutGrid, Lock, MoveDown, MoveUp, PenLine, Strikethrough, Trash2,
+  Type, Underline, Unlock,
 } from 'lucide-react'
 import { toScreen } from '../board/camera'
 import { patchItems } from '../board/doc'
-import { duplicateSelection, deleteSelection, reorder } from '../board/interaction'
+import {
+  alignSelection, arrangeInGrid, deleteSelection, distributeSelection, duplicateSelection, reorder,
+} from '../board/interaction'
+import type { AlignMode } from '../board/interaction'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import { useSelectedItems } from '../board/useBoard'
 import type { Align, Cap, ConnectorShape, Id, Item, StrokeStyle } from '../board/types'
 import { FONT_SIZES, LINE_COLORS, SHAPE_FILLS, STICKY_COLORS } from '../board/types'
-import { ColorGrid, Divider, IconButton, Popover, usePopover } from './ui'
+import { ColorGrid, Divider, HexInput, IconButton, Popover, usePopover } from './ui'
+
+const ALIGNMENTS: [AlignMode, typeof AlignLeft, string][] = [
+  ['left', AlignStartVertical, 'Sola hizala'],
+  ['centerX', AlignCenterVertical, 'Yatayda ortala'],
+  ['right', AlignEndVertical, 'Sağa hizala'],
+  ['top', AlignStartHorizontal, 'Üste hizala'],
+  ['centerY', AlignCenterHorizontal, 'Dikeyde ortala'],
+  ['bottom', AlignEndHorizontal, 'Alta hizala'],
+]
 
 const has = (items: Item[], type: Item['type']) => items.some((i) => i.type === type)
 
@@ -22,6 +37,7 @@ export function ContextToolbar() {
   const strokePop = usePopover()
   const textPop = usePopover()
   const linePop = usePopover()
+  const alignPop = usePopover()
 
   if (!selected.length || editing) return null
   if (selected.every((i) => i.type === 'comment')) return null
@@ -57,6 +73,19 @@ export function ContextToolbar() {
                 value={first.fill as string}
                 onPick={(c) => patch({ fill: c }, (i) => i.type !== 'draw' && i.type !== 'connector' && i.type !== 'image')}
               />
+              <HexInput
+                value={first.fill as string}
+                onPick={(c) => patch({ fill: c }, (i) => i.type !== 'draw' && i.type !== 'connector' && i.type !== 'image')}
+              />
+              <div className="mt-2 flex items-center gap-2 px-1">
+                <span className="text-xs text-[#585858]">Opaklık</span>
+                <input
+                  type="range" min={10} max={100}
+                  value={Math.round(((first.opacity as number) ?? 1) * 100)}
+                  onChange={(e) => patch({ opacity: +e.target.value / 100 })}
+                  className="flex-1 accent-[#4262FF]"
+                />
+              </div>
             </Popover>
           </div>
         )}
@@ -181,6 +210,60 @@ export function ContextToolbar() {
           </>
         )}
 
+        {selected.length > 1 && (
+          <>
+            <Divider />
+            <div className="relative">
+              <IconButton title="Hizala ve dağıt" onClick={alignPop.toggle}>
+                <LayoutGrid size={18} strokeWidth={1.8} />
+              </IconButton>
+              <Popover open={alignPop.open} onClose={alignPop.close} anchor="bottom" className="w-[212px]">
+                <div className="mb-1 px-1 text-xs font-semibold text-[#050038]">Hizala</div>
+                <div className="grid grid-cols-6 gap-0.5">
+                  {ALIGNMENTS.map(([mode, Icon, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      title={label}
+                      onClick={() => { alignSelection(mode); requestRender() }}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-[#050038] hover:bg-[#F1F1F3]"
+                    >
+                      <Icon size={17} strokeWidth={1.8} />
+                    </button>
+                  ))}
+                </div>
+                <div className="mb-1 mt-2 px-1 text-xs font-semibold text-[#050038]">Dağıt</div>
+                <div className="flex gap-0.5">
+                  <button
+                    type="button"
+                    title="Yatayda eşit dağıt"
+                    onClick={() => { distributeSelection('h'); requestRender() }}
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                  >
+                    <AlignHorizontalDistributeCenter size={17} strokeWidth={1.8} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Dikeyde eşit dağıt"
+                    onClick={() => { distributeSelection('v'); requestRender() }}
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                  >
+                    <AlignVerticalDistributeCenter size={17} strokeWidth={1.8} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Izgaraya diz"
+                    onClick={() => { arrangeInGrid(); requestRender() }}
+                    className="grid h-8 w-8 place-items-center rounded-lg hover:bg-[#F1F1F3]"
+                  >
+                    <Grid3x3 size={17} strokeWidth={1.8} />
+                  </button>
+                </div>
+              </Popover>
+            </div>
+          </>
+        )}
+
         <Divider />
         <IconButton title="Bring forward — ⌘]" onClick={() => reorder('forward')}>
           <MoveUp size={18} strokeWidth={1.8} />
@@ -197,7 +280,6 @@ export function ContextToolbar() {
         <IconButton title="Delete — Del" onClick={() => deleteSelection()}>
           <Trash2 size={18} strokeWidth={1.8} />
         </IconButton>
-        <Palette size={0} />
       </div>
     </div>
   )

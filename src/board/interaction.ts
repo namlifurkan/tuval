@@ -4,14 +4,17 @@ import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
 } from './doc'
 import {
-  aabb, anchorPoint, ANCHOR_SIDES, hitTest, nearestAnchor, overlaps, resizeBox, snapAngle, snapMove,
+  aabb, anchorPoint, ANCHOR_SIDES, contains, hitTest, nearestAnchor, overlaps, resizeBox, snapAngle,
+  snapMove,
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
   cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape, makeSticky,
   makeText, resolveEndpoint, STICKY_SIZE,
 } from './items'
-import { boxOf, commentPinScreen, handleScreenRects, PIN_R, quickHit, QUICK_TYPES } from './render'
+import {
+  boxOf, commentPinScreen, connectorGeometry, handleScreenRects, PIN_R, quickHit, QUICK_TYPES,
+} from './render'
 import { requestRender, session, useBoardStore } from './store'
 import type { Tool } from './store'
 import type { AnchorSide, Endpoint, Id, Item, Rect, Vec } from './types'
@@ -72,7 +75,6 @@ function pickAt(p: Vec, screenTolerance = 6): Item | null {
   const resolve = (e: Endpoint) => resolveEndpoint(e)
   for (let i = items.length - 1; i >= 0; i--) {
     const item = items[i]
-    if (item.locked) continue
     if (item.type === 'comment') {
       const pin = commentPinScreen(c, item)
       if (Math.hypot(pin.x - screen.x, pin.y - screen.y) <= PIN_R + 2) return item
@@ -183,12 +185,22 @@ function moveEndpointsFor(snaps: Snap[], dx: number, dy: number): [Id, Record<st
   return out
 }
 
+export function cancelDrag() {
+  drag = null
+  session.marquee = null
+  session.guides = []
+  session.draft = null
+  session.connectorDraft = null
+  requestRender()
+}
+
 export function pointerDown(e: PointerEvent, screen: Vec) {
   const s = store()
   const p = toBoard(s.camera, screen.x, screen.y)
   lastPointer = p
   downAt = performance.now()
   didDrag = false
+  drag = null
 
   if (e.button === 1 || s.tool === 'hand' || session.spaceDown) {
     drag = { kind: 'pan', sx: screen.x, sy: screen.y, cam: { ...s.camera } }
@@ -244,13 +256,26 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
 
   if (s.selection.length === 1) {
     const only = getIndex().get(s.selection[0])
+    if (only?.type === 'connector' && !only.locked) {
+      const { a, b } = connectorGeometry(only)
+      const sa = toScreen(s.camera, a.x, a.y)
+      const sb = toScreen(s.camera, b.x, b.y)
+      if (Math.hypot(sa.x - screen.x, sa.y - screen.y) <= 9) {
+        drag = { kind: 'endpoint', id: only.id, which: 'from' }
+        return
+      }
+      if (Math.hypot(sb.x - screen.x, sb.y - screen.y) <= 9) {
+        drag = { kind: 'endpoint', id: only.id, which: 'to' }
+        return
+      }
+    }
     if (only && QUICK_TYPES.has(only.type) && !only.locked) {
       const side = quickHit(s.camera, only, screen)
       if (side) { quickCreate(only.id, side); drag = null; return }
     }
   }
 
-  const handle = pickHandle(screen)
+  const handle = s.selection.some((id) => getIndex().get(id)?.locked) ? null : pickHandle(screen)
   if (handle) {
     const box = selectionBox()!
     const snaps = snapshotOf(s.selection)
@@ -302,6 +327,9 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     s.setSelection(selection)
   }
 
+  const index = getIndex()
+  if (selection.some((id) => index.get(id)?.locked)) { drag = null; return }
+
   const snaps = snapshotOf(selection)
   const movingIds = new Set(snaps.map((x) => x.id))
   const others = getItems()
@@ -315,6 +343,12 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
   const p = toBoard(s.camera, screen.x, screen.y)
   lastPointer = p
 
+  if (drag && e.buttons === 0) {
+    cancelDrag()
+    updateHover(p, screen)
+    requestRender()
+    return
+  }
   if (!drag) {
     updateHover(p, screen)
     requestRender()
@@ -340,7 +374,7 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
       }
       session.marquee = m
       const hits = getItems()
-        .filter((i) => !i.locked && overlaps(aabb(i), m))
+        .filter((i) => !i.locked && (i.type === 'frame' ? contains(m, aabb(i)) : overlaps(aabb(i), m)))
         .map((i) => i.id)
       s.setSelection(expandGroups(drag.additive ? [...new Set([...drag.base, ...hits])] : hits))
       break
@@ -603,6 +637,97 @@ export function doubleClick(screen: Vec) {
     s.setEditing({ id: item.id, selectAll: false })
   }
 }
+
+export type AlignMode = 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom'
+
+export function alignSelection(mode: AlignMode) {
+  const index = getIndex()
+  const items = store().selection.map((id) => index.get(id)!).filter(Boolean)
+  if (items.length < 2) return
+  const box = boxOf(items)
+  const patches = items.map((i) => {
+    const b = aabb(i)
+    const dx =
+      mode === 'left' ? box.x - b.x :
+      mode === 'centerX' ? box.x + box.w / 2 - (b.x + b.w / 2) :
+      mode === 'right' ? box.x + box.w - (b.x + b.w) : 0
+    const dy =
+      mode === 'top' ? box.y - b.y :
+      mode === 'centerY' ? box.y + box.h / 2 - (b.y + b.h / 2) :
+      mode === 'bottom' ? box.y + box.h - (b.y + b.h) : 0
+    return [i.id, { x: i.x + dx, y: i.y + dy }] as [Id, Record<string, unknown>]
+  })
+  patchItems(patches)
+}
+
+export function distributeSelection(axis: 'h' | 'v') {
+  const index = getIndex()
+  const items = store().selection.map((id) => index.get(id)!).filter(Boolean)
+  if (items.length < 3) return
+  const key = axis === 'h' ? 'x' : 'y'
+  const span = axis === 'h' ? 'w' : 'h'
+  const sorted = [...items].sort((a, b) => aabb(a)[key] - aabb(b)[key])
+  const first = aabb(sorted[0]), last = aabb(sorted[sorted.length - 1])
+  const totalGap =
+    (last[key] + last[span] - first[key]) - sorted.reduce((sum, i) => sum + aabb(i)[span], 0)
+  const gap = totalGap / (sorted.length - 1)
+  let cursor = first[key] + first[span] + gap
+  const patches: [Id, Record<string, unknown>][] = []
+  for (let i = 1; i < sorted.length - 1; i++) {
+    const item = sorted[i]
+    const b = aabb(item)
+    patches.push([item.id, { [key]: item[key] + (cursor - b[key]) }])
+    cursor += b[span] + gap
+  }
+  patchItems(patches)
+}
+
+export function arrangeInGrid(gap = 40) {
+  const index = getIndex()
+  const items = store().selection.map((id) => index.get(id)!).filter(Boolean)
+    .filter((i) => i.type !== 'connector' && i.type !== 'comment')
+  if (items.length < 2) return
+  const box = boxOf(items)
+  const cols = Math.ceil(Math.sqrt(items.length))
+  const cellW = Math.max(...items.map((i) => i.w)) + gap
+  const cellH = Math.max(...items.map((i) => i.h)) + gap
+  const sorted = [...items].sort((a, b) => a.y - b.y || a.x - b.x)
+  patchItems(sorted.map((item, i) => [item.id, {
+    x: box.x + (i % cols) * cellW,
+    y: box.y + Math.floor(i / cols) * cellH,
+  }] as [Id, Record<string, unknown>]))
+}
+
+const STYLE_KEYS = [
+  'fill', 'stroke', 'strokeWidth', 'strokeStyle', 'textColor', 'fontSize', 'fontFamily',
+  'bold', 'italic', 'underline', 'strike', 'align', 'valign', 'opacity', 'capStart', 'capEnd',
+] as const
+
+let styleClipboard: Record<string, unknown> | null = null
+
+export function copyStyle() {
+  const item = getIndex().get(store().selection[0])
+  if (!item) return
+  const out: Record<string, unknown> = {}
+  for (const k of STYLE_KEYS) {
+    if (k in item) out[k] = (item as unknown as Record<string, unknown>)[k]
+  }
+  styleClipboard = out
+}
+
+export function pasteStyle() {
+  if (!styleClipboard) return
+  const index = getIndex()
+  patchItems(store().selection.flatMap((id) => {
+    const item = index.get(id)
+    if (!item) return []
+    const patch: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(styleClipboard!)) if (k in item) patch[k] = v
+    return [[id, patch] as [Id, Record<string, unknown>]]
+  }))
+}
+
+export const hasStyleClipboard = () => styleClipboard !== null
 
 export function contextMenuAt(screen: Vec) {
   const s = store()

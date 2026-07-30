@@ -43,6 +43,8 @@ düzenleme anında DOM overlay (`TextEditor.tsx`).
 | `⇧1` `⇧2` `⇧3` | Fit, seçime zoom, %100 |
 | Ok tuşları (`⇧` = 10px) | Nudge |
 | `Tab` / `⇧Tab` | Seçili item'ın sağına/soluna yeni item (hızlı ekleme) |
+| `⌘F` | Board içinde ara |
+| `⌘⌥C` / `⌘⌥V` | Stili kopyala / yapıştır |
 | `Alt`+sürükle | Kopyalayarak taşı |
 | `⇧`+resize | Oranı koru · `Alt`+resize: merkezden |
 | `⌘`+taşı | Snap'i kapat |
@@ -59,4 +61,10 @@ IndexedDB kalıcılık, resim sürükle-bırak/yapıştır.
 Brainwriting, Akış şeması, Zihin haritası), sunum modu (frame'ler slayt), silgi,
 frame boyut preset'leri, metin taşınca shape/sticky'nin otomatik büyümesi.
 
-Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi.
+**Faz 3 — etkileşim doğruluğu:** connector uç noktalarını sürükleyerek yeniden bağlama,
+kilitli item'lar seçilebilir (rozetli, taşınamaz), hizala/dağıt/ızgaraya diz, stil
+kopyala-yapıştır, opaklık + hex renk seçici, board içi arama (`⌘F`), connector etiketi
+düzenleme, marquee frame'i ancak tamamen kapsayınca seçer.
+
+Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi,
+sürükleme sırasında Yjs yazımlarını throttle etme (doküman büyümesi).
