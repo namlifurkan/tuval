@@ -1,6 +1,6 @@
 import { Check, Link2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { room } from '../board/doc'
+import { getMeta, room } from '../board/doc'
 import {
   invite, listInvites, listMembers, myRole, removeMember, revokeInvite, setMemberRole,
 } from '../board/cloud'
@@ -12,6 +12,8 @@ import { Popover, usePopover } from './ui'
 type Role = 'editor' | 'viewer'
 
 const ROLES: Role[] = ['editor', 'viewer']
+
+const boardName = () => (getMeta().name as string) ?? ''
 
 export function Share() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
@@ -33,10 +35,27 @@ export function Share() {
 
   useEffect(() => { if (pop.open) refresh() }, [pop.open, refresh])
 
+  const boardLink = () => `${location.origin}${location.pathname}#${room}`
+
   const copyLink = () => {
-    navigator.clipboard?.writeText(`${location.origin}${location.pathname}#${room}`)
+    navigator.clipboard?.writeText(boardLink())
     setCopied(true)
     setTimeout(() => setCopied(false), 1600)
+  }
+
+  // Tuval has no mail server. Access is granted the moment the row lands; this only opens a
+  // prepared draft so the invite actually reaches a human, and you send it yourself.
+  const draft = (to: string) => {
+    const subject = t('Tuval board: {name}', { name: boardName() || t('Untitled board') })
+    const body = [
+      t('I have given you access to a board on Tuval.'),
+      '',
+      boardLink(),
+      '',
+      t('Open the link and sign in with this address to see it.'),
+    ].join('\n')
+    location.href = `mailto:${encodeURIComponent(to)}`
+      + `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   if (!cloudEnabled) {
@@ -54,10 +73,14 @@ export function Share() {
   const owner = role === 'owner'
 
   const send = async () => {
-    if (!email.trim()) return
-    const problem = await invite(room, email, newRole)
+    const to = email.trim()
+    if (!to) return
+    const problem = await invite(room, to, newRole)
     setNote(problem ?? '')
-    if (!problem) { setEmail(''); refresh() }
+    if (problem) return
+    setEmail('')
+    refresh()
+    draft(to)
   }
 
   return (
@@ -159,6 +182,15 @@ export function Share() {
             {invites.map((i) => (
               <div key={i.email} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5">
                 <span className="min-w-0 flex-1 truncate text-sm text-[#8A867C]">{i.email}</span>
+                {owner && (
+                  <button
+                    type="button"
+                    onClick={() => draft(i.email)}
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                  >
+                    {t('Email again')}
+                  </button>
+                )}
                 <span className="shrink-0 text-xs text-[#8A867C]">{t('pending')}</span>
                 {owner && (
                   <button
@@ -177,7 +209,7 @@ export function Share() {
 
         {user && owner && (
           <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
-            {t('An invited address gets access the moment it signs in. Send them the link too.')}
+            {t('Access is granted the moment that address signs in. Tuval does not send mail: your mail app opens with the invite ready, you press send.')}
           </p>
         )}
       </Popover>

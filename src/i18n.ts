@@ -334,6 +334,14 @@ const tr: Record<string, string> = {
     'Davet için giriş yap. Şu an bu board yalnızca senin tarayıcında.',
   'An invited address gets access the moment it signs in. Send them the link too.':
     'Davet edilen adres giriş yaptığı anda erişim kazanır. Linki de yolla.',
+  'Email again': 'Tekrar yolla',
+  'Tuval board: {name}': 'Tuval board: {name}',
+  'I have given you access to a board on Tuval.':
+    'Tuval\'da bir board\'a erişimini açtım.',
+  'Open the link and sign in with this address to see it.':
+    'Linki aç ve bu adresle giriş yap, board görünecek.',
+  'Access is granted the moment that address signs in. Tuval does not send mail: your mail app opens with the invite ready, you press send.':
+    'O adres giriş yaptığı anda erişim açılır. Tuval posta göndermez: e-posta uygulaman hazır davetle açılır, göndere sen basarsın.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }
