@@ -83,6 +83,20 @@ export interface FrameItem extends BaseItem {
   fill: string
 }
 
+export interface CommentReply {
+  id: string
+  author: string
+  color: string
+  text: string
+  at: number
+}
+
+export interface CommentItem extends BaseItem {
+  type: 'comment'
+  replies: CommentReply[]
+  resolved: boolean
+}
+
 export interface Endpoint {
   itemId: Id | null
   anchor: AnchorSide | null
@@ -105,6 +119,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
 
 export type Item =
   | StickyItem | ShapeItem | TextItem | DrawItem | ImageItem | FrameItem | ConnectorItem
+  | CommentItem
 
 export type ItemType = Item['type']
 

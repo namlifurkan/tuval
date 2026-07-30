@@ -109,6 +109,7 @@ function drawItem(s: Scene, item: Item) {
       case 'draw': drawStroke(s, item); break
       case 'image': drawImage(s, item); break
       case 'connector': drawConnector(s, item); break
+      case 'comment': break
     }
   })
   ctx.globalAlpha = 1
@@ -329,6 +330,109 @@ function drawText(s: Scene, item: Item & TextStyle & { text: string }, box: Rect
   })
 }
 
+export const PIN_R = 15
+export const PIN_LIFT = 26
+
+export function commentPinScreen(cam: Camera, item: Item): Vec {
+  const p = toScreen(cam, item.x, item.y)
+  return { x: p.x + PIN_R, y: p.y - PIN_LIFT }
+}
+
+function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
+  const { ctx, cam } = s
+  const c = commentPinScreen(cam, item)
+  const tip = toScreen(cam, item.x, item.y)
+  const selected = s.selection.has(item.id)
+  ctx.save()
+  ctx.globalAlpha = item.resolved ? 0.42 : 1
+  ctx.beginPath()
+  ctx.moveTo(tip.x, tip.y)
+  ctx.lineTo(c.x - PIN_R * 0.55, c.y + PIN_R * 0.5)
+  ctx.lineTo(c.x + PIN_R * 0.2, c.y + PIN_R * 0.92)
+  ctx.closePath()
+  ctx.fillStyle = '#FFFFFF'
+  ctx.strokeStyle = selected ? BRAND.blue : 'rgba(9,9,20,0.16)'
+  ctx.lineWidth = selected ? 2 : 1
+  ctx.fill()
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.arc(c.x, c.y, PIN_R, 0, Math.PI * 2)
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fill()
+  ctx.stroke()
+  const first = item.replies[0]
+  ctx.fillStyle = first?.color ?? '#9B9BAB'
+  ctx.beginPath()
+  ctx.arc(c.x, c.y, PIN_R - 4, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = '700 11px "Open Sans", system-ui, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(
+    item.replies.length > 1 ? String(item.replies.length) : (first?.author?.[0] ?? '?').toUpperCase(),
+    c.x, c.y + 0.5,
+  )
+  ctx.restore()
+}
+
+export type QuickSide = 'top' | 'right' | 'bottom' | 'left'
+const QUICK_OFFSET = 26
+const QUICK_R = 11
+
+export function quickArrowScreens(cam: Camera, item: Item): { side: QuickSide; x: number; y: number }[] {
+  const c = toScreen(cam, item.x + item.w / 2, item.y + item.h / 2)
+  const hw = (item.w / 2) * cam.z + QUICK_OFFSET
+  const hh = (item.h / 2) * cam.z + QUICK_OFFSET
+  const cos = Math.cos(item.rotation), sin = Math.sin(item.rotation)
+  const at = (lx: number, ly: number) => ({ x: c.x + lx * cos - ly * sin, y: c.y + lx * sin + ly * cos })
+  return [
+    { side: 'top' as const, ...at(0, -hh) },
+    { side: 'right' as const, ...at(hw, 0) },
+    { side: 'bottom' as const, ...at(0, hh) },
+    { side: 'left' as const, ...at(-hw, 0) },
+  ]
+}
+
+export const QUICK_TYPES = new Set(['sticky', 'shape', 'text', 'image'])
+
+function drawQuickArrows(s: Scene, item: Item) {
+  const { ctx } = s
+  for (const a of quickArrowScreens(s.cam, item)) {
+    ctx.beginPath()
+    ctx.arc(a.x, a.y, QUICK_R, 0, Math.PI * 2)
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(9,9,20,0.14)'
+    ctx.lineWidth = 1
+    ctx.stroke()
+    ctx.save()
+    ctx.translate(a.x, a.y)
+    ctx.rotate(
+      a.side === 'right' ? 0 : a.side === 'bottom' ? Math.PI / 2 : a.side === 'left' ? Math.PI : -Math.PI / 2,
+    )
+    ctx.strokeStyle = BRAND.blue
+    ctx.lineWidth = 1.8
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(-3.5, 0)
+    ctx.lineTo(3, 0)
+    ctx.moveTo(0.2, -3.2)
+    ctx.lineTo(3.4, 0)
+    ctx.lineTo(0.2, 3.2)
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+
+export const quickHit = (cam: Camera, item: Item, screen: Vec): QuickSide | null => {
+  for (const a of quickArrowScreens(cam, item)) {
+    if (Math.hypot(a.x - screen.x, a.y - screen.y) <= QUICK_R + 2) return a.side
+  }
+  return null
+}
+
 const HANDLE_SIZE = 9
 
 export function handleScreenRects(cam: Camera, box: Rect & { rotation: number }) {
@@ -365,15 +469,22 @@ function drawOverlay(s: Scene) {
     ctx.setLineDash([])
   }
 
+  for (const item of s.items) {
+    if (item.type === 'comment') drawCommentPin(s, item)
+  }
+
   const selected = s.items.filter((i) => s.selection.has(i.id))
   if (s.hover && !s.selection.has(s.hover)) {
     const item = s.items.find((i) => i.id === s.hover)
-    if (item && item.type !== 'connector') outline(ctx, cam, item, 'rgba(66, 98, 255, 0.55)', 1.5)
+    if (item && item.type !== 'connector' && item.type !== 'comment') {
+      outline(ctx, cam, item, 'rgba(66, 98, 255, 0.55)', 1.5)
+    }
   }
 
   if (selected.length === 1 && s.editing !== selected[0].id) {
     const item = selected[0]
-    if (item.type === 'connector') {
+    if (item.type === 'comment') { /* pin drawn above */ }
+    else if (item.type === 'connector') {
       const { a, b } = connectorGeometry(item)
       for (const p of [a, b]) {
         const sp = toScreen(cam, p.x, p.y)
@@ -381,7 +492,10 @@ function drawOverlay(s: Scene) {
       }
     } else {
       outline(ctx, cam, item, BRAND.blue, 2)
-      if (!item.locked) drawHandles(ctx, cam, item)
+      if (!item.locked) {
+        drawHandles(ctx, cam, item)
+        if (QUICK_TYPES.has(item.type)) drawQuickArrows(s, item)
+      }
     }
   } else if (selected.length > 1) {
     for (const item of selected) {
@@ -398,7 +512,7 @@ function drawOverlay(s: Scene) {
 
   if (s.showAnchors && s.hover) {
     const item = s.items.find((i) => i.id === s.hover)
-    if (item && item.type !== 'connector' && item.type !== 'frame') {
+    if (item && item.type !== 'connector' && item.type !== 'frame' && item.type !== 'comment') {
       for (const side of ANCHOR_SIDES) {
         const p = toScreen(cam, ...(({ x, y }) => [x, y] as [number, number])(anchorPoint(item, side)))
         dot(ctx, p.x, p.y, 5)

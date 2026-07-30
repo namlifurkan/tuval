@@ -1,8 +1,9 @@
 import { getIndex, newId, nextZ } from './doc'
 import { anchorPoint, nearestAnchor } from './geometry'
+import { me } from './me'
 import type {
-  ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item, ShapeItem,
-  StickyItem, TextItem, TextStyle, Vec,
+  CommentItem, CommentReply, ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item,
+  ShapeItem, StickyItem, TextItem, TextStyle, Vec,
 } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
 
@@ -74,6 +75,20 @@ export function makeFrame(x: number, y: number, w: number, h: number, title: str
 
 export function makeImage(x: number, y: number, w: number, h: number, src: string): ImageItem {
   return { ...base(x, y, w, h), type: 'image', src, naturalW: w, naturalH: h }
+}
+
+export function makeComment(x: number, y: number, text: string): CommentItem {
+  return {
+    ...base(x, y, 1, 1),
+    type: 'comment',
+    resolved: false,
+    replies: text ? [makeReply(text)] : [],
+    z: 1e6 + Math.random(),
+  }
+}
+
+export function makeReply(text: string): CommentReply {
+  return { id: newId(), author: me.name, color: me.color, text, at: Date.now() }
 }
 
 export function makeConnector(

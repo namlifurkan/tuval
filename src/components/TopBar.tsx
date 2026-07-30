@@ -1,5 +1,5 @@
 import { ChevronDown, Clock, Play, Search, Star, Users } from 'lucide-react'
-import { room } from '../board/doc'
+import { getItems, room } from '../board/doc'
 import { useBoardStore } from '../board/store'
 import { IconButton } from './ui'
 
@@ -38,7 +38,15 @@ export function TopBar() {
           >
             Share
           </button>
-          <IconButton title="Present"><Play size={18} strokeWidth={1.8} /></IconButton>
+          <IconButton
+            title="Present"
+            onClick={() => {
+              const frames = getItems().filter((i) => i.type === 'frame')
+              if (frames.length) update({ presenting: 0, selection: [] })
+            }}
+          >
+            <Play size={18} strokeWidth={1.8} />
+          </IconButton>
         </div>
       </div>
 

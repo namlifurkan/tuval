@@ -8,10 +8,10 @@ import {
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
-  cloneItems, freeEndpoint, makeConnector, makeDraw, makeFrame, makeShape, makeSticky, makeText,
-  resolveEndpoint, STICKY_SIZE,
+  cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape, makeSticky,
+  makeText, resolveEndpoint, STICKY_SIZE,
 } from './items'
-import { boxOf, handleScreenRects } from './render'
+import { boxOf, commentPinScreen, handleScreenRects, PIN_R, quickHit, QUICK_TYPES } from './render'
 import { requestRender, session, useBoardStore } from './store'
 import type { Tool } from './store'
 import type { AnchorSide, Endpoint, Id, Item, Rect, Vec } from './types'
@@ -28,6 +28,7 @@ type Drag =
   | { kind: 'draw'; pts: number[][] }
   | { kind: 'connect'; from: Endpoint; to: Vec; targetId: Id | null; targetSide: AnchorSide | null }
   | { kind: 'endpoint'; id: Id; which: 'from' | 'to' }
+  | { kind: 'erase' }
 
 let drag: Drag | null = null
 let lastPointer: Vec = { x: 0, y: 0 }
@@ -64,22 +65,61 @@ export function ungroupSelection() {
 }
 
 function pickAt(p: Vec, screenTolerance = 6): Item | null {
-  const tol = screenTolerance / cam().z
+  const c = cam()
+  const tol = screenTolerance / c.z
+  const screen = toScreen(c, p.x, p.y)
   const items = getItems()
   const resolve = (e: Endpoint) => resolveEndpoint(e)
   for (let i = items.length - 1; i >= 0; i--) {
     const item = items[i]
     if (item.locked) continue
+    if (item.type === 'comment') {
+      const pin = commentPinScreen(c, item)
+      if (Math.hypot(pin.x - screen.x, pin.y - screen.y) <= PIN_R + 2) return item
+      continue
+    }
     if (hitTest(item, p, tol, resolve)) return item
   }
   return null
+}
+
+export function quickCreate(id: Id, side: 'top' | 'right' | 'bottom' | 'left') {
+  const s = store()
+  const item = getIndex().get(id)
+  if (!item) return
+  const gap = 40
+  const dx = side === 'right' ? item.w + gap : side === 'left' ? -(item.w + gap) : 0
+  const dy = side === 'bottom' ? item.h + gap : side === 'top' ? -(item.h + gap) : 0
+  const [copy] = cloneItems([item], dx, dy)
+  if ('text' in copy) copy.text = ''
+  createItems([copy])
+  s.setSelection([copy.id])
+  if ('text' in copy) s.setEditing({ id: copy.id, selectAll: false })
+  reparentToFrames([copy.id])
+}
+
+export function quickCreateFromSelection(side: 'top' | 'right' | 'bottom' | 'left' = 'right') {
+  const s = store()
+  if (s.selection.length !== 1) return
+  const item = getIndex().get(s.selection[0])
+  if (item && QUICK_TYPES.has(item.type)) quickCreate(item.id, side)
+}
+
+function eraseAt(p: Vec) {
+  const tol = 8 / cam().z
+  const resolve = (e: Endpoint) => resolveEndpoint(e)
+  const victims = getItems()
+    .filter((i) => i.type === 'draw' && !i.locked && hitTest(i, p, tol, resolve))
+    .map((i) => i.id)
+  if (victims.length) removeItems(victims)
 }
 
 function selectionBox(): (Box & { single: boolean }) | null {
   const { selection } = store()
   if (!selection.length) return null
   const index = getIndex()
-  const items = selection.map((id) => index.get(id)).filter(Boolean) as Item[]
+  const items = (selection.map((id) => index.get(id)).filter(Boolean) as Item[])
+    .filter((i) => i.type !== 'comment')
   if (!items.length) return null
   if (items.length === 1) {
     const it = items[0]
@@ -157,9 +197,34 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   if (e.button === 2) return
 
   if (s.editing) s.setEditing(null)
+  if (s.openComment) {
+    const under = pickAt(p)
+    if (under?.id !== s.openComment) s.update({ openComment: null })
+  }
 
   if (s.tool === 'pen') {
+    if (s.pen.eraser) {
+      drag = { kind: 'erase' }
+      eraseAt(p)
+      return
+    }
     drag = { kind: 'draw', pts: [[p.x, p.y, e.pressure || 0.5]] }
+    return
+  }
+
+  if (s.tool === 'comment') {
+    const existing = pickAt(p)
+    if (existing?.type === 'comment') {
+      s.setSelection([existing.id])
+      s.update({ openComment: existing.id })
+      s.setTool('select')
+      return
+    }
+    const c = makeComment(p.x, p.y, '')
+    createItems([c])
+    s.setSelection([c.id])
+    s.update({ openComment: c.id })
+    s.setTool('select')
     return
   }
 
@@ -177,6 +242,14 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     return
   }
 
+  if (s.selection.length === 1) {
+    const only = getIndex().get(s.selection[0])
+    if (only && QUICK_TYPES.has(only.type) && !only.locked) {
+      const side = quickHit(s.camera, only, screen)
+      if (side) { quickCreate(only.id, side); drag = null; return }
+    }
+  }
+
   const handle = pickHandle(screen)
   if (handle) {
     const box = selectionBox()!
@@ -191,6 +264,15 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   }
 
   const hovered = pickAt(p)
+  if (hovered?.type === 'comment') {
+    s.setSelection([hovered.id])
+    s.update({ openComment: hovered.id })
+    drag = {
+      kind: 'translate', origin: p,
+      snaps: snapshotOf([hovered.id]), others: [], moved: false, cloned: false,
+    }
+    return
+  }
   const side = anchorAt(p, hovered)
   if (hovered && side && s.selection.length <= 1) {
     drag = {
@@ -341,6 +423,10 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
         target: drag.targetId,
       }
       s.setHover(drag.targetId)
+      break
+    }
+    case 'erase': {
+      eraseAt(p)
       break
     }
     case 'endpoint': {

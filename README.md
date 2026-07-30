@@ -42,16 +42,21 @@ düzenleme anında DOM overlay (`TextEditor.tsx`).
 | `⌘]` `⌘[` (`⇧` ile en öne/arkaya) | Z-sırası |
 | `⇧1` `⇧2` `⇧3` | Fit, seçime zoom, %100 |
 | Ok tuşları (`⇧` = 10px) | Nudge |
+| `Tab` / `⇧Tab` | Seçili item'ın sağına/soluna yeni item (hızlı ekleme) |
 | `Alt`+sürükle | Kopyalayarak taşı |
 | `⇧`+resize | Oranı koru · `Alt`+resize: merkezden |
 | `⌘`+taşı | Snap'i kapat |
 
 ## Durum
 
-Yapıldı: sonsuz canvas, sticky/shape/text/pen/frame/image/connector, çoklu seçim,
-resize+rotate, hizalama guide'ları, gruplama, frame'e otomatik ekleme, z-sırası,
-undo/redo, minimap, sağ tık menüsü, context toolbar, awareness (canlı imleç),
+**Faz 1 — canvas motoru:** sonsuz canvas, sticky/shape/text/pen/frame/image/connector,
+çoklu seçim, resize+rotate, hizalama guide'ları, gruplama, frame'e otomatik ekleme,
+z-sırası, undo/redo, minimap, sağ tık menüsü, context toolbar, awareness (canlı imleç),
 IndexedDB kalıcılık, resim sürükle-bırak/yapıştır.
 
-Sırada: Supabase (auth + board listesi + storage + snapshot), comment tool,
-template kütüphanesi, presentation mode.
+**Faz 2 — canvas fidelity:** yorum pin'leri + thread (yanıt, çözüldü, sil), seçimin
+4 yanındaki hızlı-ekle okları ve `Tab` kısayolu, 5 şablon (Kanban, Retrospektif,
+Brainwriting, Akış şeması, Zihin haritası), sunum modu (frame'ler slayt), silgi,
+frame boyut preset'leri, metin taşınca shape/sticky'nin otomatik büyümesi.
+
+Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi.

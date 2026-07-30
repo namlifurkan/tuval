@@ -3,9 +3,11 @@ import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, undoManager } from '../board/doc'
 import {
   contextMenuAt, deleteSelection, doubleClick, duplicateSelection, getPointer, groupSelection,
-  nudge, pointerDown, pointerMove, pointerUp, reorder, ungroupSelection, wheel,
+  nudge, pointerDown, pointerMove, pointerUp, quickCreateFromSelection, reorder, ungroupSelection,
+  wheel,
 } from '../board/interaction'
 import { cloneItems, makeImage, makeSticky, makeText } from '../board/items'
+import { me } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
@@ -15,13 +17,6 @@ import type { Item, Vec } from '../board/types'
 const TOOL_KEYS: Record<string, Tool> = {
   v: 'select', h: 'hand', n: 'sticky', t: 'text', s: 'shape',
   l: 'connector', p: 'pen', f: 'frame', c: 'comment',
-}
-
-const NAMES = ['Ada', 'Kerem', 'Deniz', 'Mina', 'Poyraz', 'Zeynep', 'Efe', 'Lara']
-const COLORS = ['#F24E1E', '#4262FF', '#00B37E', '#B36BFF', '#FF9D48', '#EA94BB']
-const me = {
-  name: NAMES[Math.floor(Math.random() * NAMES.length)],
-  color: COLORS[Math.floor(Math.random() * COLORS.length)],
 }
 
 let clipboard: Item[] = []
@@ -207,7 +202,15 @@ export function Canvas() {
       if (mod && e.key === '[') { e.preventDefault(); reorder(e.shiftKey ? 'back' : 'backward'); return }
 
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(); return }
-      if (e.key === 'Escape') { s.setSelection([]); s.setTool('select'); return }
+      if (e.key === 'Escape') {
+        if (s.openComment) { s.update({ openComment: null }); return }
+        s.setSelection([]); s.setTool('select'); return
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault()
+        quickCreateFromSelection(e.shiftKey ? 'left' : 'right')
+        return
+      }
       if (e.key === 'Enter' && s.selection.length === 1) {
         const item = getIndex().get(s.selection[0])
         if (item && 'text' in item) { e.preventDefault(); s.setEditing({ id: item.id, selectAll: true }) }

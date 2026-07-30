@@ -13,7 +13,7 @@ interface BoardState {
   tool: Tool
   stickyFill: string
   shape: { kind: ShapeKind; fill: string; stroke: string; strokeWidth: number; strokeStyle: StrokeStyle }
-  pen: { stroke: string; strokeWidth: number; highlighter: boolean }
+  pen: { stroke: string; strokeWidth: number; highlighter: boolean; eraser: boolean }
   connector: {
     shape: ConnectorShape; stroke: string; strokeWidth: number
     strokeStyle: StrokeStyle; capStart: Cap; capEnd: Cap
@@ -27,6 +27,8 @@ interface BoardState {
   boardName: string
   previousTool: Tool
   menu: { x: number; y: number } | null
+  openComment: Id | null
+  presenting: number | null
 
   setCamera: (c: Camera | ((c: Camera) => Camera)) => void
   setTool: (t: Tool, remember?: boolean) => void
@@ -44,7 +46,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   tool: 'select',
   stickyFill: '#FFF9B1',
   shape: { kind: 'rect', fill: '#FFFFFF', stroke: '#1A1A1A', strokeWidth: 2, strokeStyle: 'solid' },
-  pen: { stroke: '#1A1A1A', strokeWidth: 4, highlighter: false },
+  pen: { stroke: '#1A1A1A', strokeWidth: 4, highlighter: false, eraser: false },
   connector: {
     shape: 'curved', stroke: '#1A1A1A', strokeWidth: 2,
     strokeStyle: 'solid', capStart: 'none', capEnd: 'arrow',
@@ -58,6 +60,8 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   boardName: 'Untitled board',
   previousTool: 'select',
   menu: null,
+  openComment: null,
+  presenting: null,
 
   setCamera: (c) => set((s) => ({ camera: typeof c === 'function' ? c(s.camera) : c })),
   setTool: (tool, remember) =>

@@ -24,6 +24,7 @@ export function ContextToolbar() {
   const linePop = usePopover()
 
   if (!selected.length || editing) return null
+  if (selected.every((i) => i.type === 'comment')) return null
 
   const box = boxOf(selected)
   const p = toScreen(camera, box.x + box.w / 2, box.y)

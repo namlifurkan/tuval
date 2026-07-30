@@ -3,7 +3,7 @@ import { toScreen } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
 import { textInsetFor } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
-import { fontString, layoutText, LINE_HEIGHT } from '../board/text'
+import { fontString, layoutText, LINE_HEIGHT, wrapText } from '../board/text'
 import { useItemIndex } from '../board/useBoard'
 import type { Item, TextStyle } from '../board/types'
 
@@ -56,8 +56,18 @@ export function TextEditor() {
   const fontSize = (style.autoFit ? layout.fontSize : style.fontSize) * camera.z
   const contentH = item.type === 'text' ? box.h * camera.z : layout.lines.length * layout.lineHeight * camera.z
 
+  const MIN_AUTOFIT = 8
+
   const commit = (value: string) => {
     patchItem(item.id, { text: value })
+    if (item.type === 'sticky' || item.type === 'shape') {
+      const fitted = layoutText(value || ' ', box.w, box.h, style)
+      if (fitted.fontSize <= MIN_AUTOFIT) {
+        const lines = wrapText(value || ' ', box.w, fontString(style, fitted.fontSize))
+        const needed = lines.length * fitted.fontSize * LINE_HEIGHT
+        if (needed > box.h + 1) patchItem(item.id, { h: Math.ceil(needed * (item.h / box.h)) })
+      }
+    }
     if (item.type === 'text') {
       const h = Math.max(
         style.fontSize * LINE_HEIGHT,

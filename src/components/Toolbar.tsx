@@ -1,11 +1,14 @@
 import {
-  Circle, Diamond, Frame, Highlighter, Image as ImageIcon, LayoutTemplate, Minus,
+  Circle, Diamond, Eraser, Frame, Highlighter, Image as ImageIcon, LayoutTemplate, Minus,
   MessageSquare, MousePointer2, MoreHorizontal, Pen, Redo2, Spline, Square, StickyNote,
   Triangle, Type, Undo2,
 } from 'lucide-react'
 import { useRef } from 'react'
-import { createItems, undoManager } from '../board/doc'
-import { makeImage } from '../board/items'
+import { fitRect } from '../board/camera'
+import { createItems, getItems, undoManager } from '../board/doc'
+import { makeFrame, makeImage } from '../board/items'
+import { boxOf } from '../board/render'
+import { TEMPLATES } from '../board/templates'
 import { SHAPE_LIST, shapeToSvgPath } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
@@ -43,9 +46,25 @@ export function Toolbar() {
   const stickyPop = usePopover()
   const shapePop = usePopover()
   const penPop = usePopover()
+  const templatePop = usePopover()
+  const framePop = usePopover()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const pick = (t: Tool) => () => { setTool(t); requestRender() }
+
+  const viewportCenter = () => {
+    const el = document.querySelector('canvas')!
+    const cam = useBoardStore.getState().camera
+    return { x: cam.x + el.clientWidth / 2 / cam.z, y: cam.y + el.clientHeight / 2 / cam.z }
+  }
+
+  const insert = (items: ReturnType<typeof makeFrame>[] | Parameters<typeof createItems>[0]) => {
+    createItems(items)
+    const el = document.querySelector('canvas')!
+    useBoardStore.getState().setCamera(fitRect(boxOf(items), el.clientWidth, el.clientHeight))
+    useBoardStore.getState().setSelection([])
+    requestRender()
+  }
 
   return (
     <div className="pointer-events-auto absolute left-4 top-1/2 z-40 -translate-y-1/2">
@@ -53,9 +72,27 @@ export function Toolbar() {
         <IconButton title="Select — V" active={tool === 'select'} onClick={pick('select')}>
           <MousePointer2 size={20} strokeWidth={1.8} />
         </IconButton>
-        <IconButton title="Templates" onClick={() => {}}>
-          <LayoutTemplate size={20} strokeWidth={1.8} />
-        </IconButton>
+        <div className="relative">
+          <IconButton title="Templates" active={templatePop.open} onClick={templatePop.toggle}>
+            <LayoutTemplate size={20} strokeWidth={1.8} />
+          </IconButton>
+          <Popover open={templatePop.open} onClose={templatePop.close} className="w-[268px]">
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Şablonlar</div>
+            <div className="flex flex-col gap-0.5">
+              {TEMPLATES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => { insert(t.build(viewportCenter())); templatePop.close() }}
+                  className="rounded-lg px-2.5 py-2 text-left hover:bg-[#F1F1F3]"
+                >
+                  <div className="text-sm font-semibold text-[#050038]">{t.name}</div>
+                  <div className="text-xs text-[#8A8A9B]">{t.description}</div>
+                </button>
+              ))}
+            </div>
+          </Popover>
+        </div>
         <IconButton title="Text — T" active={tool === 'text'} onClick={pick('text')}>
           <Type size={20} strokeWidth={1.8} />
         </IconButton>
@@ -123,20 +160,27 @@ export function Toolbar() {
             active={tool === 'pen'}
             onClick={() => { tool === 'pen' ? penPop.toggle() : setTool('pen') }}
           >
-            {pen.highlighter ? <Highlighter size={20} strokeWidth={1.8} /> : <Pen size={20} strokeWidth={1.8} />}
+            {pen.eraser
+              ? <Eraser size={20} strokeWidth={1.8} />
+              : pen.highlighter ? <Highlighter size={20} strokeWidth={1.8} /> : <Pen size={20} strokeWidth={1.8} />}
           </IconButton>
           <Popover open={penPop.open} onClose={penPop.close} className="w-[212px]">
             <div className="mb-2 flex gap-1">
               <button
                 type="button"
-                onClick={() => update({ pen: { ...pen, highlighter: false } })}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${!pen.highlighter ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
-              >Pen</button>
+                onClick={() => update({ pen: { ...pen, highlighter: false, eraser: false } })}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+              >Kalem</button>
               <button
                 type="button"
-                onClick={() => update({ pen: { ...pen, highlighter: true, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.highlighter ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+                onClick={() => update({ pen: { ...pen, highlighter: true, eraser: false, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
               >Marker</button>
+              <button
+                type="button"
+                onClick={() => update({ pen: { ...pen, eraser: true } })}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#E8ECFF] text-[#4262FF]' : 'hover:bg-[#F1F1F3]'}`}
+              >Silgi</button>
             </div>
             <div className="mb-2 flex items-center gap-2 px-1">
               <Minus size={14} />
@@ -162,9 +206,38 @@ export function Toolbar() {
         <IconButton title="Comment — C" active={tool === 'comment'} onClick={pick('comment')}>
           <MessageSquare size={20} strokeWidth={1.8} />
         </IconButton>
-        <IconButton title="Frame — F" active={tool === 'frame'} onClick={pick('frame')}>
-          <Frame size={20} strokeWidth={1.8} />
-        </IconButton>
+        <div className="relative">
+          <IconButton
+            title="Frame — F"
+            active={tool === 'frame'}
+            onClick={() => { tool === 'frame' ? framePop.toggle() : setTool('frame') }}
+          >
+            <Frame size={20} strokeWidth={1.8} />
+          </IconButton>
+          <Popover open={framePop.open} onClose={framePop.close} className="w-[212px]">
+            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#050038]">Frame boyutu</div>
+            <div className="flex flex-col gap-0.5">
+              {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(
+                ([label, w, h]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => {
+                      const c = viewportCenter()
+                      const n = getItems().filter((i) => i.type === 'frame').length + 1
+                      insert([makeFrame(c.x - w / 2, c.y - h / 2, w, h, `Frame ${n}`)])
+                      framePop.close()
+                    }}
+                    className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#F1F1F3]"
+                  >
+                    <span className="font-medium text-[#050038]">{label}</span>
+                    <span className="text-xs text-[#9B9BAB]">{w}×{h}</span>
+                  </button>
+                ),
+              )}
+            </div>
+          </Popover>
+        </div>
         <IconButton title="Upload image" onClick={() => fileRef.current?.click()}>
           <ImageIcon size={20} strokeWidth={1.8} />
         </IconButton>
