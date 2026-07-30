@@ -1,3 +1,5 @@
+import { isNode, layoutMindmap, rootOf } from '../board/mindmap'
+import { mindmapBranch, quickCreateFromSelection } from '../board/interaction'
 import { LABEL_SIZES, labelInk, STATUS_LABELS } from '../board/labels'
 import { t } from '../i18n'
 import { LANGS } from '../board/code'
@@ -77,6 +79,7 @@ export function Inspector() {
   const code = selected.length === 1 && selected[0].type === 'code' ? selected[0] : null
   const stickies = selected.filter((i) => i.type === 'sticky')
   const frame = selected.length === 1 && selected[0].type === 'frame' ? selected[0] : null
+  const mind = selected.length === 1 && isNode(selected[0]) ? selected[0] : null
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
 
@@ -176,6 +179,34 @@ export function Inspector() {
               >{c}</button>
             ))}
           </div>
+        </Section>
+      )}
+
+      {mind && (
+        <Section title={t('Mind map')}>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => { quickCreateFromSelection('right'); requestRender() }}
+              className="flex-1 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-xs font-semibold text-[#C8452D]"
+            >
+              {t('Add child')} <span className="opacity-60">Tab</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { mindmapBranch(true); requestRender() }}
+              className="flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+            >
+              {t('Add sibling')} <span className="opacity-60">↵</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => { layoutMindmap(rootOf(mind.id)); requestRender() }}
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+          >
+            {t('Tidy layout')}
+          </button>
         </Section>
       )}
 

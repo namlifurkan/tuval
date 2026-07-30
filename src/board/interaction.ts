@@ -410,7 +410,8 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     }
     if (only && QUICK_TYPES.has(only.type) && !only.locked) {
       const side = quickHit(s.camera, only, screen)
-      if (side) { quickCreate(only.id, side); drag = null; return }
+      // Route through quickCreateFromSelection so a mind node branches instead of cloning.
+      if (side) { quickCreateFromSelection(side); drag = null; return }
     }
   }
 

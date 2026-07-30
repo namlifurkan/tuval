@@ -277,6 +277,9 @@ const tr: Record<string, string> = {
   'Label size': 'Etiket boyutu',
   'Auto': 'Oto',
   'Main idea': 'Ana fikir',
+  'Add child': 'Alt dal',
+  'Add sibling': 'Kardeş dal',
+  'Tidy layout': 'Yerleşimi düzelt',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }
