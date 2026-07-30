@@ -66,5 +66,10 @@ kilitli item'lar seçilebilir (rozetli, taşınamaz), hizala/dağıt/ızgaraya d
 kopyala-yapıştır, opaklık + hex renk seçici, board içi arama (`⌘F`), connector etiketi
 düzenleme, marquee frame'i ancak tamamen kapsayınca seçer.
 
-Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi,
-sürükleme sırasında Yjs yazımlarını throttle etme (doküman büyümesi).
+**Faz 4-5 — cila:** resize/rotate sırasında canlı boyut-açı rozeti, görsellerde oran
+kilidi, eşit-aralık snap'i ve aralık işaretleri, sürüklenen item'ın altındaki frame'in
+vurgulanması, canlı önizlemeli frame paneli, canvas'ta frame başlığı yeniden adlandırma,
+metin yazarken otomatik genişleme, PNG dışa aktarma, connector kırılma noktası,
+zoom menüsü, board menüsü, canlı katılımcı avatarları, uzak zoom'da metin LOD'u.
+
+Sırada: Supabase (auth + board listesi + storage + snapshot), çoklu kullanıcı testi.

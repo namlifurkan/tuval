@@ -317,12 +317,13 @@ export function connectorPath(item: Item & { type: 'connector' }, resolve: (e: E
   if (item.bend) {
     const m = item.bend
     if (item.shape === 'curved') {
+      const c = bendControl(a, b, m)
       const out: Vec[] = []
       for (let i = 0; i <= 24; i++) {
         const t = i / 24, u = 1 - t
         out.push({
-          x: u * u * a.x + 2 * u * t * m.x + t * t * b.x,
-          y: u * u * a.y + 2 * u * t * m.y + t * t * b.y,
+          x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
+          y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
         })
       }
       return out
@@ -344,6 +345,11 @@ export function connectorPath(item: Item & { type: 'connector' }, resolve: (e: E
   for (let i = 0; i <= 24; i++) out.push(cubicAt(a, c1, c2, b, i / 24))
   return out
 }
+
+export const bendControl = (a: Vec, b: Vec, through: Vec): Vec => ({
+  x: 2 * through.x - (a.x + b.x) / 2,
+  y: 2 * through.y - (a.y + b.y) / 2,
+})
 
 export function curveControls(item: Item & { type: 'connector' }, a: Vec, b: Vec): [Vec, Vec] {
   const d = Math.max(40, Math.hypot(b.x - a.x, b.y - a.y) * 0.4)

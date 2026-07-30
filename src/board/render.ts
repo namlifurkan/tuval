@@ -2,7 +2,7 @@ import getStroke from 'perfect-freehand'
 import type { Camera } from './camera'
 import { toScreen, viewportRect } from './camera'
 import {
-  ANCHOR_SIDES, aabb, anchorPoint, connectorPath, corners, curveControls, overlaps,
+  ANCHOR_SIDES, aabb, anchorPoint, bendControl, connectorPath, corners, curveControls, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
 import { resolveEndpoint } from './items'
@@ -272,8 +272,9 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   const endTrim = capLength(item.capEnd, item.strokeWidth)
 
   if (item.shape === 'curved' && item.bend) {
+    const c = bendControl(a, b, item.bend)
     path.moveTo(a.x, a.y)
-    path.quadraticCurveTo(item.bend.x, item.bend.y, b.x, b.y)
+    path.quadraticCurveTo(c.x, c.y, b.x, b.y)
   } else if (item.shape === 'curved') {
     const [c1, c2] = curveControls(item, a, b)
     path.moveTo(a.x, a.y)
