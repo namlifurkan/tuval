@@ -18,8 +18,10 @@ export function IconButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-colors
-        ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}
+      className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-[background-color,box-shadow] duration-150
+        ${active
+          ? 'bg-[#F7E9E4] text-[#C8452D] ring-1 ring-[#C8452D]/25'
+          : 'hover:bg-[#EAE6DD] hover:ring-1 hover:ring-black/[0.07]'}
         ${disabled ? 'cursor-not-allowed opacity-35' : ''} ${className}`}
     >
       {children}

@@ -87,11 +87,33 @@ export function Dock() {
 
   const onMove = (e: React.PointerEvent) => {
     if (!magnify || dragId) return
-    barRef.current?.querySelectorAll<HTMLElement>('[data-slot]').forEach((el) => {
-      const rect = el.getBoundingClientRect()
-      const distance = Math.abs(rect.left + rect.width / 2 - e.clientX)
-      const scale = 1 + MAGNIFY_AMPLITUDE * Math.exp(-((distance / MAGNIFY_SPREAD) ** 2))
-      el.style.transform = `translateY(${-(scale - 1) * unit * 0.55}px) scale(${scale})`
+    const bar = barRef.current
+    if (!bar) return
+    const slots = [...bar.querySelectorAll<HTMLElement>('[data-slot]')]
+    if (!slots.length) return
+
+    const pointer = e.clientX - bar.getBoundingClientRect().left + bar.scrollLeft
+    const centers = slots.map((el) => el.offsetLeft + el.offsetWidth / 2)
+    const scales = centers.map((c) => 1 + MAGNIFY_AMPLITUDE * Math.exp(-(((c - pointer) / MAGNIFY_SPREAD) ** 2)))
+    const extras = slots.map((el, i) => el.offsetWidth * (scales[i] - 1))
+
+    let nearest = 0
+    for (let i = 1; i < centers.length; i++) {
+      if (Math.abs(centers[i] - pointer) < Math.abs(centers[nearest] - pointer)) nearest = i
+    }
+
+    const before: number[] = []
+    let running = 0
+    for (const extra of extras) {
+      before.push(running)
+      running += extra
+    }
+    const anchor = before[nearest] + extras[nearest] / 2
+
+    slots.forEach((el, i) => {
+      const shift = before[i] + extras[i] / 2 - anchor
+      const lift = -(scales[i] - 1) * unit * 0.55
+      el.style.transform = `translate(${shift}px, ${lift}px) scale(${scales[i]})`
     })
   }
 
@@ -134,8 +156,10 @@ export function Dock() {
       aria-label={title}
       onClick={onClick}
       style={{ width: unit, height: unit }}
-      className={`tap-target grid place-items-center rounded-xl transition-colors
-        ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310] hover:bg-[#EFEBE2]'}`}
+      className={`tap-target grid place-items-center rounded-xl transition-[background-color,box-shadow] duration-150
+        ${active
+          ? 'bg-[#F7E9E4] text-[#C8452D] shadow-[0_1px_3px_rgba(20,19,16,0.14)] ring-1 ring-[#C8452D]/25'
+          : 'text-[#141310] hover:bg-[#EAE6DD] hover:shadow-[0_1px_3px_rgba(20,19,16,0.12)] hover:ring-1 hover:ring-black/[0.07]'}`}
     >
       {icon}
     </button>
@@ -339,7 +363,7 @@ export function Dock() {
               type="button"
               onClick={zoomPop.toggle}
               style={{ height: unit }}
-              className="min-w-[50px] rounded-lg px-1 text-sm font-semibold tabular-nums text-[#141310] hover:bg-[#EFEBE2]"
+              className="min-w-[50px] rounded-lg px-1 text-sm font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[0_1px_3px_rgba(20,19,16,0.12)] hover:ring-1 hover:ring-black/[0.07]"
             >
               {Math.round(camera.z * 100)}%
             </button>
