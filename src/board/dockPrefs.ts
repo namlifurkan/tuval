@@ -1,18 +1,19 @@
 export type DockItemId =
   | 'undo' | 'redo' | 'select' | 'sticky' | 'text' | 'shape' | 'connector' | 'pen'
-  | 'table' | 'mindmap' | 'frame' | 'comment' | 'templates' | 'image' | 'more'
+  | 'table' | 'mindmap' | 'frame' | 'comment' | 'code' | 'templates' | 'image' | 'more'
   | 'minimap' | 'fit' | 'zoom'
 
 export const DOCK_LABELS: Record<DockItemId, string> = {
   undo: 'Geri al', redo: 'İleri al', select: 'Seç', sticky: 'Sticky', text: 'Metin',
   shape: 'Şekil', connector: 'Bağlantı', pen: 'Kalem', table: 'Tablo', mindmap: 'Zihin haritası',
-  frame: 'Frame', comment: 'Yorum', templates: 'Şablonlar', image: 'Görsel', more: 'Daha fazla',
+  frame: 'Frame', comment: 'Yorum', code: 'Kod bloğu', templates: 'Şablonlar', image: 'Görsel',
+  more: 'Daha fazla',
   minimap: 'Minimap', fit: 'İçeriğe sığdır', zoom: 'Zoom',
 }
 
 export const DEFAULT_ORDER: DockItemId[] = [
   'undo', 'redo', 'select', 'sticky', 'text', 'shape', 'connector', 'pen',
-  'table', 'mindmap', 'frame', 'comment', 'templates', 'image', 'more',
+  'table', 'mindmap', 'frame', 'comment', 'code', 'templates', 'image', 'more',
   'minimap', 'fit', 'zoom',
 ]
 

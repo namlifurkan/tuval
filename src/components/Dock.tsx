@@ -8,7 +8,7 @@ import {
   setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
-import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
+import { makeCode, makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
 import { TEMPLATES } from '../board/templates'
@@ -16,7 +16,7 @@ import { requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { LINE_COLORS, STICKY_COLORS, type ShapeKind } from '../board/types'
 import {
-  Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
+  CodeTool, Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
   Nib, Select, Sticky, TableTool, Templates, TextTool,
 } from './icons'
 import { ColorGrid, IconButton, Popover, usePopover } from './ui'
@@ -77,7 +77,7 @@ export function Dock() {
   const side = prefs.side
   const vertical = side === 'left' || side === 'right'
   const originClass = { bottom: 'origin-bottom', top: 'origin-top', left: 'origin-left', right: 'origin-right' }[side]
-  const popSide = { bottom: 'top', top: 'bottom', left: 'right', right: 'right' }[side] as 'top' | 'bottom' | 'right'
+  const popSide = { bottom: 'top', top: 'bottom', left: 'right', right: 'left' }[side] as 'top' | 'bottom' | 'right' | 'left'
   const unit = SIZE_PX[prefs.size]
   const glyph = Math.round(unit * 0.52)
 
@@ -314,6 +314,15 @@ export function Dock() {
           </div>
         )
 
+      case 'code':
+        return button('Kod bloğu', false, () => {
+          const c = viewportCenter()
+          const item = makeCode(c.x - 260, c.y - 40)
+          createItems([item])
+          useBoardStore.getState().setSelection([item.id])
+          useBoardStore.getState().setEditing({ id: item.id, selectAll: false })
+          requestRender()
+        }, <CodeTool size={glyph} />)
       case 'templates':
         return (
           <div className="relative">

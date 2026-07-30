@@ -36,17 +36,29 @@ export function Popover({
   onClose: () => void
   children: ReactNode
   className?: string
-  anchor?: 'right' | 'top' | 'bottom' | 'topLeft' | 'bottomRight'
+  anchor?: 'right' | 'left' | 'top' | 'bottom' | 'topLeft' | 'bottomRight'
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const holder = useRef<HTMLSpanElement>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
 
   useLayoutEffect(() => {
-    if (!open) return setRect(null)
+    if (!open) { setRect(null); setSize(null); return }
     const trigger = holder.current?.parentElement
     if (trigger) setRect(trigger.getBoundingClientRect())
   }, [open])
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!open || !el) return
+    const measure = () => setSize({ w: el.offsetWidth, h: el.offsetHeight })
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => { ro.disconnect(); window.removeEventListener('resize', measure) }
+  }, [open, rect])
 
   useEffect(() => {
     if (!open) return
@@ -68,18 +80,47 @@ export function Popover({
   const style = (): CSSProperties => {
     if (!rect) return { visibility: 'hidden' }
     const gap = 10
+    const pad = 8
+    const w = size?.w ?? 0
+    const h = size?.h ?? 0
+    const clampX = (x: number) => Math.max(pad, Math.min(x, window.innerWidth - w - pad))
+    const clampY = (y: number) => Math.max(pad, Math.min(y, window.innerHeight - h - pad))
+
+    let left: number
+    let top: number
     switch (anchor) {
       case 'right':
-        return { left: rect.right + gap, top: rect.top }
+        left = rect.right + gap
+        top = rect.top
+        if (left + w > window.innerWidth - pad) left = rect.left - gap - w
+        break
+      case 'left':
+        left = rect.left - gap - w
+        top = rect.top
+        if (left < pad) left = rect.right + gap
+        break
       case 'top':
-        return { bottom: window.innerHeight - rect.top + gap, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
+        left = rect.left + rect.width / 2 - w / 2
+        top = rect.top - gap - h
+        if (top < pad) top = rect.bottom + gap
+        break
       case 'topLeft':
-        return { bottom: window.innerHeight - rect.top + gap, left: rect.left }
+        left = rect.left
+        top = rect.top - gap - h
+        if (top < pad) top = rect.bottom + gap
+        break
       case 'bottomRight':
-        return { top: rect.bottom + gap, right: window.innerWidth - rect.right }
+        left = rect.right - w
+        top = rect.bottom + gap
+        if (top + h > window.innerHeight - pad) top = rect.top - gap - h
+        break
       default:
-        return { top: rect.bottom + gap, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
+        left = rect.left + rect.width / 2 - w / 2
+        top = rect.bottom + gap
+        if (top + h > window.innerHeight - pad) top = rect.top - gap - h
+        break
     }
+    return { left: clampX(left), top: clampY(top), visibility: size ? 'visible' : 'hidden' }
   }
 
   if (!open) return <span ref={holder} className="hidden" />
@@ -92,7 +133,7 @@ export function Popover({
           ref={ref}
           onPointerDown={(e) => e.stopPropagation()}
           style={style()}
-          className={`fixed z-[70] max-h-[80vh] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)] ${className}`}
+          className={`fixed z-[70] max-h-[calc(100vh-16px)] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)] ${className}`}
         >
           {children}
         </div>,

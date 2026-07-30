@@ -4,7 +4,7 @@ import { anchorPoint, nearestAnchor, resolveConnector } from './geometry'
 import type { Ends } from './geometry'
 import { me } from './me'
 import type {
-  AnchorSide, CommentItem, CommentReply, ConnectorItem, DrawItem, EmbedItem, Endpoint, FrameItem,
+  AnchorSide, CodeItem, CommentItem, CommentReply, ConnectorItem, DrawItem, EmbedItem, Endpoint, FrameItem,
   ImageItem, Item,
   Rect, ShapeItem, StickyItem, TableItem, TextItem, TextStyle, Vec,
 } from './types'
@@ -64,6 +64,27 @@ export function makeText(x: number, y: number, w: number, style: TextStyle): Tex
     valign: 'top',
     autoFit: false,
   }
+}
+
+export const CODE_PAD = 16
+export const CODE_LINE = 1.5
+
+export function makeCode(x: number, y: number, w = 520, lang = 'ts'): CodeItem {
+  const fontSize = 15
+  return {
+    ...base(x, y, w, fontSize * CODE_LINE + CODE_PAD * 2),
+    type: 'code',
+    text: '',
+    lang,
+    fontSize,
+    theme: 'light',
+    showLines: true,
+  }
+}
+
+export function codeHeight(item: Pick<CodeItem, 'text' | 'fontSize'>) {
+  const lines = Math.max(1, item.text.split('\n').length)
+  return Math.ceil(lines * item.fontSize * CODE_LINE + CODE_PAD * 2)
 }
 
 export function makeDraw(

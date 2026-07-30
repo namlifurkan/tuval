@@ -80,6 +80,10 @@ export const Highlight = (p: Props) => (
   <Ico {...p} d={['M8 3 H16 V9.5 L13 13 H11 L8 9.5 Z', 'M11 13 V18 H13 V13', 'M6.5 21 H17.5']} />
 )
 
+export const CodeTool = (p: Props) => (
+  <Ico {...p} d={['M9 7.5 L3.5 12 L9 16.5', 'M15 7.5 L20.5 12 L15 16.5', 'M13.5 4 L10.5 20']} />
+)
+
 export const More = (p: Props) => (
   <Ico {...p} d={['M3.5 10.5 H6.5 V13.5 H3.5 Z', 'M10.5 10.5 H13.5 V13.5 H10.5 Z', 'M17.5 10.5 H20.5 V13.5 H17.5 Z']} />
 )

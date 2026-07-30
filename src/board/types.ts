@@ -123,6 +123,15 @@ export interface TableItem extends BaseItem, TextStyle {
   strokeWidth: number
 }
 
+export interface CodeItem extends BaseItem {
+  type: 'code'
+  text: string
+  lang: string
+  fontSize: number
+  theme: 'light' | 'dark'
+  showLines: boolean
+}
+
 export interface Endpoint {
   itemId: Id | null
   anchor: AnchorSide | null
@@ -147,7 +156,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
 
 export type Item =
   | StickyItem | ShapeItem | TextItem | DrawItem | ImageItem | FrameItem | ConnectorItem
-  | CommentItem | TableItem | EmbedItem
+  | CommentItem | TableItem | EmbedItem | CodeItem
 
 export type ItemType = Item['type']
 

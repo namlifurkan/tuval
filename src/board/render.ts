@@ -6,7 +6,8 @@ import {
   curveControls, midpoint, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
-import { cellRect, connectorEnds } from './items'
+import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
+import { CODE_THEME, tokenize } from './code'
 import { isDarkSurface } from './brand'
 import { drawPaper } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
@@ -126,6 +127,7 @@ function drawItem(s: Scene, item: Item) {
       case 'connector': drawConnector(s, item); break
       case 'table': drawTable(s, item); break
       case 'embed': drawEmbed(s, item); break
+      case 'code': drawCode(s, item); break
       case 'comment': break
     }
   })
@@ -365,6 +367,61 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
     ctx.textBaseline = 'middle'
     ctx.fillText(item.text, mid.x, mid.y)
   }
+}
+
+function drawCode(s: Scene, item: Item & { type: 'code' }) {
+  const { ctx } = s
+  const t = CODE_THEME[item.theme]
+  const path = new Path2D()
+  path.roundRect(item.x, item.y, item.w, item.h, 8)
+  ctx.fillStyle = t.bg
+  ctx.fill(path)
+  ctx.strokeStyle = t.edge
+  ctx.lineWidth = 1
+  ctx.setLineDash([])
+  ctx.stroke(path)
+  if (s.editing === item.id) return
+
+  const lines = item.text.split('\n')
+  const lh = item.fontSize * CODE_LINE
+  const gutterW = item.showLines
+    ? Math.max(2, String(lines.length).length) * item.fontSize * 0.62 + 10
+    : 0
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(item.x, item.y, item.w, item.h)
+  ctx.clip()
+  ctx.font = `${item.fontSize}px "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace`
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = 'left'
+
+  lines.forEach((line, n) => {
+    const y = item.y + CODE_PAD + lh * n + lh / 2
+    if (y < item.y - lh || y > item.y + item.h + lh) return
+    if (item.showLines) {
+      ctx.fillStyle = t.gutter
+      ctx.textAlign = 'right'
+      ctx.fillText(String(n + 1), item.x + CODE_PAD + gutterW - 10, y)
+      ctx.textAlign = 'left'
+    }
+    let x = item.x + CODE_PAD + gutterW
+    for (const token of tokenize(line, item.lang)) {
+      ctx.fillStyle = t[token.kind]
+      ctx.fillText(token.text, x, y)
+      x += ctx.measureText(token.text).width
+    }
+  })
+  ctx.restore()
+
+  ctx.fillStyle = t.gutter
+  ctx.font = '600 10px "Instrument Sans", system-ui, sans-serif'
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'alphabetic'
+  ctx.letterSpacing = '1px'
+  ctx.fillText(item.lang.toUpperCase(), item.x + item.w - 10, item.y + 15)
+  ctx.letterSpacing = '0px'
+  ctx.textAlign = 'left'
 }
 
 function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {

@@ -1,3 +1,10 @@
+import { LANGS } from '../board/code'
+import { codeHeight } from '../board/items'
+import { useSyncExternalStore } from 'react'
+import { getDockPrefs, SIZE_PX, subscribeDock } from '../board/dockPrefs'
+
+const readDockSide = () => getDockPrefs().side
+
 import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical,
   AlignHorizontalDistributeCenter, AlignLeft, AlignRight, AlignStartHorizontal, AlignStartVertical,
@@ -55,6 +62,7 @@ function Chip({
 
 export function Inspector() {
   const selected = useSelectedItems()
+  const dockSide = useSyncExternalStore(subscribeDock, readDockSide, readDockSide)
   const editing = useBoardStore((s) => s.editing)
   const dragging = useBoardStore((s) => s.dragging)
 
@@ -62,7 +70,8 @@ export function Inspector() {
   if (selected.every((i) => i.type === 'comment')) return null
 
   const first = selected[0] as Item & Record<string, unknown>
-  const textual = selected.filter((i) => 'text' in i)
+  const textual = selected.filter((i) => 'text' in i && i.type !== 'code')
+  const code = selected.length === 1 && selected[0].type === 'code' ? selected[0] : null
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
 
@@ -74,7 +83,9 @@ export function Inspector() {
   }
 
   return (
-    <aside className="pointer-events-auto absolute right-4 top-[76px] z-30 flex max-h-[calc(100dvh-190px)] w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+    <aside
+      style={{ right: dockSide === 'right' ? SIZE_PX[getDockPrefs().size] + 44 : 16 }}
+      className="pointer-events-auto absolute top-[76px] z-30 flex max-h-[calc(100dvh-190px)] w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <header className="flex items-baseline justify-between border-b border-[#EAE6DD] px-3 py-2.5">
         <span className="text-sm font-semibold text-[#141310]">
           {selected.length === 1 ? TYPE_LABEL[selected[0].type] ?? selected[0].type : `${selected.length} öğe`}
@@ -156,6 +167,41 @@ export function Inspector() {
                   ${first.capEnd === c ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
               >{c}</button>
             ))}
+          </div>
+        </Section>
+      )}
+
+      {code && (
+        <Section title="Kod">
+          <div className="mb-2 flex gap-1.5">
+            <select
+              value={code.lang}
+              onChange={(e) => patch({ lang: e.target.value })}
+              className="flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+            >
+              {LANGS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+            <select
+              value={code.fontSize}
+              onChange={(e) => {
+                const fontSize = Number(e.target.value)
+                patch({ fontSize, h: codeHeight({ text: code.text, fontSize }) })
+              }}
+              className="w-[70px] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+            >
+              {[11, 13, 15, 18, 22, 28].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div className="flex gap-1">
+            <Chip title="Açık tema" active={code.theme === 'light'} onClick={() => patch({ theme: 'light' })}>
+              <span className="px-1 text-xs font-semibold">Açık</span>
+            </Chip>
+            <Chip title="Koyu tema" active={code.theme === 'dark'} onClick={() => patch({ theme: 'dark' })}>
+              <span className="px-1 text-xs font-semibold">Koyu</span>
+            </Chip>
+            <Chip title="Satır numarası" active={code.showLines} onClick={() => patch({ showLines: !code.showLines })}>
+              <span className="px-1 text-xs font-semibold">1 2 3</span>
+            </Chip>
           </div>
         </Section>
       )}
@@ -277,4 +323,5 @@ export function Inspector() {
 const TYPE_LABEL: Record<string, string> = {
   sticky: 'Sticky', shape: 'Şekil', text: 'Metin', draw: 'Çizim', image: 'Görsel',
   frame: 'Frame', connector: 'Bağlantı', table: 'Tablo', embed: 'Gömülü', comment: 'Yorum',
+  code: 'Kod bloğu',
 }

@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { toScreen } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
-import { cellRect, setCell } from '../board/items'
+import { CODE_THEME } from '../board/code'
+import { CODE_LINE, CODE_PAD, cellRect, codeHeight, setCell } from '../board/items'
 import { connectorGeometry } from '../board/render'
 import { textInsetFor } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
@@ -29,6 +30,68 @@ function textBox(item: Item, cell?: [number, number]) {
     return { x: item.x + b.x, y: item.y + b.y, w: b.w, h: b.h }
   }
   return { x: item.x, y: item.y, w: item.w, h: item.h }
+}
+
+function CodeEditor({ item }: { item: Item & { type: 'code' } }) {
+  const camera = useBoardStore((s) => s.camera)
+  const setEditing = useBoardStore((s) => s.setEditing)
+  const ref = useRef<HTMLTextAreaElement>(null)
+  const p = toScreen(camera, item.x, item.y)
+  const t = CODE_THEME[item.theme]
+  const gutter = item.showLines
+    ? Math.max(2, String(item.text.split('\n').length).length) * item.fontSize * 0.62 + 10
+    : 0
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.focus({ preventScroll: true })
+    el.setSelectionRange(el.value.length, el.value.length)
+  }, [])
+
+  const commit = (next: string) => {
+    patchItem(item.id, { text: next, h: codeHeight({ text: next, fontSize: item.fontSize }) })
+    requestRender()
+  }
+
+  return (
+    <textarea
+      ref={ref}
+      value={item.text}
+      spellCheck={false}
+      autoCapitalize="off"
+      autoCorrect="off"
+      onChange={(e) => commit(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault()
+          const el = e.currentTarget
+          const at = el.selectionStart
+          const next = `${el.value.slice(0, at)}  ${el.value.slice(el.selectionEnd)}`
+          commit(next)
+          requestAnimationFrame(() => el.setSelectionRange(at + 2, at + 2))
+        }
+        if (e.key === 'Escape') { e.stopPropagation(); setEditing(null) }
+      }}
+      onBlur={() => { setEditing(null); requestRender() }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
+      className="absolute z-30 resize-none border-0 bg-transparent outline-none"
+      style={{
+        left: p.x + (CODE_PAD + gutter) * camera.z,
+        top: p.y + CODE_PAD * camera.z,
+        width: (item.w - CODE_PAD * 2 - gutter) * camera.z,
+        height: (item.h - CODE_PAD * 2) * camera.z,
+        font: `${item.fontSize * camera.z}px "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace`,
+        lineHeight: `${item.fontSize * CODE_LINE * camera.z}px`,
+        color: t.plain,
+        caretColor: t.plain,
+        tabSize: 2,
+        whiteSpace: 'pre',
+        overflow: 'hidden',
+      }}
+    />
+  )
 }
 
 export function TextEditor() {
@@ -60,6 +123,7 @@ export function TextEditor() {
   }, [editing, setEditing])
 
   if (!editing || !item) return null
+  if (item.type === 'code') return <CodeEditor item={item} />
   const isTable = item.type === 'table'
   if (!isTable && !('text' in item)) return null
 

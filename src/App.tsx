@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react'
 import { Canvas } from './components/Canvas'
 import { CommentsPanel } from './components/CommentsPanel'
 import { CursorChat } from './components/CursorChat'
@@ -17,12 +18,22 @@ import { TopBar } from './components/TopBar'
 import { Inspector } from './components/Inspector'
 import { Minimap } from './components/Minimap'
 import { useBoardStore } from './board/store'
+import { getDockPrefs, subscribeDock } from './board/dockPrefs'
+
+const readDockSide = () => getDockPrefs().side
 
 function MinimapCorner() {
   const show = useBoardStore((s) => s.showMinimap)
+  const side = useSyncExternalStore(subscribeDock, readDockSide, readDockSide)
   if (!show) return null
+  const place = {
+    bottom: 'bottom-[88px] right-4',
+    top: 'bottom-5 right-4',
+    right: 'bottom-5 left-4',
+    left: 'bottom-5 right-4',
+  }[side]
   return (
-    <div className="pointer-events-auto absolute bottom-[88px] right-4 z-30">
+    <div className={`pointer-events-auto absolute z-30 ${place}`}>
       <Minimap />
     </div>
   )
