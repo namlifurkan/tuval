@@ -190,3 +190,95 @@ $$;
 
 revoke all on function public.claim_invites() from public;
 grant execute on function public.claim_invites() to authenticated;
+
+-- Domain access ---------------------------------------------------------------------------
+-- A board can be opened to everyone at one email domain. The domain is not free text: the
+-- policy only accepts the domain the owner themselves signed in with, so nobody can claim a
+-- domain they cannot receive mail at. Public mailbox providers are refused outright.
+
+alter table public.boards add column if not exists allowed_domain text;
+alter table public.boards add column if not exists domain_role text
+  default 'editor' check (domain_role in ('editor', 'viewer'));
+
+create or replace function public.email_domain(addr text)
+returns text
+language sql
+immutable
+as $$ select lower(split_part(coalesce(addr, ''), '@', 2)) $$;
+
+create table if not exists public.public_mail_domains (domain text primary key);
+insert into public.public_mail_domains (domain) values
+  ('gmail.com'), ('googlemail.com'), ('outlook.com'), ('hotmail.com'), ('live.com'),
+  ('yahoo.com'), ('icloud.com'), ('me.com'), ('proton.me'), ('protonmail.com'),
+  ('yandex.com'), ('mail.ru'), ('aol.com'), ('gmx.com'), ('zoho.com')
+on conflict (domain) do nothing;
+
+alter table public.public_mail_domains enable row level security;
+drop policy if exists public_mail_read on public.public_mail_domains;
+create policy public_mail_read on public.public_mail_domains for select to authenticated using (true);
+
+-- Refuse a domain the owner does not sign in with, and refuse shared mailbox providers.
+create or replace function public.boards_guard_domain()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.allowed_domain is null then
+    return new;
+  end if;
+  new.allowed_domain := lower(new.allowed_domain);
+  if new.allowed_domain <> public.email_domain((select auth.jwt() ->> 'email')) then
+    raise exception 'a board can only be opened to the domain you sign in with';
+  end if;
+  if exists (select 1 from public.public_mail_domains d where d.domain = new.allowed_domain) then
+    raise exception 'that domain is a public mailbox provider';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists boards_domain_guard on public.boards;
+create trigger boards_domain_guard before insert or update of allowed_domain on public.boards
+  for each row execute function public.boards_guard_domain();
+
+create or replace function public.can_read_board(board text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.boards b
+    where b.id = board and (
+      b.owner = (select auth.uid())
+      or (b.allowed_domain is not null
+          and b.allowed_domain = public.email_domain((select auth.jwt() ->> 'email')))
+    )
+  ) or exists (
+    select 1 from public.board_members m
+    where m.board_id = board and m.user_id = (select auth.uid())
+  );
+$$;
+
+create or replace function public.can_write_board(board text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.boards b
+    where b.id = board and (
+      b.owner = (select auth.uid())
+      or (b.allowed_domain is not null and b.domain_role = 'editor'
+          and b.allowed_domain = public.email_domain((select auth.jwt() ->> 'email')))
+    )
+  ) or exists (
+    select 1 from public.board_members m
+    where m.board_id = board and m.user_id = (select auth.uid()) and m.role = 'editor'
+  );
+$$;

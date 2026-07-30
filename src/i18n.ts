@@ -347,6 +347,11 @@ const tr: Record<string, string> = {
     'Erişim açıldı ama e-posta gitmedi: {reason}',
   'The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.':
     'Davet, Supabase SMTP\'nden giriş bağlantısı olarak gider. Authentication → SMTP Settings\'ten ayarla; yoksa dahili gönderici birkaç mesajdan sonra kısar.',
+  'Everyone at {domain}': '{domain} uzantılı herkes',
+  'Anyone signing in with that domain can open this board, no invite needed.':
+    'O uzantıyla giren herkes bu board\'u açabilir, davete gerek yok.',
+  'Off: only the people listed below can open this board.':
+    'Kapalı: board\'u yalnızca aşağıdaki kişiler açabilir.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

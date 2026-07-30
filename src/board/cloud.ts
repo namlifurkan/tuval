@@ -108,6 +108,32 @@ export interface Member {
   owner: boolean
 }
 
+export interface DomainAccess {
+  domain: string | null
+  role: 'editor' | 'viewer'
+}
+
+export const myDomain = () => (getUser()?.email ?? '').split('@')[1]?.toLowerCase() ?? ''
+
+export async function getDomainAccess(room: string): Promise<DomainAccess> {
+  if (!supabase || !getUser()) return { domain: null, role: 'editor' }
+  const { data } = await supabase
+    .from('boards').select('allowed_domain, domain_role').eq('id', room).maybeSingle()
+  return {
+    domain: (data?.allowed_domain as string) ?? null,
+    role: (data?.domain_role as 'editor' | 'viewer') ?? 'editor',
+  }
+}
+
+export async function setDomainAccess(room: string, next: DomainAccess) {
+  if (!supabase || !getUser()) return 'not signed in'
+  const { error } = await supabase
+    .from('boards')
+    .update({ allowed_domain: next.domain, domain_role: next.role })
+    .eq('id', room)
+  return error ? error.message : null
+}
+
 export interface Invite {
   email: string
   role: 'editor' | 'viewer'
