@@ -6,6 +6,12 @@ Miro, FigJam ve benzeri araçlara açık kaynak bir alternatif. Kod, tasarım ve
 tamamen kendimize ait; hiçbir ticari üründen görsel kimlik veya varlık kopyalanmamıştır.
 Ürün vizyonu ve çalışma kuralları için [CLAUDE.md](CLAUDE.md).
 
+## Lisans
+
+[AGPL-3.0-or-later](LICENSE). Tuval'i dilediğin gibi kullan, değiştir ve self-host et.
+Değiştirilmiş bir sürümü ağ üzerinden bir servis olarak sunuyorsan, kullanıcılarına
+kaynak kodunu da sunmak zorundasın.
+
 ## Çalıştırma
 
 ```bash

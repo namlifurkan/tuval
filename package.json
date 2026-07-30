@@ -1,7 +1,9 @@
 {
-  "name": "miroclone",
-  "private": true,
-  "version": "0.0.0",
+  "name": "tuval",
+  "version": "0.1.0",
+  "description": "Açık kaynak sonsuz tuval — Canvas 2D + Yjs CRDT",
+  "license": "AGPL-3.0-or-later",
+  "repository": { "type": "git", "url": "" },
   "type": "module",
   "scripts": {
     "dev": "vite",
