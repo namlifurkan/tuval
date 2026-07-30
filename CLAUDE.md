@@ -160,8 +160,11 @@ döngüsü. Doküman Yjs CRDT; kalıcılık IndexedDB, çoklu kullanıcı y-webs
   birikir, ~80ms'de bir ve bırakışta flush edilir.
 - `src/board/doc.ts` ve `store.ts` singleton state tutar; ikisinde de `import.meta.hot.accept →
   invalidate` var, HMR'de tam reload olsun diye. Bu satırları silme, yoksa ikinci bir Y.Doc oluşur.
-- Değişiklik sonrası: `npx tsc --noEmit` ve `npx vite build`. Test suite'i her adımda değil, iş
-  bitince bir kez.
+- **Tip kontrolü `npx tsc -b --noEmit` ile yapılır.** `npx tsc --noEmit` bu projede hiçbir şeyi
+  kontrol etmez: kök `tsconfig.json` `"files": []` olan bir solution dosyası, gerçek ayarlar
+  `tsconfig.app.json` içinde. Bare komut sessizce başarılı döner ve hataları gizler.
+- Değişiklik sonrası: `npx tsc -b --noEmit` ve `npx vite build`. Test suite'i her adımda değil,
+  iş bitince bir kez.
 
 ### Doğrulama
 

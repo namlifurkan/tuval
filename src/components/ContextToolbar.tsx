@@ -1,6 +1,6 @@
 import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical,
-  AlignHorizontalDistributeCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight,
+  AlignHorizontalDistributeCenter, AlignLeft, AlignRight,
   AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowRight, Bold,
   Copy, Grid3x3, Italic, LayoutGrid, Lock, Maximize, MoveDown, MoveUp, PenLine, Strikethrough,
   Table2, Trash2,

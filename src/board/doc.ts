@@ -30,10 +30,10 @@ function rebuild() {
     next.push(item)
     map.set(item.id, item)
   })
-  const resolve = makeResolver(map)
+  const ends = makeResolver(map)
   for (const item of next) {
     if (item.type !== 'connector') continue
-    Object.assign(item, connectorBounds(item, resolve))
+    Object.assign(item, connectorBounds(item, ends(item)))
   }
   next.sort((a, b) => a.z - b.z || (a.id < b.id ? -1 : 1))
   snapshot = next

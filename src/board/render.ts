@@ -6,7 +6,7 @@ import {
   curveControls, midpoint, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
-import { cellRect, resolveEndpoint } from './items'
+import { cellRect, connectorEnds } from './items'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
@@ -60,6 +60,7 @@ export function render(s: Scene) {
     if (item.type !== 'connector' && !overlaps(aabb(item), visible)) continue
     drawItem(s, item)
   }
+  if (s.session.draft) drawDraftStroke(ctx, s.session.draft)
   ctx.restore()
 
   drawOverlay(s)
@@ -187,9 +188,17 @@ function drawStroke(s: Scene, item: Item & { type: 'draw' }) {
     pts.push([item.x + item.points[i] * item.w, item.y + item.points[i + 1] * item.h, item.points[i + 2]])
   }
   if (!pts.length) return
+  const path = strokeOutline(pts, item.strokeWidth, item.highlighter)
+  ctx.globalAlpha = (item.opacity ?? 1) * (item.highlighter ? 0.4 : 1)
+  ctx.fillStyle = item.stroke
+  ctx.fill(path)
+  ctx.globalAlpha = 1
+}
+
+function strokeOutline(pts: number[][], size: number, highlighter: boolean) {
   const outline = getStroke(pts, {
-    size: item.strokeWidth,
-    thinning: item.highlighter ? 0 : 0.55,
+    size,
+    thinning: highlighter ? 0 : 0.55,
     smoothing: 0.6,
     streamline: 0.4,
     simulatePressure: false,
@@ -198,10 +207,19 @@ function drawStroke(s: Scene, item: Item & { type: 'draw' }) {
   const path = new Path2D()
   outline.forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y)))
   path.closePath()
-  ctx.globalAlpha = (item.opacity ?? 1) * (item.highlighter ? 0.4 : 1)
-  ctx.fillStyle = item.stroke
-  ctx.fill(path)
-  ctx.globalAlpha = 1
+  return path
+}
+
+function drawDraftStroke(
+  ctx: CanvasRenderingContext2D,
+  draft: { pts: number[][]; stroke: string; strokeWidth: number; highlighter: boolean },
+) {
+  if (draft.pts.length < 2) return
+  ctx.save()
+  ctx.globalAlpha = draft.highlighter ? 0.4 : 1
+  ctx.fillStyle = draft.stroke
+  ctx.fill(strokeOutline(draft.pts, draft.strokeWidth, draft.highlighter))
+  ctx.restore()
 }
 
 function drawImage(s: Scene, item: Item & { type: 'image' }) {
@@ -258,12 +276,12 @@ function drawCap(ctx: CanvasRenderingContext2D, cap: Cap, at: Vec, dir: Vec, wid
 export function connectorMid(item: Item & { type: 'connector' }): Vec {
   const bends = connectorBends(item)
   if (bends.length) return bends[Math.floor(bends.length / 2)]
-  const pts = connectorPath(item, resolveEndpoint)
+  const pts = connectorPath(item, connectorEnds(item))
   return pts[Math.floor(pts.length / 2)]
 }
 
 export function connectorHandles(item: Item & { type: 'connector' }) {
-  const a = resolveEndpoint(item.from), b = resolveEndpoint(item.to)
+  const { a, b } = connectorEnds(item)
   const bends = connectorBends(item)
   const through = [a, ...bends, b]
   const ghosts: { at: Vec; index: number }[] = []
@@ -271,15 +289,12 @@ export function connectorHandles(item: Item & { type: 'connector' }) {
   return { bends, ghosts }
 }
 
-export function connectorGeometry(item: Item & { type: 'connector' }) {
-  const a = resolveEndpoint(item.from)
-  const b = resolveEndpoint(item.to)
-  return { a, b }
-}
+export const connectorGeometry = connectorEnds
 
 function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   const { ctx } = s
-  const { a, b } = connectorGeometry(item)
+  const ends = connectorEnds(item)
+  const { a, b } = ends
   const path = new Path2D()
   const startTrim = capLength(item.capStart, item.strokeWidth)
   const endTrim = capLength(item.capEnd, item.strokeWidth)
@@ -294,7 +309,7 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
     path.moveTo(a.x, a.y)
     path.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y)
   } else {
-    const pts = connectorPath(item, resolveEndpoint)
+    const pts = connectorPath(item, ends)
     pts.forEach((p, i) => (i ? path.lineTo(p.x, p.y) : path.moveTo(p.x, p.y)))
   }
   ctx.lineWidth = item.strokeWidth
@@ -305,7 +320,7 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   ctx.stroke(path)
   ctx.setLineDash([])
 
-  const pts = connectorPath(item, resolveEndpoint)
+  const pts = connectorPath(item, ends)
   const dirEnd = { x: b.x - pts[pts.length - 2].x, y: b.y - pts[pts.length - 2].y }
   const dirStart = { x: a.x - pts[1].x, y: a.y - pts[1].y }
   drawCap(ctx, item.capEnd, b, dirEnd, item.strokeWidth, item.stroke)

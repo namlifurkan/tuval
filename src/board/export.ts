@@ -5,6 +5,8 @@ import type { Item } from './types'
 const BLANK: Session = {
   preview: new Map(),
   badge: null,
+  spacing: [],
+  dropFrame: null,
   marquee: null,
   guides: [],
   draft: null,

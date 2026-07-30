@@ -4,14 +4,16 @@ import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
 } from './doc'
 import {
-  aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, nearestAnchor, overlaps,
+  aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, overlaps,
   resizeBox, snapAngle, snapMove, snapSpacing,
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
   cellAt, cloneItems, freeEndpoint, makeComment, makeConnector, makeDraw, makeFrame, makeShape,
-  makeSticky, makeTable, makeText, resolveEndpoint, STICKY_SIZE, TABLE_CELL_H, TABLE_CELL_W,
+  makeSticky, makeTable, makeText, anchorTowards, connectorEnds, STICKY_SIZE, TABLE_CELL_H,
+  TABLE_CELL_W,
 } from './items'
+import { firstUrl, layoutText } from './text'
 import {
   boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
   QUICK_TYPES,
@@ -74,7 +76,6 @@ function pickAt(p: Vec, screenTolerance = 6): Item | null {
   const tol = screenTolerance / c.z
   const screen = toScreen(c, p.x, p.y)
   const items = getItems()
-  const resolve = (e: Endpoint) => resolveEndpoint(e)
   for (let i = items.length - 1; i >= 0; i--) {
     const item = items[i]
     if (item.type === 'comment') {
@@ -82,7 +83,7 @@ function pickAt(p: Vec, screenTolerance = 6): Item | null {
       if (Math.hypot(pin.x - screen.x, pin.y - screen.y) <= PIN_R + 2) return item
       continue
     }
-    if (hitTest(item, p, tol, resolve)) return item
+    if (hitTest(item, p, tol, connectorEnds)) return item
   }
   return null
 }
@@ -111,9 +112,8 @@ export function quickCreateFromSelection(side: 'top' | 'right' | 'bottom' | 'lef
 
 function eraseAt(p: Vec) {
   const tol = 8 / cam().z
-  const resolve = (e: Endpoint) => resolveEndpoint(e)
   const victims = getItems()
-    .filter((i) => i.type === 'draw' && !i.locked && hitTest(i, p, tol, resolve))
+    .filter((i) => i.type === 'draw' && !i.locked && hitTest(i, p, tol, connectorEnds))
     .map((i) => i.id)
   if (victims.length) removeItems(victims)
 }
@@ -248,6 +248,8 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
       return
     }
     drag = { kind: 'draw', pts: [[p.x, p.y, e.pressure || 0.5]] }
+    session.draft = { pts: drag.pts, ...s.pen }
+    requestRender()
     return
   }
 
@@ -275,7 +277,7 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
   if (s.tool === 'connector') {
     const target = pickAt(p)
     const from: Endpoint = target
-      ? { itemId: target.id, anchor: anchorAt(p, target) ?? nearestAnchor(target, p), x: p.x, y: p.y }
+      ? { itemId: target.id, anchor: anchorAt(p, target), x: p.x, y: p.y }
       : freeEndpoint(p)
     drag = { kind: 'connect', from, to: p, targetId: null, targetSide: null }
     return
@@ -517,7 +519,7 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
     }
     case 'draw': {
       drag.pts.push([p.x, p.y, e.pressure || 0.5])
-      session.draft = drag.pts
+      session.draft = { pts: drag.pts, ...s.pen }
       break
     }
     case 'connect': {
@@ -525,9 +527,14 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
       drag.to = p
       drag.targetId = target && target.id !== drag.from.itemId ? target.id : null
       drag.targetSide = target ? anchorAt(p, target) : null
+      const fromItem = drag.from.itemId ? getIndex().get(drag.from.itemId) : null
+      const fromAt = fromItem
+        ? anchorTowards(fromItem, drag.targetId ? p : p, drag.from.anchor)
+        : { x: drag.from.x, y: drag.from.y }
+      const toItem = drag.targetId ? getIndex().get(drag.targetId) : null
       session.connectorDraft = {
-        from: resolveEndpoint(drag.from, p),
-        to: drag.targetId ? anchorPoint(getIndex().get(drag.targetId)!, drag.targetSide ?? nearestAnchor(getIndex().get(drag.targetId)!, resolveEndpoint(drag.from, p))) : p,
+        from: fromAt,
+        to: toItem ? anchorTowards(toItem, fromAt, drag.targetSide) : p,
         target: drag.targetId,
       }
       s.setHover(drag.targetId)
@@ -658,10 +665,12 @@ function finishConnect(d: Extract<Drag, { kind: 'connect' }>, p: Vec) {
   const s = store()
   const target = d.targetId ? getIndex().get(d.targetId) : null
   const to: Endpoint = target
-    ? { itemId: target.id, anchor: d.targetSide ?? nearestAnchor(target, resolveEndpoint(d.from, p)), x: p.x, y: p.y }
+    ? { itemId: target.id, anchor: d.targetSide, x: p.x, y: p.y }
     : freeEndpoint(p)
   const from = { ...d.from }
-  if (Math.hypot(p.x - resolveEndpoint(from, p).x, p.y - resolveEndpoint(from, p).y) < 8 && !target) return
+  const fromItem = from.itemId ? getIndex().get(from.itemId) : null
+  const fromAt = fromItem ? anchorTowards(fromItem, p, from.anchor) : { x: from.x, y: from.y }
+  if (!target && Math.hypot(p.x - fromAt.x, p.y - fromAt.y) < 8) return
   const c = makeConnector(from, to, s.connector)
   createItems([c])
   s.setSelection([c.id])

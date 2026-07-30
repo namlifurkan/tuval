@@ -104,7 +104,7 @@ export interface Session {
   dropFrame: Id | null
   marquee: { x: number; y: number; w: number; h: number } | null
   guides: [Vec, Vec][]
-  draft: unknown | null
+  draft: { pts: number[][]; stroke: string; strokeWidth: number; highlighter: boolean } | null
   connectorDraft: { from: Vec; to: Vec; target: Id | null } | null
   anchorsFor: Id | null
   remote: RemoteUser[]

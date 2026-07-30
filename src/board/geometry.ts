@@ -1,4 +1,4 @@
-import type { AnchorSide, Endpoint, Item, Rect, Vec } from './types'
+import type { AnchorSide, Item, Rect, Vec } from './types'
 
 export const TAU = Math.PI * 2
 
@@ -69,9 +69,9 @@ export function distToPolyline(p: Vec, pts: Vec[]): number {
   return pts.length === 1 ? Math.hypot(p.x - pts[0].x, p.y - pts[0].y) : min
 }
 
-export function hitTest(item: Item, p: Vec, tolerance: number, resolve: (e: Endpoint) => Vec): boolean {
+export function hitTest(item: Item, p: Vec, tolerance: number, ends: (c: Item & { type: 'connector' }) => Ends): boolean {
   if (item.type === 'connector') {
-    return distToPolyline(p, connectorPath(item, resolve)) <= Math.max(tolerance, item.strokeWidth / 2 + 4)
+    return distToPolyline(p, connectorPath(item, ends(item))) <= Math.max(tolerance, item.strokeWidth / 2 + 4)
   }
   const l = toLocal(item, p)
   const hw = item.w / 2, hh = item.h / 2
@@ -285,22 +285,33 @@ const NORMALS: Record<AnchorSide, Vec> = {
   top: { x: 0, y: -1 }, bottom: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 },
 }
 
-export function makeResolver(index: Map<string, Item>) {
-  return (e: Endpoint, other?: Vec): Vec => {
-    if (!e.itemId) return { x: e.x, y: e.y }
-    const item = index.get(e.itemId)
-    if (!item) return { x: e.x, y: e.y }
-    return anchorPoint(item, e.anchor ?? nearestAnchor(item, other ?? { x: e.x, y: e.y }))
+export interface Ends { a: Vec; b: Vec }
+
+export function resolveConnector(
+  item: Item & { type: 'connector' },
+  lookup: (id: string) => Item | undefined,
+): Ends {
+  const ia = item.from.itemId ? lookup(item.from.itemId) : undefined
+  const ib = item.to.itemId ? lookup(item.to.itemId) : undefined
+  const freeA = { x: item.from.x, y: item.from.y }
+  const freeB = { x: item.to.x, y: item.to.y }
+  const bends = connectorBends(item)
+  const towardA = bends[0] ?? (ib ? center(ib) : freeB)
+  const towardB = bends[bends.length - 1] ?? (ia ? center(ia) : freeA)
+  return {
+    a: ia ? anchorPoint(ia, item.from.anchor ?? nearestAnchor(ia, towardA)) : freeA,
+    b: ib ? anchorPoint(ib, item.to.anchor ?? nearestAnchor(ib, towardB)) : freeB,
   }
 }
 
-export function connectorBounds(
-  item: Item & { type: 'connector' }, resolve: (e: Endpoint) => Vec,
-): Rect {
-  const pts = connectorPath(item, resolve)
+export function makeResolver(index: Map<string, Item>) {
+  return (item: Item & { type: 'connector' }) => resolveConnector(item, (id) => index.get(id))
+}
+
+export function connectorBounds(item: Item & { type: 'connector' }, ends: Ends): Rect {
+  const pts = connectorPath(item, ends)
   if (item.shape === 'curved') {
-    const [a, b] = [resolve(item.from), resolve(item.to)]
-    pts.push(...curveControls(item, a, b))
+    pts.push(...curveControls(item, ends.a, ends.b))
   }
   const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y)
   const pad = item.strokeWidth * 3
@@ -338,8 +349,8 @@ export function smoothThrough(points: Vec[], steps = 12): Vec[] {
 
 export const midpoint = (a: Vec, b: Vec): Vec => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
 
-export function connectorPath(item: Item & { type: 'connector' }, resolve: (e: Endpoint) => Vec): Vec[] {
-  const a = resolve(item.from), b = resolve(item.to)
+export function connectorPath(item: Item & { type: 'connector' }, ends: Ends): Vec[] {
+  const { a, b } = ends
   const bends = connectorBends(item)
   if (bends.length === 1 && item.shape === 'curved') {
     const c = bendControl(a, b, bends[0])

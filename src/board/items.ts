@@ -1,9 +1,10 @@
 import { getIndex, newId, nextZ } from './doc'
 import { session } from './store'
-import { anchorPoint, nearestAnchor } from './geometry'
+import { anchorPoint, nearestAnchor, resolveConnector } from './geometry'
+import type { Ends } from './geometry'
 import { me } from './me'
 import type {
-  CommentItem, CommentReply, ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item,
+  AnchorSide, CommentItem, CommentReply, ConnectorItem, DrawItem, Endpoint, FrameItem, ImageItem, Item,
   Rect, ShapeItem, StickyItem, TableItem, TextItem, TextStyle, Vec,
 } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -207,17 +208,17 @@ export function withPreview<T extends Item>(item: T): T {
   return p ? ({ ...item, ...p } as T) : item
 }
 
-export function resolveEndpoint(e: Endpoint, other?: Vec): Vec {
-  if (!e.itemId) return { x: e.x, y: e.y }
-  const raw = getIndex().get(e.itemId)
-  if (!raw) return { x: e.x, y: e.y }
-  const item = withPreview(raw)
-  const side = e.anchor ?? nearestAnchor(item, other ?? { x: item.x, y: item.y })
-  return anchorPoint(item, side)
+const livePreview = (id: string) => {
+  const raw = getIndex().get(id)
+  return raw ? withPreview(raw) : undefined
 }
 
-export function makeResolver() {
-  return (e: Endpoint) => resolveEndpoint(e)
+export function connectorEnds(item: Item & { type: 'connector' }): Ends {
+  return resolveConnector(item, livePreview)
+}
+
+export function anchorTowards(target: Item, toward: Vec, side: AnchorSide | null): Vec {
+  return anchorPoint(target, side ?? nearestAnchor(target, toward))
 }
 
 export function cloneItems(items: Item[], dx: number, dy: number): Item[] {
