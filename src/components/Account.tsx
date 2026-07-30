@@ -2,7 +2,7 @@ import { useState, useSyncExternalStore } from 'react'
 import { cloudEnabled, displayName, getUser, signIn, signOut, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
-import { Spark } from './icons'
+import { LogIn } from 'lucide-react'
 
 const readUser = () => getUser()
 
@@ -42,7 +42,7 @@ export function Account() {
         </button>
       ) : (
         <IconButton title={t('Sign in')} active={pop.open} onClick={pop.toggle}>
-          <Spark size={18} />
+          <LogIn size={18} strokeWidth={1.8} />
         </IconButton>
       )}
 

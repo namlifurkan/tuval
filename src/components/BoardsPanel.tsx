@@ -8,6 +8,7 @@ import { deleteCloudBoard, listCloudBoards } from '../board/cloud'
 import { getUser, subscribeAuth } from '../board/supabase'
 import { requestRender, useBoardStore } from '../board/store'
 import { t } from '../i18n'
+import { Wordmark } from './Logo'
 import type { BoardEntry } from '../board/boards'
 
 function when(at: number) {
@@ -51,7 +52,7 @@ export function BoardsPanel() {
   return (
     <aside className="pointer-events-auto absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-190px)] w-[320px] flex-col overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2.5">
-        <span className="text-sm font-semibold text-[#141310]">{t('Boards')}</span>
+        <Wordmark height={17} />
         <div className="flex items-center gap-1">
           <button
             type="button"

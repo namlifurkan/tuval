@@ -1,4 +1,4 @@
-# Tuval
+<img src="public/brand/tuval-wordmark.png" alt="Tuval" width="280" />
 
 Open source infinite canvas. Canvas 2D renderer + Yjs CRDT, local-first, self-hostable.
 
