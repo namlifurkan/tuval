@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { surfaceColor } from '../board/brand'
 import { readTexture } from '../board/paperPrefs'
+import { flushCamera, saveCamera } from '../board/viewport'
 import { fitRect, toBoard } from '../board/camera'
-import { awareness, createItems, getIndex, getItems, getMeta, subscribeMeta, undoManager } from '../board/doc'
+import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeMeta, undoManager } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
@@ -105,9 +106,23 @@ export function Canvas() {
     }
     raf = requestAnimationFrame(loop)
 
-    const unsub = useBoardStore.subscribe(requestRender)
+    let lastCam = useBoardStore.getState().camera
+    const unsub = useBoardStore.subscribe(() => {
+      const cam = useBoardStore.getState().camera
+      if (cam !== lastCam) { lastCam = cam; saveCamera(room, cam) }
+      requestRender()
+    })
+    const persist = () => flushCamera(room)
+    window.addEventListener('pagehide', persist)
     const unsubMeta = subscribeMeta(requestRender)
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); unsub(); unsubMeta() }
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+      unsub()
+      unsubMeta()
+      window.removeEventListener('pagehide', persist)
+      flushCamera(room)
+    }
   }, [])
 
   useEffect(() => {

@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { room } from './doc'
+import { loadCamera } from './viewport'
 import type { Camera } from './camera'
 import type { Cap, ConnectorShape, Id, ShapeKind, StrokeStyle, TextStyle, Vec } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -52,7 +54,7 @@ interface BoardState {
 }
 
 export const useBoardStore = create<BoardState>((set, get) => ({
-  camera: { x: -600, y: -400, z: 1 },
+  camera: loadCamera(room) ?? { x: -600, y: -400, z: 1 },
   tool: 'select',
   stickyFill: '#F0E3B0',
   shape: { kind: 'rect', fill: '#FCFBF8', stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' },
