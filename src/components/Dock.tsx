@@ -2,13 +2,14 @@ import { Minus, Plus, Redo2, RotateCcw, Settings2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { clampZoom, fitRect, zoomAt } from '../board/camera'
-import { createItems, getItems, undoManager } from '../board/doc'
+import { createItems, getIndex, getItems, undoManager } from '../board/doc'
 import {
   DEFAULT_ORDER, DOCK_LABELS, DOCK_SIDES, getDockPrefs, moveDockItem, resetDock, setDockSide,
   setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
 import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
+import { reparentToFrames } from '../board/interaction'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
 import { TEMPLATES } from '../board/templates'
@@ -151,10 +152,18 @@ export function Dock() {
 
   const insert = (list: Parameters<typeof createItems>[0], fit = false) => {
     createItems(list)
+    // Templates and mind maps ship their own frames; attach whatever landed inside one so
+    // dragging the frame carries its contents.
+    reparentToFrames(list.map((i) => i.id))
     const store = useBoardStore.getState()
     const el = canvasEl()
     if (fit && el) {
-      store.setCamera(fitRect(boxOf(list), el.clientWidth, el.clientHeight))
+      // Fit the stored items, not the freshly built ones: a connector is born with a zero
+      // rect and only gets real bounds once the doc rebuilds. Fitting the raw list stretches
+      // the box back to the world origin and throws the camera off.
+      const index = getIndex()
+      const stored = list.map((i) => index.get(i.id) ?? i)
+      store.setCamera(fitRect(boxOf(stored), el.clientWidth, el.clientHeight))
       store.setSelection([])
     } else store.setSelection(list.map((i) => i.id))
     requestRender()
