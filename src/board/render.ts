@@ -2,11 +2,12 @@ import getStroke from 'perfect-freehand'
 import type { Camera } from './camera'
 import { toScreen, viewportRect } from './camera'
 import {
-  ANCHOR_SIDES, aabb, anchorPoint, bendControl, connectorPath, corners, curveControls, overlaps,
+  ANCHOR_SIDES, aabb, anchorPoint, bendControl, connectorBends, connectorPath, corners,
+  curveControls, midpoint, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
 import { cellRect, resolveEndpoint } from './items'
-import { shapePath, textInsetFor } from './shapes'
+import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
 import type { Cap, Id, Item, Rect, TextStyle, Vec } from './types'
@@ -153,7 +154,7 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
 function drawShape(s: Scene, item: Item & { type: 'shape' }) {
   const { ctx } = s
   const path = shapePath(item.kind, item.x, item.y, item.w, item.h)
-  if (item.fill !== 'transparent') {
+  if (item.fill !== 'transparent' && !STROKE_ONLY.has(item.kind)) {
     ctx.fillStyle = item.fill
     ctx.fill(path)
   }
@@ -255,9 +256,19 @@ function drawCap(ctx: CanvasRenderingContext2D, cap: Cap, at: Vec, dir: Vec, wid
 }
 
 export function connectorMid(item: Item & { type: 'connector' }): Vec {
-  if (item.bend) return item.bend
+  const bends = connectorBends(item)
+  if (bends.length) return bends[Math.floor(bends.length / 2)]
   const pts = connectorPath(item, resolveEndpoint)
   return pts[Math.floor(pts.length / 2)]
+}
+
+export function connectorHandles(item: Item & { type: 'connector' }) {
+  const a = resolveEndpoint(item.from), b = resolveEndpoint(item.to)
+  const bends = connectorBends(item)
+  const through = [a, ...bends, b]
+  const ghosts: { at: Vec; index: number }[] = []
+  for (let i = 0; i < through.length - 1; i++) ghosts.push({ at: midpoint(through[i], through[i + 1]), index: i })
+  return { bends, ghosts }
 }
 
 export function connectorGeometry(item: Item & { type: 'connector' }) {
@@ -273,11 +284,12 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   const startTrim = capLength(item.capStart, item.strokeWidth)
   const endTrim = capLength(item.capEnd, item.strokeWidth)
 
-  if (item.shape === 'curved' && item.bend) {
-    const c = bendControl(a, b, item.bend)
+  const bendList = connectorBends(item)
+  if (item.shape === 'curved' && bendList.length === 1) {
+    const c = bendControl(a, b, bendList[0])
     path.moveTo(a.x, a.y)
     path.quadraticCurveTo(c.x, c.y, b.x, b.y)
-  } else if (item.shape === 'curved') {
+  } else if (item.shape === 'curved' && bendList.length === 0) {
     const [c1, c2] = curveControls(item, a, b)
     path.moveTo(a.x, a.y)
     path.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y)
@@ -598,11 +610,17 @@ function drawOverlay(s: Scene) {
         const sp = toScreen(cam, p.x, p.y)
         dot(ctx, sp.x, sp.y, 5)
       }
-      const mid = connectorMid(item)
-      const sm = toScreen(cam, mid.x, mid.y)
-      ctx.globalAlpha = item.bend ? 1 : 0.55
-      dot(ctx, sm.x, sm.y, 4.5)
-      ctx.globalAlpha = 1
+      const handles = connectorHandles(item)
+      for (const g of handles.ghosts) {
+        const sp = toScreen(cam, g.at.x, g.at.y)
+        ctx.globalAlpha = 0.45
+        dot(ctx, sp.x, sp.y, 4)
+        ctx.globalAlpha = 1
+      }
+      for (const bendAt of handles.bends) {
+        const sp = toScreen(cam, bendAt.x, bendAt.y)
+        dot(ctx, sp.x, sp.y, 4.5)
+      }
     } else {
       outline(ctx, cam, item, BRAND.selection, 2)
       if (item.locked) drawLockBadge(ctx, cam, item)

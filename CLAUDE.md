@@ -182,8 +182,7 @@ buradan silinir. Sıra öncelik sırasıdır.
 - [ ] Yorumlarda mention (@kişi) ve bildirim
 - [ ] Tabloda sütun/satır genişliğini sürükleyerek değiştirme ve hücre birleştirme
 - [ ] Mind map aracı (otomatik yerleşim, dal ekleme)
-- [ ] Connector: birden çok kırılma noktası ve çoklu etiket
-- [ ] Shape kütüphaneleri: flowchart seti, UML, wireframe kiti
+- [ ] Connector üzerinde birden çok etiket
 - [ ] Embed: video, iframe, harici doküman
 - [ ] Emoji ve reaksiyon
 - [ ] Dokunmatik: tablet ve trackpad jestlerinin tam desteği

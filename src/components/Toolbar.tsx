@@ -9,7 +9,7 @@ import { createItems, getItems, undoManager } from '../board/doc'
 import { makeFrame, makeImage } from '../board/items'
 import { boxOf } from '../board/render'
 import { TEMPLATES } from '../board/templates'
-import { SHAPE_LIST, shapeToSvgPath } from '../board/shapes'
+import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { LINE_COLORS, STICKY_COLORS, type ShapeKind } from '../board/types'
@@ -131,22 +131,26 @@ export function Toolbar() {
           >
             <ShapeGlyph kind={shape.kind} />
           </IconButton>
-          <Popover open={shapePop.open} onClose={shapePop.close} className="w-[268px]">
-            <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">Shapes</div>
-            <div className="grid grid-cols-6 gap-1">
-              {SHAPE_LIST.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  title={k}
-                  onClick={() => { update({ shape: { ...shape, kind: k } }); setTool('shape'); shapePop.close() }}
-                  className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]
-                    ${shape.kind === k ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310]'}`}
-                >
-                  <ShapeGlyph kind={k} size={22} />
-                </button>
-              ))}
-            </div>
+          <Popover open={shapePop.open} onClose={shapePop.close} className="max-h-[70vh] w-[268px] overflow-y-auto">
+            {SHAPE_GROUPS.map((group) => (
+              <div key={group.name} className="mb-2 last:mb-0">
+                <div className="px-1 pb-1.5 pt-1 text-xs font-semibold text-[#141310]">{group.name}</div>
+                <div className="grid grid-cols-6 gap-1">
+                  {group.kinds.map((k) => (
+                    <button
+                      key={`${group.name}-${k}`}
+                      type="button"
+                      title={k}
+                      onClick={() => { update({ shape: { ...shape, kind: k } }); setTool('shape'); shapePop.close() }}
+                      className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]
+                        ${shape.kind === k ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310]'}`}
+                    >
+                      <ShapeGlyph kind={k} size={22} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </Popover>
         </div>
 

@@ -312,23 +312,50 @@ export function connectorBounds(
   }
 }
 
+export function connectorBends(item: Item & { type: 'connector' }): Vec[] {
+  if (item.bends?.length) return item.bends
+  return item.bend ? [item.bend] : []
+}
+
+export function smoothThrough(points: Vec[], steps = 12): Vec[] {
+  if (points.length < 3) return points
+  const out: Vec[] = [points[0]]
+  for (let i = 1; i < points.length - 1; i++) {
+    const prev = i === 1 ? points[0] : midpoint(points[i - 1], points[i])
+    const next = i === points.length - 2 ? points[i + 1] : midpoint(points[i], points[i + 1])
+    const c = bendControl(prev, next, points[i])
+    for (let s = 1; s <= steps; s++) {
+      const t = s / steps, u = 1 - t
+      out.push({
+        x: u * u * prev.x + 2 * u * t * c.x + t * t * next.x,
+        y: u * u * prev.y + 2 * u * t * c.y + t * t * next.y,
+      })
+    }
+  }
+  out.push(points[points.length - 1])
+  return out
+}
+
+export const midpoint = (a: Vec, b: Vec): Vec => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
+
 export function connectorPath(item: Item & { type: 'connector' }, resolve: (e: Endpoint) => Vec): Vec[] {
   const a = resolve(item.from), b = resolve(item.to)
-  if (item.bend) {
-    const m = item.bend
-    if (item.shape === 'curved') {
-      const c = bendControl(a, b, m)
-      const out: Vec[] = []
-      for (let i = 0; i <= 24; i++) {
-        const t = i / 24, u = 1 - t
-        out.push({
-          x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
-          y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
-        })
-      }
-      return out
+  const bends = connectorBends(item)
+  if (bends.length === 1 && item.shape === 'curved') {
+    const c = bendControl(a, b, bends[0])
+    const out: Vec[] = []
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24, u = 1 - t
+      out.push({
+        x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
+        y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+      })
     }
-    return [a, m, b]
+    return out
+  }
+  if (bends.length) {
+    const through = [a, ...bends, b]
+    return item.shape === 'curved' ? smoothThrough(through) : through
   }
   if (item.shape === 'straight') return [a, b]
   if (item.shape === 'elbow') {

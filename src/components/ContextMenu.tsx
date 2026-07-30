@@ -50,12 +50,12 @@ export function ContextMenu() {
       hidden: items.length !== 1 || items[0].type !== 'frame',
     },
     {
-      label: 'Kırılmayı sıfırla',
+      label: 'Kırılmaları sıfırla',
       run: () => {
-        patchItems(selection.map((id) => [id, { bend: null }] as [Id, Record<string, unknown>]))
+        patchItems(selection.map((id) => [id, { bend: null, bends: [] }] as [Id, Record<string, unknown>]))
         requestRender()
       },
-      hidden: !items.some((i) => i.type === 'connector' && i.bend),
+      hidden: !items.some((i) => i.type === 'connector' && (i.bend || i.bends?.length)),
     },
     {
       label: 'PNG olarak dışa aktar',

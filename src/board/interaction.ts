@@ -4,8 +4,8 @@ import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
 } from './doc'
 import {
-  aabb, anchorPoint, ANCHOR_SIDES, contains, hitTest, nearestAnchor, overlaps, resizeBox, snapAngle,
-  snapMove, snapSpacing,
+  aabb, anchorPoint, ANCHOR_SIDES, connectorBends, contains, hitTest, nearestAnchor, overlaps,
+  resizeBox, snapAngle, snapMove, snapSpacing,
 } from './geometry'
 import type { Box, Handle } from './geometry'
 import {
@@ -13,7 +13,7 @@ import {
   makeSticky, makeTable, makeText, resolveEndpoint, STICKY_SIZE, TABLE_CELL_H, TABLE_CELL_W,
 } from './items'
 import {
-  boxOf, commentPinScreen, connectorGeometry, connectorMid, handleScreenRects, PIN_R, quickHit,
+  boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
   QUICK_TYPES,
 } from './render'
 import { requestRender, session, useBoardStore } from './store'
@@ -32,7 +32,7 @@ type Drag =
   | { kind: 'draw'; pts: number[][] }
   | { kind: 'connect'; from: Endpoint; to: Vec; targetId: Id | null; targetSide: AnchorSide | null }
   | { kind: 'endpoint'; id: Id; which: 'from' | 'to' }
-  | { kind: 'bend'; id: Id }
+  | { kind: 'bend'; id: Id; index: number }
   | { kind: 'erase' }
 
 let drag: Drag | null = null
@@ -295,11 +295,23 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
         drag = { kind: 'endpoint', id: only.id, which: 'to' }
         return
       }
-      const mid = connectorMid(only)
-      const sm = toScreen(s.camera, mid.x, mid.y)
-      if (Math.hypot(sm.x - screen.x, sm.y - screen.y) <= 9) {
-        drag = { kind: 'bend', id: only.id }
-        return
+      const handles = connectorHandles(only)
+      for (let i = 0; i < handles.bends.length; i++) {
+        const sp = toScreen(s.camera, handles.bends[i].x, handles.bends[i].y)
+        if (Math.hypot(sp.x - screen.x, sp.y - screen.y) <= 9) {
+          drag = { kind: 'bend', id: only.id, index: i }
+          return
+        }
+      }
+      for (const ghost of handles.ghosts) {
+        const sp = toScreen(s.camera, ghost.at.x, ghost.at.y)
+        if (Math.hypot(sp.x - screen.x, sp.y - screen.y) <= 9) {
+          const next = [...handles.bends]
+          next.splice(ghost.index, 0, { x: p.x, y: p.y })
+          patchItems([[only.id, { bends: next, bend: null }]])
+          drag = { kind: 'bend', id: only.id, index: ghost.index }
+          return
+        }
       }
     }
     if (only && QUICK_TYPES.has(only.type) && !only.locked) {
@@ -522,7 +534,12 @@ export function pointerMove(e: PointerEvent, screen: Vec) {
       break
     }
     case 'bend': {
-      patchItems([[drag.id, { bend: { x: p.x, y: p.y } }]])
+      const { id, index } = drag
+      const target = getIndex().get(id)
+      if (target?.type === 'connector') {
+        const next = connectorBends(target).map((v, i) => (i === index ? { x: p.x, y: p.y } : v))
+        patchItems([[id, { bends: next, bend: null }]])
+      }
       break
     }
     case 'erase': {

@@ -193,6 +193,7 @@ export function makeConnector(
     to,
     text: '',
     bend: null,
+    bends: [],
     ...DEFAULT_TEXT_STYLE,
     fontSize: 14,
     ...opts,

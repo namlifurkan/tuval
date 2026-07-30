@@ -4,6 +4,9 @@ export type ShapeKind =
   | 'rect' | 'roundRect' | 'ellipse' | 'triangle' | 'diamond' | 'star'
   | 'pentagon' | 'hexagon' | 'octagon' | 'arrowRight' | 'chevron' | 'cloud'
   | 'cross' | 'cylinder' | 'parallelogram' | 'trapezoid' | 'speech' | 'bracket'
+  | 'stadium' | 'document' | 'manualInput' | 'display' | 'delay'
+  | 'folder' | 'note' | 'actor' | 'component' | 'node3d'
+  | 'browser' | 'phone' | 'avatar' | 'field'
 
 export type Align = 'left' | 'center' | 'right'
 export type VAlign = 'top' | 'middle' | 'bottom'
@@ -131,6 +134,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
   capEnd: Cap
   text: string
   bend: Vec | null
+  bends: Vec[]
 }
 
 export type Item =
