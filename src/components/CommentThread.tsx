@@ -49,7 +49,7 @@ export function CommentThread() {
 
   return (
     <div
-      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-white shadow-[0_8px_28px_rgba(9,9,20,0.18)]"
+      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.18)]"
       style={{ left: pin.x + 24, top: Math.max(12, pin.y - 20) }}
       onPointerDown={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
@@ -116,7 +116,7 @@ export function CommentThread() {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
             if (e.key === 'Escape') close()
           }}
-          className="max-h-24 min-h-[30px] flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-[#C8452D]"
+          className="max-h-24 min-h-[30px] flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-[#FCFBF8] focus:ring-1 focus:ring-[#C8452D]"
         />
         <button
           type="button"

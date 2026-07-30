@@ -303,7 +303,7 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
     const font = fontString(item, item.fontSize)
     ctx.font = font
     const w = ctx.measureText(item.text).width
-    ctx.fillStyle = '#FFFFFF'
+    ctx.fillStyle = '#FCFBF8'
     ctx.fillRect(mid.x - w / 2 - 4, mid.y - item.fontSize * 0.75, w + 8, item.fontSize * 1.5)
     ctx.fillStyle = item.textColor
     ctx.textAlign = 'center'
@@ -370,14 +370,14 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.lineTo(c.x - PIN_R * 0.55, c.y + PIN_R * 0.5)
   ctx.lineTo(c.x + PIN_R * 0.2, c.y + PIN_R * 0.92)
   ctx.closePath()
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.strokeStyle = selected ? BRAND.selection : 'rgba(9,9,20,0.16)'
   ctx.lineWidth = selected ? 2 : 1
   ctx.fill()
   ctx.stroke()
   ctx.beginPath()
   ctx.arc(c.x, c.y, PIN_R, 0, Math.PI * 2)
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.stroke()
   const first = item.replies[0]
@@ -385,7 +385,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.beginPath()
   ctx.arc(c.x, c.y, PIN_R - 4, 0, Math.PI * 2)
   ctx.fill()
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.font = '700 11px "Instrument Sans", system-ui, sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -421,7 +421,7 @@ function drawQuickArrows(s: Scene, item: Item) {
   for (const a of quickArrowScreens(s.cam, item)) {
     ctx.beginPath()
     ctx.arc(a.x, a.y, QUICK_R, 0, Math.PI * 2)
-    ctx.fillStyle = '#FFFFFF'
+    ctx.fillStyle = '#FCFBF8'
     ctx.fill()
     ctx.strokeStyle = 'rgba(9,9,20,0.14)'
     ctx.lineWidth = 1
@@ -597,7 +597,7 @@ function drawOverlay(s: Scene) {
       ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
       ctx.fillStyle = BRAND.selection
       ctx.fill()
-      ctx.fillStyle = '#FFFFFF'
+      ctx.fillStyle = '#FCFBF8'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(session.badge, at.x, at.y + 24.5)
@@ -643,7 +643,7 @@ function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { r
     ctx.save()
     ctx.translate(h.x, h.y)
     ctx.rotate(box.rotation)
-    ctx.fillStyle = '#FFFFFF'
+    ctx.fillStyle = '#FCFBF8'
     ctx.strokeStyle = BRAND.selection
     ctx.lineWidth = 1.5
     ctx.beginPath()
@@ -662,12 +662,12 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
   ctx.arc(0, 0, 11, 0, Math.PI * 2)
   ctx.fillStyle = BRAND.selection
   ctx.fill()
-  ctx.strokeStyle = '#FFFFFF'
+  ctx.strokeStyle = '#FCFBF8'
   ctx.lineWidth = 1.6
   ctx.beginPath()
   ctx.arc(0, -1.6, 3.1, Math.PI, 0)
   ctx.stroke()
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.beginPath()
   ctx.roundRect(-4.4, -1.6, 8.8, 6.6, 1.6)
   ctx.fill()
@@ -677,7 +677,7 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, cam: Camera, item: Item) {
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.beginPath()
   ctx.arc(x, y, r, 0, Math.PI * 2)
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.fill()
   ctx.lineWidth = 2
   ctx.strokeStyle = BRAND.selection
@@ -694,7 +694,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.lineTo(10.5, 12.2)
   ctx.closePath()
   ctx.fillStyle = color
-  ctx.strokeStyle = '#FFFFFF'
+  ctx.strokeStyle = '#FCFBF8'
   ctx.lineWidth = 1.4
   ctx.fill()
   ctx.stroke()
@@ -704,7 +704,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.roundRect(12, 12, w + 14, 20, 10)
   ctx.fillStyle = color
   ctx.fill()
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = '#FCFBF8'
   ctx.textBaseline = 'middle'
   ctx.textAlign = 'left'
   ctx.fillText(name, 19, 22.5)

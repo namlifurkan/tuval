@@ -59,7 +59,7 @@ export function ContextToolbar() {
       className="pointer-events-auto absolute z-40"
       style={{ left: p.x, top: Math.max(70, p.y - 56), transform: 'translateX(-50%)' }}
     >
-      <div className="flex items-center gap-0.5 rounded-xl border border-black/5 bg-white px-1.5 py-1 shadow-[0_4px_16px_rgba(9,9,20,0.16)]">
+      <div className="flex items-center gap-0.5 rounded-xl border border-black/5 bg-[#FCFBF8] px-1.5 py-1 shadow-[0_4px_16px_rgba(9,9,20,0.16)]">
         {(has(selected, 'sticky') || has(selected, 'shape') || has(selected, 'text')) && (
           <div className="relative">
             <IconButton title="Fill color" onClick={fillPop.toggle}>

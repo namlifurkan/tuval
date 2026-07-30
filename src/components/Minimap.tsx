@@ -56,7 +56,7 @@ export function Minimap() {
     <canvas
       ref={ref}
       style={{ width: W, height: H }}
-      className="cursor-pointer rounded-xl border border-black/5 bg-white shadow-[0_4px_16px_rgba(9,9,20,0.12)]"
+      className="cursor-pointer rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_4px_16px_rgba(9,9,20,0.12)]"
     />
   )
 }

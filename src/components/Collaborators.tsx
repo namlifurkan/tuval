@@ -31,7 +31,7 @@ export function Collaborators() {
         <div
           key={p.id}
           title={p.id === -1 ? `${p.name} (sen)` : p.name}
-          className="grid h-8 w-8 place-items-center rounded-full border-2 border-white text-[11px] font-bold text-white"
+          className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#FCFBF8] text-[11px] font-bold text-white"
           style={{ background: p.color, marginLeft: i ? -8 : 0, zIndex: 10 - i }}
         >
           {initials(p.name)}
@@ -39,7 +39,7 @@ export function Collaborators() {
       ))}
       {extra > 0 && (
         <div
-          className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
+          className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#FCFBF8] bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
           style={{ marginLeft: -8 }}
         >
           +{extra}

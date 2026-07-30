@@ -9,7 +9,7 @@ export const COLOR = {
   inkSoft: '#4A463E',
   muted: '#8A867C',
   paper: '#F2EFE9',
-  surface: '#FFFFFF',
+  surface: '#FCFBF8',
   hairline: '#E2DED5',
   wash: '#EBE7DE',
   pigment: '#C8452D',

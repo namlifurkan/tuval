@@ -26,9 +26,15 @@ Halihazırda kurulu ve bu depoda işe yarayanlar: `yjs-best-practices`, `supabas
 
 ## 1. Ürün perspektifi
 
-Bu depo tek başına "Miro klonu" değil. Hedef: **beyaz yakalıların Miro + Jira + Notion'a
-ödediği ücretlerden kurtulmak** için kendi açık kaynak çalışma alanımızı kurmak. AFFiNE gibi
-açık kaynak bir proje olarak sunulacak.
+**Birincil hedef: Miro'nun işlevsel olarak %95'ini klonlamak ve şirket içinde kullanmak.**
+Ölçüt: Miro'da yapılan iş burada aynı akış, aynı kısayollar ve aynı hissiyatla yapılabilmeli.
+Eksik davranışlar borçtur, §4'te listelenir. **Özellik paritesi görsel süslemenin önündedir.**
+
+İkincil hedef: aynı kod tabanını AFFiNE gibi açık kaynak yayınlamak. Görsel kimliğin bize ait
+olmasının tek sebebi budur (bkz. §2) — işlev kopyalanır, marka kopyalanmaz. Bu, parite hedefini
+gevşetmez: bir davranış "Miro'da böyle" diye doğrudur, "Miro'ya benzemesin" diye değiştirilmez.
+
+Motivasyon: beyaz yakalıların Miro + Jira + Notion'a ödediği ücretlerden kurtulmak.
 
 Sıra: **Kanban (bitti) → sonsuz tuval (bu depo) → doküman/veritabanı (Notion tarzı)**.
 
@@ -165,10 +171,51 @@ gidiyor (kontrolü ayrı bir çağrıda yap).
 
 ---
 
-## 4. Sırada
+## 4. Miro parite borcu
 
-1. Supabase fazı — auth, board listesi/dashboard, Storage'a görsel, Postgres'e snapshot
-2. Çoklu kullanıcı testi — `npm run collab`, iki sekme, canlı imleç ve seçim
-3. Kalan tuval cilası — yorum paneli, sticky boyut ön ayarları, çoklu kırılma noktası,
-   frame panelinde sürükleyerek sıralama, imleç sohbeti
-4. Workspace çekirdeği (bkz. §1) — ondan sonra doküman/blok editörü fazı
+Hedef %95. Aşağıdaki liste "Miro'da var, bizde yok" davranışlarıdır; bir madde kapandığında
+buradan silinir. Sıra öncelik sırasıdır.
+
+### Tuval içi (parite için şart)
+
+- [ ] Sticky "pack / auto-arrange" ve sticky ızgarasına yapışma
+- [ ] Sticky ve shape içinde zengin metin: madde imi, numaralı liste, bağlantı
+- [ ] Yorum yan paneli: tüm yorumlar, çözülmüş filtresi, mention
+- [ ] Tablo aracı
+- [ ] Mind map aracı (otomatik yerleşim, dal ekleme)
+- [ ] Connector: birden çok kırılma noktası ve çoklu etiket
+- [ ] Shape kütüphaneleri: flowchart seti, UML, wireframe kiti
+- [ ] Embed: video, iframe, harici doküman
+- [ ] Emoji ve reaksiyon
+- [ ] Dokunmatik: tablet ve trackpad jestlerinin tam desteği
+- [ ] Frame panelinde sürükleyerek sıralama, sunumda geçişler
+- [ ] PDF dışa aktarma ve çoklu frame dışa aktarma
+- [ ] İçeri aktarma: görsel, PDF, mevcut Miro board'u
+
+### Çoklu kullanıcı
+
+- [ ] Gerçek zamanlı ortak çalışma doğrulaması (sunucu var, test edilmedi)
+- [ ] Follow mode / spotlight
+- [ ] İmleç sohbeti
+- [ ] Oylama, zamanlayıcı, tahmin (estimation) araçları
+- [ ] Versiyon geçmişi
+
+### Çevresi
+
+- [ ] Giriş, workspace, board listesi/dashboard (Supabase fazı)
+- [ ] Paylaşım linkleri, yetkiler, salt-görüntüleme modu
+- [ ] Daha geniş şablon kütüphanesi
+
+### Bilinçli olarak yapılmayacaklar
+
+Miro'da var ama bizim kapsamımız dışında: AI asistanı, Jira/Azure gibi üçüncü parti kart
+entegrasyonları (kendi Kanban'ımıza bağlanacak), video konferans, ödeme/faturalama.
+
+---
+
+## 5. Yol haritası
+
+1. Yukarıdaki tuval içi borçları kapat (parite önce gelir)
+2. Supabase fazı — auth, board listesi, Storage'a görsel, Postgres'e snapshot
+3. Çoklu kullanıcı testi ve sertleştirme
+4. Workspace çekirdeği (bkz. §1) — sonra doküman/blok editörü fazı

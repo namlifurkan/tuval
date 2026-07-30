@@ -72,7 +72,7 @@ export function makeDraw(
 }
 
 export function makeFrame(x: number, y: number, w: number, h: number, title: string): FrameItem {
-  return { ...base(x, y, w, h), type: 'frame', title, fill: '#FFFFFF', z: -1000 - Math.random() }
+  return { ...base(x, y, w, h), type: 'frame', title, fill: '#FCFBF8', z: -1000 - Math.random() }
 }
 
 export function makeImage(x: number, y: number, w: number, h: number, src: string): ImageItem {

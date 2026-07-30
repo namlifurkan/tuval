@@ -14,7 +14,7 @@ function Thumb({ frame }: { frame: FrameItem }) {
   const inside = items.filter((i) => i.id === frame.id || contains(frame, aabb(i)))
   const canvas = renderToCanvas(inside, 0.12, 0)
   return (
-    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-[#E2DED5] bg-white">
+    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-[#E2DED5] bg-[#FCFBF8]">
       {canvas && (
         <img
           src={canvas.toDataURL()}
@@ -46,7 +46,7 @@ export function FramesPanel() {
   }
 
   return (
-    <div className="absolute left-[76px] top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-white shadow-[0_8px_28px_rgba(9,9,20,0.16)]">
+    <div className="absolute left-[76px] top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[0_8px_28px_rgba(9,9,20,0.16)]">
       <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
         <span className="text-xs font-semibold text-[#141310]">Frame'ler ({frames.length})</span>
         <div className="flex items-center gap-0.5">

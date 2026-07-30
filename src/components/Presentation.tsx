@@ -44,7 +44,7 @@ export function Presentation() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50">
-      <div className="pointer-events-auto absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_8px_28px_rgba(9,9,20,0.18)]">
+      <div className="pointer-events-auto absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_8px_28px_rgba(9,9,20,0.18)]">
         <button
           type="button"
           disabled={presenting === 0}

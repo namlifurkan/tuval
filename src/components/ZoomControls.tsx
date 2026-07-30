@@ -31,7 +31,7 @@ export function ZoomControls() {
   return (
     <div className="pointer-events-auto absolute bottom-4 right-4 z-40 flex flex-col items-end gap-2">
       {showMinimap && <Minimap />}
-      <div className="flex items-center gap-0.5 rounded-xl border border-black/5 bg-white p-1 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+      <div className="flex items-center gap-0.5 rounded-xl border border-black/5 bg-[#FCFBF8] p-1 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
         <IconButton title="Minimap" active={showMinimap} onClick={() => update({ showMinimap: !showMinimap })}>
           <MapIcon size={18} strokeWidth={1.8} />
         </IconButton>

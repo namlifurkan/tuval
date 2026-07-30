@@ -15,7 +15,7 @@ export function TopBar() {
   return (
     <>
       <div className="pointer-events-auto absolute left-4 top-4 z-40 flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
           <div
             className="grid h-9 w-9 place-items-center rounded-lg text-sm font-bold text-white"
             style={{ background: COLOR.ink }}
@@ -76,14 +76,14 @@ export function TopBar() {
       </div>
 
       <div className="pointer-events-auto absolute right-4 top-4 z-40 flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+        <div className="flex items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
           <IconButton title="Ara — ⌘F" onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton title="Activity"><Clock size={18} strokeWidth={1.8} /></IconButton>
           <Collaborators />
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+        <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
           <button
             type="button"
             onClick={() => navigator.clipboard?.writeText(location.href)}

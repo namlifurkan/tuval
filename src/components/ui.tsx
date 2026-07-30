@@ -59,7 +59,7 @@ export function Popover({
     <div
       ref={ref}
       onPointerDown={(e) => e.stopPropagation()}
-      className={`absolute z-50 rounded-xl border border-black/5 bg-white p-2 shadow-[0_8px_28px_rgba(9,9,20,0.16)] ${pos} ${className}`}
+      className={`absolute z-50 rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[0_8px_28px_rgba(9,9,20,0.16)] ${pos} ${className}`}
     >
       {children}
     </div>
@@ -115,7 +115,7 @@ export function HexInput({ value, onPick }: { value?: string; onPick: (c: string
         type="color"
         value={/^#([0-9a-f]{6})$/i.test(hex) ? hex : '#ffffff'}
         onChange={(e) => { setHex(e.target.value); onPick(e.target.value) }}
-        className="h-7 w-8 cursor-pointer rounded-md border border-[#E2DED5] bg-white p-0.5"
+        className="h-7 w-8 cursor-pointer rounded-md border border-[#E2DED5] bg-[#FCFBF8] p-0.5"
       />
     </div>
   )

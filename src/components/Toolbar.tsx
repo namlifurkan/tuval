@@ -68,7 +68,7 @@ export function Toolbar() {
 
   return (
     <div className="pointer-events-auto absolute left-4 top-1/2 z-40 -translate-y-1/2">
-      <div className="flex flex-col items-center gap-0.5 rounded-2xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+      <div className="flex flex-col items-center gap-0.5 rounded-2xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
         <IconButton title="Select — V" active={tool === 'select'} onClick={pick('select')}>
           <MousePointer2 size={20} strokeWidth={1.8} />
         </IconButton>
@@ -280,7 +280,7 @@ export function Toolbar() {
         />
       </div>
 
-      <div className="mt-2 flex flex-col items-center gap-0.5 rounded-2xl border border-black/5 bg-white p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
+      <div className="mt-2 flex flex-col items-center gap-0.5 rounded-2xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[0_4px_16px_rgba(9,9,20,0.12)]">
         <IconButton title="Undo — ⌘Z" onClick={() => undoManager.undo()}>
           <Undo2 size={19} strokeWidth={1.8} />
         </IconButton>
