@@ -2,7 +2,7 @@ import { Check, Link2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { getMeta, room } from '../board/doc'
 import {
-  invite, listInvites, listMembers, myRole, removeMember, revokeInvite, setMemberRole,
+  invite, listInvites, listMembers, mailInvite, myRole, removeMember, revokeInvite, setMemberRole,
 } from '../board/cloud'
 import type { Invite, Member } from '../board/cloud'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
@@ -75,12 +75,15 @@ export function Share() {
   const send = async () => {
     const to = email.trim()
     if (!to) return
+    setNote(t('Sending…'))
     const problem = await invite(room, to, newRole)
-    setNote(problem ?? '')
-    if (problem) return
+    if (problem) { setNote(problem); return }
     setEmail('')
     refresh()
-    draft(to)
+    const mail = await mailInvite(to, boardLink())
+    setNote(mail
+      ? t('Access granted, but the email failed: {reason}', { reason: mail })
+      : t('Invite emailed to {email}.', { email: to }))
   }
 
   return (
@@ -139,7 +142,11 @@ export function Share() {
             >
               {t('Send invite')}
             </button>
-            {note && <p className="px-2.5 pt-1.5 text-[11px] text-[#DC2626]">{note}</p>}
+            {note && (
+              <p className={`px-2.5 pt-1.5 text-[11px] leading-snug ${
+                /failed|error|rate/i.test(note) ? 'text-[#DC2626]' : 'text-[#8A867C]'
+              }`}>{note}</p>
+            )}
           </>
         )}
 
@@ -185,7 +192,7 @@ export function Share() {
                 {owner && (
                   <button
                     type="button"
-                    onClick={() => draft(i.email)}
+                    onClick={() => { void mailInvite(i.email, boardLink()); draft(i.email) }}
                     className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
                   >
                     {t('Email again')}
@@ -209,7 +216,7 @@ export function Share() {
 
         {user && owner && (
           <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
-            {t('Access is granted the moment that address signs in. Tuval does not send mail: your mail app opens with the invite ready, you press send.')}
+            {t('The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.')}
           </p>
         )}
       </Popover>

@@ -156,6 +156,18 @@ export async function invite(room: string, email: string, role: 'editor' | 'view
   return error ? error.message : null
 }
 
+// Supabase only sends auth mail, so the invite rides on a magic link. The invitee gets a real
+// email from the configured SMTP and lands on the board signed in as themselves. Sending it
+// does not touch the current session.
+export async function mailInvite(email: string, boardUrl: string) {
+  if (!supabase) return 'not configured'
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.trim().toLowerCase(),
+    options: { emailRedirectTo: boardUrl, shouldCreateUser: true },
+  })
+  return error ? error.message : null
+}
+
 export async function revokeInvite(room: string, email: string) {
   await supabase?.from('board_invites').delete().eq('board_id', room).eq('email', email)
 }

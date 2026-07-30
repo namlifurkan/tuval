@@ -56,6 +56,12 @@ Sharing is by email. The owner invites an address from the **Share** menu; the i
 invite someone who has never opened Tuval. Roles are `editor` and `viewer`, enforced by row
 level security rather than by the interface.
 
+The invite itself travels as a sign-in link, which is the only mail Supabase sends on your
+behalf. Configure **Authentication → SMTP Settings** with your own server before relying on
+it: the built-in sender is throttled to a handful of messages an hour and is not meant for
+production. Editing the *Magic Link* template under **Authentication → Email Templates** is
+worth the two minutes, since that is the text an invited colleague reads.
+
 The document itself is still a Yjs CRDT. The snapshot is *merged* on open rather than
 assigned, so a board edited offline on two machines converges instead of one side winning.
 

@@ -342,6 +342,11 @@ const tr: Record<string, string> = {
     'Linki aç ve bu adresle giriş yap, board görünecek.',
   'Access is granted the moment that address signs in. Tuval does not send mail: your mail app opens with the invite ready, you press send.':
     'O adres giriş yaptığı anda erişim açılır. Tuval posta göndermez: e-posta uygulaman hazır davetle açılır, göndere sen basarsın.',
+  'Invite emailed to {email}.': 'Davet {email} adresine gönderildi.',
+  'Access granted, but the email failed: {reason}':
+    'Erişim açıldı ama e-posta gitmedi: {reason}',
+  'The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.':
+    'Davet, Supabase SMTP\'nden giriş bağlantısı olarak gider. Authentication → SMTP Settings\'ten ayarla; yoksa dahili gönderici birkaç mesajdan sonra kısar.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }
