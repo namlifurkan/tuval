@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   addCol, addRow, anchorOf, connectorLabels, dropCol, growMerge, isCovered, makeTable, pointAlong,
-  remapMerges, spanRect, splitMerge,
+  makeFrame, makeRecordItem, makeSticky, remapMerges, spanRect, splitMerge,
 } from './items'
+import { canPromote } from './promote'
 import type { ConnectorItem, TableItem, Vec } from './types'
 
 const table = (): TableItem => makeTable(0, 0, 3, 3)
@@ -105,5 +106,28 @@ describe('connector labels', () => {
 
   it('has nothing to draw for a bare connector', () => {
     expect(connectorLabels({ text: '' } as ConnectorItem)).toEqual([])
+  })
+})
+
+describe('a record on a canvas', () => {
+  it('carries a copy of what the row said, so the board reads offline', () => {
+    const card = makeRecordItem(10, 20, 'rec-1', 'Ship it', 'doing')
+    expect(card).toMatchObject({
+      type: 'record', recordId: 'rec-1', kind: 'issue',
+      snapshot: { title: 'Ship it', status: 'doing' },
+      x: 10, y: 20,
+    })
+  })
+
+  // Turning something into work needs somewhere for the work to live, and without a workspace
+  // there is none, whatever was selected.
+  it('offers nothing to promote until there is a workspace', () => {
+    expect(canPromote(makeSticky(0, 0, '#F0E3B0', 'an idea'))).toBe(false)
+    expect(canPromote(makeFrame(0, 0, 10, 10, 'section'))).toBe(false)
+  })
+
+  it('never offers to promote what is already a record', () => {
+    const card = makeRecordItem(0, 0, 'r', 't', null)
+    expect(['sticky', 'text']).not.toContain(card.type)
   })
 })

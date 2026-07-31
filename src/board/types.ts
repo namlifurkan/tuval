@@ -51,6 +51,17 @@ export interface StickyItem extends BaseItem, TextStyle {
   labelSize?: number
 }
 
+// A record placed on a canvas. It carries no content of its own: the record is a row, and this
+// is where it happens to be. The snapshot is a copy of what the row said the last time anyone
+// looked, kept so the board still reads with the network unplugged; it is never the truth.
+export interface RecordItem extends BaseItem, TextStyle {
+  type: 'record'
+  recordId: string
+  kind: string
+  fill: string
+  snapshot: { title: string; status: string | null }
+}
+
 export interface ShapeItem extends BaseItem, TextStyle {
   type: 'shape'
   mindParent?: Id | null
@@ -167,6 +178,7 @@ export interface ConnectorItem extends BaseItem, TextStyle {
 
 export type Item =
   | StickyItem | ShapeItem | TextItem | DrawItem | ImageItem | FrameItem | ConnectorItem
+  | RecordItem
   | CommentItem | TableItem | EmbedItem | CodeItem
 
 export type ItemType = Item['type']

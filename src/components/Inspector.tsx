@@ -1,4 +1,7 @@
 import { readOnly, subscribeAccess } from '../board/access'
+import { go } from '../board/boards'
+import { canPromote, promoteToIssue } from '../board/promote'
+import { patchRecord, STATUSES } from '../board/records'
 import { boardPeople, isAssigned, toggleAssignee } from '../board/people'
 import { initials } from '../board/me'
 import { isNode, layoutMindmap, rootOf } from '../board/mindmap'
@@ -89,6 +92,8 @@ export function Inspector() {
   const mind = selected.length === 1 && isNode(selected[0]) ? selected[0] : null
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
+  const card = selected.length === 1 && selected[0].type === 'record' ? selected[0] : null
+  const promotable = selected.filter(canPromote)
   const cell = table && editing?.id === table.id ? editing.cell ?? null : null
   const wire = selected.length === 1 && selected[0].type === 'connector' ? selected[0] : null
 
@@ -440,6 +445,48 @@ export function Inspector() {
               <Maximize size={13} /> {t('Fit to text')}
             </button>
           </div>
+        </Section>
+      )}
+
+      {card && (
+        <Section title={t('Issue')}>
+          <div className="grid grid-cols-3 gap-1">
+            {STATUSES.map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => {
+                  void patchRecord(card.recordId, { status: st })
+                  patchItem(card.id, { snapshot: { ...card.snapshot, status: st } })
+                  requestRender()
+                }}
+                className={`rounded-lg px-1 py-1.5 text-[11px] font-semibold capitalize
+                  ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+              >{t(st)}</button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => go('/issues')}
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+          >{t('Open in issues')}</button>
+        </Section>
+      )}
+
+      {!!promotable.length && (
+        <Section title={t('Work')}>
+          <button
+            type="button"
+            onClick={() => void promoteToIssue(promotable.map((i) => i.id))}
+            className="w-full rounded-lg bg-[#C8452D] px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#A83621]"
+          >
+            {promotable.length > 1
+              ? t('Turn {n} into issues', { n: promotable.length })
+              : t('Turn into an issue')}
+          </button>
+          <p className="mt-1.5 text-[11px] leading-snug text-[#8A867C]">
+            {t('It keeps its place on the board and turns up in the issue list, because it is the same thing in two views.')}
+          </p>
         </Section>
       )}
 

@@ -22,6 +22,7 @@ import { PasswordGate } from './PasswordGate'
 import { Inspector } from './Inspector'
 import { Minimap } from './Minimap'
 import { startRealtime } from '../board/realtime'
+import { refreshSnapshots } from '../board/promote'
 import { startCloudSync, sweepOrphanImages } from '../board/sync'
 import { takeTemplate } from '../board/boards'
 import { insertItems } from '../board/interaction'
@@ -71,8 +72,11 @@ export default function Board() {
     startRealtime()
     // Once, after the document has had time to arrive: sweeping an empty document would look
     // like every image on the board is unreferenced.
-    const id = setTimeout(() => void sweepOrphanImages(), 8000)
-    return () => clearTimeout(id)
+    // Once the document has arrived: the rows are the truth and the cards on the board carry a
+    // copy, so the copies are brought up to date on the way in.
+    const fresh = setTimeout(() => void refreshSnapshots(), 2500)
+    const swept = setTimeout(() => void sweepOrphanImages(), 8000)
+    return () => { clearTimeout(fresh); clearTimeout(swept) }
   }, [])
 
   return (

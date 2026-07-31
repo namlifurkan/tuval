@@ -3,7 +3,7 @@ import { session } from './store'
 import { anchorPoint, nearestAnchor, resolveConnector } from './geometry'
 import type { Ends } from './geometry'
 import { me } from './me'
-import type {
+import type { RecordItem,
   AnchorSide, CodeItem, CommentItem, CommentReply, ConnectorItem, DrawItem, EmbedItem, Endpoint, FrameItem,
   ImageItem, Item,
   Rect, ShapeItem, StickyItem, TableItem, TextItem, TextStyle, Vec,
@@ -111,6 +111,26 @@ export function makeImage(x: number, y: number, w: number, h: number, src: strin
 
 export const TABLE_CELL_W = 180
 export const TABLE_CELL_H = 56
+
+export const RECORD_W = 260
+export const RECORD_H = 96
+
+export function makeRecordItem(
+  x: number, y: number, recordId: string, title: string, status: string | null, fill = '#FCFBF8',
+): RecordItem {
+  return {
+    ...base(x, y, RECORD_W, RECORD_H),
+    type: 'record',
+    recordId,
+    kind: 'issue',
+    fill,
+    snapshot: { title, status },
+    ...DEFAULT_TEXT_STYLE,
+    fontSize: 18,
+    align: 'left',
+    valign: 'top',
+  }
+}
 
 export function makeTable(x: number, y: number, rows = 3, cols = 3, style?: Partial<TextStyle>): TableItem {
   const widths = Array.from({ length: cols }, () => TABLE_CELL_W)

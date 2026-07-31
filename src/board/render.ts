@@ -112,6 +112,7 @@ function drawItem(s: Scene, item: Item) {
       case 'table': drawTable(s, item); break
       case 'embed': drawEmbed(s, item); break
       case 'code': drawCode(s, item); break
+      case 'record': drawRecord(s, item); break
       case 'comment': break
     }
   })
@@ -155,6 +156,55 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
     ctx.textAlign = 'left'
     ctx.textBaseline = 'alphabetic'
   }
+}
+
+const STATUS_TONE: Record<string, string> = {
+  todo: '#8A867C',
+  doing: '#DE9A4E',
+  blocked: '#C8664A',
+  done: '#5E9A8A',
+  cancelled: '#C6C2B6',
+}
+
+// Drawn as a card rather than a sticky, because it is not one: it is a row that happens to be
+// here. The mark down the left says so without needing a legend.
+function drawRecord(s: Scene, item: Item & { type: 'record' }) {
+  const { ctx } = s
+  const { title, status } = item.snapshot
+
+  ctx.save()
+  ctx.fillStyle = item.fill
+  ctx.fillRect(item.x, item.y, item.w, item.h)
+  ctx.strokeStyle = 'rgba(20, 19, 16, 0.12)'
+  ctx.lineWidth = 1
+  ctx.setLineDash([])
+  ctx.strokeRect(item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
+
+  const tone = status ? STATUS_TONE[status] ?? '#8A867C' : '#D6D1C6'
+  ctx.fillStyle = tone
+  ctx.fillRect(item.x, item.y, 4, item.h)
+
+  const pad = 14
+  ctx.fillStyle = tone
+  ctx.beginPath()
+  ctx.rect(item.x + pad, item.y + pad, 9, 9)
+  ctx.fill()
+
+  if (status) {
+    ctx.font = fontString({ ...item, bold: true }, 11)
+    ctx.fillStyle = '#8A867C'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(status.toUpperCase(), item.x + pad + 16, item.y + pad + 5)
+  }
+  ctx.restore()
+
+  if (s.editing === item.id) return
+  drawText(
+    s,
+    { ...item, text: title },
+    { x: item.x + pad, y: item.y + pad + 20, w: item.w - pad * 2, h: item.h - pad * 2 - 20 },
+  )
 }
 
 function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {

@@ -367,6 +367,13 @@ const tr: Record<string, string> = {
   'Home': 'Anasayfa',
   'Workspace': 'Çalışma alanı',
   'Issues': 'İşler',
+  'Issue': 'İş',
+  'Work': 'İş',
+  'Turn into an issue': 'İşe çevir',
+  'Turn {n} into issues': '{n} tanesini işe çevir',
+  'It keeps its place on the board and turns up in the issue list, because it is the same thing in two views.':
+    'Board\'daki yerinde kalır ve iş listesinde de görünür; iki görünümdeki aynı şey çünkü.',
+  'Open in issues': 'İşlerde aç',
   'Settings': 'Ayarlar',
   'Press ⌘K for anything': 'Her şey için ⌘K',
   'Write an issue and press enter': 'Bir iş yaz ve enter\'a bas',
