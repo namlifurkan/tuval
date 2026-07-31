@@ -18,6 +18,7 @@ let opening: Promise<void> = Promise.resolve()
 let saving = 0
 let dirty = false
 
+export const pageDoc = () => doc
 export const pageFragment = () => doc.getXmlFragment(FRAGMENT)
 export const pageAwareness = () => awareness
 

@@ -1,8 +1,10 @@
 import { useSyncExternalStore } from 'react'
 import { BlockNoteSchema } from '@blocknote/core'
+import { CommentsExtension } from '@blocknote/core/comments'
 import { withCollaboration } from '@blocknote/core/yjs'
 import {
-  createReactInlineContentSpec, SuggestionMenuController, useCreateBlockNote,
+  createReactInlineContentSpec, FloatingComposerController, FloatingThreadController,
+  SuggestionMenuController, useCreateBlockNote,
 } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
 import type { Theme } from '@blocknote/mantine'
@@ -12,6 +14,8 @@ import { COLOR, PIGMENTS } from '../board/brand'
 import { me } from '../board/me'
 import { MENTION } from '../board/mention'
 import { pageAwareness, pageFragment } from '../board/page'
+import { PageThreadStore } from '../board/threads'
+import { listTeam } from '../board/workspace'
 import { ancestors, createRecord, getRecords, subscribeRecords } from '../board/records'
 import { displayName, getUser } from '../board/supabase'
 import { t } from '../i18n'
@@ -49,6 +53,11 @@ const theme: Theme = {
   fontFamily: '"Instrument Sans", ui-sans-serif, system-ui, sans-serif',
 }
 
+// The same paper whichever way the machine is set. BlockNote follows the system otherwise, and
+// on a laptop in dark mode half the editor went black inside a product that is paper and ink:
+// the comment box arrived as white text on a black field.
+const paper = { light: theme, dark: theme }
+
 // A page named inside another page. The whole point of a wiki is that the naming is the link,
 // so it carries the id and shows the title, and a renamed page is still pointed at.
 const Mention = createReactInlineContentSpec(
@@ -68,11 +77,34 @@ const Mention = createReactInlineContentSpec(
 
 const schema = BlockNoteSchema.create().extend({ inlineContentSpecs: { [MENTION]: Mention } })
 
+// Everyone the workspace knows, asked for once and answered from memory after that. BlockNote
+// asks for the people it does not have rather than for all of them.
+const faces = new Map<string, { username: string; avatarUrl: string }>()
+
+async function resolveUsers(ids: string[]) {
+  const missing = ids.filter((id) => !faces.has(id))
+  if (missing.length) {
+    for (const mate of await listTeam()) {
+      faces.set(mate.userId, {
+        username: mate.email.split('@')[0] || t('Member'),
+        avatarUrl: '',
+      })
+    }
+  }
+  return ids.map((id) => ({ id, ...(faces.get(id) ?? { username: t('Member'), avatarUrl: '' }) }))
+}
+
 export function PageEditor() {
   const pages = useSyncExternalStore(subscribeRecords, docs, docs)
+  const myId = getUser()?.id ?? ''
 
   const editor = useCreateBlockNote(withCollaboration({
     schema,
+    // Comments live in the page's own document, so they arrive with it and cannot drift from
+    // the text they are attached to.
+    extensions: myId
+      ? [CommentsExtension({ threadStore: new PageThreadStore(myId), resolveUsers })]
+      : [],
     // The type-change animation marks a block with what it used to be, and the size of a
     // heading is written in a rule that refuses to match a block still carrying that mark.
     // Restoring a document is a change from nothing to everything, so every heading on a
@@ -89,7 +121,9 @@ export function PageEditor() {
   const mine = here.kind === 'page' ? here.id : ''
 
   return (
-    <BlockNoteView editor={editor} theme={theme}>
+    <BlockNoteView editor={editor} theme={paper}>
+      {!!myId && <FloatingComposerController />}
+      {!!myId && <FloatingThreadController />}
       <SuggestionMenuController
         triggerCharacter="@"
         getItems={async (query) => {
