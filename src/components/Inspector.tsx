@@ -580,5 +580,5 @@ export function Inspector() {
 const TYPE_LABEL: Record<string, string> = {
   sticky: 'Sticky', shape: 'Shape', text: 'Text', draw: 'Drawing', image: 'Image',
   frame: 'Frame', connector: 'Connector', table: 'Table', embed: 'Embed', comment: 'Comment',
-  code: 'Code block',
+  code: 'Code block', record: 'Issue',
 }
