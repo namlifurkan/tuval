@@ -1,12 +1,16 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { ChevronRight, Plus, Table2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
-import { ancestors, createRecord, getPages, loadPages, subscribeRecords } from '../board/records'
+import {
+  ancestors, between, canReparent, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
+} from '../board/records'
 import type { Record } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 
 const pages = getPages
+
+type Where = 'above' | 'below' | 'inside'
 
 const OPEN = 'tuval:tree-open'
 
@@ -18,7 +22,7 @@ const writeOpen = (ids: Set<string>) => {
   try { localStorage.setItem(OPEN, JSON.stringify([...ids])) } catch { /* private mode */ }
 }
 
-function Row({ page, kids, depth, here, open, toggle, add }: {
+function Row({ page, kids, depth, here, open, toggle, add, move }: {
   page: Record
   kids: Map<string | null, Record[]>
   depth: number
@@ -26,17 +30,42 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
   open: Set<string>
   toggle: (id: string) => void
   add: (parent: string) => void
+  move: (id: string, onto: Record, where: Where) => void
 }) {
   // A database draws its rows itself. Repeating them in the tree would bury the pages.
   const children = page.kind === 'database' ? [] : kids.get(page.id) ?? []
   const expanded = open.has(page.id)
   const active = here === page.id
+  const [over, setOver] = useState<Where | null>(null)
+
+  // The top and bottom sixths of a row put the page beside this one; the middle puts it inside.
+  // Sixths rather than thirds because dropping inside is the common intent and the easier target
+  // should be the one people mean.
+  const zone = (e: React.DragEvent): Where => {
+    const box = e.currentTarget.getBoundingClientRect()
+    const y = (e.clientY - box.top) / box.height
+    if (y < 0.17) return 'above'
+    if (y > 0.83) return 'below'
+    return 'inside'
+  }
 
   return (
     <li>
       <div
+        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setOver(zone(e)) }}
+        onDragLeave={() => setOver(null)}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const id = e.dataTransfer.getData('text/plain')
+          setOver(null)
+          if (id && id !== page.id) move(id, page, zone(e))
+        }}
         className={`group flex items-center rounded-md pr-1 transition-colors
-          ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+          ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}
+          ${over === 'inside' ? 'ring-1 ring-[#C8452D]' : ''}
+          ${over === 'above' ? 'border-t border-[#C8452D]' : ''}
+          ${over === 'below' ? 'border-b border-[#C8452D]' : ''}`}
         style={{ paddingLeft: `${depth * 12}px` }}
       >
         <button
@@ -52,6 +81,8 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
 
         <a
           href={`/d/${page.id}`}
+          draggable
+          onDragStart={(e) => { e.dataTransfer.setData('text/plain', page.id); e.dataTransfer.effectAllowed = 'move' }}
           aria-current={active ? 'page' : undefined}
           onClick={(e) => { e.preventDefault(); go(`/d/${page.id}`) }}
           className="min-w-0 flex-1 truncate py-1 text-left text-[13px] font-medium"
@@ -84,6 +115,7 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
               open={open}
               toggle={toggle}
               add={add}
+              move={move}
             />
           ))}
         </ul>
@@ -112,6 +144,9 @@ export function PageTree() {
     if (!kids.has(parent)) kids.set(parent, [])
     kids.get(parent)!.push(row)
   }
+  // The rows arrive in position order but a page just moved has a new one, so each branch is
+  // ordered again here rather than waiting for the next load.
+  for (const branch of kids.values()) branch.sort((a, b) => a.position - b.position)
 
   // The branch you are standing on is open whether or not you opened it yourself.
   const shown = new Set(open)
@@ -139,6 +174,34 @@ export function PageTree() {
       }
       go(`/d/${id}`)
     })
+  }
+
+  // Dropped beside a page it becomes its sibling and takes a position between its neighbours;
+  // dropped on one it goes inside, at the end. A page cannot be dropped into its own branch.
+  const move = (id: string, onto: Record, where: Where) => {
+    const parent = where === 'inside' ? onto.id : onto.parent_id
+    if (!canReparent(rows, id, parent)) return
+
+    const siblings = (kids.get(parent) ?? []).filter((r) => r.id !== id)
+    let position: number
+    if (where === 'inside') {
+      position = between(siblings.at(-1) ?? null, null)
+    } else {
+      const at = siblings.findIndex((r) => r.id === onto.id)
+      const [before, after] = where === 'above'
+        ? [siblings[at - 1] ?? null, onto]
+        : [onto, siblings[at + 1] ?? null]
+      position = between(before, after)
+    }
+
+    patchRecord(id, { parent_id: parent, position })
+    if (where === 'inside') {
+      setOpen((was) => {
+        const next = new Set(was).add(onto.id)
+        writeOpen(next)
+        return next
+      })
+    }
   }
 
   const roots = kids.get(null) ?? []
@@ -170,6 +233,14 @@ export function PageTree() {
         </span>
       </div>
 
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData('text/plain')
+          if (!id) return
+          patchRecord(id, { parent_id: null, position: between(roots.at(-1) ?? null, null) })
+        }}
+      >
       {roots.length
         ? (
           <ul className="mt-1">
@@ -183,11 +254,14 @@ export function PageTree() {
                 open={shown}
                 toggle={toggle}
                 add={add}
+                move={move}
               />
             ))}
           </ul>
         )
         : <p className="mt-1 px-2 text-[12px] leading-snug text-[#B6B1A6]">{t('No pages yet')}</p>}
+      <div className="h-6" aria-hidden />
+      </div>
     </div>
   )
 }

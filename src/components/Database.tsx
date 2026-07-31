@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Plus, X } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addField, addView, cellsOf, editView, removeView, rowsOf, schemaOf, setCell,
+  addField, addView, applyView, cellsOf, editView, removeView, rowsOf, schemaOf, setCell,
 } from '../board/database'
 import type { Choice, Field, View } from '../board/database'
 import { between, createRecord, getPages, patchRecord, subscribeRecords } from '../board/records'
@@ -11,6 +11,7 @@ import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 import { DatabaseTable } from './DatabaseTable'
+import { ViewBar } from './ViewBar'
 
 const pages = getPages
 
@@ -132,7 +133,8 @@ export function Database({ db }: { db: Row }) {
 
   const schema = schemaOf(db)
   const view = schema.views[Math.min(at, schema.views.length - 1)] ?? schema.views[0]
-  const mine = rowsOf(db.id)
+  const all = rowsOf(db.id)
+  const mine = applyView(all, view)
 
   return (
     <div className="mt-5">
@@ -183,6 +185,8 @@ export function Database({ db }: { db: Row }) {
           </select>
         )}
       </div>
+
+      {view && <ViewBar db={db} view={view} fields={schema.fields} hidden={all.length - mine.length} />}
 
       {view?.kind === 'board'
         ? <Board db={db} rows={mine} view={view} fields={schema.fields} />

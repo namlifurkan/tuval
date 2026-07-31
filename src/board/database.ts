@@ -8,7 +8,56 @@ export const FIELD_TYPES: FieldType[] = ['text', 'number', 'select', 'date', 'ch
 
 export interface Choice { id: string; name: string; tone: string }
 export interface Field { id: string; name: string; type: FieldType; choices?: Choice[] }
-export interface View { id: string; name: string; kind: 'table' | 'board'; groupBy?: string }
+
+export type Op =
+  | 'contains' | 'is' | 'isNot' | 'empty' | 'notEmpty'
+  | 'gt' | 'lt' | 'before' | 'after' | 'checked' | 'unchecked'
+
+export interface Filter { id: string; field: string; op: Op; value?: string }
+export interface Sort { field: string; dir: 'asc' | 'desc' }
+
+export interface View {
+  id: string
+  name: string
+  kind: 'table' | 'board'
+  groupBy?: string
+  filters?: Filter[]
+  sorts?: Sort[]
+}
+
+// The name column is not one of the user's fields but it is the one everybody filters and sorts
+// by first, so it answers to a reserved id rather than being a special case at every call site.
+export const TITLE = '__title__'
+
+const OPS: { [K in FieldType | 'title']: Op[] } = {
+  title: ['contains', 'is', 'empty', 'notEmpty'],
+  text: ['contains', 'is', 'empty', 'notEmpty'],
+  url: ['contains', 'is', 'empty', 'notEmpty'],
+  number: ['is', 'gt', 'lt', 'empty', 'notEmpty'],
+  select: ['is', 'isNot', 'empty', 'notEmpty'],
+  date: ['is', 'before', 'after', 'empty', 'notEmpty'],
+  checkbox: ['checked', 'unchecked'],
+  person: ['is', 'empty', 'notEmpty'],
+}
+
+export const opsFor = (field: Field | null) => OPS[field?.type ?? 'title']
+
+export const NO_VALUE: Op[] = ['empty', 'notEmpty', 'checked', 'unchecked']
+
+// The key is short because it is stored; the label is a sentence because it is read.
+export const OP_LABEL: { [K in Op]: string } = {
+  contains: 'contains',
+  is: 'is',
+  isNot: 'is not',
+  empty: 'is empty',
+  notEmpty: 'is not empty',
+  gt: 'is more than',
+  lt: 'is less than',
+  before: 'is before',
+  after: 'is after',
+  checked: 'is checked',
+  unchecked: 'is not checked',
+}
 
 export interface Schema { fields: Field[]; views: View[] }
 
@@ -114,4 +163,79 @@ export function setCell(row: Row, fieldId: string, value: unknown) {
 export const cellText = (row: Row, field: Field): string => {
   const value = cellsOf(row)[field.id]
   return value === undefined || value === null ? '' : String(value)
+}
+
+const held = (row: Row, fieldId: string) =>
+  fieldId === TITLE ? row.title : cellsOf(row)[fieldId]
+
+const same = (a: unknown, b: string) => String(a ?? '').toLowerCase() === b.toLowerCase()
+
+function passes(row: Row, filter: Filter): boolean {
+  const value = held(row, filter.field)
+  const want = filter.value ?? ''
+  switch (filter.op) {
+    case 'empty': return value === undefined || value === null || value === ''
+    case 'notEmpty': return !(value === undefined || value === null || value === '')
+    case 'checked': return value === true
+    case 'unchecked': return value !== true
+    case 'is': return same(value, want)
+    case 'isNot': return !same(value, want)
+    case 'contains': return String(value ?? '').toLowerCase().includes(want.toLowerCase())
+    case 'gt': return Number(value) > Number(want)
+    case 'lt': return Number(value) < Number(want)
+    case 'before': return String(value ?? '') !== '' && String(value) < want
+    case 'after': return String(value ?? '') !== '' && String(value) > want
+    default: return true
+  }
+}
+
+// shortcut: filtering and sorting happen in memory over the whole set, which is right while a
+// workspace holds hundreds of rows. Past a few thousand this belongs in the query, and the
+// filters are already the shape of one.
+export function applyView(rows: Row[], view: View | undefined): Row[] {
+  const filters = view?.filters ?? []
+  const sorts = view?.sorts ?? []
+  const kept = filters.length ? rows.filter((r) => filters.every((f) => passes(r, f))) : rows
+  if (!sorts.length) return kept
+
+  return [...kept].sort((a, b) => {
+    for (const sort of sorts) {
+      const [left, right] = [held(a, sort.field), held(b, sort.field)]
+      // An empty cell sorts last whichever way the column is pointing, because a row with no
+      // value is not the smallest value, it is a row with no value.
+      const [emptyL, emptyR] = [left === undefined || left === '', right === undefined || right === '']
+      if (emptyL !== emptyR) return emptyL ? 1 : -1
+      if (emptyL) continue
+      const step = typeof left === 'number' && typeof right === 'number'
+        ? left - right
+        : String(left).localeCompare(String(right), undefined, { numeric: true })
+      if (step) return sort.dir === 'desc' ? -step : step
+    }
+    return a.position - b.position
+  })
+}
+
+export function addFilter(db: Row, viewId: string, field: string, type: FieldType | 'title') {
+  const view = schemaOf(db).views.find((v) => v.id === viewId)
+  const op = OPS[type][0]
+  editView(db, viewId, {
+    filters: [...(view?.filters ?? []), { id: nanoid(8), field, op, value: '' }],
+  })
+}
+
+export function editFilter(db: Row, viewId: string, filterId: string, changes: Partial<Filter>) {
+  const view = schemaOf(db).views.find((v) => v.id === viewId)
+  editView(db, viewId, {
+    filters: (view?.filters ?? []).map((f) => (f.id === filterId ? { ...f, ...changes } : f)),
+  })
+}
+
+export function removeFilter(db: Row, viewId: string, filterId: string) {
+  const view = schemaOf(db).views.find((v) => v.id === viewId)
+  editView(db, viewId, { filters: (view?.filters ?? []).filter((f) => f.id !== filterId) })
+}
+
+// One sort at a time is what a person uses; the list keeps the shape for the day it is more.
+export function setSort(db: Row, viewId: string, field: string | null, dir: Sort['dir'] = 'asc') {
+  editView(db, viewId, { sorts: field ? [{ field, dir }] : [] })
 }

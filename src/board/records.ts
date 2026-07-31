@@ -174,6 +174,20 @@ export function between(before: Record | null, after: Record | null): number {
   return (before.position + after.position) / 2
 }
 
+// Dropping a page onto one of its own descendants would cut the branch off from the tree: it
+// would still be a chain, and nothing would reach it. The check is here rather than at the drop
+// site because the column allows it and only this file knows the whole set.
+export function canReparent(rows: Record[], id: string, parent: string | null): boolean {
+  if (!parent || id === parent) return parent !== id
+  const by = new Map(rows.map((r) => [r.id, r]))
+  const seen = new Set<string>()
+  for (let at: string | null = parent; at && !seen.has(at); at = by.get(at)?.parent_id ?? null) {
+    if (at === id) return false
+    seen.add(at)
+  }
+  return true
+}
+
 // The chain from the workspace down to a page, used for breadcrumbs. Guarded against a record
 // that is its own ancestor: the column allows it even though nothing in the product creates it.
 export function ancestors(rows: Record[], id: string): Record[] {
