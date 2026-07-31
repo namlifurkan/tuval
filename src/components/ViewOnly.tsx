@@ -1,7 +1,7 @@
 import { Eye } from 'lucide-react'
 import { useEffect, useSyncExternalStore } from 'react'
 import { readOnly, setRole, subscribeAccess } from '../board/access'
-import { myRole } from '../board/cloud'
+import { myRole, touchMembership } from '../board/cloud'
 import { room } from '../board/doc'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
@@ -13,7 +13,9 @@ export function ViewOnly() {
   useEffect(() => {
     if (!cloudEnabled || !user) { setRole(null); return }
     let live = true
-    void myRole(room).then((r) => { if (live) setRole(r) })
+    void touchMembership(room)
+      .then(() => myRole(room))
+      .then((r) => { if (live) setRole(r) })
     return () => { live = false }
   }, [user])
 

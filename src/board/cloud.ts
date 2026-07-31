@@ -148,7 +148,8 @@ export async function listMembers(room: string): Promise<Member[]> {
   const user = getUser()
   if (!supabase || !user) return []
   const board = await supabase.from('boards').select('owner').eq('id', room).maybeSingle()
-  const rows = await supabase.from('board_members').select('user_id, email, role').eq('board_id', room)
+  const rows = await supabase
+    .from('board_members').select('user_id, email, role').eq('board_id', room).neq('role', 'blocked')
   const ownerId = board.data?.owner as string | undefined
   const out: Member[] = (rows.data ?? []).map((r) => ({
     userId: r.user_id as string,
@@ -198,8 +199,15 @@ export async function revokeInvite(room: string, email: string) {
   await supabase?.from('board_invites').delete().eq('board_id', room).eq('email', email)
 }
 
+// Removing has to leave a trace: deleting the row would let the domain rule hand the board
+// straight back on the next open.
 export async function removeMember(room: string, userId: string) {
-  await supabase?.from('board_members').delete().eq('board_id', room).eq('user_id', userId)
+  await supabase?.from('board_members')
+    .upsert({ board_id: room, user_id: userId, role: 'blocked' }, { onConflict: 'board_id,user_id' })
+}
+
+export async function touchMembership(room: string) {
+  await supabase?.rpc('touch_membership', { board: room })
 }
 
 export async function setMemberRole(room: string, userId: string, role: 'editor' | 'viewer') {
@@ -209,10 +217,16 @@ export async function setMemberRole(room: string, userId: string, role: 'editor'
 export async function myRole(room: string): Promise<'owner' | 'editor' | 'viewer' | null> {
   const user = getUser()
   if (!supabase || !user) return null
-  const board = await supabase.from('boards').select('owner').eq('id', room).maybeSingle()
+  const board = await supabase
+    .from('boards').select('owner, allowed_domain, domain_role').eq('id', room).maybeSingle()
   if (!board.data) return null
   if (board.data.owner === user.id) return 'owner'
   const mine = await supabase
     .from('board_members').select('role').eq('board_id', room).eq('user_id', user.id).maybeSingle()
-  return (mine.data?.role as 'editor' | 'viewer') ?? null
+  const role = mine.data?.role as 'editor' | 'viewer' | 'blocked' | undefined
+  if (role) return role === 'blocked' ? null : role
+  const domain = board.data.allowed_domain as string | null
+  const mail = (user.email ?? '').split('@')[1]?.toLowerCase()
+  if (domain && mail === domain) return (board.data.domain_role as 'editor' | 'viewer') ?? 'editor'
+  return null
 }
