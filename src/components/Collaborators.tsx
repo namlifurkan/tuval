@@ -34,7 +34,7 @@ export function Collaborators() {
 
   const guide: Peer = { id: -2, name: GUIDE.name, color: GUIDE.color }
   const all: Peer[] = [
-    { id: -1, name: me.name, color: me.color },
+    { id: -1, name: me.name, color: me.color, avatar: me.avatar },
     ...(ada.off ? [] : [guide]),
     ...peers,
   ]
