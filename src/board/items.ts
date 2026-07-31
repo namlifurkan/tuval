@@ -151,7 +151,9 @@ export function cellAt(t: TableItem, p: Vec): [number, number] | null {
   for (let r = 0; r < t.rows; r++) {
     for (let c = 0; c < t.cols; c++) {
       const rect = cellRect(t, r, c)
-      if (p.x >= rect.x && p.x <= rect.x + rect.w && p.y >= rect.y && p.y <= rect.y + rect.h) return [r, c]
+      if (p.x >= rect.x && p.x <= rect.x + rect.w && p.y >= rect.y && p.y <= rect.y + rect.h) {
+        return anchorOf(t, r, c)
+      }
     }
   }
   return null
@@ -206,7 +208,7 @@ export function addRow(t: TableItem, at = t.rows): Partial<TableItem> {
   const cells = [...t.cells]
   cells.splice(at, 0, Array.from({ length: t.cols }, () => ''))
   const scale = t.h / t.heights.reduce((a, b) => a + b, 0)
-  return { rows: t.rows + 1, heights, cells, h: heights.reduce((a, b) => a + b, 0) * scale }
+  return { rows: t.rows + 1, heights, cells, merges: remapMerges(t.merges, 'row', at, 1), h: heights.reduce((a, b) => a + b, 0) * scale }
 }
 
 export function addCol(t: TableItem, at = t.cols): Partial<TableItem> {
@@ -218,7 +220,7 @@ export function addCol(t: TableItem, at = t.cols): Partial<TableItem> {
     return next
   })
   const scale = t.w / t.widths.reduce((a, b) => a + b, 0)
-  return { cols: t.cols + 1, widths, cells, w: widths.reduce((a, b) => a + b, 0) * scale }
+  return { cols: t.cols + 1, widths, cells, merges: remapMerges(t.merges, 'col', at, 1), w: widths.reduce((a, b) => a + b, 0) * scale }
 }
 
 export function dropRow(t: TableItem, at: number): Partial<TableItem> | null {
@@ -226,7 +228,7 @@ export function dropRow(t: TableItem, at: number): Partial<TableItem> | null {
   const heights = t.heights.filter((_, i) => i !== at)
   const cells = t.cells.filter((_, i) => i !== at)
   const scale = t.h / t.heights.reduce((a, b) => a + b, 0)
-  return { rows: t.rows - 1, heights, cells, h: heights.reduce((a, b) => a + b, 0) * scale }
+  return { rows: t.rows - 1, heights, cells, merges: remapMerges(t.merges, 'row', at, -1), h: heights.reduce((a, b) => a + b, 0) * scale }
 }
 
 export function dropCol(t: TableItem, at: number): Partial<TableItem> | null {
@@ -234,7 +236,7 @@ export function dropCol(t: TableItem, at: number): Partial<TableItem> | null {
   const widths = t.widths.filter((_, i) => i !== at)
   const cells = t.cells.map((row) => row.filter((_, i) => i !== at))
   const scale = t.w / t.widths.reduce((a, b) => a + b, 0)
-  return { cols: t.cols - 1, widths, cells, w: widths.reduce((a, b) => a + b, 0) * scale }
+  return { cols: t.cols - 1, widths, cells, merges: remapMerges(t.merges, 'col', at, -1), w: widths.reduce((a, b) => a + b, 0) * scale }
 }
 
 const EMBED_RULES: [RegExp, (m: RegExpMatchArray) => string][] = [
@@ -348,3 +350,93 @@ export function cloneItems(items: Item[], dx: number, dy: number): Item[] {
 
 export const isTextual = (i: Item): i is StickyItem | ShapeItem | TextItem | ConnectorItem =>
   i.type === 'sticky' || i.type === 'shape' || i.type === 'text' || i.type === 'connector'
+
+// Merged cells ------------------------------------------------------------------------------
+// A merge is a rectangle anchored at its top-left cell. That cell keeps the text and is the
+// only one drawn; the rest are covered and every lookup redirects to the anchor.
+
+export function mergeAt(t: TableItem, r: number, c: number): number[] | null {
+  return t.merges?.find((m) => m[0] === r && m[1] === c) ?? null
+}
+
+export function anchorOf(t: TableItem, r: number, c: number): [number, number] {
+  for (const [mr, mc, rs, cs] of t.merges ?? []) {
+    if (r >= mr && r < mr + rs && c >= mc && c < mc + cs) return [mr, mc]
+  }
+  return [r, c]
+}
+
+export const isCovered = (t: TableItem, r: number, c: number) => {
+  const [ar, ac] = anchorOf(t, r, c)
+  return ar !== r || ac !== c
+}
+
+export function spanRect(t: TableItem, r: number, c: number) {
+  const span = mergeAt(t, r, c)
+  const rect = cellRect(t, r, c)
+  if (!span) return rect
+  const last = cellRect(t, r + span[2] - 1, c + span[3] - 1)
+  return { x: rect.x, y: rect.y, w: last.x + last.w - rect.x, h: last.y + last.h - rect.y }
+}
+
+const overlaps1d = (a: number, an: number, b: number, bn: number) => a < b + bn && b < a + an
+
+// Growing a block swallows whatever it now covers, including other merges. Their text is kept
+// rather than dropped: losing a cell's contents to a layout change is not a fair trade.
+export function growMerge(t: TableItem, r: number, c: number, axis: 'row' | 'col'): Partial<TableItem> | null {
+  const [ar, ac] = anchorOf(t, r, c)
+  const own = mergeAt(t, ar, ac) ?? [ar, ac, 1, 1]
+  const rs = own[2] + (axis === 'row' ? 1 : 0)
+  const cs = own[3] + (axis === 'col' ? 1 : 0)
+  if (ar + rs > t.rows || ac + cs > t.cols) return null
+
+  const eaten = (t.merges ?? []).filter((m) =>
+    !(m[0] === ar && m[1] === ac) && overlaps1d(m[0], m[2], ar, rs) && overlaps1d(m[1], m[3], ac, cs))
+
+  const words: string[] = []
+  const cells = t.cells.map((row, i) => row.map((cell, j) => {
+    if (i === ar && j === ac) return cell
+    if (i < ar || i >= ar + rs || j < ac || j >= ac + cs) return cell
+    if (cell) words.push(cell)
+    return ''
+  }))
+  if (words.length) cells[ar][ac] = [cells[ar][ac], ...words].filter(Boolean).join(' ')
+
+  const merges = (t.merges ?? [])
+    .filter((m) => !eaten.includes(m) && !(m[0] === ar && m[1] === ac))
+    .concat([[ar, ac, rs, cs]])
+  return { merges, cells }
+}
+
+export function splitMerge(t: TableItem, r: number, c: number): Partial<TableItem> | null {
+  const [ar, ac] = anchorOf(t, r, c)
+  if (!mergeAt(t, ar, ac)) return null
+  return { merges: (t.merges ?? []).filter((m) => !(m[0] === ar && m[1] === ac)) }
+}
+
+// A row or column appearing or disappearing under a block would leave it describing cells that
+// no longer line up, so anything the change cuts through is split rather than left wrong.
+export function remapMerges(
+  merges: number[][] | undefined, axis: 'row' | 'col', at: number, delta: 1 | -1,
+): number[][] {
+  const i = axis === 'row' ? 0 : 1
+  const n = i + 2
+  const out: number[][] = []
+  for (const m of merges ?? []) {
+    const start = m[i]
+    const span = m[n]
+    if (delta === 1) {
+      if (at <= start) { const next = [...m]; next[i] = start + 1; out.push(next); continue }
+      if (at < start + span) { const next = [...m]; next[n] = span + 1; out.push(next); continue }
+      out.push([...m])
+      continue
+    }
+    if (at < start) { const next = [...m]; next[i] = start - 1; out.push(next); continue }
+    if (at < start + span) {
+      if (span <= 2) continue
+      const next = [...m]; next[n] = span - 1; out.push(next); continue
+    }
+    out.push([...m])
+  }
+  return out.filter((m) => m[2] > 1 || m[3] > 1)
+}

@@ -24,7 +24,7 @@ import {
   fitStickyToText, reorder,
 } from '../board/interaction'
 import type { AlignMode } from '../board/interaction'
-import { addCol, addRow, dropCol, dropRow } from '../board/items'
+import { addCol, addRow, anchorOf, dropCol, dropRow, growMerge, mergeAt, splitMerge } from '../board/items'
 import { requestRender, useBoardStore } from '../board/store'
 import { useSelectedItems } from '../board/useBoard'
 import type { Align, Cap, ConnectorShape, Id, Item, StrokeStyle } from '../board/types'
@@ -73,6 +73,8 @@ export function Inspector() {
   const showMinimap = useBoardStore((s) => s.showMinimap)
   const dragging = useBoardStore((s) => s.dragging)
   const ro = useSyncExternalStore(subscribeAccess, readOnly, readOnly)
+  // Merging needs a target, and the only cell the board knows about is the one being edited.
+  const editing = useBoardStore((s) => s.editing)
 
   // The panel stays up while text is being edited: changing fill or font size mid-sentence is
   // the common case, and hiding it read as "the panel does not open when I add something".
@@ -87,6 +89,7 @@ export function Inspector() {
   const mind = selected.length === 1 && isNode(selected[0]) ? selected[0] : null
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
+  const cell = table && editing?.id === table.id ? editing.cell ?? null : null
 
   const patch = (changes: Record<string, unknown>, filter?: (i: Item) => boolean) => {
     patchItems(
@@ -379,6 +382,29 @@ export function Inspector() {
             >
               <Maximize size={13} /> {t('Fit to text')}
             </button>
+          </div>
+        </Section>
+      )}
+
+      {table && cell && (
+        <Section title={t('Cell')}>
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              type="button"
+              onClick={() => { const p = growMerge(table, cell[0], cell[1], 'col'); if (p) { patchItem(table.id, p); requestRender() } }}
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+            >{t('Merge right')}</button>
+            <button
+              type="button"
+              onClick={() => { const p = growMerge(table, cell[0], cell[1], 'row'); if (p) { patchItem(table.id, p); requestRender() } }}
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+            >{t('Merge down')}</button>
+            <button
+              type="button"
+              disabled={!mergeAt(table, ...anchorOf(table, cell[0], cell[1]))}
+              onClick={() => { const p = splitMerge(table, cell[0], cell[1]); if (p) { patchItem(table.id, p); requestRender() } }}
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2] disabled:opacity-40"
+            >{t('Split')}</button>
           </div>
         </Section>
       )}

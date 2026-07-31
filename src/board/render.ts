@@ -6,7 +6,7 @@ import {
   curveControls, midpoint, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
-import { CODE_LINE, CODE_PAD, cellRect, connectorEnds } from './items'
+import { CODE_LINE, CODE_PAD, cellRect, connectorEnds, isCovered, spanRect } from './items'
 import { CODE_THEME, tokenize } from './code'
 import { labelColor, labelFontSize, labelHeight, labelInk } from './labels'
 import { initials } from './me'
@@ -465,19 +465,18 @@ function drawTable(s: Scene, item: Item & { type: 'table' }) {
     ctx.fillRect(item.x, item.y, item.w, head.h)
   }
 
+  // Each visible cell draws its own outline. Ruling the whole grid would put lines through
+  // the middle of a merged block.
   ctx.strokeStyle = item.stroke
   ctx.lineWidth = item.strokeWidth
   ctx.setLineDash([])
   ctx.beginPath()
-  for (let r = 0; r <= item.rows; r++) {
-    const y = r === item.rows ? item.y + item.h : cellRect(item, r, 0).y
-    ctx.moveTo(item.x, y)
-    ctx.lineTo(item.x + item.w, y)
-  }
-  for (let c = 0; c <= item.cols; c++) {
-    const x = c === item.cols ? item.x + item.w : cellRect(item, 0, c).x
-    ctx.moveTo(x, item.y)
-    ctx.lineTo(x, item.y + item.h)
+  for (let r = 0; r < item.rows; r++) {
+    for (let c = 0; c < item.cols; c++) {
+      if (isCovered(item, r, c)) continue
+      const rect = spanRect(item, r, c)
+      ctx.rect(rect.x, rect.y, rect.w, rect.h)
+    }
   }
   ctx.stroke()
 
@@ -485,9 +484,10 @@ function drawTable(s: Scene, item: Item & { type: 'table' }) {
   for (let r = 0; r < item.rows; r++) {
     for (let c = 0; c < item.cols; c++) {
       if (editing && editing[0] === r && editing[1] === c) continue
+      if (isCovered(item, r, c)) continue
       const text = item.cells[r]?.[c]
       if (!text) continue
-      const rect = cellRect(item, r, c)
+      const rect = spanRect(item, r, c)
       const pad = 8
       drawText(
         s,

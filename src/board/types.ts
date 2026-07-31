@@ -121,6 +121,8 @@ export interface TableItem extends BaseItem, TextStyle {
   widths: number[]
   heights: number[]
   cells: string[][]
+  // [row, col, rowSpan, colSpan] per merged block; absent on tables made before merging existed
+  merges?: number[][]
   headerRow: boolean
   fill: string
   headerFill: string
