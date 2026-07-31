@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { ChevronRight, FileText, Plus } from 'lucide-react'
+import { ChevronRight, CornerUpLeft, FileText, Plus } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
+import { backlinks } from '../board/mention'
+import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
 import {
   ancestors, createRecord, getRecords, loadRecords, patchRecord, subscribeRecords,
@@ -22,6 +24,7 @@ export function Page() {
   const [title, setTitle] = useState('')
   const [ready, setReady] = useState(false)
   const name = useRef<HTMLInputElement>(null)
+  const [links, setLinks] = useState<Backlink[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -39,6 +42,15 @@ export function Page() {
       // anyone does. A page with a title is one you came back to read.
       if (row && !row.title) name.current?.focus()
     })
+  }, [workspace, id])
+
+  // Read once on arrival rather than kept live: what points at a page changes when somebody
+  // else writes, which is a different problem than what this page says.
+  useEffect(() => {
+    if (!workspace || !id) return
+    let live = true
+    void backlinks(id).then((found) => { if (live) setLinks(found) })
+    return () => { live = false }
   }, [workspace, id])
 
   if (!id) return null
@@ -76,6 +88,28 @@ export function Page() {
       <div className="mt-5 -ml-[54px]">
         {ready && <Suspense fallback={null}><PageEditor /></Suspense>}
       </div>
+
+      {!!links.length && (
+        <section className="mt-10 border-t border-[#EAE6DD] pt-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+            {t('Linked from')}
+          </h2>
+          <ul className="mt-2">
+            {links.map((from) => (
+              <li key={from.id}>
+                <a
+                  href={`/d/${from.id}`}
+                  onClick={(e) => { e.preventDefault(); go(`/d/${from.id}`) }}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                >
+                  <CornerUpLeft size={14} className="shrink-0 text-[#8A867C]" />
+                  {from.title || t('Untitled page')}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-10 border-t border-[#EAE6DD] pt-4">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">

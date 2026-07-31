@@ -398,6 +398,8 @@ const tr: Record<string, string> = {
   'Archive': 'Arşivle',
   'Open': 'Aç',
   'Pages': 'Sayfalar',
+  'Linked from': 'Buraya bağlananlar',
+  'New page: {title}': 'Yeni sayfa: {title}',
   'Page': 'Sayfa',
   'Go to docs': 'Dokümanlara git',
   'Find a page, an issue, or write one': 'Sayfa veya iş bul, ya da yaz',
