@@ -14,9 +14,8 @@ import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { duplicateBoard } from '../board/duplicate'
 import { TEMPLATES } from '../board/templates'
 import { t } from '../i18n'
-import { Account } from './Account'
 import { PasswordGate } from './PasswordGate'
-import { Wordmark } from './Logo'
+import { Shell } from './Shell'
 
 function when(at: number) {
   if (!at) return t('never opened')
@@ -177,16 +176,9 @@ export function Dashboard() {
   }
 
   return (
-    <div className="h-dvh overflow-y-auto bg-[#F2EFE9]">
+    <Shell title={t('Boards')} wide>
       <PasswordGate />
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px] sm:px-10">
-        <a href="/" aria-label={t('Home')} className="rounded-md focus-visible:outline-2 focus-visible:outline-[#C8452D]">
-          <Wordmark height={18} />
-        </a>
-        <Account />
-      </header>
-
-      <main className="mx-auto w-full max-w-[1180px] px-6 pb-24 pt-8 sm:px-10">
+      <div>
         {copying && (
           <p className="mb-4 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm text-[#4A463E]">
             {t('Copying the board and its images…')}
@@ -289,7 +281,7 @@ export function Dashboard() {
             ))}
           </Band>
         )}
-      </main>
-    </div>
+      </div>
+    </Shell>
   )
 }

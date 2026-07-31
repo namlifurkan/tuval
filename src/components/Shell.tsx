@@ -16,7 +16,12 @@ const NAV = [
 
 // One frame around everything that is not a board. A board fills the window on its own, because
 // the canvas is the work; everywhere else there is a workspace to move around in.
-export function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+export function Shell({ title, wide, action, children }: {
+  title: string
+  wide?: boolean
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const here = location.pathname.replace(/\/+$/, '') || '/'
 
@@ -49,10 +54,15 @@ export function Shell({ title, children }: { title: string; children: React.Reac
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px]">
           <h1 className="truncate text-[15px] font-semibold text-[#141310]">{title}</h1>
-          <Account />
+          <div className="flex shrink-0 items-center gap-2">
+            {action}
+            <Account />
+          </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[900px] px-6 pb-24 pt-7">{children}</main>
+        <main className={`mx-auto w-full px-6 pb-24 pt-7 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
+          {children}
+        </main>
       </div>
 
       <Palette />

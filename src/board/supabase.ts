@@ -44,8 +44,13 @@ let trouble: AuthTrouble = null
 let leaving = false
 export const authTrouble = () => trouble
 
+// Restoring a stored session is asynchronous, so anything that reads the cloud on mount would
+// otherwise run signed out and come back empty. Await this first.
+export const authReady: Promise<void> = supabase
+  ? supabase.auth.getSession().then(({ data }) => { announce(data.session) })
+  : Promise.resolve()
+
 if (supabase) {
-  void supabase.auth.getSession().then(({ data }) => announce(data.session))
   supabase.auth.onAuthStateChange((event, next) => {
     // A refresh token the server no longer knows leaves the client holding a session it can
     // never use. Supabase drops it and reports a sign-out, which on its own looks like the

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { go, goHome } from '../board/boards'
+import { go } from '../board/boards'
 import { initials } from '../board/me'
 import { avatarUrl, profileName, setProfile, uploadAvatar } from '../board/profile'
 import {
@@ -8,7 +8,7 @@ import {
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Identities } from './Identities'
 import { Team } from './Team'
-import { Wordmark } from './Logo'
+import { Shell } from './Shell'
 
 const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
 const button = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40'
@@ -87,15 +87,8 @@ export function Settings() {
   }
 
   return (
-    <div className="h-dvh overflow-y-auto bg-[#F2EFE9]">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px] sm:px-10">
-        <a href="/" aria-label={t('Home')}><Wordmark height={18} /></a>
-        <button type="button" onClick={goHome} className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] hover:bg-[#EAE6DD]">
-          {t('Your boards')}
-        </button>
-      </header>
-
-      <main className="mx-auto w-full max-w-[720px] px-6 pb-24 pt-8 sm:px-10">
+    <Shell title={t('Settings')}>
+      <div className="max-w-[720px]">
         <h1 className="mb-8 font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-[#141310]">
           {t('Account')}
         </h1>
@@ -206,7 +199,7 @@ export function Settings() {
             {t('Sign out')}
           </button>
         </Row>
-      </main>
-    </div>
+      </div>
+    </Shell>
   )
 }

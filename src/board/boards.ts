@@ -99,9 +99,26 @@ export function goHome() {
   go('/dashboard')
 }
 
+const routeListeners = new Set<() => void>()
+const announceRoute = () => routeListeners.forEach((l) => l())
+
+export function subscribeRoute(fn: () => void) {
+  routeListeners.add(fn)
+  return () => { routeListeners.delete(fn) }
+}
+
+export const routePath = () => location.pathname
+
+addEventListener('popstate', announceRoute)
+
+// A board binds its Y.Doc, its renderer and its socket at module load, so arriving at one or
+// leaving one is a fresh page. Everything else is one tree and moves without reloading.
 export function go(path: string) {
-  history.replaceState(null, '', path)
-  location.reload()
+  if (path === location.pathname) return
+  const heavy = readRoute().kind === 'board' || path.startsWith('/b/')
+  history.pushState(null, '', path)
+  if (heavy) location.reload()
+  else announceRoute()
 }
 
 const PENDING = 'tuval:pending-template'
