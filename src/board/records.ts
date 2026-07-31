@@ -193,6 +193,41 @@ export async function emptyOldTrash(dropCover: (path: string) => Promise<void>) 
   for (const row of stale) await deleteRecord(row, dropCover)
 }
 
+// The body is not loaded with the rest — five hundred pages of prose is not something to carry
+// around to draw a sidebar — so searching inside pages is a question for the server. Titles are
+// still matched from memory, which is why the palette answers before this comes back.
+export interface Hit { id: string; kind: Kind; title: string; icon: string; excerpt: string }
+
+export async function searchBodies(query: string): Promise<Hit[]> {
+  const ws = getWorkspace()
+  const typed = query.trim()
+  if (!supabase || !ws || typed.length < 2) return []
+  const { data } = await supabase
+    .from('records').select('id, kind, title, icon, body')
+    .eq('workspace_id', ws.id).is('archived_at', null)
+    .textSearch('search', typed, { type: 'websearch', config: 'simple' })
+    .limit(8)
+
+  type Row = { id: string; kind: Kind; title: string; icon: string; body: string }
+  return ((data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    title: r.title,
+    icon: r.icon,
+    excerpt: excerpt(r.body, typed),
+  }))
+}
+
+// The line the word is on, not the first line of the page: a result you cannot see the reason
+// for is a result you have to open to judge.
+function excerpt(body: string, query: string): string {
+  const first = query.split(/\s+/)[0].toLowerCase()
+  const at = body.toLowerCase().indexOf(first)
+  if (at < 0) return body.slice(0, 90)
+  const from = Math.max(0, at - 30)
+  return `${from ? '…' : ''}${body.slice(from, from + 110)}${body.length > from + 110 ? '…' : ''}`
+}
+
 // Archiving a page archives what is under it. Leaving the children behind would strand them:
 // nothing points at them and no tree draws them, so they exist only as rows.
 export async function archiveRecord(id: string) {

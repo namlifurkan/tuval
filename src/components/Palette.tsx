@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { go, newRoom, openBoard, touchBoard } from '../board/boards'
-import { ancestors, createRecord, getPages, getRecords, loadRecords, subscribeRecords } from '../board/records'
+import {
+  ancestors, createRecord, getPages, getRecords, loadRecords, searchBodies, subscribeRecords,
+} from '../board/records'
+import type { Hit } from '../board/records'
 import { t } from '../i18n'
 
 interface Action { id: string; label: string; note?: string; hint?: string; run: () => void }
@@ -20,6 +23,7 @@ export function Palette() {
   const field = useRef<HTMLInputElement>(null)
   const docs = useSyncExternalStore(subscribeRecords, pages, pages)
   const work = useSyncExternalStore(subscribeRecords, issues, issues)
+  const [inside, setInside] = useState<Hit[]>([])
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -37,6 +41,19 @@ export function Palette() {
 
   useEffect(() => { if (open) field.current?.focus() }, [open])
   useEffect(() => { if (open && !work.length) void loadRecords('issue') }, [open, work.length])
+
+  // Asked a beat after the typing stops, and thrown away if the answer arrives for a question
+  // that is no longer on screen.
+  useEffect(() => {
+    if (!open) return
+    const typed = query.trim()
+    if (typed.length < 2) { setInside([]); return }
+    let live = true
+    const timer = window.setTimeout(() => {
+      void searchBodies(typed).then((found) => { if (live) setInside(found) })
+    }, 220)
+    return () => { live = false; clearTimeout(timer) }
+  }, [open, query])
 
   const commands = useMemo<Action[]>(() => [
     { id: 'boards', label: t('Go to boards'), hint: '/dashboard', run: () => go('/dashboard') },
@@ -76,6 +93,16 @@ export function Palette() {
         run: () => go(`/i/${i.id}`),
       })),
       ...commands.filter((c) => c.label.toLowerCase().includes(q)),
+      // What the title did not say. Anything already matched by name is not repeated.
+      ...inside
+        .filter((hit) => !hit.title.toLowerCase().includes(q))
+        .map((hit) => ({
+          id: `b:${hit.id}`,
+          label: `${hit.icon ? `${hit.icon} ` : ''}${hit.title || t('Untitled page')}`,
+          note: hit.excerpt,
+          hint: t('In the text'),
+          run: () => go(hit.kind === 'issue' ? `/i/${hit.id}` : `/d/${hit.id}`),
+        })),
     ]
 
     // Typing something nothing answers to is taken as the issue you meant to write.
@@ -86,7 +113,7 @@ export function Palette() {
       run: () => { void createRecord(typed).then(() => loadRecords('issue')) },
     })
     return found
-  }, [commands, docs, work, query])
+  }, [commands, docs, work, query, inside])
 
   if (!open) return null
 

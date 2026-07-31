@@ -7,6 +7,12 @@
       "skillPath": "skills/building-tables/SKILL.md",
       "computedHash": "4958f0f361f72a866c27255e6cdb0fa6f025ed43aa1c29ce74f092095c8cc0c1"
     },
+    "postgres": {
+      "source": "timescale/pg-aiguide",
+      "sourceType": "github",
+      "skillPath": "skills/postgres/SKILL.md",
+      "computedHash": "a6bf1a45932f4a8cdbb7479d18e6d3cf35f015ed0cd7688e36e151e1a6b32dd9"
+    },
     "sidebar": {
       "source": "thedaviddias/ux-patterns-for-developers",
       "sourceType": "github",

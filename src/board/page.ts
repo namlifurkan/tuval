@@ -37,6 +37,18 @@ async function pull(id: string): Promise<Uint8Array | null> {
   return out
 }
 
+// The words in a page, flattened so the server can index what it cannot read. Walked from the
+// shared type rather than the editor, because saving happens whether or not one is mounted.
+function textOf(from: Y.Doc): string {
+  const parts: string[] = []
+  const walk = (node: Y.XmlElement | Y.XmlFragment | Y.XmlText | Y.XmlHook) => {
+    if (node instanceof Y.XmlText) parts.push(node.toString().replace(/<[^>]*>/g, ' '))
+    else if (node instanceof Y.XmlElement || node instanceof Y.XmlFragment) node.toArray().forEach(walk)
+  }
+  walk(from.getXmlFragment(FRAGMENT))
+  return parts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 20000)
+}
+
 async function push() {
   saving = 0
   if (!dirty || !current || !supabase || !getUser()) return
@@ -47,7 +59,7 @@ async function push() {
     supabase.from('record_docs').upsert({ record_id: id, doc: hex(Y.encodeStateAsUpdate(saved)), updated_at: at }),
     // Writing the body is editing the page. Without this the record keeps the timestamp of the
     // last time somebody changed its title, and a page written all afternoon looks untouched.
-    supabase.from('records').update({ updated_at: at }).eq('id', id),
+    supabase.from('records').update({ updated_at: at, body: textOf(saved) }).eq('id', id),
     linkMentions(id, saved),
   ])
 }
