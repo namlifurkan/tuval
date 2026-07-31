@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { addCol, addRow, anchorOf, dropCol, growMerge, isCovered, makeTable, remapMerges, spanRect, splitMerge } from './items'
-import type { TableItem } from './types'
+import {
+  addCol, addRow, anchorOf, connectorLabels, dropCol, growMerge, isCovered, makeTable, pointAlong,
+  remapMerges, spanRect, splitMerge,
+} from './items'
+import type { ConnectorItem, TableItem, Vec } from './types'
 
 const table = (): TableItem => makeTable(0, 0, 3, 3)
 
@@ -68,5 +71,39 @@ describe('merges when rows and columns move', () => {
     expect((addRow(t, 0) as TableItem).merges).toEqual([[1, 0, 1, 2]])
     expect((addCol(t, 0) as TableItem).merges).toEqual([[0, 1, 1, 2]])
     expect((dropCol(t, 0) as TableItem).merges).toEqual([])
+  })
+})
+
+describe('connector labels', () => {
+  const line: Vec[] = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }]
+
+  it('measures the position by length, not by vertex', () => {
+    expect(pointAlong(line, 0)).toEqual({ x: 0, y: 0 })
+    expect(pointAlong(line, 0.5)).toEqual({ x: 100, y: 0 })
+    expect(pointAlong(line, 1)).toEqual({ x: 100, y: 100 })
+    expect(pointAlong(line, 0.25)).toEqual({ x: 50, y: 0 })
+  })
+
+  it('clamps a position outside the line', () => {
+    expect(pointAlong(line, -1)).toEqual({ x: 0, y: 0 })
+    expect(pointAlong(line, 2)).toEqual({ x: 100, y: 100 })
+  })
+
+  it('survives a connector with no length', () => {
+    expect(pointAlong([{ x: 5, y: 5 }, { x: 5, y: 5 }], 0.5)).toEqual({ x: 5, y: 5 })
+  })
+
+  it('puts the main label in the middle by default and keeps the extras', () => {
+    const wire = { text: 'then', labels: [{ t: 0.15, text: 'yes' }] } as ConnectorItem
+    expect(connectorLabels(wire)).toEqual([{ t: 0.5, text: 'then' }, { t: 0.15, text: 'yes' }])
+  })
+
+  it('honours a moved main label and drops empty extras', () => {
+    const wire = { text: 'x', labelT: 0.2, labels: [{ t: 0.9, text: '' }] } as ConnectorItem
+    expect(connectorLabels(wire)).toEqual([{ t: 0.2, text: 'x' }])
+  })
+
+  it('has nothing to draw for a bare connector', () => {
+    expect(connectorLabels({ text: '' } as ConnectorItem)).toEqual([])
   })
 })

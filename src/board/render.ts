@@ -6,7 +6,9 @@ import {
   curveControls, midpoint, overlaps,
 } from './geometry'
 import type { Handle } from './geometry'
-import { CODE_LINE, CODE_PAD, cellRect, connectorEnds, isCovered, spanRect } from './items'
+import {
+  CODE_LINE, CODE_PAD, cellRect, connectorEnds, connectorLabels, isCovered, pointAlong, spanRect,
+} from './items'
 import { CODE_THEME, tokenize } from './code'
 import { labelColor, labelFontSize, labelHeight, labelInk } from './labels'
 import { initials } from './me'
@@ -369,17 +371,21 @@ function drawConnector(s: Scene, item: Item & { type: 'connector' }) {
   drawCap(ctx, item.capStart, a, dirStart, item.strokeWidth, item.stroke)
   void startTrim; void endTrim
 
-  if (item.text && s.editing !== item.id) {
-    const mid = pts[Math.floor(pts.length / 2)]
-    const font = fontString(item, item.fontSize)
-    ctx.font = font
-    const w = ctx.measureText(item.text).width
-    ctx.fillStyle = '#FCFBF8'
-    ctx.fillRect(mid.x - w / 2 - 4, mid.y - item.fontSize * 0.75, w + 8, item.fontSize * 1.5)
-    ctx.fillStyle = item.textColor
+  const labels = connectorLabels(item)
+  if (labels.length) {
+    ctx.font = fontString(item, item.fontSize)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(item.text, mid.x, mid.y)
+    for (const label of labels) {
+      // The main label is the one the text editor is showing, so it is left to the overlay.
+      if (s.editing === item.id && label.text === item.text) continue
+      const at = pointAlong(pts, label.t)
+      const w = ctx.measureText(label.text).width
+      ctx.fillStyle = '#FCFBF8'
+      ctx.fillRect(at.x - w / 2 - 4, at.y - item.fontSize * 0.75, w + 8, item.fontSize * 1.5)
+      ctx.fillStyle = item.textColor
+      ctx.fillText(label.text, at.x, at.y)
+    }
   }
 }
 

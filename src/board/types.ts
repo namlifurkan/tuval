@@ -157,6 +157,10 @@ export interface ConnectorItem extends BaseItem, TextStyle {
   capStart: Cap
   capEnd: Cap
   text: string
+  // Where the main label sits along the line, 0 at the start and 1 at the end
+  labelT?: number
+  // Further labels, so a branch can be marked at both ends as well as in the middle
+  labels?: { t: number; text: string }[]
   bend: Vec | null
   bends: Vec[]
 }

@@ -90,6 +90,7 @@ export function Inspector() {
   const locked = selected.every((i) => i.locked)
   const table = selected.length === 1 && selected[0].type === 'table' ? selected[0] : null
   const cell = table && editing?.id === table.id ? editing.cell ?? null : null
+  const wire = selected.length === 1 && selected[0].type === 'connector' ? selected[0] : null
 
   const patch = (changes: Record<string, unknown>, filter?: (i: Item) => boolean) => {
     patchItems(
@@ -187,6 +188,62 @@ export function Inspector() {
               >{c}</button>
             ))}
           </div>
+        </Section>
+      )}
+
+      {wire && (
+        <Section title={t('Labels')}>
+          <div className="flex items-center gap-1.5">
+            <input
+              value={wire.text}
+              onChange={(e) => patchItem(wire.id, { text: e.target.value })}
+              onKeyDown={(e) => e.stopPropagation()}
+              placeholder={t('Main label')}
+              className="min-w-0 flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-xs outline-none focus:border-[#C8452D]"
+            />
+            <input
+              type="range" min={0} max={1} step={0.05}
+              value={wire.labelT ?? 0.5}
+              onChange={(e) => patchItem(wire.id, { labelT: Number(e.target.value) })}
+              className="w-16 shrink-0 accent-[#C8452D]"
+            />
+          </div>
+          {(wire.labels ?? []).map((label, i) => (
+            <div key={i} className="mt-1 flex items-center gap-1.5">
+              <input
+                value={label.text}
+                onChange={(e) => patchItem(wire.id, {
+                  labels: (wire.labels ?? []).map((l, j) => (j === i ? { ...l, text: e.target.value } : l)),
+                })}
+                onKeyDown={(e) => e.stopPropagation()}
+                placeholder={t('Label')}
+                className="min-w-0 flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-xs outline-none focus:border-[#C8452D]"
+              />
+              <input
+                type="range" min={0} max={1} step={0.05}
+                value={label.t}
+                onChange={(e) => patchItem(wire.id, {
+                  labels: (wire.labels ?? []).map((l, j) => (j === i ? { ...l, t: Number(e.target.value) } : l)),
+                })}
+                className="w-16 shrink-0 accent-[#C8452D]"
+              />
+              <button
+                type="button"
+                title={t('Remove')}
+                onClick={() => patchItem(wire.id, { labels: (wire.labels ?? []).filter((_, j) => j !== i) })}
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => patchItem(wire.id, {
+              labels: [...(wire.labels ?? []), { t: (wire.labels ?? []).length % 2 ? 0.85 : 0.15, text: '' }],
+            })}
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+          >{t('Add label')}</button>
         </Section>
       )}
 

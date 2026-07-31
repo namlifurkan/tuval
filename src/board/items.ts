@@ -440,3 +440,40 @@ export function remapMerges(
   }
   return out.filter((m) => m[2] > 1 || m[3] > 1)
 }
+
+// Connector labels --------------------------------------------------------------------------
+// `text` stays the main label so double clicking a connector still edits it; anything else is
+// an extra with a position of its own.
+
+export interface ConnectorLabel { t: number; text: string }
+
+export function connectorLabels(c: ConnectorItem): ConnectorLabel[] {
+  const main = c.text ? [{ t: c.labelT ?? 0.5, text: c.text }] : []
+  return [...main, ...(c.labels ?? []).filter((l) => l.text)]
+}
+
+// A point a fraction of the way along a polyline, measured by length rather than by vertex
+// count so a label does not drift when a bend is added.
+export function pointAlong(pts: Vec[], t: number): Vec {
+  if (pts.length < 2) return pts[0] ?? { x: 0, y: 0 }
+  const spans: number[] = []
+  let total = 0
+  for (let i = 1; i < pts.length; i++) {
+    const d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+    spans.push(d)
+    total += d
+  }
+  if (!total) return pts[0]
+  let want = Math.min(Math.max(t, 0), 1) * total
+  for (let i = 0; i < spans.length; i++) {
+    if (want <= spans[i] || i === spans.length - 1) {
+      const f = spans[i] ? want / spans[i] : 0
+      return {
+        x: pts[i].x + (pts[i + 1].x - pts[i].x) * f,
+        y: pts[i].y + (pts[i + 1].y - pts[i].y) * f,
+      }
+    }
+    want -= spans[i]
+  }
+  return pts[pts.length - 1]
+}
