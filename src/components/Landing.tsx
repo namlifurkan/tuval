@@ -13,6 +13,7 @@ import { Canvas } from './Canvas'
 import { TextEditor } from './TextEditor'
 import { Connector, Nib, Select, Sticky } from './icons'
 import { Wordmark } from './Logo'
+import { Account } from './Account'
 
 const REPO = 'https://github.com/namlifurkan/tuval'
 
@@ -98,18 +99,45 @@ const Spine = () => (
   </svg>
 )
 
-// Signed in, the front door still explains the product, so the way to your own work has to
-// be visible from it.
-function SignedIn() {
+// The front door still explains the product once you are signed in, so it has to offer the
+// way through to your own work instead of asking you to sign in again.
+function Visitor({ onOpen }: { onOpen: () => void }) {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
-  if (!user) return null
+
+  if (!cloudEnabled) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+      >
+        {t('Open a board')}
+      </button>
+    )
+  }
+
+  if (user) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={goHome}
+          className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+        >
+          {t('Your boards')}
+        </button>
+        <Account />
+      </>
+    )
+  }
+
   return (
     <button
       type="button"
-      onClick={goHome}
-      className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+      onClick={() => go('/login')}
+      className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
     >
-      {t('Your boards')}
+      {t('Sign in')}
     </button>
   )
 }
@@ -150,24 +178,7 @@ export function Landing() {
         >
           GitHub
         </a>
-        <SignedIn />
-        {cloudEnabled ? (
-          <button
-            type="button"
-            onClick={() => go('/login')}
-            className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
-          >
-            {t('Sign in')}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={openScratch}
-            className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
-          >
-            {t('Open a board')}
-          </button>
-        )}
+        <Visitor onOpen={openScratch} />
       </header>
 
       <div
