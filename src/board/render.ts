@@ -15,20 +15,27 @@ import { initials } from './me'
 import { drawPaper } from './paper'
 import type { TextureId } from './paper'
 import { shapePath, STROKE_ONLY, textInsetFor } from './shapes'
+import { signedUrl, storagePath } from './storage'
 import type { Session } from './store'
 import { fontString, layoutText, URL_RE } from './text'
 import type { Cap, Id, Item, Rect, TextStyle, Vec } from './types'
 import { BRAND } from './types'
 
 const images = new Map<string, HTMLImageElement>()
+
+// The bucket is private, so an item that names an object in it cannot be loaded directly: the
+// element is created empty and given a signed url once one comes back. Data urls and anything
+// hosted elsewhere are loaded as they are.
 export function getImage(src: string, onLoad: () => void) {
   let img = images.get(src)
   if (!img) {
     img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = onLoad
-    img.src = src
     images.set(src, img)
+    const path = storagePath(src)
+    if (path) void signedUrl(path).then((url) => { if (url) img!.src = url })
+    else img.src = src
   }
   return img.complete ? img : null
 }

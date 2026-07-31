@@ -1,4 +1,5 @@
 import { getUser, supabase } from './supabase'
+import { BUCKET } from './storage'
 import type { BoardEntry } from './boards'
 
 export interface CloudBoard extends BoardEntry {
@@ -107,12 +108,13 @@ export async function pullSnapshot(room: string): Promise<Uint8Array | null> {
 export async function uploadImage(room: string, blob: Blob, ext: string): Promise<string | null> {
   if (!supabase || !getUser()) return null
   const path = `${room}/${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from('board-images').upload(path, blob, {
+  const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
     contentType: blob.type || 'image/webp',
     upsert: false,
   })
   if (error) return null
-  return supabase.storage.from('board-images').getPublicUrl(path).data.publicUrl
+  // The path, not a url: the bucket is private and every link is signed when it is needed.
+  return path
 }
 
 export interface Member {

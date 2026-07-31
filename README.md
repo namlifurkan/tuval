@@ -151,10 +151,12 @@ is y-websocket.
 High-frequency work (dragging) does not write to Yjs every frame; it accumulates in a local
 preview layer and flushes every ~80 ms and on release.
 
-Images are embedded as data URLs inside the CRDT, so they are downscaled to 1600px and
-re-encoded to WebP before they are added. Files under 400 KB and 1600px are kept untouched.
-Object storage is the real fix and is planned; until then every byte of an image replicates
-to every peer and is kept in IndexedDB and in version snapshots.
+Images are downscaled to 1600px and re-encoded to WebP on the way in. Signed in, they go to
+object storage and the item keeps only the path; the bucket is private, so a link is signed
+when the image is drawn and expires within the hour. Both reading and writing are checked
+against the same board access rules as the tables, which is why removing somebody from a
+board takes its images with them. Without a backend an image stays inline as a data URL, and
+then every byte of it replicates to every peer.
 
 ## Shortcuts
 
