@@ -22,13 +22,17 @@ export interface Record {
   due_at: string | null
   position: number
   updated_at: string
+  // Set when a page is opened to the world; the slug is its address and outlives unpublishing.
+  published_at: string | null
+  public_slug: string | null
   // Whatever a kind needs and a column would not earn: a database keeps its fields and views
   // here, a row of one keeps its values.
   data: { [key: string]: unknown }
 }
 
 const COLUMNS =
-  'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, position, updated_at, data'
+  'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, '
+  + 'position, updated_at, published_at, public_slug, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so
 // the two are loaded at the same time and a single list would have them overwriting each other.
@@ -79,7 +83,7 @@ export async function loadRecords(kind: Kind = 'issue') {
     .is('archived_at', null)
     .order('position', { ascending: true })
     .limit(500)
-  publish(kind, (data ?? []) as Record[])
+  publish(kind, (data ?? []) as unknown as Record[])
 }
 
 export async function createRecord(
@@ -104,8 +108,9 @@ export async function createRecord(
 
   const { data, error } = await supabase.from('records').insert(row).select(COLUMNS).single()
   if (error || !data) return null
-  publish(kind, [data as Record, ...here])
-  return (data as Record).id
+  const made = data as unknown as Record
+  publish(kind, [made, ...here])
+  return made.id
 }
 
 // A title is typed a letter at a time, and one request per letter is a set of requests that

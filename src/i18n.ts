@@ -469,6 +469,20 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'On the web': 'İnternette',
+  'In the workspace': 'Çalışma alanında',
+  'Publish to the web': 'İnternette yayınla',
+  'Stop publishing': 'Yayından kaldır',
+  'Not named': 'Adı geçmiyor',
+  'Only the people named here, and whatever is inside this page.':
+    'Yalnızca burada adı geçenler, ve bu sayfanın içindeki her şey.',
+  'Everybody in the workspace. Name somebody to narrow it to a list.':
+    'Çalışma alanındaki herkes. Birinin adını yazarsan yalnızca listedekiler kalır.',
+  'Nobody else is in this workspace yet.': 'Bu çalışma alanında başka kimse yok.',
+  'Nothing here': 'Burada bir şey yok',
+  'This page is not published, or it was published and then taken down.':
+    'Bu sayfa yayında değil, ya da yayınlanıp sonra kaldırılmış.',
+  'Published with {product}': '{product} ile yayınlandı',
   'Inbox': 'Gelen kutusu',
   'Mark all read': 'Tümünü okundu işaretle',
   'Somebody': 'Biri',

@@ -20,6 +20,8 @@ const row = (id: string, title: string, data: { [k: string]: unknown } = {}, pos
   due_at: null,
   position,
   updated_at: '2026-08-01T00:00:00Z',
+  published_at: null,
+  public_slug: null,
   data,
 })
 

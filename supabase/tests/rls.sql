@@ -40,7 +40,8 @@ values ('rls-team-board', '\x00'::bytea, 3, 1);
 
 create temporary table result (name text, expected boolean, actual boolean);
 -- The checks run while impersonating a user, and that role has to be able to record them.
-grant all on result to authenticated;
+-- Publishing is checked as a caller with no account at all, so anon needs it too.
+grant all on result to authenticated, anon;
 
 create or replace function pg_temp.becomes(who uuid, mail text) returns void
 language plpgsql as $$
@@ -299,6 +300,102 @@ select public.notify_mentions('dddddddd-0000-4000-8000-000000000004',
 set local role postgres;
 select pg_temp.check('somebody outside the workspace cannot post into an inbox', false,
   exists(select 1 from public.notifications));
+
+-- Naming people on a page shuts everybody else out of it ------------------------------------------
+
+set local role postgres;
+delete from public.notifications;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+insert into public.records (id, workspace_id, kind, title, created_by)
+values ('eeeeeeee-0000-4000-8000-000000000005', 'cccccccc-0000-4000-8000-000000000003',
+        'doc', 'Quiet page', 'aaaaaaaa-0000-4000-8000-000000000001'),
+       ('ffffffff-0000-4000-8000-000000000006', 'cccccccc-0000-4000-8000-000000000003',
+        'doc', 'Under it', 'aaaaaaaa-0000-4000-8000-000000000001');
+update public.records set parent_id = 'eeeeeeee-0000-4000-8000-000000000005'
+where id = 'ffffffff-0000-4000-8000-000000000006';
+-- Written before the page is restricted, so that "and so does its body" is a body that was
+-- really there and really became invisible.
+insert into public.record_docs (record_id, doc)
+values ('eeeeeeee-0000-4000-8000-000000000005', '\x00'::bytea);
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a member of the workspace reads an unrestricted page', true,
+  public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+
+set local role postgres;
+insert into public.record_members (record_id, user_id, role, email)
+values ('eeeeeeee-0000-4000-8000-000000000005', 'aaaaaaaa-0000-4000-8000-000000000001', 'editor', 'ann@rls.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('naming people shuts out the rest of the workspace', false,
+  public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+select pg_temp.check('and shuts them out of what is under it', false,
+  public.can_read_record('ffffffff-0000-4000-8000-000000000006'));
+select pg_temp.check('the row itself disappears', false,
+  exists(select 1 from public.records where id = 'eeeeeeee-0000-4000-8000-000000000005'));
+select pg_temp.check('and so does its body', false,
+  exists(select 1 from public.record_docs where record_id = 'eeeeeeee-0000-4000-8000-000000000005'));
+
+set local role postgres;
+insert into public.record_members (record_id, user_id, role, email)
+values ('eeeeeeee-0000-4000-8000-000000000005', 'bbbbbbbb-0000-4000-8000-000000000002', 'viewer', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('being named on it lets you read it', true,
+  public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+select pg_temp.check('and read what is under it', true,
+  public.can_read_record('ffffffff-0000-4000-8000-000000000006'));
+select pg_temp.check('a viewer still cannot write it', false,
+  public.can_write_record('eeeeeeee-0000-4000-8000-000000000005'));
+
+set local role postgres;
+update public.record_members set role = 'editor'
+where record_id = 'eeeeeeee-0000-4000-8000-000000000005'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('an editor writes it', true,
+  public.can_write_record('eeeeeeee-0000-4000-8000-000000000005'));
+
+set local role postgres;
+update public.record_members set role = 'blocked'
+where record_id = 'eeeeeeee-0000-4000-8000-000000000005'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('blocked beats being named', false,
+  public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('the owner of the workspace is never shut out', true,
+  public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+
+-- Publishing is a hole in the wall, and only where it was made --------------------------------------
+
+set local role postgres;
+delete from public.record_members;
+update public.records set published_at = now(), public_slug = 'quiet-page'
+where id = 'eeeeeeee-0000-4000-8000-000000000005';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a stranger with no account reads a published page', true,
+  exists(select 1 from public.records where public_slug = 'quiet-page'));
+select pg_temp.check('and its body', true,
+  exists(select 1 from public.record_docs where record_id = 'eeeeeeee-0000-4000-8000-000000000005'));
+select pg_temp.check('but not the page under it', false,
+  exists(select 1 from public.records where id = 'ffffffff-0000-4000-8000-000000000006'));
+
+set local role postgres;
+update public.records set published_at = null where id = 'eeeeeeee-0000-4000-8000-000000000005';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('unpublishing closes it again', false,
+  exists(select 1 from public.records where public_slug = 'quiet-page'));
 
 -- What went wrong, if anything --------------------------------------------------------------------
 

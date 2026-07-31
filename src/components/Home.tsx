@@ -4,6 +4,7 @@ import { AuthPage } from './AuthPage'
 import { Dashboard } from './Dashboard'
 import { Docs } from './Docs'
 import { Inbox } from './Inbox'
+const Published = lazy(() => import('./Published').then((m) => ({ default: m.Published })))
 import { Issues } from './Issues'
 import { Page } from './Page'
 import { Settings } from './Settings'
@@ -19,6 +20,7 @@ export function Home() {
   if (route.kind === 'issues' || route.kind === 'issue') return <Issues />
   if (route.kind === 'docs') return <Docs />
   if (route.kind === 'inbox') return <Inbox />
+  if (route.kind === 'published') return <Suspense fallback={null}><Published /></Suspense>
   if (route.kind === 'page') return <Page key={route.id} />
   if (route.kind === 'dashboard') return <Dashboard />
   return <Suspense fallback={null}><Landing /></Suspense>

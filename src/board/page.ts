@@ -26,8 +26,11 @@ export const pageAwareness = () => awareness
 export const hex = (bytes: Uint8Array) =>
   `\\x${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`
 
+// No account needed to ask. A published page is readable by anybody, and the policy is what
+// decides that — requiring a signed-in user here would have meant a published page with a title
+// and nothing under it.
 async function pull(id: string): Promise<Uint8Array | null> {
-  if (!supabase || !getUser()) return null
+  if (!supabase) return null
   const { data } = await supabase
     .from('record_docs').select('doc').eq('record_id', id).maybeSingle()
   const raw = data?.doc as string | undefined
@@ -107,3 +110,10 @@ export function openPage(id: string): Promise<void> {
 }
 
 addEventListener('pagehide', () => { void push() })
+
+// The same guard doc.ts carries, for the same reason: this module holds one Y.Doc and one
+// persistence handle, and a hot replacement makes a second of each while the editor on screen
+// is still bound to the first. The page then looks empty although nothing was lost.
+if (import.meta.hot) {
+  import.meta.hot.accept(() => import.meta.hot!.invalidate())
+}

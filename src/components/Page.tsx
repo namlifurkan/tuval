@@ -16,6 +16,7 @@ import { t } from '../i18n'
 import { Database } from './Database'
 import { Cover } from './Cover'
 import { IconPicker } from './IconPicker'
+import { PageShare } from './PageShare'
 import { Shell } from './Shell'
 
 // The editor is a third of the bundle and only a page needs it.
@@ -119,6 +120,7 @@ export function Page() {
         >
           {copying ? t('Copying…') : t('Duplicate')}
         </button>
+        {here && <PageShare record={here} />}
       </div>
 
       <input
