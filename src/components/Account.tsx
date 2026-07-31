@@ -4,6 +4,8 @@ import {
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { go } from '../board/boards'
+import { initials } from '../board/me'
+import { avatarUrl } from '../board/profile'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -64,7 +66,8 @@ export function Account() {
     }
   }
 
-  const initial = (user?.email ?? '?')[0].toUpperCase()
+  const face = avatarUrl()
+  const initial = initials(displayName(user?.email))
 
   return (
     <div className="relative" data-ada="account">
@@ -73,9 +76,9 @@ export function Account() {
           type="button"
           title={user.email}
           onClick={pop.toggle}
-          className="grid h-8 w-8 place-items-center rounded-md bg-[#3E5C93] text-[11px] font-bold text-white"
+          className="grid h-8 w-8 place-items-center overflow-hidden rounded-md bg-[#3E5C93] text-[11px] font-bold text-white"
         >
-          {initial}
+          {face ? <img src={face} alt="" className="h-full w-full object-cover" /> : initial}
         </button>
       ) : (
         <IconButton title={t('Sign in')} onClick={() => go('/login')}>
@@ -86,9 +89,14 @@ export function Account() {
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[268px]">
         {user ? (
           <>
-            <div className="px-2.5 pb-2 pt-1">
-              <div className="text-sm font-semibold text-[#141310]">{displayName(user.email)}</div>
-              <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
+            <div className="flex items-center gap-2.5 px-2.5 pb-2 pt-1">
+              <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-md bg-[#3E5C93] text-xs font-bold text-white">
+                {face ? <img src={face} alt="" className="h-full w-full object-cover" /> : initial}
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-[#141310]">{displayName(user.email)}</div>
+                <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
+              </div>
             </div>
             <div className="my-1 h-px bg-[#EAE6DD]" />
             <button
