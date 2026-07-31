@@ -26,7 +26,7 @@ export const cloudError = () => lastError
 
 async function save() {
   timer = 0
-  if (!dirty || !getUser() || readOnly()) return
+  if (!room || !dirty || !getUser() || readOnly()) return
   dirty = false
   const { items, frames } = counts()
   const name = (getMeta().name as string) ?? ''
@@ -38,11 +38,11 @@ async function save() {
 // Opening a board is enough to want a picture of it: a board nobody has edited since the
 // feature shipped would otherwise stay blank in the list for ever.
 export function refreshThumb() {
-  dirty = true
   schedule()
 }
 
 function schedule() {
+  if (!room) return
   dirty = true
   if (timer || !getUser()) return
   timer = window.setTimeout(() => void save(), SAVE_AFTER)

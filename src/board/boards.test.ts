@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
-  currentRoom, forgetBoard, getBoards, legacyTarget, newRoom, readRoute, touchBoard,
+  currentRoom, forgetBoard, getBoards, legacyTarget, newRoom, openBoard, readRoute, touchBoard,
 } from './boards'
 
 beforeEach(() => {
@@ -105,5 +105,18 @@ describe('board pictures', () => {
     expect(getBoards()[0].thumb).toBe('data:image/webp;base64,xx')
     touchBoard('alpha', { items: 4 })
     expect(getBoards()[0]).toMatchObject({ items: 4, thumb: 'data:image/webp;base64,xx' })
+  })
+})
+
+describe('the landing hero is not a board', () => {
+  it('refuses to register a board with no room', () => {
+    touchBoard('', { name: 'hero', items: 7 })
+    expect(getBoards()).toHaveLength(0)
+  })
+
+  it('refuses to open one', () => {
+    const before = location.href
+    openBoard('')
+    expect(location.href).toBe(before)
   })
 })
