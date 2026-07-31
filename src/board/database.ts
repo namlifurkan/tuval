@@ -168,6 +168,27 @@ export function toggleLink(row: Row, fieldId: string, id: string) {
   setCell(row, fieldId, now.includes(id) ? now.filter((x) => x !== id) : [...now, id])
 }
 
+// What points here. Read from the other side rather than written on both, so the two can never
+// disagree: there is one list, and this is it seen backwards.
+export interface Backlink { row: Row; field: Field; db: Row }
+
+export function relatedTo(row: Row, databases: Row[], rows: Row[]): Backlink[] {
+  const mine = row.parent_id
+  if (!mine) return []
+  const found: Backlink[] = []
+  for (const db of databases) {
+    for (const field of schemaOf(db).fields) {
+      if (field.type !== 'relation' || field.db !== mine) continue
+      for (const other of rows) {
+        if (other.parent_id === db.id && linksOf(other, field.id).includes(row.id)) {
+          found.push({ row: other, field, db })
+        }
+      }
+    }
+  }
+  return found
+}
+
 export const dayOf = (row: Row, fieldId: string | undefined): string =>
   (fieldId && typeof cellsOf(row)[fieldId] === 'string' ? String(cellsOf(row)[fieldId]) : '').slice(0, 10)
 

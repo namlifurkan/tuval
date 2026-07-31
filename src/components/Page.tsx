@@ -1,12 +1,14 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { ChevronRight, CornerUpLeft, FileText, Plus } from 'lucide-react'
+import { ChevronRight, CornerUpLeft, FileText, Plus, Table2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
+import { relatedTo } from '../board/database'
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
 import {
   ancestors, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
 } from '../board/records'
+import { getRecords } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Database } from './Database'
@@ -64,6 +66,7 @@ export function Page() {
   const children = database ? [] : rows.filter((r) => r.parent_id === id)
   const icon = here?.icon ?? ''
   const cover = here?.cover ?? ''
+  const related = here ? relatedTo(here, getRecords('database'), rows) : []
 
   return (
     <Shell title={title || t('Untitled page')}>
@@ -107,6 +110,31 @@ export function Page() {
             {ready && <Suspense fallback={null}><PageEditor /></Suspense>}
           </div>
         )}
+
+      {!!related.length && (
+        <section className="mt-10 border-t border-[#EAE6DD] pt-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+            {t('Related to this')}
+          </h2>
+          <ul className="mt-2">
+            {related.map(({ row, field, db }) => (
+              <li key={`${row.id}:${field.id}`}>
+                <a
+                  href={`/d/${row.id}`}
+                  onClick={(e) => { e.preventDefault(); go(`/d/${row.id}`) }}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                >
+                  <Table2 size={14} className="shrink-0 text-[#8A867C]" />
+                  <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled')}</span>
+                  <span className="shrink-0 text-[11px] text-[#8A867C]">
+                    {db.title || t('Untitled database')} · {field.name}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {!!links.length && (
         <section className="mt-10 border-t border-[#EAE6DD] pt-4">

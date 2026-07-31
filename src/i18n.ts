@@ -398,6 +398,7 @@ const tr: Record<string, string> = {
   'Archive': 'Arşivle',
   'Open': 'Aç',
   'Pages': 'Sayfalar',
+  'Related to this': 'Buna bağlı olanlar',
   'Emptied automatically after {n} days. Until then a page here can be brought back exactly as it was.':
     '{n} gün sonra otomatik boşaltılır. O zamana kadar buradaki bir sayfa aynen geri getirilebilir.',
   'Add a cover': 'Kapak ekle',
