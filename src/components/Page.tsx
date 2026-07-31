@@ -10,6 +10,7 @@ import {
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Database } from './Database'
+import { Cover } from './Cover'
 import { IconPicker } from './IconPicker'
 import { Shell } from './Shell'
 
@@ -62,9 +63,12 @@ export function Page() {
   const database = here?.kind === 'database'
   const children = database ? [] : rows.filter((r) => r.parent_id === id)
   const icon = here?.icon ?? ''
+  const cover = here?.cover ?? ''
 
   return (
     <Shell title={title || t('Untitled page')}>
+      {!!cover && <Cover id={id} path={cover} />}
+
       {!!trail.length && (
         <nav aria-label={t('Breadcrumb')} className="mb-3 flex flex-wrap items-center gap-1">
           {trail.map((up) => (
@@ -83,8 +87,9 @@ export function Page() {
         </nav>
       )}
 
-      <div className="-ml-2 mb-1">
+      <div className="-ml-2 mb-1 flex items-center gap-1">
         <IconPicker value={icon} onPick={(emoji) => patchRecord(id, { icon: emoji })} />
+        {!cover && <Cover id={id} path="" />}
       </div>
 
       <input

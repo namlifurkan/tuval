@@ -13,6 +13,7 @@ export interface Record {
   title: string
   description: string
   icon: string
+  cover: string
   parent_id: string | null
   status: Status | null
   assignee: string | null
@@ -26,7 +27,7 @@ export interface Record {
 }
 
 const COLUMNS =
-  'id, kind, title, description, icon, parent_id, status, assignee, priority, due_at, position, updated_at, data'
+  'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, position, updated_at, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so
 // the two are loaded at the same time and a single list would have them overwriting each other.

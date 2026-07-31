@@ -9,6 +9,7 @@ const row = (id: string, title: string, data: { [k: string]: unknown } = {}, pos
   title,
   description: '',
   icon: '',
+  cover: '',
   parent_id: 'db',
   status: null,
   assignee: null,

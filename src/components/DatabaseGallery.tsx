@@ -1,11 +1,32 @@
+import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { go } from '../board/boards'
+import { coverUrl } from '../board/cover'
 import { cellsOf, linksOf } from '../board/database'
 import type { Field } from '../board/database'
 import { createRecord, getRecords } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
+
+function Tile({ row }: { row: Row }) {
+  const [url, setUrl] = useState('')
+
+  useEffect(() => {
+    if (!row.cover) { setUrl(''); return }
+    let live = true
+    void coverUrl(row.cover).then((made) => { if (live) setUrl(made) })
+    return () => { live = false }
+  }, [row.cover])
+
+  return (
+    <span className="grid aspect-[8/5] w-full place-items-center overflow-hidden border-b border-[#EAE6DD] bg-[#F2EFE9] text-[40px] leading-none">
+      {url
+        ? <img src={url} alt="" className="h-full w-full object-cover" />
+        : row.icon}
+    </span>
+  )
+}
 
 function Value({ row, field, team }: { row: Row; field: Field; team: Teammate[] }) {
   const held = cellsOf(row)[field.id]
@@ -58,9 +79,7 @@ export function DatabaseGallery({ dbId, rows, fields, team }: {
           onClick={() => go(`/d/${row.id}`)}
           className="flex flex-col overflow-hidden rounded-xl border border-[#E2DED5] bg-[#FCFBF8] text-left transition-shadow hover:shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
         >
-          <span className="grid aspect-[8/5] w-full place-items-center border-b border-[#EAE6DD] bg-[#F2EFE9] text-[40px] leading-none">
-            {row.icon}
-          </span>
+          <Tile row={row} />
           <span className="min-w-0 p-2.5">
             <span className="block truncate text-sm font-medium text-[#141310]">
               {row.title || t('Untitled')}
