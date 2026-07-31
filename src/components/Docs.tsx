@@ -1,14 +1,28 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Plus } from 'lucide-react'
 import { go } from '../board/boards'
-import { archiveRecord, createRecord, getRecords, loadRecords, subscribeRecords } from '../board/records'
+import {
+  ancestors, archiveRecord, createRecord, getRecords, loadRecords, subscribeRecords,
+} from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Shell } from './Shell'
 
+const pages = () => getRecords('doc')
+
+function when(iso: string) {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (mins < 1) return t('just now')
+  if (mins < 60) return t('{n} min ago', { n: mins })
+  if (mins < 1440) return t('{n} h ago', { n: Math.floor(mins / 60) })
+  return t('{n} d ago', { n: Math.floor(mins / 1440) })
+}
+
+// The sidebar answers "where does this page live". This answers "what was I doing", which is a
+// different question and the reason the two are not the same list.
 export function Docs() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
-  const records = useSyncExternalStore(subscribeRecords, getRecords, getRecords)
+  const records = useSyncExternalStore(subscribeRecords, pages, pages)
 
   useEffect(() => { if (workspace) void loadRecords('doc') }, [workspace])
 
@@ -19,6 +33,10 @@ export function Docs() {
     if (id) go(`/d/${id}`)
     else setBusy(false)
   }
+
+  const recent = [...records]
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+    .slice(0, 40)
 
   return (
     <Shell title={t('Docs')}>
@@ -31,25 +49,40 @@ export function Docs() {
         <Plus size={15} strokeWidth={2.4} /> {t('New page')}
       </button>
 
-      <div className="mt-5 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
-        {records.map((page) => (
-          <div key={page.id} className="group flex items-center gap-3 py-2.5">
-            <button
-              type="button"
-              onClick={() => go(`/d/${page.id}`)}
-              className="min-w-0 flex-1 truncate text-left text-sm text-[#141310] hover:text-[#C8452D]"
-            >
-              {page.title || t('Untitled page')}
-            </button>
-            <button
-              type="button"
-              onClick={() => void archiveRecord(page.id)}
-              className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
-            >
-              {t('Archive')}
-            </button>
-          </div>
-        ))}
+      <h2 className="mt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+        {t('Recently edited')}
+      </h2>
+
+      <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+        {recent.map((page) => {
+          const trail = ancestors(records, page.id)
+          return (
+            <div key={page.id} className="group flex items-center gap-3 py-2.5">
+              <button
+                type="button"
+                onClick={() => go(`/d/${page.id}`)}
+                className="min-w-0 flex-1 text-left"
+              >
+                <span className="block truncate text-sm text-[#141310] group-hover:text-[#C8452D]">
+                  {page.title || t('Untitled page')}
+                </span>
+                {!!trail.length && (
+                  <span className="mt-0.5 block truncate text-[11px] text-[#8A867C]">
+                    {trail.map((up) => up.title || t('Untitled page')).join(' / ')}
+                  </span>
+                )}
+              </button>
+              <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(page.updated_at)}</span>
+              <button
+                type="button"
+                onClick={() => void archiveRecord(page.id)}
+                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
+              >
+                {t('Archive')}
+              </button>
+            </div>
+          )
+        })}
       </div>
 
       {!records.length && (

@@ -4,6 +4,7 @@ import { go, readRoute } from '../board/boards'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
+import { PageTree } from './PageTree'
 import { Palette } from './Palette'
 import { Wordmark } from './Logo'
 
@@ -27,7 +28,10 @@ export function Shell({ title, wide, action, children }: {
 
   return (
     <div className="flex h-dvh bg-[#F2EFE9]">
-      <nav className="hidden w-[212px] shrink-0 flex-col border-r border-[#E2DED5] px-3 py-4 sm:flex">
+      <nav
+        aria-label={t('Workspace')}
+        className="hidden w-[228px] shrink-0 flex-col overflow-y-auto border-r border-[#E2DED5] px-3 py-4 sm:flex"
+      >
         <a href="/" className="mb-1 px-2"><Wordmark height={18} /></a>
         <span className="mb-5 truncate px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
           {workspace?.name || t('Workspace')}
@@ -37,6 +41,7 @@ export function Shell({ title, wide, action, children }: {
           <button
             key={path}
             type="button"
+            aria-current={here === path ? 'page' : undefined}
             onClick={() => go(path)}
             className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold transition-colors
               ${here === path ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
@@ -46,7 +51,9 @@ export function Shell({ title, wide, action, children }: {
           </button>
         ))}
 
-        <span className="mt-auto px-2 text-[11px] leading-snug text-[#B6B1A6]">
+        <div className="mt-5"><PageTree /></div>
+
+        <span className="mt-auto px-2 pt-4 text-[11px] leading-snug text-[#B6B1A6]">
           {t('Press ⌘K for anything')}
         </span>
       </nav>

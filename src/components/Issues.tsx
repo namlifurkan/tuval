@@ -11,6 +11,8 @@ import { IssueBoard } from './IssueBoard'
 import { IssueDetail } from './IssueDetail'
 import { Shell } from './Shell'
 
+const issues = () => getRecords('issue')
+
 const TONE: { [K in Status]: string } = {
   todo: '#8A867C',
   doing: '#DE9A4E',
@@ -31,7 +33,7 @@ function Dot({ status }: { status: Status | null }) {
 
 export function Issues() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
-  const records = useSyncExternalStore(subscribeRecords, getRecords, getRecords)
+  const records = useSyncExternalStore(subscribeRecords, issues, issues)
   const [team, setTeam] = useState<Teammate[]>([])
   const [title, setTitle] = useState('')
   const [filter, setFilter] = useState<Status | 'all'>('all')

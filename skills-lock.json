@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "sidebar": {
+      "source": "thedaviddias/ux-patterns-for-developers",
+      "sourceType": "github",
+      "skillPath": "skills/sidebar/SKILL.md",
+      "computedHash": "a3759a02f7c58e5f0fff5275c290eb655f40d8c984e1f1f524276425f6691ddb"
+    },
     "wysiwyg-editor": {
       "source": "blink-new/claude",
       "sourceType": "github",

@@ -39,12 +39,14 @@ async function push() {
   saving = 0
   if (!dirty || !current || !supabase || !getUser()) return
   const [id, saved] = [current, doc]
+  const at = new Date().toISOString()
   dirty = false
-  await supabase.from('record_docs').upsert({
-    record_id: id,
-    doc: hex(Y.encodeStateAsUpdate(saved)),
-    updated_at: new Date().toISOString(),
-  })
+  await Promise.all([
+    supabase.from('record_docs').upsert({ record_id: id, doc: hex(Y.encodeStateAsUpdate(saved)), updated_at: at }),
+    // Writing the body is editing the page. Without this the record keeps the timestamp of the
+    // last time somebody changed its title, and a page written all afternoon looks untouched.
+    supabase.from('records').update({ updated_at: at }).eq('id', id),
+  ])
 }
 
 function schedule() {

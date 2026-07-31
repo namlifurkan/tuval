@@ -52,7 +52,7 @@ export async function refreshSnapshots() {
   if (!cards.length || !getWorkspace()) return
 
   await loadRecords('issue')
-  const rows = new Map(getRecords().map((r) => [r.id, r]))
+  const rows = new Map(getRecords('issue').map((r) => [r.id, r]))
 
   const stale: [Id, Record<string, unknown>][] = []
   for (const card of cards) {
