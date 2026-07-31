@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
+import { currentRoom } from './boards'
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
@@ -33,11 +34,17 @@ if (supabase) {
   supabase.auth.onAuthStateChange((_event, next) => announce(next))
 }
 
+function returnTo() {
+  const room = currentRoom()
+  const base = location.origin + location.pathname
+  return room ? `${base}?room=${encodeURIComponent(room)}` : base
+}
+
 export async function signIn(email: string) {
   if (!supabase) throw new Error('Supabase is not configured')
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: location.origin + location.pathname },
+    options: { emailRedirectTo: returnTo() },
   })
   if (error) throw error
 }

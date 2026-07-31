@@ -3,10 +3,11 @@ import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
 import { Awareness } from 'y-protocols/awareness'
 import { nanoid } from 'nanoid'
+import { currentRoom } from './boards'
 import { connectorBounds, makeResolver } from './geometry'
 import type { Id, Item } from './types'
 
-export const room = location.hash.replace(/^#/, '') || 'demo-board'
+export const room = currentRoom() || 'demo-board'
 export const ydoc = new Y.Doc()
 export const yitems = ydoc.getMap<Y.Map<unknown>>('items')
 export const ymeta = ydoc.getMap<unknown>('meta')

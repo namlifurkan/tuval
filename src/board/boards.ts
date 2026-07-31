@@ -67,7 +67,13 @@ export function openBoard(room: string) {
   location.reload()
 }
 
-export const currentRoom = () => location.hash.replace(/^#/, '')
+const AUTH_HASH = /(?:^|&)(?:access_token|refresh_token|error_description|error_code)=/
+
+export function currentRoom() {
+  const hash = location.hash.replace(/^#/, '')
+  if (hash && !AUTH_HASH.test(hash)) return hash
+  return new URLSearchParams(location.search).get('room') ?? ''
+}
 
 // Rooms this browser has data for but that never made it into the registry: an older visit,
 // a link someone sent, a cleared localStorage.
