@@ -3,6 +3,7 @@ import { lazy, Suspense, useSyncExternalStore } from 'react'
 import { AuthPage } from './AuthPage'
 import { Dashboard } from './Dashboard'
 import { Docs } from './Docs'
+import { Inbox } from './Inbox'
 import { Issues } from './Issues'
 import { Page } from './Page'
 import { Settings } from './Settings'
@@ -17,6 +18,7 @@ export function Home() {
   if (route.kind === 'settings') return <Settings />
   if (route.kind === 'issues' || route.kind === 'issue') return <Issues />
   if (route.kind === 'docs') return <Docs />
+  if (route.kind === 'inbox') return <Inbox />
   if (route.kind === 'page') return <Page key={route.id} />
   if (route.kind === 'dashboard') return <Dashboard />
   return <Suspense fallback={null}><Landing /></Suspense>

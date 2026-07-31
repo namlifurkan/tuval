@@ -34,12 +34,18 @@ export async function linkMentions(from: string, doc: Y.Doc) {
 
 // Walking the shared type rather than the editor: saving happens whether or not an editor is
 // mounted, and a document that arrived from somebody else has mentions too.
-export function mentionsIn(doc: Y.Doc): Set<string> {
+//
+// One mark serves both kinds of naming. A mention carries the id of a page or the id of a
+// person, and which attribute is filled in is what tells the two apart.
+export const mentionsIn = (doc: Y.Doc) => named(doc, 'pageId')
+export const peopleIn = (doc: Y.Doc) => named(doc, 'userId')
+
+function named(doc: Y.Doc, attribute: 'pageId' | 'userId'): Set<string> {
   const found = new Set<string>()
   const walk = (node: Y.XmlElement | Y.XmlFragment | Y.XmlText | Y.XmlHook) => {
     if (node instanceof Y.XmlElement) {
       if (node.nodeName === MENTION) {
-        const id = node.getAttribute('pageId')
+        const id = node.getAttribute(attribute)
         if (id) found.add(id)
       }
       node.toArray().forEach(walk)

@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { BlockNoteSchema } from '@blocknote/core'
 import {
   getMultiColumnSlashMenuItems, locales as columnLocales, multiColumnDropCursor, withMultiColumn,
@@ -21,6 +21,7 @@ import { MENTION } from '../board/mention'
 import { pageAwareness, pageFragment } from '../board/page'
 import { PageThreadStore } from '../board/threads'
 import { listTeam } from '../board/workspace'
+import type { Teammate } from '../board/workspace'
 import { ancestors, createRecord, getRecords, subscribeRecords } from '../board/records'
 import { displayName, getUser } from '../board/supabase'
 import { t } from '../i18n'
@@ -67,17 +68,30 @@ const paper = { light: theme, dark: theme }
 
 // A page named inside another page. The whole point of a wiki is that the naming is the link,
 // so it carries the id and shows the title, and a renamed page is still pointed at.
+//
+// The same mark names a page or a person; which id it carries is the difference. A person is
+// not a link to anywhere, so it is drawn as a chip rather than underlined like a destination.
 const Mention = createReactInlineContentSpec(
-  { type: MENTION, propSchema: { pageId: { default: '' }, label: { default: '' } }, content: 'none' },
+  {
+    type: MENTION,
+    propSchema: { pageId: { default: '' }, userId: { default: '' }, label: { default: '' } },
+    content: 'none',
+  },
   {
     render: ({ inlineContent }) => (
-      <a
-        href={`/d/${inlineContent.props.pageId}`}
-        onClick={(e) => { e.preventDefault(); go(`/d/${inlineContent.props.pageId}`) }}
-        className="rounded px-0.5 font-medium text-[#C8452D] underline decoration-[#E6BDB2] underline-offset-2 hover:decoration-[#C8452D]"
-      >
-        {inlineContent.props.label || 'Untitled page'}
-      </a>
+      inlineContent.props.userId ? (
+        <span className="rounded bg-[#F7E9E4] px-1 font-medium text-[#C8452D]">
+          @{inlineContent.props.label || 'Member'}
+        </span>
+      ) : (
+        <a
+          href={`/d/${inlineContent.props.pageId}`}
+          onClick={(e) => { e.preventDefault(); go(`/d/${inlineContent.props.pageId}`) }}
+          className="rounded px-0.5 font-medium text-[#C8452D] underline decoration-[#E6BDB2] underline-offset-2 hover:decoration-[#C8452D]"
+        >
+          {inlineContent.props.label || 'Untitled page'}
+        </a>
+      )
     ),
   },
 )
@@ -108,6 +122,9 @@ async function resolveUsers(ids: string[]) {
 export function PageEditor({ title }: { title: string }) {
   const pages = useSyncExternalStore(subscribeRecords, docs, docs)
   const myId = getUser()?.id ?? ''
+  const [team, setTeam] = useState<Teammate[]>([])
+
+  useEffect(() => { void listTeam().then(setTeam) }, [])
 
   const editor = useCreateBlockNote(withCollaboration({
     schema,
@@ -158,6 +175,24 @@ export function PageEditor({ title }: { title: string }) {
         triggerCharacter="@"
         getItems={async (query) => {
           const q = query.toLowerCase()
+          // People first: a name typed after @ is far more often a person than a page.
+          const named = team
+            .filter((mate) => mate.userId !== myId && mate.email.toLowerCase().includes(q))
+            .slice(0, 5)
+            .map((mate) => {
+              const label = displayName(mate.email) || t('Member')
+              return {
+                title: `@${label}`,
+                subtext: mate.email,
+                onItemClick: () => {
+                  editor.insertInlineContent([
+                    { type: MENTION, props: { pageId: '', userId: mate.userId, label } },
+                    ' ',
+                  ])
+                },
+              }
+            })
+
           // Linking a page to itself says nothing and would show the page in its own backlinks.
           const found = pages
             .filter((p) => p.id !== mine && (p.title || t('Untitled page')).toLowerCase().includes(q))
@@ -167,19 +202,20 @@ export function PageEditor({ title }: { title: string }) {
               subtext: ancestors(pages, p.id).map((up) => up.title || t('Untitled page')).join(' / '),
               onItemClick: () => {
                 editor.insertInlineContent([
-                  { type: MENTION, props: { pageId: p.id, label: p.title || t('Untitled page') } },
+                  { type: MENTION, props: { pageId: p.id, userId: '', label: p.title || t('Untitled page') } },
                   ' ',
                 ])
               },
             }))
 
-          return found.length ? found : [{
+          if (named.length || found.length) return [...named, ...found]
+          return [{
             title: t('New page: {title}', { title: query || t('Untitled page') }),
             onItemClick: () => {
               void createRecord(query, 'doc', mine || null).then((id) => {
                 if (!id) return
                 editor.insertInlineContent([
-                  { type: MENTION, props: { pageId: id, label: query || t('Untitled page') } },
+                  { type: MENTION, props: { pageId: id, userId: '', label: query || t('Untitled page') } },
                   ' ',
                 ])
               })

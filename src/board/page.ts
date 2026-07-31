@@ -1,7 +1,8 @@
 import * as Y from 'yjs'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { Awareness } from 'y-protocols/awareness'
-import { linkMentions } from './mention'
+import { linkMentions, peopleIn } from './mention'
+import { notifyMentions } from './notifications'
 import { authReady, getUser, supabase } from './supabase'
 
 // The name BlockNote gives its own fragment. Matching it means the library's own conversion
@@ -61,6 +62,7 @@ async function push() {
     // last time somebody changed its title, and a page written all afternoon looks untouched.
     supabase.from('records').update({ updated_at: at, body: textOf(saved) }).eq('id', id),
     linkMentions(id, saved),
+    notifyMentions(id, peopleIn(saved)),
   ])
 }
 

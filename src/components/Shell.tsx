@@ -1,6 +1,7 @@
-import { useSyncExternalStore } from 'react'
-import { CircleDot, FileText, LayoutGrid, Settings2 } from 'lucide-react'
+import { useEffect, useSyncExternalStore } from 'react'
+import { CircleDot, FileText, Inbox, LayoutGrid, Settings2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
+import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
@@ -10,6 +11,7 @@ import { Wordmark } from './Logo'
 
 const NAV = [
   { path: '/dashboard', label: 'Boards', icon: LayoutGrid },
+  { path: '/inbox', label: 'Inbox', icon: Inbox },
   { path: '/issues', label: 'Issues', icon: CircleDot },
   { path: '/docs', label: 'Docs', icon: FileText },
   { path: '/settings', label: 'Settings', icon: Settings2 },
@@ -24,7 +26,11 @@ export function Shell({ title, wide, action, children }: {
   children: React.ReactNode
 }) {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
+  const waiting = useSyncExternalStore(subscribeInbox, unreadCount, unreadCount)
   const here = location.pathname.replace(/\/+$/, '') || '/'
+
+  // Asked for once wherever you land, so the badge is right on a page that is not the inbox.
+  useEffect(() => { if (workspace) void loadInbox() }, [workspace])
 
   return (
     <div className="flex h-dvh bg-[#F2EFE9]">
@@ -47,7 +53,12 @@ export function Shell({ title, wide, action, children }: {
               ${here === path ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
           >
             <Icon size={15} strokeWidth={1.9} />
-            {t(label)}
+            <span className="min-w-0 flex-1 truncate">{t(label)}</span>
+            {path === '/inbox' && waiting > 0 && (
+              <span className="shrink-0 rounded-full bg-[#C8452D] px-1.5 text-[10px] font-bold text-white">
+                {waiting}
+              </span>
+            )}
           </button>
         ))}
 

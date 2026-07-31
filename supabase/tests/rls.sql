@@ -221,6 +221,85 @@ values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-0000000
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('a guest reads the body', true, exists(select 1 from public.record_docs));
 
+-- An inbox is yours alone --------------------------------------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.notifications (workspace_id, user_id, actor, kind, record_id)
+values ('cccccccc-0000-4000-8000-000000000003', 'aaaaaaaa-0000-4000-8000-000000000001',
+        'bbbbbbbb-0000-4000-8000-000000000002', 'assigned', 'dddddddd-0000-4000-8000-000000000004');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('you read your own notification', true,
+  exists(select 1 from public.notifications));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('the sender cannot read the inbox they wrote to', false,
+  exists(select 1 from public.notifications));
+
+set local role postgres;
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a member of the workspace still cannot read another inbox', false,
+  exists(select 1 from public.notifications));
+
+-- Assigning writes to the assignee's inbox, and assigning to yourself does not ----------------------
+
+set local role postgres;
+delete from public.notifications;
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+update public.records set assignee = 'aaaaaaaa-0000-4000-8000-000000000001'
+where id = 'dddddddd-0000-4000-8000-000000000004';
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('being assigned something reaches you', true,
+  exists(select 1 from public.notifications where kind = 'assigned'));
+
+set local role postgres;
+delete from public.notifications;
+-- Cleared first, so that assigning below is a real change and not a no-op that would pass this
+-- check without the trigger ever having a decision to make.
+update public.records set assignee = null where id = 'dddddddd-0000-4000-8000-000000000004';
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+update public.records set assignee = 'aaaaaaaa-0000-4000-8000-000000000001'
+where id = 'dddddddd-0000-4000-8000-000000000004';
+select pg_temp.check('assigning to yourself is not news', false,
+  exists(select 1 from public.notifications));
+
+-- Being named in a page tells you once, and only if you are in the workspace ----------------------
+
+set local role postgres;
+delete from public.notifications;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select public.notify_mentions('dddddddd-0000-4000-8000-000000000004',
+  array['aaaaaaaa-0000-4000-8000-000000000001']::uuid[]);
+select public.notify_mentions('dddddddd-0000-4000-8000-000000000004',
+  array['aaaaaaaa-0000-4000-8000-000000000001']::uuid[]);
+
+set local role postgres;
+select pg_temp.check('being named in a page tells you exactly once', true,
+  (select count(*) = 1 from public.notifications where kind = 'mentioned'));
+
+set local role postgres;
+delete from public.notifications;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select public.notify_mentions('dddddddd-0000-4000-8000-000000000004',
+  array['aaaaaaaa-0000-4000-8000-000000000001']::uuid[]);
+
+set local role postgres;
+select pg_temp.check('somebody outside the workspace cannot post into an inbox', false,
+  exists(select 1 from public.notifications));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

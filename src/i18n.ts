@@ -469,6 +469,14 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Inbox': 'Gelen kutusu',
+  'Mark all read': 'Tümünü okundu işaretle',
+  'Somebody': 'Biri',
+  '{who} gave you': '{who} sana verdi:',
+  '{who} named you in': '{who} seni şurada andı:',
+  'Something that is no longer there': 'Artık var olmayan bir şey',
+  'Nothing waiting. Being given an issue or named in a page turns up here.':
+    'Bekleyen bir şey yok. Sana bir iş verilirse ya da bir sayfada anılırsan burada görünür.',
   'Import': 'İçeri aktar',
   'Reading…': 'Okunuyor…',
   '{pages} pages, {databases} databases, {rows} rows.':

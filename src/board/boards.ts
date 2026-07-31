@@ -153,6 +153,7 @@ export type Route =
   | { kind: 'issues' }
   | { kind: 'issue'; id: string }
   | { kind: 'docs' }
+  | { kind: 'inbox' }
   | { kind: 'page'; id: string }
   | { kind: 'auth'; page: AuthPage }
   | { kind: 'board'; room: string }
@@ -167,6 +168,7 @@ export function readRoute(): Route {
   if (path === '/settings') return { kind: 'settings' }
   if (path === '/issues') return { kind: 'issues' }
   if (path === '/docs') return { kind: 'docs' }
+  if (path === '/inbox') return { kind: 'inbox' }
   const page = /^\/d\/(.+)$/.exec(path)
   if (page) return { kind: 'page', id: decodeURIComponent(page[1]) }
   const issue = /^\/i\/(.+)$/.exec(path)
