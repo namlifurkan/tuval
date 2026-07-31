@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  authError, authTrouble, cloudEnabled, isStaleLink, displayName, getUser, setPassword, signIn, signInWith,
+  authError, authTrouble, cloudEnabled, isStaleLink, passwordProblem, displayName, getUser, setPassword, signIn, signInWith,
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { go } from '../board/boards'
@@ -37,6 +37,7 @@ export function Account() {
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [reason, setReason] = useState('')
   const [fresh, setFresh] = useState('')
+  const [freshAgain, setFreshAgain] = useState('')
   const [note, setNote] = useState('')
 
   const { setOpen } = pop
@@ -68,11 +69,13 @@ export function Account() {
   }
 
   const save = async () => {
-    if (fresh.length < 8) { setNote(t('At least 8 characters.')); return }
+    const problem = passwordProblem(fresh, freshAgain)
+    if (problem) { setNote(t(problem)); return }
     setNote(t('Saving…'))
     try {
       await setPassword(fresh)
       setFresh('')
+      setFreshAgain('')
       setNote(t('Password saved. Next time you can sign in with it.'))
     } catch (e) {
       setNote(e instanceof Error ? e.message : String(e))
@@ -116,9 +119,18 @@ export function Account() {
               placeholder={t('New password')}
               className="mx-1 mb-1.5 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
             />
+            <input
+              value={freshAgain}
+              onChange={(e) => setFreshAgain(e.target.value)}
+              onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void save() }}
+              type="password"
+              autoComplete="new-password"
+              placeholder={t('Again')}
+              className="mx-1 mb-1.5 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+            />
             <button
               type="button"
-              disabled={!fresh}
+              disabled={!fresh || !freshAgain}
               onClick={() => void save()}
               className="mx-1 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:bg-[#EFEBE2] disabled:opacity-40"
             >

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { storagePath } from './storage'
+import { passwordProblem } from './supabase'
 
 describe('naming an object in the bucket', () => {
   it('reads a bare path as written', () => {
@@ -26,5 +27,19 @@ describe('naming an object in the bucket', () => {
     expect(storagePath('data:image/webp;base64,AAAA')).toBe(null)
     expect(storagePath('https://images.example.com/photo.jpg')).toBe(null)
     expect(storagePath('')).toBe(null)
+  })
+})
+
+describe('choosing a password', () => {
+  it('refuses one that is too short', () => {
+    expect(passwordProblem('short', 'short')).toBe('At least 8 characters.')
+  })
+
+  it('refuses two that differ', () => {
+    expect(passwordProblem('longenough', 'longenougH')).toBe('The two passwords do not match.')
+  })
+
+  it('accepts a long pair that matches', () => {
+    expect(passwordProblem('longenough', 'longenough')).toBe(null)
   })
 })

@@ -2,8 +2,8 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { go, goHome, readRoute } from '../board/boards'
 import type { AuthPage as Page } from '../board/boards'
 import {
-  authError, getUser, isStaleLink, sendReset, setPassword, signIn, signInWith, signInWithPassword,
-  subscribeAuth,
+  authError, getUser, isStaleLink, passwordProblem, sendReset, setPassword, signIn, signInWith,
+  signInWithPassword, subscribeAuth,
 } from '../board/supabase'
 import type { Provider } from '../board/supabase'
 import { t } from '../i18n'
@@ -57,6 +57,7 @@ export function AuthPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPass] = useState('')
+  const [again, setAgain] = useState('')
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'error'>('idle')
   const [reason, setReason] = useState('')
 
@@ -80,7 +81,8 @@ export function AuthPage() {
   const submit = () => {
     if (page === 'forgot') return run(() => sendReset(email.trim()), 'sent')
     if (page === 'reset') {
-      if (password.length < 8) { setReason(t('At least 8 characters.')); setState('error'); return }
+      const problem = passwordProblem(password, again)
+      if (problem) { setReason(t(problem)); setState('error'); return }
       return run(async () => { await setPassword(password); goHome() }, 'idle')
     }
     if (!email.trim()) return
@@ -134,6 +136,17 @@ export function AuthPage() {
                 type="password"
                 autoComplete={page === 'login' ? 'current-password' : 'new-password'}
                 placeholder={page === 'login' ? t('Password (leave empty for a link)') : t('New password')}
+                className={field}
+              />
+            )}
+            {page === 'reset' && (
+              <input
+                value={again}
+                onChange={(e) => setAgain(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') void submit() }}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t('Again')}
                 className={field}
               />
             )}

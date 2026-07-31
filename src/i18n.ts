@@ -458,6 +458,8 @@ const tr: Record<string, string> = {
   'Save password': 'Parolayı kaydet',
   'Saving…': 'Kaydediliyor…',
   'At least 8 characters.': 'En az 8 karakter.',
+  'The two passwords do not match.': 'İki parola birbirini tutmuyor.',
+  'Again': 'Tekrar',
   'Password saved. Next time you can sign in with it.':
     'Parola kaydedildi. Bundan sonra onunla girebilirsin.',
   'Cloud': 'Bulut',

@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from 'react'
-import { getUser, hasPassword, setPassword, subscribeAuth } from '../board/supabase'
+import { getUser, hasPassword, passwordProblem, setPassword, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
 
 // The email link proves the address once. After that an account needs a password of its own,
@@ -8,6 +8,7 @@ import { t } from '../i18n'
 export function PasswordGate() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
   const [value, setValue] = useState('')
+  const [again, setAgain] = useState('')
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
@@ -15,7 +16,8 @@ export function PasswordGate() {
   if (!user || done || hasPassword()) return null
 
   const save = async () => {
-    if (value.length < 8) { setNote(t('At least 8 characters.')); return }
+    const problem = passwordProblem(value, again)
+    if (problem) { setNote(t(problem)); return }
     setSaving(true)
     try {
       await setPassword(value)
@@ -43,11 +45,20 @@ export function PasswordGate() {
             type="password"
             autoComplete="new-password"
             placeholder={t('New password')}
-            className="w-[190px] rounded-lg border border-white/30 bg-white/10 px-2 py-1.5 text-sm text-white outline-none placeholder:text-[#FBEDE9]/70 focus:border-white"
+            className="w-[170px] rounded-lg border border-white/30 bg-white/10 px-2 py-1.5 text-sm text-white outline-none placeholder:text-[#FBEDE9]/70 focus:border-white"
+          />
+          <input
+            value={again}
+            onChange={(e) => setAgain(e.target.value)}
+            onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void save() }}
+            type="password"
+            autoComplete="new-password"
+            placeholder={t('Again')}
+            className="w-[150px] rounded-lg border border-white/30 bg-white/10 px-2 py-1.5 text-sm text-white outline-none placeholder:text-[#FBEDE9]/70 focus:border-white"
           />
           <button
             type="button"
-            disabled={saving || !value}
+            disabled={saving || !value || !again}
             onClick={() => void save()}
             className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-[#C8452D] disabled:opacity-50"
           >

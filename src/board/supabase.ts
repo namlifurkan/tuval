@@ -79,10 +79,13 @@ export async function signInWithPassword(email: string, password: string) {
 
 // Supabase does not say whether an account has a password, so the answer is kept where it
 // travels with the session: the user's own metadata.
+// Only an account whose sole way in is an emailed link needs to be pushed into choosing a
+// password. Connect GitHub or sign in with Google and there is already a second way back.
 export const hasPassword = () => {
   const user = getUser()
   if (!user) return true
-  if (user.app_metadata?.provider && user.app_metadata.provider !== 'email') return true
+  const providers = (user.app_metadata?.providers as string[] | undefined) ?? []
+  if (providers.some((p) => p !== 'email')) return true
   return !!user.user_metadata?.has_password
 }
 
@@ -96,6 +99,16 @@ export async function setPassword(password: string) {
 }
 
 export type Provider = 'github' | 'google' | 'apple'
+
+export const MIN_PASSWORD = 8
+
+// Typing a password you cannot see, once, into an account you then have to sign in to is how
+// people lock themselves out. It is asked for twice and the two have to match.
+export function passwordProblem(value: string, again: string): string | null {
+  if (value.length < MIN_PASSWORD) return 'At least 8 characters.'
+  if (value !== again) return 'The two passwords do not match.'
+  return null
+}
 
 export async function signInWith(provider: Provider) {
   if (!supabase) throw new Error('Supabase is not configured')
