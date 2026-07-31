@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { archiveRecord, createRecord, getRecords, loadRecords, patchRecord, STATUSES, subscribeRecords } from '../board/records'
 import type { Status } from '../board/records'
+import { go, readRoute } from '../board/boards'
 import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { initials } from '../board/me'
@@ -35,7 +36,12 @@ export function Issues() {
   const [title, setTitle] = useState('')
   const [filter, setFilter] = useState<Status | 'all'>('all')
   const [view, setView] = useState<'list' | 'board'>('list')
-  const [openId, setOpenId] = useState<string | null>(null)
+
+  // The open issue is the address, not a piece of state beside it. That is what makes it
+  // something you can send to somebody, and what makes the back button close the panel.
+  const route = readRoute()
+  const openId = route.kind === 'issue' ? route.id : null
+  const setOpenId = (id: string | null) => go(id ? `/i/${id}` : '/issues')
 
   useEffect(() => {
     if (!workspace) return

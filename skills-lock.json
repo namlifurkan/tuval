@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "wysiwyg-editor": {
+      "source": "blink-new/claude",
+      "sourceType": "github",
+      "skillPath": "skills/wysiwyg-editor/SKILL.md",
+      "computedHash": "d2d0b2fe275ac994a57599d5751ed8b80f995d0e9c985201d3548443628309c1"
+    }
+  }
+}

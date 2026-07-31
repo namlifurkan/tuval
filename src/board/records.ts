@@ -11,6 +11,7 @@ export interface Record {
   id: string
   kind: Kind
   title: string
+  description: string
   status: Status | null
   assignee: string | null
   priority: number | null
@@ -19,7 +20,8 @@ export interface Record {
   updated_at: string
 }
 
-const COLUMNS = 'id, kind, title, status, assignee, priority, due_at, position, updated_at'
+const COLUMNS =
+  'id, kind, title, description, status, assignee, priority, due_at, position, updated_at'
 
 // One place holds what has been loaded, so a change made in one view is seen by the others
 // without either knowing about the other.

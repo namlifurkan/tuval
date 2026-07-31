@@ -397,6 +397,7 @@ const tr: Record<string, string> = {
   'Nobody': 'Kimse',
   'Archive': 'Arşivle',
   'Open': 'Aç',
+  'What needs doing, and what done looks like': 'Ne yapılacak ve bitti neye benziyor',
   'all': 'hepsi',
   'todo': 'yapılacak',
   'doing': 'yapılıyor',

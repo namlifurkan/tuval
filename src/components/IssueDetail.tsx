@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { archiveRecord, patchRecord, PRIORITIES, STATUSES } from '../board/records'
 import type { Record as Issue, Status } from '../board/records'
@@ -14,7 +15,8 @@ export function IssueDetail({ issue, team, nameOf, onClose }: {
   nameOf: (id: string | null) => string
   onClose: () => void
 }) {
-  const set = (changes: Parameters<typeof patchRecord>[1]) => void patchRecord(issue.id, changes)
+  const [copied, setCopied] = useState(false)
+  const set = (changes: Parameters<typeof patchRecord>[1]) => patchRecord(issue.id, changes)
 
   return (
     <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[380px] overflow-y-auto border-l border-[#E2DED5] bg-[#FCFBF8] p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
@@ -34,7 +36,15 @@ export function IssueDetail({ issue, team, nameOf, onClose }: {
         </button>
       </div>
 
-      <dl className="mt-5 grid grid-cols-[5.5rem_1fr] items-center gap-x-3 gap-y-2.5">
+      <textarea
+        value={issue.description}
+        onChange={(e) => set({ description: e.target.value })}
+        rows={6}
+        placeholder={t('What needs doing, and what done looks like')}
+        className="mt-3 w-full resize-none bg-transparent text-sm leading-[1.65] text-[#4A463E] outline-none placeholder:text-[#C6C2B6]"
+      />
+
+      <dl className="mt-2 grid grid-cols-[5.5rem_1fr] items-center gap-x-3 gap-y-2.5">
         <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Status')}</dt>
         <dd>
           <select value={issue.status ?? 'todo'} onChange={(e) => set({ status: e.target.value as Status })} className={field}>
@@ -74,13 +84,22 @@ export function IssueDetail({ issue, team, nameOf, onClose }: {
         </dd>
       </dl>
 
-      <button
-        type="button"
-        onClick={() => { void archiveRecord(issue.id); onClose() }}
-        className="mt-6 w-full rounded-lg px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
-      >
-        {t('Archive')}
-      </button>
+      <div className="mt-6 flex gap-2">
+        <button
+          type="button"
+          onClick={() => { void navigator.clipboard.writeText(`${location.origin}/i/${issue.id}`); setCopied(true) }}
+          className="flex-1 rounded-lg border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:border-[#C8452D] hover:text-[#C8452D]"
+        >
+          {copied ? t('Copied') : t('Copy link')}
+        </button>
+        <button
+          type="button"
+          onClick={() => { void archiveRecord(issue.id); onClose() }}
+          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+        >
+          {t('Archive')}
+        </button>
+      </div>
     </aside>
   )
 }

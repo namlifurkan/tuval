@@ -1,0 +1,124 @@
+/**
+ * WYSIWYG Editor CSS Styles
+ * 
+ * CRITICAL: These styles are essential for proper list rendering.
+ * Copy relevant sections to your globals.css or component styles.
+ */
+
+/* ============================================
+ * EDITOR CONTENT STYLES
+ * Apply these to the Tiptap EditorContent wrapper
+ * ============================================ */
+
+.editor-content {
+  /* Base prose styling */
+  @apply prose prose-sm dark:prose-invert max-w-none;
+  
+  /* Tight vertical spacing for content */
+  @apply prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0;
+  
+  /* CRITICAL: List styling - makes bullets and numbers visible */
+  @apply [&_ul]:list-disc [&_ul]:pl-6;
+  @apply [&_ol]:list-decimal [&_ol]:pl-6;
+  
+  /* Link styling */
+  @apply prose-a:text-primary prose-a:underline prose-a:underline-offset-2;
+  
+  /* Editor minimum height and padding */
+  @apply min-h-[120px] px-3 py-2;
+  
+  /* Remove focus outline (handled by container) */
+  @apply focus:outline-none;
+}
+
+/* ============================================
+ * DISPLAYED HTML CONTENT STYLES
+ * Apply these when rendering sanitized HTML
+ * ============================================ */
+
+.html-content {
+  /* Base prose styling */
+  @apply prose prose-sm dark:prose-invert max-w-none;
+  
+  /* Tight vertical spacing */
+  @apply prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0;
+  
+  /* CRITICAL: List styling */
+  @apply [&_ul]:list-disc [&_ul]:pl-5;
+  @apply [&_ol]:list-decimal [&_ol]:pl-5;
+  
+  /* Link styling */
+  @apply prose-a:underline prose-a:underline-offset-2 prose-a:text-primary;
+  
+  /* Text handling */
+  @apply text-sm break-words;
+}
+
+/* Inverted colors for dark backgrounds (e.g., chat bubbles) */
+.html-content-inverted {
+  @apply prose-invert prose-a:text-inherit/90;
+}
+
+/* ============================================
+ * PLACEHOLDER STYLES
+ * For Tiptap Placeholder extension
+ * ============================================ */
+
+.tiptap-placeholder {
+  @apply before:content-[attr(data-placeholder)];
+  @apply before:text-muted-foreground;
+  @apply before:absolute;
+  @apply before:opacity-50;
+  @apply before:pointer-events-none;
+}
+
+/* ============================================
+ * TOOLBAR STYLES
+ * ============================================ */
+
+.editor-toolbar {
+  @apply flex items-center gap-0.5 px-2 py-1.5 border-b bg-muted/30;
+}
+
+.editor-toolbar-divider {
+  @apply w-px h-4 bg-border mx-1;
+}
+
+/* ============================================
+ * TAILWIND CSS UTILITY REFERENCE
+ * ============================================
+ * 
+ * If you can't use @apply, use these raw Tailwind classes:
+ * 
+ * For editor content:
+ * class="prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-3 py-2 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6"
+ * 
+ * For displayed HTML:
+ * class="prose prose-sm dark:prose-invert max-w-none text-sm break-words prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 prose-a:underline prose-a:underline-offset-2"
+ * 
+ * ============================================ */
+
+/* ============================================
+ * NESTED LIST STYLING (Optional)
+ * For multi-level lists
+ * ============================================ */
+
+.editor-content ul ul,
+.html-content ul ul {
+  @apply list-[circle];
+}
+
+.editor-content ul ul ul,
+.html-content ul ul ul {
+  @apply list-[square];
+}
+
+.editor-content ol ol,
+.html-content ol ol {
+  @apply list-[lower-alpha];
+}
+
+.editor-content ol ol ol,
+.html-content ol ol ol {
+  @apply list-[lower-roman];
+}

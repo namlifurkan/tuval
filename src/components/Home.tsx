@@ -15,7 +15,7 @@ export function Home() {
   const route = readRoute()
   if (route.kind === 'auth') return <AuthPage />
   if (route.kind === 'settings') return <Settings />
-  if (route.kind === 'issues') return <Issues />
+  if (route.kind === 'issues' || route.kind === 'issue') return <Issues />
   if (route.kind === 'docs') return <Docs />
   if (route.kind === 'page') return <Page key={route.id} />
   if (route.kind === 'dashboard') return <Dashboard />
