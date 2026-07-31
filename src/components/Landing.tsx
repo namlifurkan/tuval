@@ -20,11 +20,11 @@ const REPO = 'https://github.com/namlifurkan/tuval'
 // with something worth touching.
 function seed() {
   if (getItems().length) return
-  const frame = makeFrame(-460, -250, 900, 500, t('Try me'))
-  const a = makeSticky(-380, -150, '#F0E3B0', t('An idea lands here'))
-  const b = makeSticky(-60, -150, '#7FA5BE', t('Drag me anywhere'))
-  const c = makeSticky(260, -150, '#CBD79A', t('Double click to write'))
-  const caption = makeText(-380, 120, 700, { ...DEFAULT_TEXT_STYLE, fontSize: 20 })
+  const frame = makeFrame(-514, -250, 1028, 500, t('Try me'))
+  const a = makeSticky(-420, -150, '#F0E3B0', t('An idea lands here'))
+  const b = makeSticky(-100, -150, '#7FA5BE', t('Drag me anywhere'))
+  const c = makeSticky(220, -150, '#CBD79A', t('Double click to write'))
+  const caption = makeText(-420, 120, 760, { ...DEFAULT_TEXT_STYLE, fontSize: 20 })
   caption.text = t('Nothing here is saved. Sign in and it is your board.')
   const wire = (from: string, to: string) => makeConnector(
     { itemId: from, anchor: 'right', x: 0, y: 0 },

@@ -7,6 +7,18 @@ export interface CloudBoard extends BoardEntry {
 
 const table = () => supabase?.from('boards')
 
+export interface Snapshot { items: number; frames: number; thumb: string | null }
+
+// board_snapshots.board_id is both the foreign key and the primary key, so PostgREST reads the
+// relationship as one-to-one and embeds an object where a plain foreign key would give an
+// array. Reading only the array shape left every cloud board looking empty.
+export function pickSnapshot(embedded: unknown): Snapshot | null {
+  const row = Array.isArray(embedded) ? embedded[0] : embedded
+  if (!row || typeof row !== 'object') return null
+  const { items, frames, thumb } = row as Partial<Snapshot>
+  return { items: items ?? 0, frames: frames ?? 0, thumb: thumb ?? null }
+}
+
 export async function listCloudBoards(): Promise<CloudBoard[]> {
   const user = getUser()
   if (!supabase || !user) return []
@@ -16,7 +28,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
     .order('updated_at', { ascending: false })
   if (error || !data) return []
   return data.map((row) => {
-    const snap = (row.board_snapshots as { items: number; frames: number; thumb: string | null }[] | null)?.[0]
+    const snap = pickSnapshot(row.board_snapshots)
     return {
       room: row.id as string,
       name: (row.name as string) ?? '',

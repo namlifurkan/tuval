@@ -31,9 +31,23 @@ function announce(next: Session | null) {
   listeners.forEach((l) => l())
 }
 
+export type AuthTrouble = 'expired' | null
+let trouble: AuthTrouble = null
+let leaving = false
+export const authTrouble = () => trouble
+
 if (supabase) {
   void supabase.auth.getSession().then(({ data }) => announce(data.session))
-  supabase.auth.onAuthStateChange((_event, next) => announce(next))
+  supabase.auth.onAuthStateChange((event, next) => {
+    // A refresh token the server no longer knows leaves the client holding a session it can
+    // never use. Supabase drops it and reports a sign-out, which on its own looks like the
+    // app forgot you for no reason, so the reason is kept and shown.
+    if (event === 'TOKEN_REFRESHED') trouble = null
+    if (event === 'SIGNED_OUT') trouble = session && !leaving ? 'expired' : null
+    leaving = false
+    if (event === 'SIGNED_IN') trouble = null
+    announce(next)
+  })
 }
 
 export async function signIn(email: string) {
@@ -58,6 +72,7 @@ export async function setPassword(password: string) {
 }
 
 export async function signOut() {
+  leaving = true
   await supabase?.auth.signOut()
 }
 

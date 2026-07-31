@@ -318,6 +318,8 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Your session expired and could not be renewed. Sign in again.':
+    'Oturumun süresi doldu ve yenilenemedi. Tekrar giriş yap.',
   'Open source infinite canvas': 'Açık kaynak sonsuz tuval',
   'Open a board': 'Board aç',
   'A surface for thinking,': 'Düşünmek için bir yüzey,',

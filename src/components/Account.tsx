@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  authError, cloudEnabled, displayName, getUser, setPassword, signIn, signInWithPassword, signOut,
-  subscribeAuth,
+  authError, authTrouble, cloudEnabled, displayName, getUser, setPassword, signIn,
+  signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
@@ -163,6 +163,11 @@ export function Account() {
             )}
             {state === 'error' && (
               <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#DC2626]">{reason}</p>
+            )}
+            {authTrouble() === 'expired' && (
+              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#DC2626]">
+                {t('Your session expired and could not be renewed. Sign in again.')}
+              </p>
             )}
             <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
               {t('First time: leave the password empty and confirm the link we email you. Then set a password from this menu and sign in with it. Without signing in Tuval keeps working, but boards stay in this browser only.')}
