@@ -3,13 +3,14 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import type { ReactNode } from 'react'
 import { readOnly, subscribeAccess } from '../board/access'
 import { clampZoom, fitRect, zoomAt } from '../board/camera'
-import { createItems, getItems, redo, undo } from '../board/doc'
+import { getItems, redo, undo } from '../board/doc'
 import {
   DEFAULT_ORDER, DOCK_LABELS, DOCK_SIDES, getDockPrefs, moveDockItem, resetDock, setDockSide,
   setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
-import { makeEmbed, makeFrame, makeImage, makeText } from '../board/items'
+import { addImage } from '../board/images'
+import { makeEmbed, makeFrame, makeText } from '../board/items'
 import { insertItems } from '../board/interaction'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
@@ -557,20 +558,7 @@ export function Dock() {
           hidden
           onChange={(e) => {
             const center = viewportCenter()
-            for (const file of e.target.files ?? []) {
-              const reader = new FileReader()
-              reader.onload = () => {
-                const img = new Image()
-                img.onload = () => {
-                  const scale = Math.min(1, 600 / img.width)
-                  const w = img.width * scale, h = img.height * scale
-                  createItems([makeImage(center.x - w / 2, center.y - h / 2, w, h, reader.result as string)])
-                  requestRender()
-                }
-                img.src = reader.result as string
-              }
-              reader.readAsDataURL(file)
-            }
+            for (const file of e.target.files ?? []) void addImage(file, center)
             e.target.value = ''
           }}
         />

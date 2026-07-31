@@ -4,8 +4,6 @@ import { makeThumb } from '../board/thumb'
 import { refreshThumb } from '../board/sync'
 import { readTexture } from '../board/paperPrefs'
 import { touchBoard } from '../board/boards'
-import { uploadImage } from '../board/cloud'
-import { getUser } from '../board/supabase'
 import { flushCamera, saveCamera } from '../board/viewport'
 import { fitRect, toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, redo, undo } from '../board/doc'
@@ -14,7 +12,8 @@ import {
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
   quickCreateFromSelection, reorder, ungroupSelection, wheel,
 } from '../board/interaction'
-import { cloneItems, makeEmbed, makeImage, makeSticky, makeText, withPreview } from '../board/items'
+import { addImage } from '../board/images'
+import { cloneItems, makeEmbed, makeSticky, makeText, withPreview } from '../board/items'
 import { me, subscribeMe } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
@@ -440,51 +439,4 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
   )
 }
 
-const MAX_EDGE = 1600
-const KEEP_ORIGINAL_BYTES = 400_000
-
-// Signed in, an image goes to object storage and the item keeps a URL. Without a backend it
-// stays inline as a data URL, so it is downscaled first: every byte would otherwise replicate
-// to every peer and sit in IndexedDB and in each version snapshot.
-async function encodeImage(file: File) {
-  const bitmap = await createImageBitmap(file)
-  const longest = Math.max(bitmap.width, bitmap.height)
-  if (file.size <= KEEP_ORIGINAL_BYTES && longest <= MAX_EDGE) {
-    const src = await new Promise<string>((done) => {
-      const reader = new FileReader()
-      reader.onload = () => done(reader.result as string)
-      reader.readAsDataURL(file)
-    })
-    return { src, width: bitmap.width, height: bitmap.height, blob: file as Blob }
-  }
-  const scale = Math.min(1, MAX_EDGE / longest)
-  const width = Math.round(bitmap.width * scale)
-  const height = Math.round(bitmap.height * scale)
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, width, height)
-  bitmap.close()
-  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, 'image/webp', 0.82))
-  return { src: canvas.toDataURL('image/webp', 0.82), width, height, blob }
-}
-
-async function hostImage(src: string, blob: Blob | null) {
-  if (!blob || !getUser()) return src
-  const ext = blob.type.split('/')[1] || 'webp'
-  return (await uploadImage(room, blob, ext)) ?? src
-}
-
-function readImage(file: File, p: Vec) {
-  encodeImage(file).then(async ({ src, width, height, blob }) => {
-    const hosted = await hostImage(src, blob)
-    const scale = Math.min(1, 600 / width)
-    const w = width * scale, h = height * scale
-    const item = makeImage(p.x - w / 2, p.y - h / 2, w, h, hosted)
-    item.naturalW = width
-    item.naturalH = height
-    createItems([item])
-    useBoardStore.getState().setSelection([item.id])
-    requestRender()
-  })
-}
+const readImage = (file: File, p: Vec) => { void addImage(file, p) }
