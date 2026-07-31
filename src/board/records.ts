@@ -81,12 +81,35 @@ export async function createRecord(title: string, kind: Kind = 'issue'): Promise
   return (data as Record).id
 }
 
-export async function patchRecord(id: string, changes: Partial<Record>) {
-  await optimistic(
-    cache.map((r) => (r.id === id ? { ...r, ...changes } : r)),
-    async () => supabase!.from('records').update(changes).eq('id', id),
-  )
+// A title is typed a letter at a time, and one request per letter is a set of requests that
+// finish in whatever order the network decides. The last one to arrive wins, so a slow early
+// request overwrites the later, longer title with a prefix of itself. Changes are collected
+// per record and sent once the typing stops, which is both one request and one answer.
+const queued = new Map<string, Partial<Record>>()
+const timers = new Map<string, number>()
+
+const SETTLE = 400
+
+export function patchRecord(id: string, changes: Partial<Record>) {
+  publish(cache.map((r) => (r.id === id ? { ...r, ...changes } : r)))
+  queued.set(id, { ...queued.get(id), ...changes })
+  clearTimeout(timers.get(id))
+  timers.set(id, window.setTimeout(() => void flushRecord(id), SETTLE))
 }
+
+export async function flushRecord(id: string) {
+  clearTimeout(timers.get(id))
+  timers.delete(id)
+  const changes = queued.get(id)
+  if (!changes || !supabase) return
+  queued.delete(id)
+  const { error } = await supabase.from('records').update(changes).eq('id', id)
+  if (error) await loadRecords(cache.find((r) => r.id === id)?.kind ?? 'issue')
+}
+
+export const flushRecords = () => Promise.all([...queued.keys()].map(flushRecord))
+
+addEventListener('pagehide', () => { void flushRecords() })
 
 export async function archiveRecord(id: string) {
   await optimistic(

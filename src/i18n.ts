@@ -396,6 +396,7 @@ const tr: Record<string, string> = {
   'Write an issue and press enter': 'Bir iş yaz ve enter\'a bas',
   'Nobody': 'Kimse',
   'Archive': 'Arşivle',
+  'Open': 'Aç',
   'all': 'hepsi',
   'todo': 'yapılacak',
   'doing': 'yapılıyor',

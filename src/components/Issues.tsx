@@ -5,7 +5,7 @@ import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { initials } from '../board/me'
 import { t } from '../i18n'
-import { Trash2 } from 'lucide-react'
+import { PanelRight, Trash2 } from 'lucide-react'
 import { IssueBoard } from './IssueBoard'
 import { IssueDetail } from './IssueDetail'
 import { Shell } from './Shell'
@@ -61,7 +61,7 @@ export function Issues() {
   }
 
   return (
-    <Shell title={t('Issues')}>
+    <Shell title={t('Issues')} wide={view === 'board'}>
       <div className="mb-4 flex gap-1">
         {(['list', 'board'] as const).map((v) => (
           <button
@@ -143,6 +143,15 @@ export function Issues() {
             >
               {STATUSES.map((s) => <option key={s} value={s}>{t(s)}</option>)}
             </select>
+
+            <button
+              type="button"
+              title={t('Open')}
+              onClick={() => setOpenId(issue.id)}
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#EFEBE2] hover:text-[#141310] group-hover:opacity-100"
+            >
+              <PanelRight size={13} />
+            </button>
 
             <button
               type="button"
