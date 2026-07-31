@@ -41,6 +41,12 @@ npx npm@10 ci --dry-run
 A lockfile written by a newer npm is rejected by an older one, and the failure only shows up
 in CI.
 
+## Deploys
+
+The build writes the commit it came from to `dist/version.json`, and the **Deployed** workflow
+waits for `https://tuval.dev/version.json` to report that commit. A build that fails silently
+looks exactly like one that worked, so this is what catches it.
+
 ## Before opening a pull request
 
 ```bash
