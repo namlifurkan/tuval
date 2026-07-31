@@ -10,12 +10,16 @@ import type { Record as Row } from '../board/records'
 import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
+import { DatabaseCalendar } from './DatabaseCalendar'
+import { DatabaseGallery } from './DatabaseGallery'
 import { DatabaseTable } from './DatabaseTable'
 import { ViewBar } from './ViewBar'
 
 const pages = getPages
 
 const UNSET = '__none__'
+
+const KIND_NAME = { table: 'Table', board: 'Board', gallery: 'Gallery', calendar: 'Calendar' } as const
 
 function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
   choice: Choice | null
@@ -161,16 +165,14 @@ export function Database({ db }: { db: Row }) {
           </span>
         ))}
 
-        <button
-          type="button"
-          onClick={() => addView(db, 'table', t('Table'))}
-          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EAE6DD]"
-        >+ {t('Table')}</button>
-        <button
-          type="button"
-          onClick={() => addView(db, 'board', t('Board'))}
-          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EAE6DD]"
-        >+ {t('Board')}</button>
+        {(['table', 'board', 'gallery', 'calendar'] as const).map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            onClick={() => { addView(db, kind, t(KIND_NAME[kind])); setAt(schema.views.length) }}
+            className="rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          >+ {t(KIND_NAME[kind])}</button>
+        ))}
 
         {view?.kind === 'board' && (
           <select
@@ -184,21 +186,39 @@ export function Database({ db }: { db: Row }) {
             ))}
           </select>
         )}
+
+        {view?.kind === 'calendar' && (
+          <select
+            value={view.dateBy ?? ''}
+            onChange={(e) => editView(db, view.id, { dateBy: e.target.value || undefined })}
+            className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
+          >
+            <option value="">{t('Place by…')}</option>
+            {schema.fields.filter((f) => f.type === 'date').map((f) => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {view && <ViewBar db={db} view={view} fields={schema.fields} hidden={all.length - mine.length} />}
 
-      {view?.kind === 'board'
-        ? <Board db={db} rows={mine} view={view} fields={schema.fields} />
-        : (
-          <DatabaseTable
-            db={db}
-            rows={mine}
-            fields={schema.fields}
-            team={team}
-            onAddField={() => addField(db, 'text', t('Field'))}
-          />
-        )}
+      {view?.kind === 'board' && <Board db={db} rows={mine} view={view} fields={schema.fields} />}
+      {view?.kind === 'gallery' && (
+        <DatabaseGallery dbId={db.id} rows={mine} fields={schema.fields} team={team} />
+      )}
+      {view?.kind === 'calendar' && (
+        <DatabaseCalendar db={db} rows={mine} view={view} fields={schema.fields} />
+      )}
+      {(!view || view.kind === 'table') && (
+        <DatabaseTable
+          db={db}
+          rows={mine}
+          fields={schema.fields}
+          team={team}
+          onAddField={() => addField(db, 'text', t('Field'))}
+        />
+      )}
 
       <p className="mt-3 text-[11px] text-[#B6B1A6]">
         {mine.length} {t(mine.length === 1 ? 'row' : 'rows')} · {t('a row is a page: open one to write in it')}

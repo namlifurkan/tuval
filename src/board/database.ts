@@ -16,11 +16,14 @@ export type Op =
 export interface Filter { id: string; field: string; op: Op; value?: string }
 export interface Sort { field: string; dir: 'asc' | 'desc' }
 
+export type ViewKind = 'table' | 'board' | 'gallery' | 'calendar'
+
 export interface View {
   id: string
   name: string
-  kind: 'table' | 'board'
+  kind: ViewKind
   groupBy?: string
+  dateBy?: string
   filters?: Filter[]
   sorts?: Sort[]
 }
@@ -128,12 +131,43 @@ export function addChoice(db: Row, fieldId: string, name: string): Choice {
   return made
 }
 
-export function addView(db: Row, kind: View['kind'], name: string) {
+// A board needs something to group by and a calendar needs something to place by. Both pick the
+// first column that can answer, so a new view shows the rows rather than an empty frame with a
+// note telling you to configure it.
+export function addView(db: Row, kind: ViewKind, name: string) {
   const held = schemaOf(db)
-  const groupBy = kind === 'board'
-    ? held.fields.find((f) => f.type === 'select')?.id
-    : undefined
-  writeSchema(db.id, { ...held, views: [...held.views, { id: nanoid(8), name, kind, groupBy }] })
+  const groupBy = kind === 'board' ? held.fields.find((f) => f.type === 'select')?.id : undefined
+  const dateBy = kind === 'calendar' ? held.fields.find((f) => f.type === 'date')?.id : undefined
+  writeSchema(db.id, {
+    ...held,
+    views: [...held.views, { id: nanoid(8), name, kind, groupBy, dateBy }],
+  })
+}
+
+// Dates are kept the way a date input hands them over, as YYYY-MM-DD, so a day is compared by
+// string and no clock or timezone gets a say in which day a row lands on.
+export const dayOf = (row: Row, fieldId: string | undefined): string =>
+  (fieldId && typeof cellsOf(row)[fieldId] === 'string' ? String(cellsOf(row)[fieldId]) : '').slice(0, 10)
+
+export const monthKey = (iso: string) => iso.slice(0, 7)
+
+export const shiftMonth = (key: string, by: number) => {
+  const [year, month] = key.split('-').map(Number)
+  const at = new Date(Date.UTC(year, month - 1 + by, 1))
+  return `${at.getUTCFullYear()}-${String(at.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
+// Six weeks from the Monday on or before the first, which is every layout a month can need and
+// keeps the grid from changing height as you page through the year.
+export function monthGrid(key: string): string[] {
+  const [year, month] = key.split('-').map(Number)
+  const first = new Date(Date.UTC(year, month - 1, 1))
+  const back = (first.getUTCDay() + 6) % 7
+  const start = new Date(Date.UTC(year, month - 1, 1 - back))
+  return Array.from({ length: 42 }, (_, i) => {
+    const at = new Date(start.getTime() + i * 86400000)
+    return at.toISOString().slice(0, 10)
+  })
 }
 
 export function editView(db: Row, viewId: string, changes: Partial<View>) {
