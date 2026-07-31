@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { PRODUCT } from '../board/brand'
 import { fitRect } from '../board/camera'
 import { createItems, getItems } from '../board/doc'
 import { boxOf } from '../board/render'
 import { makeConnector, makeFrame, makeSticky, makeText } from '../board/items'
-import { newRoom, openBoard, touchBoard } from '../board/boards'
+import { goHome, newRoom, openBoard, touchBoard } from '../board/boards'
 import { requestRender, useBoardStore } from '../board/store'
-import { cloudEnabled } from '../board/supabase'
+import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { DEFAULT_TEXT_STYLE } from '../board/types'
 import { t } from '../i18n'
 import { Canvas } from './Canvas'
@@ -98,6 +98,22 @@ const Spine = () => (
   </svg>
 )
 
+// Signed in, the front door still explains the product, so the way to your own work has to
+// be visible from it.
+function SignedIn() {
+  const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
+  if (!user) return null
+  return (
+    <button
+      type="button"
+      onClick={goHome}
+      className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+    >
+      {t('Your boards')}
+    </button>
+  )
+}
+
 export function Landing() {
   const [touched, setTouched] = useState(false)
   const hero = useRef<HTMLDivElement>(null)
@@ -134,6 +150,7 @@ export function Landing() {
         >
           GitHub
         </a>
+        <SignedIn />
         {cloudEnabled ? <Account /> : (
           <button
             type="button"

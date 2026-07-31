@@ -35,6 +35,13 @@ async function save() {
   if (lastError) console.warn('[tuval] cloud save failed:', lastError)
 }
 
+// Opening a board is enough to want a picture of it: a board nobody has edited since the
+// feature shipped would otherwise stay blank in the list for ever.
+export function refreshThumb() {
+  dirty = true
+  schedule()
+}
+
 function schedule() {
   dirty = true
   if (timer || !getUser()) return

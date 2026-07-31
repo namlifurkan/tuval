@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { surfaceColor } from '../board/brand'
+import { makeThumb } from '../board/thumb'
+import { refreshThumb } from '../board/sync'
 import { readTexture } from '../board/paperPrefs'
 import { touchBoard } from '../board/boards'
 import { uploadImage } from '../board/cloud'
@@ -121,13 +123,23 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
     window.addEventListener('pagehide', persist)
     const unsubMeta = subscribeMeta(requestRender)
 
+    let drawnAt = -Infinity
+    let pushedOnce = false
     const record = () => {
       const all = getItems()
+      // The first time the document has content, ask the cloud save for a fresh picture even
+      // if nothing was edited. Otherwise a board nobody touches stays blank in the list.
+      if (!pushedOnce && all.length) { pushedOnce = true; refreshThumb() }
+      // The thumbnail costs a canvas and an encode, so it is refreshed at most every 8s.
+      const now = performance.now()
+      const fresh = all.length && now - drawnAt > 8000
+      if (fresh) drawnAt = now
       touchBoard(room, {
         name: (getMeta().name as string) ?? '',
         opened: Date.now(),
         items: all.filter((i) => i.type !== 'frame').length,
         frames: all.filter((i) => i.type === 'frame').length,
+        ...(fresh ? { thumb: makeThumb(all, surfaceColor(String(getMeta().surface ?? 'paper'))) } : {}),
       })
     }
     record()

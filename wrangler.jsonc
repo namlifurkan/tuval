@@ -1,0 +1,11 @@
+{
+  // Tuval builds to a folder of static files; there is no server code. The one thing the host
+  // has to know is that /b/<room> and /dashboard are routes inside the app, not missing files,
+  // so an unknown path must be answered with index.html instead of a 404.
+  "name": "tuval",
+  "compatibility_date": "2026-07-31",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

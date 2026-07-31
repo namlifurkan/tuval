@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { currentRoom, forgetBoard, getBoards, newRoom, touchBoard } from './boards'
+import {
+  currentRoom, forgetBoard, getBoards, legacyTarget, newRoom, readRoute, touchBoard,
+} from './boards'
 
 beforeEach(() => {
   for (const b of getBoards()) forgetBoard(b.room)
@@ -48,27 +50,60 @@ describe('board registry', () => {
 })
 
 describe('room from url', () => {
-  const set = (hash: string, search = '') => {
-    history.replaceState(null, '', `/${search}${hash}`)
+  const at = (path: string, search = '', hash = '') => {
+    history.replaceState(null, '', `${path}${search}${hash}`)
   }
 
-  it('reads the room from the hash', () => {
-    set('#alpha')
+  it('reads the room from the path', () => {
+    at('/b/alpha')
     expect(currentRoom()).toBe('alpha')
+    expect(readRoute()).toEqual({ kind: 'board', room: 'alpha' })
   })
 
-  it('ignores a supabase auth callback hash', () => {
-    set('#access_token=abc&expires_in=3600&type=magiclink')
+  it('has no room on the front door or the board list', () => {
+    at('/')
     expect(currentRoom()).toBe('')
+    expect(readRoute().kind).toBe('landing')
+    at('/dashboard')
+    expect(currentRoom()).toBe('')
+    expect(readRoute().kind).toBe('dashboard')
   })
 
-  it('falls back to ?room= when the hash carries tokens', () => {
-    set('#access_token=abc&refresh_token=def', '?room=alpha')
-    expect(currentRoom()).toBe('alpha')
+  it('decodes a room that needed escaping', () => {
+    at('/b/team%20board')
+    expect(currentRoom()).toBe('team board')
+  })
+})
+
+describe('links written before rooms moved into the path', () => {
+  it('turns an old hash link into a path', () => {
+    expect(legacyTarget('/', '', '#alpha')).toBe('/b/alpha')
   })
 
-  it('prefers an explicit hash over ?room=', () => {
-    set('#beta', '?room=alpha')
-    expect(currentRoom()).toBe('beta')
+  it('keeps a sign-in token and takes the room from ?room=', () => {
+    const token = '#access_token=abc&type=magiclink'
+    expect(legacyTarget('/', '?room=alpha', token)).toBe(`/b/alpha${token}`)
+  })
+
+  it('leaves a token-only arrival on the front door', () => {
+    expect(legacyTarget('/', '', '#access_token=abc')).toBe(null)
+  })
+
+  it('never rewrites a url that already has a path', () => {
+    expect(legacyTarget('/b/alpha', '', '#beta')).toBe(null)
+    expect(legacyTarget('/dashboard', '?room=alpha', '')).toBe(null)
+  })
+
+  it('does nothing without a legacy room', () => {
+    expect(legacyTarget('/', '', '')).toBe(null)
+  })
+})
+
+describe('board pictures', () => {
+  it('keeps a thumbnail and does not lose it on the next touch', () => {
+    touchBoard('alpha', { items: 3, thumb: 'data:image/webp;base64,xx' })
+    expect(getBoards()[0].thumb).toBe('data:image/webp;base64,xx')
+    touchBoard('alpha', { items: 4 })
+    expect(getBoards()[0]).toMatchObject({ items: 4, thumb: 'data:image/webp;base64,xx' })
   })
 })

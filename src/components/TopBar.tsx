@@ -15,6 +15,7 @@ import { useItems } from '../board/useBoard'
 import { Account } from './Account'
 import { Share } from './Share'
 import { Collaborators } from './Collaborators'
+import { goHome } from '../board/boards'
 import { HandoffMenu } from './HandoffMenu'
 import { ViewOnly } from './ViewOnly'
 import { IconButton, Popover, usePopover } from './ui'
@@ -62,7 +63,6 @@ export function TopBar() {
   const dark = isDarkSurface(paint)
   const texture = useSyncExternalStore(subscribeMeta, readTexture, readTexture)
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
-  const boardsPanel = useBoardStore((s) => s.boardsPanel)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
 
@@ -79,9 +79,8 @@ export function TopBar() {
         <div className="pointer-events-auto flex min-w-0 items-start gap-1.5">
           <IconButton
             title={t('Boards')}
-            active={boardsPanel}
             className="mt-0.5"
-            onClick={() => update({ boardsPanel: !boardsPanel })}
+            onClick={goHome}
           >
             <LayoutGrid size={18} strokeWidth={1.8} />
           </IconButton>

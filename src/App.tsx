@@ -3,7 +3,6 @@ import { getLang, subscribeLang } from './i18n'
 import { Ada } from './components/Ada'
 import { Home } from './components/Home'
 import { Canvas } from './components/Canvas'
-import { BoardsPanel } from './components/BoardsPanel'
 import { BriefImport } from './components/BriefImport'
 import { CommentsPanel } from './components/CommentsPanel'
 import { CursorChat } from './components/CursorChat'
@@ -21,7 +20,7 @@ import { TextEditor } from './components/TextEditor'
 import { TopBar } from './components/TopBar'
 import { Inspector } from './components/Inspector'
 import { Minimap } from './components/Minimap'
-import { room } from './board/doc'
+import { readRoute } from './board/boards'
 import { takeTemplate } from './board/boards'
 import { insertItems } from './board/interaction'
 import { TEMPLATES } from './board/templates'
@@ -65,7 +64,7 @@ export default function App() {
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
   usePendingTemplate()
 
-  if (!room) return <div key={lang}><Home /></div>
+  if (readRoute().kind !== 'board') return <div key={lang}><Home /></div>
 
   return (
     <div key={lang} className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
@@ -80,7 +79,6 @@ export default function App() {
           <MinimapCorner />
           <ContextMenu />
           <CommentThread />
-          <BoardsPanel />
           <BriefImport />
           <CommentsPanel />
           <SearchPanel />

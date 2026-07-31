@@ -48,9 +48,11 @@ export function touchBoard(room: string, patch: Partial<Omit<BoardEntry, 'room'>
     opened: patch.opened ?? current?.opened ?? Date.now(),
     items: patch.items ?? current?.items ?? 0,
     frames: patch.frames ?? current?.frames ?? 0,
+    thumb: patch.thumb ?? current?.thumb,
   }
   if (current && next.name === current.name && next.items === current.items
-    && next.frames === current.frames && next.opened === current.opened) return
+    && next.frames === current.frames && next.opened === current.opened
+    && next.thumb === current.thumb) return
   write([...rest, next])
 }
 
@@ -61,6 +63,11 @@ export function forgetBoard(room: string) {
 }
 
 export const newRoom = () => nanoid(10)
+
+export function goHome() {
+  history.replaceState(null, '', '/dashboard')
+  location.reload()
+}
 
 const PENDING = 'tuval:pending-template'
 
@@ -76,17 +83,49 @@ export function openBoard(room: string, template?: string) {
   if (room === currentRoom()) return
   // replaceState never navigates, so the reload below is guaranteed to load the new url.
   // Assigning location.href starts a navigation that the reload then races.
-  history.replaceState(null, '', `${location.pathname}#${room}`)
+  history.replaceState(null, '', `/b/${encodeURIComponent(room)}`)
   // doc.ts binds its Y.Doc at module load, so switching rooms means a fresh page.
   location.reload()
 }
 
+// Supabase returns from a sign-in link with its tokens in the hash. Rooms live in the path,
+// so the two can no longer collide; this only recognises the old shape.
 const AUTH_HASH = /(?:^|&)(?:access_token|refresh_token|error_description|error_code)=/
 
-export function currentRoom() {
-  const hash = location.hash.replace(/^#/, '')
-  if (hash && !AUTH_HASH.test(hash)) return hash
-  return new URLSearchParams(location.search).get('room') ?? ''
+export type Route =
+  | { kind: 'landing' }
+  | { kind: 'dashboard' }
+  | { kind: 'board'; room: string }
+
+export function readRoute(): Route {
+  const path = location.pathname.replace(/\/+$/, '') || '/'
+  const board = /^\/b\/(.+)$/.exec(path)
+  if (board) return { kind: 'board', room: decodeURIComponent(board[1]) }
+  if (path === '/dashboard') return { kind: 'dashboard' }
+  return { kind: 'landing' }
+}
+
+// Boards used to live in the hash and briefly in ?room=. Links of both shapes are already out
+// in the world, in invite emails among other places, so they are translated on arrival.
+export function legacyTarget(pathname: string, search: string, hash: string): string | null {
+  if (pathname.replace(/\/+$/, '') !== '') return null
+  const raw = hash.replace(/^#/, '')
+  const token = AUTH_HASH.test(raw)
+  const room = token ? new URLSearchParams(search).get('room') ?? '' : raw
+  if (!room) return null
+  return `/b/${encodeURIComponent(room)}${token ? `#${raw}` : ''}`
+}
+
+function adoptLegacyUrl() {
+  const to = legacyTarget(location.pathname, location.search, location.hash)
+  if (to) history.replaceState(null, '', to)
+}
+
+adoptLegacyUrl()
+
+export const currentRoom = () => {
+  const route = readRoute()
+  return route.kind === 'board' ? route.room : ''
 }
 
 // Rooms this browser has data for but that never made it into the registry: an older visit,

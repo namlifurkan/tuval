@@ -38,7 +38,7 @@ export function Share() {
 
   useEffect(() => { if (pop.open) refresh() }, [pop.open, refresh])
 
-  const boardLink = () => `${location.origin}${location.pathname}#${room}`
+  const boardLink = () => `${location.origin}/b/${encodeURIComponent(room)}`
 
   const copyLink = () => {
     navigator.clipboard?.writeText(boardLink())

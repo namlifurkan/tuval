@@ -25,7 +25,7 @@ becomes connectors.
 
 ## Boards
 
-Every board is a room in the URL hash: `#team-board`. The grid icon in the top bar opens the
+Every board is a room in the URL: `/b/team-board`. The grid icon in the top bar opens the
 board list — create, search, switch, delete. The registry lives in `localStorage` and older
 rooms are recovered from `indexedDB.databases()`, so a board you visited once is never lost to
 a forgotten link. The list is per-browser: share the URL for someone else to open a board.
@@ -112,12 +112,14 @@ npm run collab         # optional y-websocket server on :1234
 
 For multiplayer put `VITE_COLLAB_URL=ws://localhost:1234` in `.env.local`, start the collab
 server and restart the dev server (Vite reads env at boot). Open two tabs: items, selection
-and live cursors sync. The board room comes from the URL hash: `http://localhost:5173/#team-board`.
+and live cursors sync. The board room comes from the URL: `http://localhost:5173/b/team-board`.
 
 ## Deploy
 
-`npm run build` produces a static `dist/`. Any static host works; there is no server to run.
-Board rooms live in the URL hash, so no SPA rewrite rules are needed.
+`npm run build` produces a static `dist/`. Any static host works; there is no server to run,
+but `/b/<room>` and `/dashboard` are routes inside the app, so unknown paths have to be
+answered with `index.html`. On Cloudflare that is `not_found_handling` in `wrangler.jsonc`;
+elsewhere it is the usual SPA fallback.
 
 After the site is up, point Supabase at it: **Authentication → URL Configuration**, set
 Site URL to your origin and add it to Redirect URLs. Sign-in links break without this.

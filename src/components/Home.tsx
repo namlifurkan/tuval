@@ -1,14 +1,9 @@
-import { useSyncExternalStore } from 'react'
-import { getBoards, subscribeBoards } from '../board/boards'
-import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
+import { readRoute } from '../board/boards'
 import { Dashboard } from './Dashboard'
 import { Landing } from './Landing'
 
-// No room in the URL means the front door. Anyone with work to come back to gets their
-// boards; a true first visit meets the product before being asked for anything.
+// The front door is the front door for everybody. Signing in does not replace the page that
+// explains the product; the board list has its own address.
 export function Home() {
-  const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
-  const local = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
-  if (user || !cloudEnabled || local.length) return <Dashboard />
-  return <Landing />
+  return readRoute().kind === 'dashboard' ? <Dashboard /> : <Landing />
 }
