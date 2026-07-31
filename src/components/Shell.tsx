@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { CircleDot, LayoutGrid, Settings2 } from 'lucide-react'
+import { CircleDot, FileText, LayoutGrid, Settings2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
@@ -10,6 +10,7 @@ import { Wordmark } from './Logo'
 const NAV = [
   { path: '/dashboard', label: 'Boards', icon: LayoutGrid },
   { path: '/issues', label: 'Issues', icon: CircleDot },
+  { path: '/docs', label: 'Docs', icon: FileText },
   { path: '/settings', label: 'Settings', icon: Settings2 },
 ]
 

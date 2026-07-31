@@ -134,6 +134,8 @@ export type Route =
   | { kind: 'dashboard' }
   | { kind: 'settings' }
   | { kind: 'issues' }
+  | { kind: 'docs' }
+  | { kind: 'page'; id: string }
   | { kind: 'auth'; page: AuthPage }
   | { kind: 'board'; room: string }
 
@@ -146,6 +148,9 @@ export function readRoute(): Route {
   if (path === '/dashboard') return { kind: 'dashboard' }
   if (path === '/settings') return { kind: 'settings' }
   if (path === '/issues') return { kind: 'issues' }
+  if (path === '/docs') return { kind: 'docs' }
+  const page = /^\/d\/(.+)$/.exec(path)
+  if (page) return { kind: 'page', id: decodeURIComponent(page[1]) }
   const auth = AUTH_PAGES.find((p) => path === `/${p}`)
   if (auth) return { kind: 'auth', page: auth }
   return { kind: 'landing' }

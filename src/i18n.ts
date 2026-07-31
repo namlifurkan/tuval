@@ -367,6 +367,13 @@ const tr: Record<string, string> = {
   'Home': 'Anasayfa',
   'Workspace': 'Çalışma alanı',
   'Issues': 'İşler',
+  'Docs': 'Dokümanlar',
+  'New page': 'Yeni sayfa',
+  'Untitled page': 'Adsız sayfa',
+  'Write, or press # for a heading and - for a list':
+    'Yaz; başlık için #, liste için - kullan',
+  'No pages yet. A page is a record like anything else: it has a title you can search for, and a body two people can write at once.':
+    'Henüz sayfa yok. Sayfa da diğerleri gibi bir kayıt: aranabilir bir başlığı ve iki kişinin aynı anda yazabildiği bir gövdesi var.',
   'Issue': 'İş',
   'list': 'liste',
   'board': 'pano',
