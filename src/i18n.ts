@@ -469,6 +469,13 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Import': 'İçeri aktar',
+  'Reading…': 'Okunuyor…',
+  '{pages} pages, {databases} databases, {rows} rows.':
+    '{pages} sayfa, {databases} veritabanı, {rows} satır.',
+  '{n} files were left out of this pass.': 'Bu turda {n} dosya dışarıda kaldı.',
+  'That file could not be read. A Notion export, a .zip, a .csv or a .md file.':
+    'Bu dosya okunamadı. Notion dışa aktarımı, .zip, .csv veya .md olmalı.',
   'Timeline': 'Zaman çizelgesi',
   'Starts on…': 'Başlangıç…',
   'Ends on…': 'Bitiş…',

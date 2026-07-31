@@ -10,6 +10,7 @@ import { removeCover } from '../board/cover'
 import { TRASH_DAYS } from '../board/cloud'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
+import { ImportButton } from './ImportButton'
 import { Shell } from './Shell'
 
 const pages = getPages
@@ -50,14 +51,17 @@ export function Docs() {
 
   return (
     <Shell title={t('Docs')}>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void add()}
-        className="flex items-center gap-1.5 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:opacity-40"
-      >
-        <Plus size={15} strokeWidth={2.4} /> {t('New page')}
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void add()}
+          className="flex items-center gap-1.5 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:opacity-40"
+        >
+          <Plus size={15} strokeWidth={2.4} /> {t('New page')}
+        </button>
+        <ImportButton />
+      </div>
 
       <h2 className="mt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
         {t('Recently edited')}

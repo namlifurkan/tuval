@@ -6,7 +6,7 @@ import { authReady, getUser, supabase } from './supabase'
 
 // The name BlockNote gives its own fragment. Matching it means the library's own conversion
 // helpers work on our documents without being told where to look.
-const FRAGMENT = 'prosemirror'
+export const FRAGMENT = 'prosemirror'
 
 const SAVE_AFTER = 2000
 
@@ -22,7 +22,7 @@ export const pageDoc = () => doc
 export const pageFragment = () => doc.getXmlFragment(FRAGMENT)
 export const pageAwareness = () => awareness
 
-const hex = (bytes: Uint8Array) =>
+export const hex = (bytes: Uint8Array) =>
   `\\x${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`
 
 async function pull(id: string): Promise<Uint8Array | null> {
@@ -39,7 +39,7 @@ async function pull(id: string): Promise<Uint8Array | null> {
 
 // The words in a page, flattened so the server can index what it cannot read. Walked from the
 // shared type rather than the editor, because saving happens whether or not one is mounted.
-function textOf(from: Y.Doc): string {
+export function textOf(from: Y.Doc): string {
   const parts: string[] = []
   const walk = (node: Y.XmlElement | Y.XmlFragment | Y.XmlText | Y.XmlHook) => {
     if (node instanceof Y.XmlText) parts.push(node.toString().replace(/<[^>]*>/g, ' '))
