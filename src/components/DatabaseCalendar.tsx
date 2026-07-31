@@ -1,19 +1,11 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { go } from '../board/boards'
-import { dayOf, monthGrid, monthKey, setCell, shiftMonth } from '../board/database'
+import { dayOf, monthGrid, monthKey, setCell, shiftMonth, today } from '../board/database'
 import type { Field, View } from '../board/database'
 import { createRecord, getPages } from '../board/records'
 import type { Record as Row } from '../board/records'
 import { getLang, t } from '../i18n'
-
-// The day where the person is, not the day in UTC. East of Greenwich an evening is already
-// tomorrow in UTC, so toISOString would ring the wrong square from mid-afternoon onwards.
-const today = () => {
-  const at = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`
-}
 
 const dayNumber = (iso: string) => Number(iso.slice(8, 10))
 

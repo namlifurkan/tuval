@@ -131,7 +131,7 @@ export function Database({ db }: { db: Row }) {
   const schema = schemaOf(db)
   const view = schema.views[Math.min(at, schema.views.length - 1)] ?? schema.views[0]
   const all = rowsOf(db.id)
-  const mine = applyView(all, view)
+  const mine = applyView(all, view, schema.fields)
 
   return (
     <div className="mt-5">

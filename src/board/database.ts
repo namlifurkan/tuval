@@ -1,21 +1,39 @@
 import { nanoid } from 'nanoid'
+import { evaluate, today } from './formula'
 import { getRecords, patchRecord } from './records'
 import type { Record as Row } from './records'
 
-export type FieldType = 'text' | 'number' | 'select' | 'date' | 'checkbox' | 'person' | 'url' | 'relation'
+export type FieldType =
+  | 'text' | 'number' | 'select' | 'date' | 'checkbox' | 'person' | 'url' | 'relation'
+  | 'formula' | 'rollup'
 
-export const FIELD_TYPES: FieldType[] =
-  ['text', 'number', 'select', 'date', 'checkbox', 'person', 'url', 'relation']
+export const FIELD_TYPES: FieldType[] = [
+  'text', 'number', 'select', 'date', 'checkbox', 'person', 'url', 'relation',
+  'formula', 'rollup',
+]
+
+// A formula and a rollup are read, never written: the value is worked out from the row every
+// time it is drawn, so there is nothing of theirs to store and nothing to keep in step.
+export const COMPUTED: FieldType[] = ['formula', 'rollup']
+
+export type Roll = 'count' | 'sum' | 'average' | 'min' | 'max' | 'range' | 'show'
+
+export const ROLLS: Roll[] = ['count', 'sum', 'average', 'min', 'max', 'range', 'show']
 
 export interface Choice { id: string; name: string; tone: string }
 // `db` is the database a relation points at. A relation with none yet is a column waiting to
-// be told what it relates to, not a broken one.
+// be told what it relates to, not a broken one. `via` and `then` are the two halves of a rollup:
+// which relation to walk, and which column to read once it is walked.
 export interface Field {
   id: string
   name: string
   type: FieldType
   choices?: Choice[]
   db?: string
+  formula?: string
+  via?: string
+  then?: string
+  roll?: Roll
 }
 
 export type Op =
@@ -51,6 +69,8 @@ const OPS: { [K in FieldType | 'title']: Op[] } = {
   checkbox: ['checked', 'unchecked'],
   person: ['is', 'empty', 'notEmpty'],
   relation: ['is', 'empty', 'notEmpty'],
+  formula: ['is', 'contains', 'gt', 'lt', 'empty', 'notEmpty'],
+  rollup: ['is', 'gt', 'lt', 'empty', 'notEmpty'],
 }
 
 export const opsFor = (field: Field | null) => OPS[field?.type ?? 'title']
@@ -107,6 +127,7 @@ export function addField(db: Row, type: FieldType = 'text', name = 'Field') {
   const held = schemaOf(db)
   const field: Field = { id: nanoid(8), name, type }
   if (type === 'select') field.choices = []
+  if (type === 'rollup') field.roll = 'count'
   writeSchema(db.id, { ...held, fields: [...held.fields, field] })
 }
 
@@ -189,8 +210,69 @@ export function relatedTo(row: Row, databases: Row[], rows: Row[]): Backlink[] {
   return found
 }
 
+// An empty cell is not the number nought. Number('') says otherwise, and believing it would put
+// a zero into every average of a column somebody had not finished filling in.
+const numbers = (values: unknown[]) =>
+  values
+    .map((v) => {
+      if (typeof v === 'number') return v
+      return v === '' || v === null || v === undefined ? NaN : Number(v)
+    })
+    .filter((n) => Number.isFinite(n))
+
+// What is done with the far side once it has been read. Counting counts rows, showing shows
+// whatever they hold, and the rest are arithmetic and so only see the values that are numbers.
+export function aggregate(values: unknown[], roll: Roll): unknown {
+  if (roll === 'count') return values.length
+  if (roll === 'show') {
+    return values.filter((v) => v !== '' && v !== undefined && v !== null).join(', ')
+  }
+  const held = numbers(values)
+  if (!held.length) return ''
+  switch (roll) {
+    case 'sum': return held.reduce((a, b) => a + b, 0)
+    case 'average': return held.reduce((a, b) => a + b, 0) / held.length
+    case 'min': return Math.min(...held)
+    case 'max': return Math.max(...held)
+    default: return Math.max(...held) - Math.min(...held)
+  }
+}
+
+// One relation walked, one column of the far side read, one answer. Everything a rollup can say
+// is said about the list this produces, so an unset half gives an empty list rather than a throw.
+function rollupOf(row: Row, field: Field, fields: Field[]): unknown {
+  const via = fields.find((f) => f.id === field.via && f.type === 'relation')
+  if (!via?.db) return ''
+
+  const linked = linksOf(row, via.id)
+  const far = schemaOf(getRecords('database').find((d) => d.id === via.db)).fields
+  const target = field.then === TITLE ? undefined : far.find((f) => f.id === field.then)
+  if (field.then !== TITLE && !target) return ''
+
+  const rows = getRecords('doc').filter((r) => linked.includes(r.id))
+  return aggregate(rows.map((r) => (target ? valueOf(r, target, far) : r.title)), field.roll ?? 'count')
+}
+
+// A formula may name another formula, so this can call itself. The depth cap is what stops two
+// columns that name each other from taking the tab down with them.
+const DEPTH = 5
+
+export function valueOf(row: Row, field: Field, fields: Field[], depth = 0): unknown {
+  if (field.type === 'rollup') return depth < DEPTH ? rollupOf(row, field, fields) : ''
+  if (field.type !== 'formula') return cellsOf(row)[field.id]
+  if (depth >= DEPTH) return ''
+
+  const props: { [name: string]: unknown } = { Name: row.title }
+  for (const other of fields) {
+    if (other.id !== field.id) props[other.name] = valueOf(row, other, fields, depth + 1)
+  }
+  return evaluate(field.formula ?? '', props)
+}
+
 export const dayOf = (row: Row, fieldId: string | undefined): string =>
   (fieldId && typeof cellsOf(row)[fieldId] === 'string' ? String(cellsOf(row)[fieldId]) : '').slice(0, 10)
+
+export { today }
 
 export const monthKey = (iso: string) => iso.slice(0, 7)
 
@@ -251,18 +333,21 @@ export function setCell(row: Row, fieldId: string, value: unknown) {
   patchRecord(row.id, { data: next } as unknown as Partial<Row>)
 }
 
-export const cellText = (row: Row, field: Field): string => {
-  const value = cellsOf(row)[field.id]
+export const cellText = (row: Row, field: Field, fields: Field[] = []): string => {
+  const value = valueOf(row, field, fields)
   return value === undefined || value === null ? '' : String(value)
 }
 
-const held = (row: Row, fieldId: string) =>
-  fieldId === TITLE ? row.title : cellsOf(row)[fieldId]
+const held = (row: Row, fieldId: string, fields: Field[]) => {
+  if (fieldId === TITLE) return row.title
+  const field = fields.find((f) => f.id === fieldId)
+  return field ? valueOf(row, field, fields) : cellsOf(row)[fieldId]
+}
 
 const same = (a: unknown, b: string) => String(a ?? '').toLowerCase() === b.toLowerCase()
 
-function passes(row: Row, filter: Filter): boolean {
-  const value = held(row, filter.field)
+function passes(row: Row, filter: Filter, fields: Field[]): boolean {
+  const value = held(row, filter.field, fields)
   const want = filter.value ?? ''
   // A relation holds a list, so "is" asks whether the list names it and "empty" asks whether
   // the list is there at all.
@@ -293,15 +378,15 @@ function passes(row: Row, filter: Filter): boolean {
 // shortcut: filtering and sorting happen in memory over the whole set, which is right while a
 // workspace holds hundreds of rows. Past a few thousand this belongs in the query, and the
 // filters are already the shape of one.
-export function applyView(rows: Row[], view: View | undefined): Row[] {
+export function applyView(rows: Row[], view: View | undefined, fields: Field[] = []): Row[] {
   const filters = view?.filters ?? []
   const sorts = view?.sorts ?? []
-  const kept = filters.length ? rows.filter((r) => filters.every((f) => passes(r, f))) : rows
+  const kept = filters.length ? rows.filter((r) => filters.every((f) => passes(r, f, fields))) : rows
   if (!sorts.length) return kept
 
   return [...kept].sort((a, b) => {
     for (const sort of sorts) {
-      const [left, right] = [held(a, sort.field), held(b, sort.field)]
+      const [left, right] = [held(a, sort.field, fields), held(b, sort.field, fields)]
       // An empty cell sorts last whichever way the column is pointing, because a row with no
       // value is not the smallest value, it is a row with no value.
       const [emptyL, emptyR] = [left === undefined || left === '', right === undefined || right === '']

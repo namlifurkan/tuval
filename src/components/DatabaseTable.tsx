@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { ArrowUpRight, Bookmark, ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addChoice, cellsOf, editField, FIELD_TYPES, groupsOf, linksOf, removeField, rowsOf, setCell,
-  toggleLink,
+  addChoice, cellsOf, cellText, COMPUTED, editField, FIELD_TYPES, groupsOf, linksOf, removeField,
+  ROLLS, rowsOf, schemaOf, setCell, TITLE, toggleLink,
 } from '../board/database'
-import type { Choice, Field, FieldType } from '../board/database'
+import type { Choice, Field, FieldType, Roll } from '../board/database'
+import { ERROR } from '../board/formula'
 import { isTemplate, rowTemplates, setTemplate, fromTemplate } from '../board/pageTemplates'
 import { archiveRecord, createRecord, getRecords, patchRecord } from '../board/records'
 import type { Record as Row } from '../board/records'
@@ -161,8 +162,20 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
   )
 }
 
-function Cell({ db, row, field, team }: { db: Row; row: Row; field: Field; team: Teammate[] }) {
+function Cell({ db, row, field, fields, team }: {
+  db: Row; row: Row; field: Field; fields: Field[]; team: Teammate[]
+}) {
   const held = cellsOf(row)[field.id]
+
+  // Worked out, not typed in, so there is nothing here to click into.
+  if (COMPUTED.includes(field.type)) {
+    const shown = cellText(row, field, fields)
+    return (
+      <span className={`block truncate px-2.5 py-1.5 text-sm ${shown === ERROR ? 'text-[#DC2626]' : 'text-[#4A463E]'}`}>
+        {shown || <span className="text-[#C6C2B6]">—</span>}
+      </span>
+    )
+  }
 
   if (field.type === 'select') return <SelectCell db={db} row={row} field={field} />
   if (field.type === 'relation') return <RelationCell row={row} field={field} />
@@ -210,9 +223,52 @@ function Cell({ db, row, field, team }: { db: Row; row: Row; field: Field; team:
   )
 }
 
-function Head({ db, field }: { db: Row; field: Field }) {
+const pick = 'mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none'
+
+// Three questions in the order they can be answered: which relation, which column on the far
+// side, what to do with the values. The second is unanswerable until the first has an answer.
+function Rollup({ db, field, fields }: { db: Row; field: Field; fields: Field[] }) {
+  const via = fields.find((f) => f.id === field.via && f.type === 'relation')
+  const far = via?.db ? schemaOf(getRecords('database').find((d) => d.id === via.db)).fields : []
+
   return (
-    <th scope="col" className="border-b border-[#E2DED5] p-0 text-left font-normal">
+    <>
+      <select
+        value={field.via ?? ''}
+        onChange={(e) => editField(db, field.id, { via: e.target.value || undefined, then: TITLE })}
+        className={pick}
+      >
+        <option value="">{t('Through which relation?')}</option>
+        {fields.filter((f) => f.type === 'relation' && f.db).map((f) => (
+          <option key={f.id} value={f.id}>{f.name}</option>
+        ))}
+      </select>
+      {!!via?.db && (
+        <select
+          value={field.then ?? TITLE}
+          onChange={(e) => editField(db, field.id, { then: e.target.value })}
+          className={pick}
+        >
+          <option value={TITLE}>{t('Name')}</option>
+          {far.filter((f) => !COMPUTED.includes(f.type) || f.type === 'formula').map((f) => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
+        </select>
+      )}
+      <select
+        value={field.roll ?? 'count'}
+        onChange={(e) => editField(db, field.id, { roll: e.target.value as Roll })}
+        className={pick}
+      >
+        {ROLLS.map((r) => <option key={r} value={r}>{t(r)}</option>)}
+      </select>
+    </>
+  )
+}
+
+function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] }) {
+  return (
+    <th scope="col" className="min-w-[120px] border-b border-[#E2DED5] p-0 text-left font-normal">
       <Popover
         width={190}
         trigger={({ toggle }) => (
@@ -255,6 +311,21 @@ function Head({ db, field }: { db: Row; field: Field }) {
                 ))}
               </select>
             )}
+            {field.type === 'formula' && (
+              <>
+                <input
+                  value={field.formula ?? ''}
+                  onChange={(e) => editField(db, field.id, { formula: e.target.value })}
+                  placeholder='prop("Price") * 1.2'
+                  spellCheck={false}
+                  className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 font-mono text-[12px] outline-none focus:border-[#C8452D]"
+                />
+                <p className="mb-1 px-0.5 text-[11px] leading-snug text-[#8A867C]">
+                  {t('prop("Name") reads a column. || joins text, ? : chooses. Also empty, text, number, today, days, round, abs, min, max.')}
+                </p>
+              </>
+            )}
+            {field.type === 'rollup' && <Rollup db={db} field={field} fields={fields} />}
             <button
               type="button"
               onClick={() => { removeField(db, field.id); close() }}
@@ -278,21 +349,31 @@ function Line({ db, row, fields, team }: { db: Row; row: Row; fields: Field[]; t
             placeholder={t('Untitled')}
             className={`${cell} font-medium placeholder:text-[#C6C2B6]`}
           />
+          {/* Icons rather than words: the title is what the column is for, and three labels beside
+              it left the name a sliver once a database had a few columns. */}
           <button
             type="button"
+            aria-label={t('Open')}
+            title={t('Open')}
             onClick={() => go(`/d/${row.id}`)}
-            className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] opacity-0 transition-opacity hover:text-[#C8452D] group-hover:opacity-100"
-          >{t('Open')}</button>
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:text-[#C8452D] group-hover:opacity-100"
+          >
+            <ArrowUpRight size={13} />
+          </button>
           <button
             type="button"
+            aria-label={isTemplate(row) ? t('A template') : t('Make a template')}
             title={isTemplate(row) ? t('A template') : t('Make a template')}
             onClick={() => setTemplate(row, !isTemplate(row))}
-            className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-opacity
+            className={`grid h-6 w-6 shrink-0 place-items-center rounded-md transition-opacity
               ${isTemplate(row) ? 'text-[#C8452D] opacity-100' : 'text-[#8A867C] opacity-0 hover:text-[#141310] group-hover:opacity-100'}`}
-          >{isTemplate(row) ? t('A template') : t('Template')}</button>
+          >
+            <Bookmark size={13} fill={isTemplate(row) ? 'currentColor' : 'none'} />
+          </button>
           <button
             type="button"
             aria-label={t('Archive')}
+            title={t('Archive')}
             onClick={() => void archiveRecord(row.id)}
             className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
           >
@@ -302,7 +383,7 @@ function Line({ db, row, fields, team }: { db: Row; row: Row; fields: Field[]; t
       </th>
       {fields.map((field) => (
         <td key={field.id} className="p-0 align-middle">
-          <Cell db={db} row={row} field={field} team={team} />
+          <Cell db={db} row={row} field={field} fields={fields} team={team} />
         </td>
       ))}
       <td />
@@ -337,10 +418,10 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
         <caption className="sr-only">{db.title || t('Untitled database')}</caption>
         <thead>
           <tr>
-            <th scope="col" className="w-[36%] border-b border-[#E2DED5] px-2.5 py-2 text-left text-[12px] font-bold uppercase tracking-[0.1em] text-[#8A867C]">
+            <th scope="col" className="w-[36%] min-w-[220px] border-b border-[#E2DED5] px-2.5 py-2 text-left text-[12px] font-bold uppercase tracking-[0.1em] text-[#8A867C]">
               {t('Name')}
             </th>
-            {fields.map((field) => <Head key={field.id} db={db} field={field} />)}
+            {fields.map((field) => <Head key={field.id} db={db} field={field} fields={fields} />)}
             <th scope="col" className="w-9 border-b border-[#E2DED5] p-0">
               <button
                 type="button"

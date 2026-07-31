@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyView, groupsOf, monthGrid, monthKey, shiftMonth } from './database'
+import { aggregate, applyView, groupsOf, monthGrid, monthKey, shiftMonth, valueOf } from './database'
 import type { Field, View } from './database'
 import type { Record as Row } from './records'
 
@@ -149,5 +149,66 @@ describe('groupsOf', () => {
   it('loses no row', () => {
     const rows = [row('1', 'a', { f: 'a' }), row('2', 'b', { f: 'b' }), row('3', 'c')]
     expect(groupsOf(rows, field).flatMap((g) => g.rows)).toHaveLength(rows.length)
+  })
+})
+
+describe('aggregate', () => {
+  const values = [3, '10', 'not a number', '', 5]
+
+  it('counts every row, whatever they hold', () => {
+    expect(aggregate(values, 'count')).toBe(5)
+    expect(aggregate([], 'count')).toBe(0)
+  })
+
+  it('does arithmetic only over the values that are numbers', () => {
+    expect(aggregate(values, 'sum')).toBe(18)
+    expect(aggregate(values, 'average')).toBe(6)
+    expect(aggregate(values, 'min')).toBe(3)
+    expect(aggregate(values, 'max')).toBe(10)
+    expect(aggregate(values, 'range')).toBe(7)
+  })
+
+  it('is empty rather than zero when nothing is a number', () => {
+    for (const roll of ['sum', 'average', 'min', 'max', 'range'] as const) {
+      expect(aggregate(['a', ''], roll)).toBe('')
+    }
+  })
+
+  it('shows what is there and skips what is not', () => {
+    expect(aggregate(['Ayse', '', null, 'Mehmet'], 'show')).toBe('Ayse, Mehmet')
+  })
+})
+
+describe('valueOf', () => {
+  const fields: Field[] = [
+    { id: 'p', name: 'Price', type: 'number' },
+    { id: 'q', name: 'Qty', type: 'number' },
+    { id: 'total', name: 'Total', type: 'formula', formula: 'prop("Price") * prop("Qty")' },
+    { id: 'vat', name: 'With VAT', type: 'formula', formula: 'round(prop("Total") * 1.2)' },
+  ]
+
+  it('reads a stored cell as it is stored', () => {
+    expect(valueOf(row('1', 'One', { p: 10 }), fields[0], fields)).toBe(10)
+  })
+
+  it('works a formula out from the row', () => {
+    expect(valueOf(row('1', 'One', { p: 10, q: 3 }), fields[2], fields)).toBe(30)
+  })
+
+  it('lets one formula name another', () => {
+    expect(valueOf(row('1', 'One', { p: 10, q: 3 }), fields[3], fields)).toBe(36)
+  })
+
+  it('gives the title the name every database calls it', () => {
+    const named: Field[] = [{ id: 'f', name: 'Greeting', type: 'formula', formula: '"hi " || prop("Name")' }]
+    expect(valueOf(row('1', 'Ayse'), named[0], named)).toBe('hi Ayse')
+  })
+
+  it('stops rather than hangs when two formulas name each other', () => {
+    const loop: Field[] = [
+      { id: 'a', name: 'A', type: 'formula', formula: 'prop("B")' },
+      { id: 'b', name: 'B', type: 'formula', formula: 'prop("A")' },
+    ]
+    expect(valueOf(row('1', 'One'), loop[0], loop)).toBe('')
   })
 })
