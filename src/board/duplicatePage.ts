@@ -66,12 +66,25 @@ async function copyOne(row: Row, parent: string | null, title: string): Promise<
   return made
 }
 
-export async function duplicatePage(id: string): Promise<string | null> {
+// The root of the copy can be given a different name, a different parent and different data.
+// Corrected at creation rather than patched afterwards: the new page is opened immediately, and
+// a page that loads itself from the server would read the state the patch has not reached yet.
+export interface Override {
+  title?: string
+  parent?: string | null
+  data?: { [key: string]: unknown }
+}
+
+export async function duplicatePage(id: string, over: Override = {}): Promise<string | null> {
   const rows = getPages()
   const source = rows.find((r) => r.id === id)
   if (!source) return null
 
-  const made = await copyOne(source, source.parent_id, `${source.title || 'Untitled'} (copy)`)
+  const made = await copyOne(
+    { ...source, ...(over.data ? { data: over.data } : {}) },
+    over.parent === undefined ? source.parent_id : over.parent,
+    over.title ?? `${source.title || 'Untitled'} (copy)`,
+  )
   if (!made) return null
 
   // Breadth first from the top, keeping a map from the old id to the new one so each child is

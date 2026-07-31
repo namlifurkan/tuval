@@ -5,6 +5,7 @@ import {
   addChoice, cellsOf, editField, FIELD_TYPES, linksOf, removeField, rowsOf, setCell, toggleLink,
 } from '../board/database'
 import type { Choice, Field, FieldType } from '../board/database'
+import { isTemplate, rowTemplates, setTemplate, fromTemplate } from '../board/pageTemplates'
 import { archiveRecord, createRecord, getRecords, patchRecord } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
@@ -314,6 +315,13 @@ export function DatabaseTable({ db, rows, fields, team, onAddField }: {
                   >{t('Open')}</button>
                   <button
                     type="button"
+                    title={isTemplate(row) ? t('A template') : t('Make a template')}
+                    onClick={() => setTemplate(row, !isTemplate(row))}
+                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-opacity
+                      ${isTemplate(row) ? 'text-[#C8452D] opacity-100' : 'text-[#8A867C] opacity-0 hover:text-[#141310] group-hover:opacity-100'}`}
+                  >{isTemplate(row) ? t('A template') : t('Template')}</button>
+                  <button
+                    type="button"
                     aria-label={t('Archive')}
                     onClick={() => void archiveRecord(row.id)}
                     className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
@@ -333,13 +341,41 @@ export function DatabaseTable({ db, rows, fields, team, onAddField }: {
         </tbody>
       </table>
 
-      <button
-        type="button"
-        onClick={() => void createRecord('', 'doc', db.id)}
-        className="flex w-full items-center gap-2 border-b border-[#EAE6DD] px-2.5 py-2 text-left text-sm font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
-      >
-        <Plus size={14} /> {t('New row')}
-      </button>
+      <div className="flex items-center border-b border-[#EAE6DD]">
+        <button
+          type="button"
+          onClick={() => void createRecord('', 'doc', db.id)}
+          className="flex flex-1 items-center gap-2 px-2.5 py-2 text-left text-sm font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+        >
+          <Plus size={14} /> {t('New row')}
+        </button>
+
+        {!!rowTemplates(db.id).length && (
+          <Popover
+            width={200}
+            trigger={({ toggle }) => (
+              <button
+                type="button"
+                onClick={toggle}
+                className="px-2.5 py-2 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+              >{t('From a template')}</button>
+            )}
+          >
+            {(close) => (
+              <>
+                {rowTemplates(db.id).map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => { close(); void fromTemplate(tpl.id, db.id) }}
+                    className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                  >{tpl.title || t('Untitled')}</button>
+                ))}
+              </>
+            )}
+          </Popover>
+        )}
+      </div>
     </div>
   )
 }

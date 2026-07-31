@@ -3,6 +3,7 @@ import { ChevronRight, CornerUpLeft, FileText, Plus, Table2 } from 'lucide-react
 import { go, readRoute } from '../board/boards'
 import { relatedTo } from '../board/database'
 import { duplicatePage } from '../board/duplicatePage'
+import { isTemplate, setTemplate } from '../board/pageTemplates'
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
@@ -95,6 +96,16 @@ export function Page() {
       <div className="-ml-2 mb-1 flex items-center gap-1">
         <IconPicker value={icon} onPick={(emoji) => patchRecord(id, { icon: emoji })} />
         {!cover && <Cover id={id} path="" />}
+        {here && (
+          <button
+            type="button"
+            onClick={() => setTemplate(here, !isTemplate(here))}
+            className={`rounded-md px-2 py-1 text-[12px] font-semibold hover:bg-[#EAE6DD]
+              ${isTemplate(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+          >
+            {isTemplate(here) ? t('A template') : t('Make a template')}
+          </button>
+        )}
         <button
           type="button"
           disabled={copying}

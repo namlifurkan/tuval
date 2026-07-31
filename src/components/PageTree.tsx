@@ -1,11 +1,13 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { ChevronRight, Plus, Table2 } from 'lucide-react'
+import { ChevronRight, Copy, Plus, Table2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import {
   ancestors, between, canReparent, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
 } from '../board/records'
 import type { Record } from '../board/records'
+import { pageTemplates, fromTemplate } from '../board/pageTemplates'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
+import { Popover } from './Popover'
 import { t } from '../i18n'
 
 const pages = getPages
@@ -222,6 +224,45 @@ export function PageTree() {
           >
             <Table2 size={13} />
           </button>
+          {!!pageTemplates().length && (
+            <Popover
+              width={200}
+              trigger={({ toggle }) => (
+                <button
+                  type="button"
+                  aria-label={t('New page from a template')}
+                  title={t('New page from a template')}
+                  onClick={toggle}
+                  className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                >
+                  <Copy size={12} />
+                </button>
+              )}
+            >
+              {(close) => (
+                <>
+                  {pageTemplates().map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => {
+                        close()
+                        void fromTemplate(tpl.id, null)
+                          .then((made) => { if (made) go(`/d/${made}`) })
+                          // A copy that half happened is worse than one that did not: silence
+                          // here left a page in the tree and the person on the old screen.
+                          .catch((e: Error) => alert(e.message))
+                      }}
+                      className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                    >
+                      {tpl.icon && <span className="mr-1.5">{tpl.icon}</span>}
+                      {tpl.title || t('Untitled page')}
+                    </button>
+                  ))}
+                </>
+              )}
+            </Popover>
+          )}
           <button
             type="button"
             aria-label={t('New page')}
