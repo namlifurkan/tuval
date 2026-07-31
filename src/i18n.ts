@@ -469,6 +469,14 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Timeline': 'Zaman çizelgesi',
+  'Starts on…': 'Başlangıç…',
+  'Ends on…': 'Bitiş…',
+  'A timeline lays rows out by a date column. Add one, then choose it above.':
+    'Zaman çizelgesi satırları bir tarih sütununa göre dizer. Bir tane ekle, sonra yukarıdan seç.',
+  'Every bar is one day wide until a second date column says where it ends.':
+    'İkinci bir tarih sütunu nerede bittiğini söyleyene kadar her çubuk bir gün genişliğinde.',
+  'No row has a date in that column yet.': 'Henüz hiçbir satırın o sütunda tarihi yok.',
   'Group by…': 'Şuna göre grupla…',
   'Remove view': 'Görünümü kaldır',
   'Name': 'Ad',

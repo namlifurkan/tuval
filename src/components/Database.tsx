@@ -13,13 +13,16 @@ import { t } from '../i18n'
 import { DatabaseCalendar } from './DatabaseCalendar'
 import { DatabaseGallery } from './DatabaseGallery'
 import { DatabaseTable } from './DatabaseTable'
+import { DatabaseTimeline } from './DatabaseTimeline'
 import { ViewBar } from './ViewBar'
 
 const pages = getPages
 
 const UNSET = '__none__'
 
-const KIND_NAME = { table: 'Table', board: 'Board', gallery: 'Gallery', calendar: 'Calendar' } as const
+const KIND_NAME = {
+  table: 'Table', board: 'Board', gallery: 'Gallery', calendar: 'Calendar', timeline: 'Timeline',
+} as const
 
 function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
   choice: Choice | null
@@ -158,7 +161,7 @@ export function Database({ db }: { db: Row }) {
           </span>
         ))}
 
-        {(['table', 'board', 'gallery', 'calendar'] as const).map((kind) => (
+        {(['table', 'board', 'gallery', 'calendar', 'timeline'] as const).map((kind) => (
           <button
             key={kind}
             type="button"
@@ -180,14 +183,27 @@ export function Database({ db }: { db: Row }) {
           </select>
         )}
 
-        {view?.kind === 'calendar' && (
+        {(view?.kind === 'calendar' || view?.kind === 'timeline') && (
           <select
             value={view.dateBy ?? ''}
             onChange={(e) => editView(db, view.id, { dateBy: e.target.value || undefined })}
             className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
           >
-            <option value="">{t('Place by…')}</option>
+            <option value="">{view.kind === 'calendar' ? t('Place by…') : t('Starts on…')}</option>
             {schema.fields.filter((f) => f.type === 'date').map((f) => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+        )}
+
+        {view?.kind === 'timeline' && (
+          <select
+            value={view.endBy ?? ''}
+            onChange={(e) => editView(db, view.id, { endBy: e.target.value || undefined })}
+            className="rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
+          >
+            <option value="">{t('Ends on…')}</option>
+            {schema.fields.filter((f) => f.type === 'date' && f.id !== view.dateBy).map((f) => (
               <option key={f.id} value={f.id}>{f.name}</option>
             ))}
           </select>
@@ -202,6 +218,9 @@ export function Database({ db }: { db: Row }) {
       )}
       {view?.kind === 'calendar' && (
         <DatabaseCalendar db={db} rows={mine} view={view} fields={schema.fields} />
+      )}
+      {view?.kind === 'timeline' && (
+        <DatabaseTimeline rows={mine} view={view} fields={schema.fields} />
       )}
       {(!view || view.kind === 'table') && (
         <DatabaseTable

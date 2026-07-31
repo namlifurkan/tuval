@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { aggregate, applyView, groupsOf, monthGrid, monthKey, shiftMonth, valueOf } from './database'
+import {
+  addDays, aggregate, applyView, daysApart, groupsOf, monthGrid, monthKey, shiftMonth, spanOf,
+  valueOf,
+} from './database'
 import type { Field, View } from './database'
 import type { Record as Row } from './records'
 
@@ -210,5 +213,44 @@ describe('valueOf', () => {
       { id: 'b', name: 'B', type: 'formula', formula: 'prop("A")' },
     ]
     expect(valueOf(row('1', 'One'), loop[0], loop)).toBe('')
+  })
+})
+
+describe('day arithmetic', () => {
+  it('adds days across a month and a year', () => {
+    expect(addDays('2026-08-30', 3)).toBe('2026-09-02')
+    expect(addDays('2026-01-01', -1)).toBe('2025-12-31')
+    expect(addDays('2024-02-28', 1)).toBe('2024-02-29')
+  })
+
+  it('counts days apart, whichever way round', () => {
+    expect(daysApart('2026-08-05', '2026-08-12')).toBe(7)
+    expect(daysApart('2026-08-12', '2026-08-05')).toBe(-7)
+    expect(daysApart('2026-08-05', '2026-08-05')).toBe(0)
+  })
+
+  it('survives the two days a year that are not 24 hours long', () => {
+    // Whatever the machine's timezone, a day added is a day added.
+    for (const iso of ['2026-03-28', '2026-03-29', '2026-10-24', '2026-10-25']) {
+      expect(daysApart(iso, addDays(iso, 1))).toBe(1)
+    }
+  })
+})
+
+describe('spanOf', () => {
+  const timeline = view({ kind: 'timeline', dateBy: 's', endBy: 'e' })
+
+  it('is nothing at all without a start', () => {
+    expect(spanOf(row('1', 'One', { e: '2026-08-10' }), timeline)).toBeNull()
+  })
+
+  it('is one day wide when there is no end', () => {
+    const held = spanOf(row('1', 'One', { s: '2026-08-05' }), timeline)
+    expect(held).toEqual({ start: '2026-08-05', end: '2026-08-05' })
+  })
+
+  it('refuses to run backwards', () => {
+    const held = spanOf(row('1', 'One', { s: '2026-08-05', e: '2026-07-01' }), timeline)
+    expect(held).toEqual({ start: '2026-08-05', end: '2026-08-05' })
   })
 })

@@ -43,14 +43,17 @@ export type Op =
 export interface Filter { id: string; field: string; op: Op; value?: string }
 export interface Sort { field: string; dir: 'asc' | 'desc' }
 
-export type ViewKind = 'table' | 'board' | 'gallery' | 'calendar'
+export type ViewKind = 'table' | 'board' | 'gallery' | 'calendar' | 'timeline'
 
+// `dateBy` places a row on a calendar and starts its bar on a timeline; `endBy` is the second
+// date a timeline needs. A row with no end is a bar one day wide, not a row with no bar.
 export interface View {
   id: string
   name: string
   kind: ViewKind
   groupBy?: string
   dateBy?: string
+  endBy?: string
   filters?: Filter[]
   sorts?: Sort[]
 }
@@ -168,7 +171,8 @@ export function addChoice(db: Row, fieldId: string, name: string): Choice {
 export function addView(db: Row, kind: ViewKind, name: string) {
   const held = schemaOf(db)
   const groupBy = kind === 'board' ? held.fields.find((f) => f.type === 'select')?.id : undefined
-  const dateBy = kind === 'calendar' ? held.fields.find((f) => f.type === 'date')?.id : undefined
+  const dated = kind === 'calendar' || kind === 'timeline'
+  const dateBy = dated ? held.fields.find((f) => f.type === 'date')?.id : undefined
   writeSchema(db.id, {
     ...held,
     views: [...held.views, { id: nanoid(8), name, kind, groupBy, dateBy }],
@@ -274,6 +278,25 @@ export const dayOf = (row: Row, fieldId: string | undefined): string =>
 
 export { today }
 
+// A day is a string here and stays one. Arithmetic goes through UTC midnight so that adding a
+// day never lands on the 23 or 25 hour that daylight saving hands out twice a year.
+export const addDays = (iso: string, by: number) =>
+  new Date(Date.parse(`${iso}T00:00:00Z`) + by * 86400000).toISOString().slice(0, 10)
+
+export const daysApart = (from: string, to: string) =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000)
+
+// Where a row sits on a timeline. An end before the start is somebody mid-edit rather than a
+// mistake to complain about, so the bar simply refuses to run backwards.
+export interface Span { start: string; end: string }
+
+export function spanOf(row: Row, view: View): Span | null {
+  const start = dayOf(row, view.dateBy)
+  if (!start) return null
+  const end = view.endBy ? dayOf(row, view.endBy) : ''
+  return { start, end: end && end >= start ? end : start }
+}
+
 export const monthKey = (iso: string) => iso.slice(0, 7)
 
 export const shiftMonth = (key: string, by: number) => {
@@ -326,12 +349,19 @@ export function removeView(db: Row, viewId: string) {
 // shortcut: the whole data object is rewritten for one cell, so two people editing different
 // cells of the same row at the same second lose one of the two. Per-cell writes need a table of
 // values, which is the upgrade path if rows ever get edited by more than one person at once.
-export function setCell(row: Row, fieldId: string, value: unknown) {
+// Cells that change together are written together. Two calls in a row would both read the copy
+// of the row this render was given, and the second would put back what the first had changed.
+export function setCells(row: Row, values: { [fieldId: string]: unknown }) {
   const next = { ...cellsOf(row) }
-  if (value === '' || value === null || value === undefined) delete next[fieldId]
-  else next[fieldId] = value
+  for (const [fieldId, value] of Object.entries(values)) {
+    if (value === '' || value === null || value === undefined) delete next[fieldId]
+    else next[fieldId] = value
+  }
   patchRecord(row.id, { data: next } as unknown as Partial<Row>)
 }
+
+export const setCell = (row: Row, fieldId: string, value: unknown) =>
+  setCells(row, { [fieldId]: value })
 
 export const cellText = (row: Row, field: Field, fields: Field[] = []): string => {
   const value = valueOf(row, field, fields)
