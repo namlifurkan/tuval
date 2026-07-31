@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { Ada } from './Ada'
+import { Boundary } from './Boundary'
 import { Canvas } from './Canvas'
 import { BoardsPanel } from './BoardsPanel'
 import { BriefImport } from './BriefImport'
@@ -76,7 +77,7 @@ export default function Board() {
       <EmbedLayer />
       <TextEditor />
       {presenting === null && (
-        <>
+        <Boundary>
           <div className="pointer-events-auto absolute inset-x-0 top-0 z-50"><PasswordGate /></div>
       <TopBar />
           <Inspector />
@@ -94,7 +95,7 @@ export default function Board() {
           <HistoryPanel />
           <FrameTitleEditor />
           <Ada />
-        </>
+        </Boundary>
       )}
       <Presentation />
     </div>

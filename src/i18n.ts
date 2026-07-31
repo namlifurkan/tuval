@@ -356,6 +356,11 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Something broke': 'Bir şey bozuldu',
+  'This part of the page stopped working.': 'Sayfanın bu kısmı çalışmayı durdurdu.',
+  'Your board is not affected. It is kept in this browser and, when you are signed in, on the server as well.':
+    'Board\'un etkilenmedi. Bu tarayıcıda, giriş yaptıysan sunucuda da duruyor.',
+  'Reload': 'Yeniden yükle',
   'Account': 'Hesap',
   'Account settings': 'Hesap ayarları',
   'Profile': 'Profil',
