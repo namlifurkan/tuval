@@ -39,8 +39,16 @@ accounts, a board list shared across devices, images in object storage, and a do
 snapshot kept server side.
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor. It creates the tables,
-   the row level security policies and the image bucket.
+2. Apply [`supabase/migrations`](supabase/migrations). Either link the project once and let
+   the CLI track what is applied:
+
+   ```bash
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase db push
+   ```
+
+   or paste the files into the SQL editor in filename order. Every migration is idempotent,
+   so re-running one is harmless.
 3. Put the project URL and anon key in `.env.local`:
 
 ```bash
@@ -192,3 +200,14 @@ on every push and pull request.
 
 [AGPL-3.0-or-later](LICENSE). Use, modify and self-host Tuval freely. If you run a modified
 version as a network service, you must offer its source to your users.
+
+### Changing the database
+
+Migrations are append-only. Never edit a file that has been applied; add a new one:
+
+```bash
+npx supabase migration new what_changed
+```
+
+Write it so it can run twice (`create or replace`, `if not exists`, `drop policy if exists`),
+because self-hosters apply these by hand.

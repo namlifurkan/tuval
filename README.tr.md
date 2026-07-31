@@ -24,6 +24,17 @@ ile sunucuyu başlat ve dev server'ı yeniden başlat (Vite env'i açılışta o
 item'lar, seçim ve canlı imleçler senkronize olur.
 Board odası URL hash'inden gelir: `http://localhost:5173/#takim-board`.
 
+## Veritabanını değiştirme
+
+Migration'lar append-only. Uygulanmış bir dosyayı asla düzenleme, yenisini ekle:
+
+```bash
+npx supabase migration new ne_degisti
+```
+
+İki kez çalışabilecek şekilde yaz (`create or replace`, `if not exists`,
+`drop policy if exists`) — self-host edenler bunları elle uyguluyor.
+
 ## Yayına alma
 
 `npm run build` statik bir `dist/` üretir. Çalışacak sunucu yok, herhangi bir statik host olur.
