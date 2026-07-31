@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addChoice, cellsOf, editField, FIELD_TYPES, linksOf, removeField, rowsOf, setCell, toggleLink,
+  addChoice, cellsOf, editField, FIELD_TYPES, groupsOf, linksOf, removeField, rowsOf, setCell,
+  toggleLink,
 } from '../board/database'
 import type { Choice, Field, FieldType } from '../board/database'
 import { isTemplate, rowTemplates, setTemplate, fromTemplate } from '../board/pageTemplates'
@@ -13,6 +14,8 @@ import { t } from '../i18n'
 import { Popover } from './Popover'
 
 const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-[#141310] outline-none focus:bg-[#F7E9E4]'
+
+const UNGROUPED = '__none__'
 
 function Tag({ choice }: { choice: Choice }) {
   return (
@@ -264,16 +267,70 @@ function Head({ db, field }: { db: Row; field: Field }) {
   )
 }
 
+function Line({ db, row, fields, team }: { db: Row; row: Row; fields: Field[]; team: Teammate[] }) {
+  return (
+    <tr className="group border-b border-[#EAE6DD]">
+      <th scope="row" className="p-0 text-left font-normal">
+        <div className="flex items-center">
+          <input
+            value={row.title}
+            onChange={(e) => patchRecord(row.id, { title: e.target.value })}
+            placeholder={t('Untitled')}
+            className={`${cell} font-medium placeholder:text-[#C6C2B6]`}
+          />
+          <button
+            type="button"
+            onClick={() => go(`/d/${row.id}`)}
+            className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] opacity-0 transition-opacity hover:text-[#C8452D] group-hover:opacity-100"
+          >{t('Open')}</button>
+          <button
+            type="button"
+            title={isTemplate(row) ? t('A template') : t('Make a template')}
+            onClick={() => setTemplate(row, !isTemplate(row))}
+            className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-opacity
+              ${isTemplate(row) ? 'text-[#C8452D] opacity-100' : 'text-[#8A867C] opacity-0 hover:text-[#141310] group-hover:opacity-100'}`}
+          >{isTemplate(row) ? t('A template') : t('Template')}</button>
+          <button
+            type="button"
+            aria-label={t('Archive')}
+            onClick={() => void archiveRecord(row.id)}
+            className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
+          >
+            <Trash2 size={12} />
+          </button>
+        </div>
+      </th>
+      {fields.map((field) => (
+        <td key={field.id} className="p-0 align-middle">
+          <Cell db={db} row={row} field={field} team={team} />
+        </td>
+      ))}
+      <td />
+    </tr>
+  )
+}
+
 // A hundred rows in a workspace, not a hundred thousand, so this is a table element with the
 // sorting done in memory. Virtual scrolling and server-side paging are what the next order of
 // magnitude needs, and this one does not have it.
-export function DatabaseTable({ db, rows, fields, team, onAddField }: {
+export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
   db: Row
   rows: Row[]
   fields: Field[]
+  group: Field | undefined
   team: Teammate[]
   onAddField: () => void
 }) {
+  const [shut, setShut] = useState<string[]>([])
+  const groups = groupsOf(rows, group)
+  const span = fields.length + 2
+
+  const newRow = async (choice: Choice | null) => {
+    const id = await createRecord('', 'doc', db.id)
+    const made = getRecords('doc').find((r) => r.id === id)
+    if (made && group && choice) setCell(made, group.id, choice.id)
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -297,48 +354,56 @@ export function DatabaseTable({ db, rows, fields, team, onAddField }: {
           </tr>
         </thead>
 
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="group border-b border-[#EAE6DD]">
-              <th scope="row" className="p-0 text-left font-normal">
-                <div className="flex items-center">
-                  <input
-                    value={row.title}
-                    onChange={(e) => patchRecord(row.id, { title: e.target.value })}
-                    placeholder={t('Untitled')}
-                    className={`${cell} font-medium placeholder:text-[#C6C2B6]`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => go(`/d/${row.id}`)}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] opacity-0 transition-opacity hover:text-[#C8452D] group-hover:opacity-100"
-                  >{t('Open')}</button>
-                  <button
-                    type="button"
-                    title={isTemplate(row) ? t('A template') : t('Make a template')}
-                    onClick={() => setTemplate(row, !isTemplate(row))}
-                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-opacity
-                      ${isTemplate(row) ? 'text-[#C8452D] opacity-100' : 'text-[#8A867C] opacity-0 hover:text-[#141310] group-hover:opacity-100'}`}
-                  >{isTemplate(row) ? t('A template') : t('Template')}</button>
-                  <button
-                    type="button"
-                    aria-label={t('Archive')}
-                    onClick={() => void archiveRecord(row.id)}
-                    className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </th>
-              {fields.map((field) => (
-                <td key={field.id} className="p-0 align-middle">
-                  <Cell db={db} row={row} field={field} team={team} />
-                </td>
+        {groups.map(({ choice, rows: held }) => {
+          const key = choice?.id ?? UNGROUPED
+          // Without a grouping column there is one group holding everything, and a heading over
+          // the whole table saying "No value" would be a heading over nothing.
+          if (!group) {
+            return (
+              <tbody key={key}>
+                {held.map((row) => <Line key={row.id} db={db} row={row} fields={fields} team={team} />)}
+              </tbody>
+            )
+          }
+          // An empty group still shows: it is where you put the first row of that kind, and a
+          // column that vanishes when you empty it is one you cannot fill again.
+          const open = !shut.includes(key)
+          return (
+            <tbody key={key}>
+              <tr className="border-b border-[#EAE6DD] bg-[#F7F5F0]">
+                <th scope="colgroup" colSpan={span} className="p-0 text-left font-normal">
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      onClick={() => setShut((was) =>
+                        was.includes(key) ? was.filter((k) => k !== key) : [...was, key])}
+                      className="flex flex-1 items-center gap-1.5 px-2 py-1.5 text-left hover:bg-[#EAE6DD]"
+                    >
+                      {open ? <ChevronDown size={12} className="text-[#8A867C]" />
+                        : <ChevronRight size={12} className="text-[#8A867C]" />}
+                      {choice
+                        ? <Tag choice={choice} />
+                        : <span className="text-[12px] font-semibold text-[#8A867C]">{t('No value')}</span>}
+                      <span className="text-[11px] text-[#B6B1A6]">{held.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t('New row')}
+                      onClick={() => void newRow(choice)}
+                      className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+                    >
+                      <Plus size={13} />
+                    </button>
+                  </div>
+                </th>
+              </tr>
+              {open && held.map((row) => (
+                <Line key={row.id} db={db} row={row} fields={fields} team={team} />
               ))}
-              <td />
-            </tr>
-          ))}
-        </tbody>
+            </tbody>
+          )
+        })}
       </table>
 
       <div className="flex items-center border-b border-[#EAE6DD]">

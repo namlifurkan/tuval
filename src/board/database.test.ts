@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { applyView, monthGrid, monthKey, shiftMonth } from './database'
-import type { View } from './database'
+import { applyView, groupsOf, monthGrid, monthKey, shiftMonth } from './database'
+import type { Field, View } from './database'
 import type { Record as Row } from './records'
 
 const row = (id: string, title: string, data: { [k: string]: unknown } = {}, position = 0): Row => ({
@@ -116,5 +116,38 @@ describe('applyView', () => {
   it('leaves the original list alone', () => {
     applyView(rows, view({ sorts: [{ field: 'n', dir: 'desc' }] }))
     expect(rows.map((r) => r.id)).toEqual(['a', 'b', 'c'])
+  })
+})
+
+describe('groupsOf', () => {
+  const field: Field = {
+    id: 'f',
+    name: 'Status',
+    type: 'select',
+    choices: [
+      { id: 'a', name: 'Todo', tone: '#000' },
+      { id: 'b', name: 'Done', tone: '#111' },
+    ],
+  }
+
+  it('is one group holding everything when nothing groups it', () => {
+    const rows = [row('1', 'One'), row('2', 'Two')]
+    expect(groupsOf(rows, undefined)).toEqual([{ choice: null, rows }])
+  })
+
+  it('keeps a group with no rows in it', () => {
+    const groups = groupsOf([row('1', 'One', { f: 'a' })], field)
+    expect(groups.map((g) => g.choice?.id ?? null)).toEqual(['a', 'b', null])
+    expect(groups[1].rows).toEqual([])
+  })
+
+  it('files a value naming a deleted choice with the ones that never had one', () => {
+    const groups = groupsOf([row('1', 'One', { f: 'gone' }), row('2', 'Two')], field)
+    expect(groups.at(-1)!.rows.map((r) => r.id)).toEqual(['1', '2'])
+  })
+
+  it('loses no row', () => {
+    const rows = [row('1', 'a', { f: 'a' }), row('2', 'b', { f: 'b' }), row('3', 'c')]
+    expect(groupsOf(rows, field).flatMap((g) => g.rows)).toHaveLength(rows.length)
   })
 })

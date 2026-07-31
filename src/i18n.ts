@@ -458,6 +458,7 @@ const tr: Record<string, string> = {
   'Find or create': 'Bul veya oluştur',
   'Clear': 'Temizle',
   'No value': 'Değersiz',
+  'No grouping': 'Gruplama yok',
   'Group by…': 'Şuna göre grupla…',
   'Remove view': 'Görünümü kaldır',
   'Name': 'Ad',

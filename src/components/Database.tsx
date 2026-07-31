@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Plus, X } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addField, addView, applyView, cellsOf, editView, removeView, rowsOf, schemaOf, setCell,
+  addField, addView, applyView, cellsOf, editView, groupsOf, removeView, rowsOf, schemaOf, setCell,
 } from '../board/database'
 import type { Choice, Field, View } from '../board/database'
 import { between, createRecord, getPages, patchRecord, subscribeRecords } from '../board/records'
@@ -81,13 +81,6 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
 
 function Board({ db, rows, view, fields }: { db: Row; rows: Row[]; view: View; fields: Field[] }) {
   const grouping = fields.find((f) => f.id === view.groupBy)
-  const choices = grouping?.choices ?? []
-
-  const inColumn = (id: string | null) =>
-    rows.filter((r) => {
-      const held = cellsOf(r)[grouping?.id ?? '']
-      return id === null ? !held || !choices.some((c) => c.id === held) : held === id
-    })
 
   const drop = (choiceId: string | null) => (rowId: string, after: Row | null) => {
     const row = rows.find((r) => r.id === rowId)
@@ -106,11 +99,11 @@ function Board({ db, rows, view, fields }: { db: Row; rows: Row[]; view: View; f
 
   return (
     <div className="mt-4 flex gap-3 overflow-x-auto pb-3">
-      {[null, ...choices].map((choice) => (
+      {groupsOf(rows, grouping).map(({ choice, rows: held }) => (
         <Column
           key={choice?.id ?? UNSET}
           choice={choice}
-          rows={inColumn(choice?.id ?? null)}
+          rows={held}
           fields={fields}
           onOpen={(row) => go(`/d/${row.id}`)}
           onDrop={drop(choice?.id ?? null)}
@@ -174,13 +167,13 @@ export function Database({ db }: { db: Row }) {
           >+ {t(KIND_NAME[kind])}</button>
         ))}
 
-        {view?.kind === 'board' && (
+        {(view?.kind === 'board' || view?.kind === 'table') && (
           <select
             value={view.groupBy ?? ''}
             onChange={(e) => editView(db, view.id, { groupBy: e.target.value || undefined })}
             className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
           >
-            <option value="">{t('Group by…')}</option>
+            <option value="">{view.kind === 'board' ? t('Group by…') : t('No grouping')}</option>
             {schema.fields.filter((f) => f.type === 'select').map((f) => (
               <option key={f.id} value={f.id}>{f.name}</option>
             ))}
@@ -215,6 +208,7 @@ export function Database({ db }: { db: Row }) {
           db={db}
           rows={mine}
           fields={schema.fields}
+          group={schema.fields.find((f) => f.id === view?.groupBy && f.type === 'select')}
           team={team}
           onAddField={() => addField(db, 'text', t('Field'))}
         />

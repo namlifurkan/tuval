@@ -213,6 +213,20 @@ export function monthGrid(key: string): string[] {
   })
 }
 
+// Rows split by a select column. A value naming a choice that has since been deleted is not a
+// group of its own; it falls in with the rows that never had one.
+export interface Group { choice: Choice | null; rows: Row[] }
+
+export function groupsOf(rows: Row[], field: Field | undefined): Group[] {
+  if (!field) return [{ choice: null, rows }]
+  const choices = field.choices ?? []
+  const of = (row: Row) => choices.find((c) => c.id === cellsOf(row)[field.id]) ?? null
+  return [
+    ...choices.map((choice) => ({ choice, rows: rows.filter((r) => of(r) === choice) })),
+    { choice: null, rows: rows.filter((r) => !of(r)) },
+  ]
+}
+
 export function editView(db: Row, viewId: string, changes: Partial<View>) {
   const held = schemaOf(db)
   writeSchema(db.id, {
