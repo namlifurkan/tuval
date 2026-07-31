@@ -1,5 +1,6 @@
 import { lazy, Suspense, useSyncExternalStore } from 'react'
 import { readRoute } from './board/boards'
+import { startWorkspace } from './board/workspace'
 import { getLang, subscribeLang } from './i18n'
 
 // The board carries the renderer, the CRDT and the synchronisation layer; the front door, the
@@ -7,6 +8,8 @@ import { getLang, subscribeLang } from './i18n'
 // in from downloading an editor.
 const Board = lazy(() => import('./components/Board'))
 const Home = lazy(() => import('./components/Home').then((m) => ({ default: m.Home })))
+
+startWorkspace()
 
 export default function App() {
   // Remount on language change: t() is read during render, not through a hook.

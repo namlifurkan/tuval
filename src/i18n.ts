@@ -365,6 +365,16 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Workspace': 'Çalışma alanı',
+  'Workspace name': 'Çalışma alanı adı',
+  'Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.':
+    'Buradaki herkes bu çalışma alanındaki board\'ları açabilir. Bir board yine de kendi Paylaş menüsünden ekipten gizlenebilir veya bir konuğa açılabilir.',
+  'Remove from workspace': 'Çalışma alanından çıkar',
+  'Invited {email}. They join when they sign in with that address.':
+    '{email} davet edildi. O adresle giriş yapınca katılır.',
+  'admin': 'yönetici',
+  'member': 'üye',
+  'guest': 'konuk',
   'Something broke': 'Bir şey bozuldu',
   'This part of the page stopped working.': 'Sayfanın bu kısmı çalışmayı durdurdu.',
   'Your board is not affected. It is kept in this browser and, when you are signed in, on the server as well.':

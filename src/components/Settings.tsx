@@ -7,6 +7,7 @@ import {
 } from '../board/supabase'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Identities } from './Identities'
+import { Team } from './Team'
 import { Wordmark } from './Logo'
 
 const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
@@ -171,6 +172,13 @@ export function Settings() {
             </button>
             {note && <span className="text-[12px] text-[#8A867C]">{note}</span>}
           </div>
+        </Row>
+
+        <Row
+          title={t('Workspace')}
+          note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
+        >
+          <Team />
         </Row>
 
         <Row title={t('Sign-in methods')} note={t('Connect a provider here rather than signing in with it: an account is chosen, not guessed.')}>

@@ -124,6 +124,52 @@ select pg_temp.check('viewer domain cannot write', false, public.can_write_board
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@elsewhere.test');
 select pg_temp.check('wrong domain cannot read', false, public.can_read_board('rls-team-board'));
 
+-- Everybody ends up in exactly one workspace ------------------------------------------------------
+
+set local role postgres;
+update public.boards set allowed_domain = null where id = 'rls-team-board';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a new account gets a workspace', true, public.ensure_workspace() is not null);
+select pg_temp.check('asking twice does not make a second',
+  true, public.ensure_workspace() = public.ensure_workspace());
+
+set local role postgres;
+delete from public.workspaces where owner = 'bbbbbbbb-0000-4000-8000-000000000002';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('an invited account joins rather than starting its own',
+  true, public.ensure_workspace() = 'cccccccc-0000-4000-8000-000000000003');
+
+-- A board created without a workspace lands in one --------------------------------------------------
+
+set local role postgres;
+insert into public.boards (id, owner) values ('rls-fresh-board', 'aaaaaaaa-0000-4000-8000-000000000001');
+select pg_temp.check('a new board is never left outside a workspace',
+  true, (select workspace_id is not null from public.boards where id = 'rls-fresh-board'));
+
+-- A team invitation turns into membership on sign in -----------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_invites (workspace_id, email, role)
+values ('cccccccc-0000-4000-8000-000000000003', 'bob@other.test', 'member');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('invited but not yet claimed, no access',
+  false, public.can_read_board('rls-team-board'));
+select public.claim_invites();
+select pg_temp.check('claiming the invite grants access',
+  true, public.can_read_board('rls-team-board'));
+select pg_temp.check('the invitation is spent',
+  false, exists(select 1 from public.workspace_invites where email = 'bob@other.test'));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@elsewhere.test');
+select pg_temp.check('an invitation is not usable by another address',
+  false, exists(select 1 from public.workspace_invites));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
