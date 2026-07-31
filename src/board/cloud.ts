@@ -100,6 +100,14 @@ export async function deleteCloudBoard(room: string) {
   await table()?.delete().eq('id', room)
 }
 
+// A duplicated board needs its own copies: the originals may only be read by people who can
+// read the board they were added to.
+export async function copyImage(from: string, to: string): Promise<boolean> {
+  if (!supabase || !getUser()) return false
+  const { error } = await supabase.storage.from(BUCKET).copy(from, to)
+  return !error
+}
+
 // An image can outlive the item that introduced it: a copy shares the same object, and an
 // undo brings a deleted item back. So nothing is removed when an item goes. Instead, whatever
 // the board no longer refers to is collected later, and only once it is old enough that it

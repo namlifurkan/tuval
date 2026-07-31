@@ -327,6 +327,7 @@ const tr: Record<string, string> = {
   'No boards yet': 'Henüz board yok',
   'Delete board': 'Board\'u sil',
   'Move to trash': 'Çöp kutusuna taşı',
+  'Copying the board and its images…': 'Board ve görselleri kopyalanıyor…',
   'Trash': 'Çöp kutusu',
   'Restore': 'Geri getir',
   'Delete for good': 'Kalıcı sil',

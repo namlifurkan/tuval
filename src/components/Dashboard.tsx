@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Copy, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   discoverBoards, forgetBoard, getBoards, getTrash, newRoom, openBoard, restoreLocalBoard,
@@ -11,6 +11,7 @@ import {
 } from '../board/cloud'
 import type { CloudBoard } from '../board/cloud'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
+import { duplicateBoard } from '../board/duplicate'
 import { TEMPLATES } from '../board/templates'
 import { t } from '../i18n'
 import { Account } from './Account'
@@ -32,10 +33,11 @@ const start = (template?: string) => {
   openBoard(room, template)
 }
 
-function Tile({ board, mine, onForget }: {
+function Tile({ board, mine, onForget, onCopy }: {
   board: BoardEntry & { owned?: boolean; role?: string }
   mine: boolean
   onForget?: () => void
+  onCopy?: () => void
 }) {
   return (
     <div className="group relative">
@@ -69,16 +71,28 @@ function Tile({ board, mine, onForget }: {
         {' · '}{when(board.opened)}
       </div>
 
-      {onForget && (
-        <button
-          type="button"
-          title={t('Move to trash')}
-          onClick={onForget}
-          className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
-        >
-          <Trash2 size={13} />
-        </button>
-      )}
+      <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        {onCopy && (
+          <button
+            type="button"
+            title={t('Duplicate')}
+            onClick={onCopy}
+            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#C8452D]"
+          >
+            <Copy size={13} />
+          </button>
+        )}
+        {onForget && (
+          <button
+            type="button"
+            title={t('Move to trash')}
+            onClick={onForget}
+            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#DC2626]"
+          >
+            <Trash2 size={13} />
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -104,6 +118,7 @@ export function Dashboard() {
   const [cloud, setCloud] = useState<CloudBoard[]>([])
   const [roles, setRoles] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(cloudEnabled)
+  const [copying, setCopying] = useState('')
 
   useEffect(() => { void discoverBoards() }, [])
   useEffect(() => {
@@ -136,6 +151,14 @@ export function Dashboard() {
     } else trashLocalBoard(board.room)
   }
 
+  const copy = (board: BoardEntry) => () => {
+    if (copying) return
+    setCopying(board.room)
+    void duplicateBoard(board.room, board.name)
+      .then((made) => openBoard(made))
+      .catch((e: Error) => { alert(e.message); setCopying('') })
+  }
+
   const restore = (board: BoardEntry, inCloud: boolean) => () => {
     if (inCloud) {
       setCloud((list) => list.map((b) => (b.room === board.room ? { ...b, deleted: undefined } : b)))
@@ -164,6 +187,12 @@ export function Dashboard() {
       </header>
 
       <main className="mx-auto w-full max-w-[1180px] px-6 pb-24 pt-8 sm:px-10">
+        {copying && (
+          <p className="mb-4 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm text-[#4A463E]">
+            {t('Copying the board and its images…')}
+          </p>
+        )}
+
         <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
           <h1 className="font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-[#141310]">
             {user ? t('Good to see you, {name}', { name: (user.email ?? '').split('@')[0] }) : t('Your boards')}
@@ -204,7 +233,7 @@ export function Dashboard() {
 
         {!loading && !!mine.length && (
           <Band title={t('Your boards')}>
-            {mine.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, true)} />)}
+            {mine.map((b) => <Tile key={b.room} board={b} mine onCopy={copy(b)} onForget={drop(b, true)} />)}
           </Band>
         )}
 
@@ -221,7 +250,7 @@ export function Dashboard() {
               ? t('Not part of any account: these were made before signing in and stay with this browser whoever is signed in. Open one and it moves to the cloud under {email}.', { email: user.email ?? '' })
               : t('These live in this browser. Sign in and they follow you to any device.')}
           >
-            {here.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, false)} />)}
+            {here.map((b) => <Tile key={b.room} board={b} mine onCopy={copy(b)} onForget={drop(b, false)} />)}
           </Band>
         )}
 
