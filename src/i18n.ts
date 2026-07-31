@@ -326,6 +326,14 @@ const tr: Record<string, string> = {
   'Filter boards': 'Board ara',
   'No boards yet': 'Henüz board yok',
   'Delete board': 'Board\'u sil',
+  'Move to trash': 'Çöp kutusuna taşı',
+  'Trash': 'Çöp kutusu',
+  'Restore': 'Geri getir',
+  'Delete for good': 'Kalıcı sil',
+  'Emptied automatically after {n} days. Until then a board here can be brought back exactly as it was.':
+    '{n} gün sonra kendiliğinden boşalır. O zamana kadar buradaki bir board olduğu gibi geri getirilebilir.',
+  'Delete "{name}" for good? This cannot be undone.':
+    '"{name}" kalıcı olarak silinsin mi? Bu geri alınamaz.',
   'never opened': 'hiç açılmadı',
   '{n} d ago': '{n} gün önce',
   'Open another board before deleting this one.':

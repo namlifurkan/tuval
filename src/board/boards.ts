@@ -7,6 +7,7 @@ export interface BoardEntry {
   items: number
   frames: number
   thumb?: string
+  deleted?: number
 }
 
 const KEY = 'tuval:boards'
@@ -14,6 +15,19 @@ const DB_PREFIX = 'tuval:'
 
 const listeners = new Set<() => void>()
 let cache: BoardEntry[] = read()
+
+// useSyncExternalStore compares snapshots by identity, so these are sliced once per write and
+// handed out as the same arrays. Filtering inside the getter returns a new array every render
+// and spins.
+let live: BoardEntry[] = []
+let binned: BoardEntry[] = []
+
+function reslice() {
+  live = cache.filter((b) => !b.deleted)
+  binned = cache.filter((b) => b.deleted)
+}
+
+reslice()
 
 function read(): BoardEntry[] {
   try {
@@ -27,11 +41,13 @@ function read(): BoardEntry[] {
 
 function write(next: BoardEntry[]) {
   cache = next.sort((a, b) => b.opened - a.opened)
+  reslice()
   try { localStorage.setItem(KEY, JSON.stringify(cache)) } catch { /* ignore */ }
   listeners.forEach((l) => l())
 }
 
-export const getBoards = () => cache
+export const getBoards = () => live
+export const getTrash = () => binned
 
 export function subscribeBoards(fn: () => void) {
   listeners.add(fn)
@@ -54,6 +70,21 @@ export function touchBoard(room: string, patch: Partial<Omit<BoardEntry, 'room'>
     && next.frames === current.frames && next.opened === current.opened
     && next.thumb === current.thumb) return
   write([...rest, next])
+}
+
+// The document survives until the trash is emptied, so restoring gives back the board rather
+// than an empty one with the right name.
+export function trashLocalBoard(room: string) {
+  const board = cache.find((b) => b.room === room)
+  if (!board) return
+  write([...cache.filter((b) => b.room !== room), { ...board, deleted: Date.now() }])
+}
+
+export function restoreLocalBoard(room: string) {
+  const board = cache.find((b) => b.room === room)
+  if (!board) return
+  const { deleted: _gone, ...rest } = board
+  write([...cache.filter((b) => b.room !== room), rest])
 }
 
 export function forgetBoard(room: string) {

@@ -1,10 +1,14 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  discoverBoards, forgetBoard, getBoards, newRoom, openBoard, subscribeBoards, touchBoard,
+  discoverBoards, forgetBoard, getBoards, getTrash, newRoom, openBoard, restoreLocalBoard,
+  subscribeBoards, touchBoard, trashLocalBoard,
 } from '../board/boards'
 import type { BoardEntry } from '../board/boards'
-import { deleteCloudBoard, listCloudBoards, myRoles } from '../board/cloud'
+import {
+  deleteCloudBoard, emptyExpiredTrash, listCloudBoards, myRoles, restoreBoard, TRASH_DAYS,
+  trashBoard,
+} from '../board/cloud'
 import type { CloudBoard } from '../board/cloud'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { TEMPLATES } from '../board/templates'
@@ -68,7 +72,7 @@ function Tile({ board, mine, onForget }: {
       {onForget && (
         <button
           type="button"
-          title={t('Delete board')}
+          title={t('Move to trash')}
           onClick={onForget}
           className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
         >
@@ -96,6 +100,7 @@ const Band = ({ title, note, children }: {
 export function Dashboard() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
   const local = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
+  const localTrash = useSyncExternalStore(subscribeBoards, getTrash, getTrash)
   const [cloud, setCloud] = useState<CloudBoard[]>([])
   const [roles, setRoles] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(cloudEnabled)
@@ -104,23 +109,43 @@ export function Dashboard() {
   useEffect(() => {
     if (!user) { setCloud([]); setLoading(false); return }
     setLoading(true)
-    void listCloudBoards().then((list) => { setCloud(list); setLoading(false) })
+    void listCloudBoards().then((list) => {
+      setCloud(list)
+      setLoading(false)
+      void emptyExpiredTrash(list)
+    })
     void myRoles().then(setRoles)
   }, [user])
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
+  const alive = cloud.filter((b) => !b.deleted)
   // Local boards belong to the browser, not to the account: signing in as somebody else does
   // not change them, and mixing them into your own boards makes that look like a bug.
-  const mine = user ? cloud.filter((b) => b.owned) : []
+  const mine = user ? alive.filter((b) => b.owned) : []
   const here = local.filter((b) => !cloudRooms.has(b.room))
-  const shared = cloud.filter((b) => !b.owned)
+  const shared = alive.filter((b) => !b.owned)
+  const trash = [
+    ...cloud.filter((b) => b.deleted && b.owned),
+    ...localTrash.filter((b) => !cloudRooms.has(b.room)),
+  ]
 
   const drop = (board: BoardEntry, inCloud: boolean) => () => {
+    if (inCloud) {
+      setCloud((list) => list.map((b) => (b.room === board.room ? { ...b, deleted: Date.now() } : b)))
+      void trashBoard(board.room)
+    } else trashLocalBoard(board.room)
+  }
+
+  const restore = (board: BoardEntry, inCloud: boolean) => () => {
+    if (inCloud) {
+      setCloud((list) => list.map((b) => (b.room === board.room ? { ...b, deleted: undefined } : b)))
+      void restoreBoard(board.room)
+    } else restoreLocalBoard(board.room)
+  }
+
+  const erase = (board: BoardEntry, inCloud: boolean) => () => {
     const name = board.name || t('Untitled board')
-    const question = inCloud
-      ? t('Delete "{name}" for everyone? This cannot be undone.', { name })
-      : t('Delete "{name}" from this browser? This cannot be undone.', { name })
-    if (!confirm(question)) return
+    if (!confirm(t('Delete "{name}" for good? This cannot be undone.', { name }))) return
     forgetBoard(board.room)
     if (inCloud) {
       setCloud((list) => list.filter((x) => x.room !== board.room))
@@ -206,6 +231,35 @@ export function Dashboard() {
           </Band>
         )}
 
+        {!!trash.length && (
+          <Band
+            title={t('Trash')}
+            note={t('Emptied automatically after {n} days. Until then a board here can be brought back exactly as it was.', { n: TRASH_DAYS })}
+          >
+            {trash.map((b) => (
+              <div key={b.room} className="opacity-70 transition-opacity hover:opacity-100">
+                <div className="aspect-[8/5] w-full overflow-hidden rounded-xl border border-[#E2DED5] bg-[#F2EFE9]">
+                  {b.thumb && <img src={b.thumb} alt="" className="h-full w-full object-cover grayscale" />}
+                </div>
+                <div className="mt-2 truncate px-0.5 text-sm font-semibold text-[#141310]">
+                  {b.name || t('Untitled board')}
+                </div>
+                <div className="mt-1 flex gap-1.5 px-0.5">
+                  <button
+                    type="button"
+                    onClick={restore(b, cloudRooms.has(b.room))}
+                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                  >{t('Restore')}</button>
+                  <button
+                    type="button"
+                    onClick={erase(b, cloudRooms.has(b.room))}
+                    className="rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  >{t('Delete for good')}</button>
+                </div>
+              </div>
+            ))}
+          </Band>
+        )}
       </main>
     </div>
   )

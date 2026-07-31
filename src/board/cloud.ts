@@ -4,7 +4,12 @@ import type { BoardEntry } from './boards'
 
 export interface CloudBoard extends BoardEntry {
   owned: boolean
+  deleted?: number
 }
+
+// Long enough that nobody is coming back for it, short enough that it is not storage nobody
+// asked for.
+export const TRASH_DAYS = 30
 
 const table = () => supabase?.from('boards')
 
@@ -25,7 +30,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
   if (!supabase || !user) return []
   const { data, error } = await supabase
     .from('boards')
-    .select('id, name, owner, updated_at, board_snapshots(items, frames, thumb)')
+    .select('id, name, owner, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
     .order('updated_at', { ascending: false })
   if (error || !data) return []
   return data.map((row) => {
@@ -38,6 +43,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
       frames: snap?.frames ?? 0,
       thumb: snap?.thumb ?? '',
       owned: row.owner === user.id,
+      deleted: row.deleted_at ? Date.parse(row.deleted_at as string) : undefined,
     }
   })
 }
@@ -65,6 +71,23 @@ export async function claimBoard(room: string, name: string): Promise<string | n
 export async function renameCloudBoard(room: string, name: string) {
   if (!supabase || !getUser()) return
   await table()?.update({ name, updated_at: new Date().toISOString() }).eq('id', room)
+}
+
+// Marked, not removed: everything hangs off this row by a cascade, so deleting it is the one
+// action on a board that cannot be undone.
+export async function trashBoard(room: string) {
+  await table()?.update({ deleted_at: new Date().toISOString() }).eq('id', room)
+}
+
+export async function restoreBoard(room: string) {
+  await table()?.update({ deleted_at: null }).eq('id', room)
+}
+
+export async function emptyExpiredTrash(boards: CloudBoard[]) {
+  const cutoff = Date.now() - TRASH_DAYS * 24 * 60 * 60 * 1000
+  for (const board of boards) {
+    if (board.owned && board.deleted && board.deleted < cutoff) await deleteCloudBoard(board.room)
+  }
 }
 
 export async function deleteCloudBoard(room: string) {

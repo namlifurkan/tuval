@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
-  currentRoom, forgetBoard, getBoards, legacyTarget, newRoom, openBoard, readRoute, touchBoard,
+  currentRoom, forgetBoard, getBoards, getTrash, legacyTarget, newRoom, openBoard, readRoute,
+  restoreLocalBoard, touchBoard, trashLocalBoard,
 } from './boards'
 
 beforeEach(() => {
@@ -131,5 +132,32 @@ describe('the landing hero is not a board', () => {
     const before = location.href
     openBoard('')
     expect(location.href).toBe(before)
+  })
+})
+
+describe('trash', () => {
+  it('takes a board out of the list without losing it', () => {
+    touchBoard('alpha', { name: 'Sprint', items: 4 })
+    trashLocalBoard('alpha')
+    expect(getBoards()).toHaveLength(0)
+    expect(getTrash().map((b) => b.name)).toEqual(['Sprint'])
+  })
+
+  it('brings it back exactly as it was', () => {
+    touchBoard('alpha', { name: 'Sprint', items: 4, thumb: 'data:x' })
+    trashLocalBoard('alpha')
+    restoreLocalBoard('alpha')
+    expect(getTrash()).toHaveLength(0)
+    expect(getBoards()[0]).toMatchObject({ name: 'Sprint', items: 4, thumb: 'data:x' })
+  })
+
+  it('keeps the document until the trash is emptied', async () => {
+    touchBoard('alpha', { name: 'Sprint' })
+    trashLocalBoard('alpha')
+    const names = (await indexedDB.databases()).map((d) => d.name)
+    expect(names).not.toContain('tuval:alpha-deleted')
+    forgetBoard('alpha')
+    expect(getTrash()).toHaveLength(0)
+    expect(getBoards()).toHaveLength(0)
   })
 })
