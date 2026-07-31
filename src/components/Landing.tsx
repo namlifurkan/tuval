@@ -10,6 +10,7 @@ import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { DEFAULT_TEXT_STYLE } from '../board/types'
 import { t } from '../i18n'
 import { Canvas } from './Canvas'
+import { TextEditor } from './TextEditor'
 import { Connector, Nib, Select, Sticky } from './icons'
 import { Wordmark } from './Logo'
 import { Account } from './Account'
@@ -168,6 +169,7 @@ export function Landing() {
         className="relative h-[min(74vh,640px)] w-full border-b border-[#E2DED5]"
       >
         <Canvas embedded />
+        <TextEditor />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-5 sm:p-8">
           <div className="pointer-events-auto max-w-[38ch] rounded-xl border border-[#E2DED5] bg-[#FCFBF8]/95 p-5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
