@@ -353,6 +353,24 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Create an account': 'Hesap oluştur',
+  'No password to begin with: confirm the address by email, then choose one.':
+    'Başlarken parola yok: adresi e-postayla doğrula, sonra bir tane seç.',
+  'Your boards follow you to any device.': 'Board\'ların her cihazda peşinden gelir.',
+  'Reset your password': 'Parolanı sıfırla',
+  'We email a link that lets you set a new one.':
+    'Yeni bir tane belirlemeni sağlayan bir bağlantı gönderiyoruz.',
+  'Choose a new password': 'Yeni bir parola seç',
+  'You are signed in from the link. Pick a password and it is done.':
+    'Bağlantıyla giriş yapmış durumdasın. Bir parola seç, bitti.',
+  'Check {email} for a link. It works once and expires.':
+    '{email} adresine bir bağlantı gönderdik. Tek kullanımlık ve süresi doluyor.',
+  'Forgot your password?': 'Parolanı mı unuttun?',
+  'I already have an account': 'Zaten hesabım var',
+  'Back to sign in': 'Girişe dön',
+  'Without an account Tuval still works: boards live in this browser and nothing leaves it.':
+    'Hesapsız da Tuval çalışır: board\'lar bu tarayıcıda durur ve hiçbir şey dışarı çıkmaz.',
+  'Signing in did not go through: {reason}': 'Giriş tamamlanamadı: {reason}',
   'or': 'veya',
   'Finish setting up your account': 'Hesabını tamamla',
   'The email link confirmed {email}. Choose a password and you can sign in with it from now on.':

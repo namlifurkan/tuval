@@ -12,8 +12,16 @@ export const supabase: SupabaseClient | null = url && anonKey
 
 export const cloudEnabled = !!supabase
 
-export const authError =
-  new URLSearchParams(location.hash.replace(/^#/, '')).get('error_description') ?? ''
+// A failure comes back in the hash for the implicit flow and in the query for PKCE, and the
+// code matters: a stale link and a refused identity are not the same problem.
+const returned = (key: string) =>
+  new URLSearchParams(location.hash.replace(/^#/, '')).get(key)
+  ?? new URLSearchParams(location.search).get(key)
+  ?? ''
+
+export const authError = returned('error_description')
+export const authErrorCode = returned('error_code') || returned('error')
+export const isStaleLink = /otp_expired|access_denied/.test(authErrorCode)
 
 let session: Session | null = null
 const listeners = new Set<() => void>()
@@ -94,6 +102,14 @@ export async function signInWith(provider: Provider) {
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo: location.origin + location.pathname },
+  })
+  if (error) throw error
+}
+
+export async function sendReset(email: string) {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${location.origin}/reset`,
   })
   if (error) throw error
 }

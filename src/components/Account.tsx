@@ -1,8 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  authError, authTrouble, cloudEnabled, displayName, getUser, setPassword, signIn, signInWith,
+  authError, authTrouble, cloudEnabled, isStaleLink, displayName, getUser, setPassword, signIn, signInWith,
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
+import { go } from '../board/boards'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -91,7 +92,7 @@ export function Account() {
           {initial}
         </button>
       ) : (
-        <IconButton title={t('Sign in')} active={pop.open} onClick={pop.toggle}>
+        <IconButton title={t('Sign in')} onClick={() => go('/login')}>
           <LogIn size={18} strokeWidth={1.8} />
         </IconButton>
       )}
@@ -160,7 +161,9 @@ export function Account() {
             </div>
             {authError && state === 'idle' && (
               <p className="mx-1 mb-2 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-[#141310]">
-                {t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })}
+                {isStaleLink
+                  ? t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })
+                  : t('Signing in did not go through: {reason}', { reason: authError })}
               </p>
             )}
             {state === 'sent' ? (

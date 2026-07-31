@@ -65,7 +65,11 @@ export function forgetBoard(room: string) {
 export const newRoom = () => nanoid(10)
 
 export function goHome() {
-  history.replaceState(null, '', '/dashboard')
+  go('/dashboard')
+}
+
+export function go(path: string) {
+  history.replaceState(null, '', path)
   location.reload()
 }
 
@@ -92,16 +96,23 @@ export function openBoard(room: string, template?: string) {
 // so the two can no longer collide; this only recognises the old shape.
 const AUTH_HASH = /(?:^|&)(?:access_token|refresh_token|error_description|error_code)=/
 
+export type AuthPage = 'login' | 'register' | 'forgot' | 'reset'
+
 export type Route =
   | { kind: 'landing' }
   | { kind: 'dashboard' }
+  | { kind: 'auth'; page: AuthPage }
   | { kind: 'board'; room: string }
+
+const AUTH_PAGES: AuthPage[] = ['login', 'register', 'forgot', 'reset']
 
 export function readRoute(): Route {
   const path = location.pathname.replace(/\/+$/, '') || '/'
   const board = /^\/b\/(.+)$/.exec(path)
   if (board) return { kind: 'board', room: decodeURIComponent(board[1]) }
   if (path === '/dashboard') return { kind: 'dashboard' }
+  const auth = AUTH_PAGES.find((p) => path === `/${p}`)
+  if (auth) return { kind: 'auth', page: auth }
   return { kind: 'landing' }
 }
 

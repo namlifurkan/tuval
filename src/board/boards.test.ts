@@ -60,6 +60,16 @@ describe('room from url', () => {
     expect(readRoute()).toEqual({ kind: 'board', room: 'alpha' })
   })
 
+  it('knows the account pages', () => {
+    for (const page of ['login', 'register', 'forgot', 'reset']) {
+      at(`/${page}`)
+      expect(readRoute()).toEqual({ kind: 'auth', page })
+      expect(currentRoom()).toBe('')
+    }
+    at('/loginn')
+    expect(readRoute().kind).toBe('landing')
+  })
+
   it('has no room on the front door or the board list', () => {
     at('/')
     expect(currentRoom()).toBe('')

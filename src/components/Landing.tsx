@@ -4,7 +4,7 @@ import { fitRect } from '../board/camera'
 import { createItems, getItems } from '../board/doc'
 import { boxOf } from '../board/render'
 import { makeConnector, makeFrame, makeSticky, makeText } from '../board/items'
-import { goHome, newRoom, openBoard, touchBoard } from '../board/boards'
+import { go, goHome, newRoom, openBoard, touchBoard } from '../board/boards'
 import { requestRender, useBoardStore } from '../board/store'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { DEFAULT_TEXT_STYLE } from '../board/types'
@@ -13,7 +13,6 @@ import { Canvas } from './Canvas'
 import { TextEditor } from './TextEditor'
 import { Connector, Nib, Select, Sticky } from './icons'
 import { Wordmark } from './Logo'
-import { Account } from './Account'
 
 const REPO = 'https://github.com/namlifurkan/tuval'
 
@@ -152,7 +151,15 @@ export function Landing() {
           GitHub
         </a>
         <SignedIn />
-        {cloudEnabled ? <Account /> : (
+        {cloudEnabled ? (
+          <button
+            type="button"
+            onClick={() => go('/login')}
+            className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+          >
+            {t('Sign in')}
+          </button>
+        ) : (
           <button
             type="button"
             onClick={openScratch}
