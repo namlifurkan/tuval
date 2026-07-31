@@ -13,6 +13,9 @@ export const supabase: SupabaseClient | null = url && anonKey
 
 export const cloudEnabled = !!supabase
 
+export const authError =
+  new URLSearchParams(location.hash.replace(/^#/, '')).get('error_description') ?? ''
+
 let session: Session | null = null
 const listeners = new Set<() => void>()
 

@@ -110,11 +110,14 @@ export function Popover({
         top = rect.top - gap - h
         if (top < pad) top = rect.bottom + gap
         break
-      case 'bottomRight':
-        left = rect.right - w
-        top = rect.bottom + gap
-        if (top + h > window.innerHeight - pad) top = rect.top - gap - h
-        break
+      case 'bottomRight': {
+        const bottomOver = h > 0 && rect.bottom + gap + h > window.innerHeight - pad
+        return {
+          right: Math.max(pad, window.innerWidth - rect.right),
+          top: bottomOver ? clampY(rect.top - gap - h) : rect.bottom + gap,
+          visibility: 'visible',
+        }
+      }
       default:
         left = rect.left + rect.width / 2 - w / 2
         top = rect.bottom + gap

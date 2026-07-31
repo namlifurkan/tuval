@@ -1,6 +1,7 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  cloudEnabled, displayName, getUser, setPassword, signIn, signInWithPassword, signOut, subscribeAuth,
+  authError, cloudEnabled, displayName, getUser, setPassword, signIn, signInWithPassword, signOut,
+  subscribeAuth,
 } from '../board/supabase'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
@@ -17,6 +18,13 @@ export function Account() {
   const [reason, setReason] = useState('')
   const [fresh, setFresh] = useState('')
   const [note, setNote] = useState('')
+
+  const { setOpen } = pop
+  useEffect(() => {
+    if (!authError || user) return
+    const id = setTimeout(() => setOpen(true), 300)
+    return () => clearTimeout(id)
+  }, [setOpen, user])
 
   if (!cloudEnabled) return null
 
@@ -54,7 +62,7 @@ export function Account() {
   const initial = (user?.email ?? '?')[0].toUpperCase()
 
   return (
-    <div className="relative">
+    <div className="relative" data-ada="account">
       {user ? (
         <button
           type="button"
@@ -114,6 +122,11 @@ export function Account() {
         ) : (
           <>
             <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Sign in')}</div>
+            {authError && state === 'idle' && (
+              <p className="mx-1 mb-2 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-[#141310]">
+                {t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })}
+              </p>
+            )}
             {state === 'sent' ? (
               <p className="px-2.5 pb-2 text-sm leading-snug text-[#141310]">
                 {t('Check {email} for a sign-in link.', { email })}

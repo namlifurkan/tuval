@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 
-const NAMES = ['Ada', 'Kerem', 'Deniz', 'Mina', 'Poyraz', 'Zeynep', 'Efe', 'Lara']
+const NAMES = ['Kerem', 'Deniz', 'Mina', 'Poyraz', 'Zeynep', 'Efe', 'Lara', 'Bora']
 const COLORS = ['#C8452D', '#3E5C93', '#5E9A8A', '#8A7FB0', '#DE9A4E', '#B9718A']
 
 export interface Me { id: string; name: string; color: string }

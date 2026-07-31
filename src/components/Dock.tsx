@@ -472,6 +472,7 @@ export function Dock() {
           <div
             key={id}
             data-slot
+            data-ada={id}
             {...(id === 'zoom' ? { 'data-no-magnify': '' } : {})}
             draggable
             onDragStart={() => setDragId(id)}

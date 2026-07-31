@@ -90,7 +90,7 @@ export function Share() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" data-ada="share">
       <button
         type="button"
         onClick={pop.toggle}

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { getLang, subscribeLang } from './i18n'
+import { Ada } from './components/Ada'
 import { Canvas } from './components/Canvas'
 import { BoardsPanel } from './components/BoardsPanel'
 import { BriefImport } from './components/BriefImport'
@@ -67,6 +68,7 @@ export default function App() {
           <FramesPanel />
           <HistoryPanel />
           <FrameTitleEditor />
+          <Ada />
         </>
       )}
       <Presentation />

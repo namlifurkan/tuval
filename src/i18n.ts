@@ -312,6 +312,31 @@ const tr: Record<string, string> = {
     'Board\'ların buluta kaydediliyor ve her cihazdan erişilebiliyor.',
   'First time: leave the password empty and confirm the link we email you. Then set a password from this menu and sign in with it. Without signing in Tuval keeps working, but boards stay in this browser only.':
     'İlk seferde parolayı boş bırak, e-postana gelen bağlantıyı onayla. Sonra bu menüden bir parola belirle ve bundan sonra onunla gir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
+  'That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.':
+    'Bu giriş bağlantısı artık geçerli değil: {reason} Bağlantılar tek kullanımlıktır ve süresi dolar. Aşağıdan yenisini iste.',
+  // guide
+  '(guide)': '(rehber)',
+  'Guidance': 'Yönlendirme',
+  'Got it': 'Anladım',
+  'Dismiss': 'Kapat',
+  'Empty board': 'Boş board',
+  'Press N and click the canvas to drop your first sticky.':
+    'N tuşuna bas, tuvale tıkla, ilk sticky\'n düşsün.',
+  'Two loose ideas': 'İki başıboş fikir',
+  'L draws a connector. Drag from one item to another and the line follows them.':
+    'L bağlayıcı çizer. Birinden diğerine sürükle, çizgi ikisini de takip eder.',
+  'Getting crowded': 'Kalabalıklaşıyor',
+  'F draws a frame. Frames become sections when you present or hand off.':
+    'F bir frame çizer. Sunumda ve devretmede frame\'ler bölüm olur.',
+  'Ready to build': 'Sıra yapmaya geldi',
+  'This turns the board into a brief an AI agent can read and act on.':
+    'Bu, board\'u bir AI ajanının okuyup uygulayabileceği brief\'e çevirir.',
+  'This browser only': 'Yalnızca bu tarayıcıda',
+  'Sign in and the board follows you to any device.':
+    'Giriş yap, board her cihazda peşinden gelsin.',
+  'Better with someone': 'Biriyle daha iyi',
+  'Share emails a teammate a sign-in link straight to this board.':
+    'Paylaş, ekip arkadaşına bu board\'a açılan bir giriş bağlantısı yollar.',
   'Password': 'Parola',
   'New password': 'Yeni parola',
   'Password (leave empty for a link)': 'Parola (boş bırakırsan bağlantı gelir)',

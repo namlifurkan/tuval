@@ -1,6 +1,8 @@
 import { t } from '../i18n'
 import { Eye } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { getAda, setAdaOff, subscribeAda } from '../board/ada'
+import { GUIDE } from '../board/brand'
 import { awareness } from '../board/doc'
 import { initials, me } from '../board/me'
 import { requestRender, useBoardStore } from '../board/store'
@@ -12,6 +14,7 @@ export function Collaborators() {
   const [peers, setPeers] = useState<Peer[]>([])
   const following = useBoardStore((s) => s.following)
   const update = useBoardStore((s) => s.update)
+  const ada = useSyncExternalStore(subscribeAda, getAda, getAda)
   const pop = usePopover()
 
   useEffect(() => {
@@ -29,7 +32,12 @@ export function Collaborators() {
     return () => awareness.off('change', sync)
   }, [])
 
-  const all: Peer[] = [{ id: -1, name: me.name, color: me.color }, ...peers]
+  const guide: Peer = { id: -2, name: GUIDE.name, color: GUIDE.color }
+  const all: Peer[] = [
+    { id: -1, name: me.name, color: me.color },
+    ...(ada.off ? [] : [guide]),
+    ...peers,
+  ]
   const shown = all.slice(0, 4)
   const extra = all.length - shown.length
 
@@ -79,7 +87,29 @@ export function Collaborators() {
         <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">
           {t('On the board')} {all.length} {t('people')}
         </div>
-        {all.map((p) => (
+        <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5">
+          {chip(guide, 26)}
+          <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+            {guide.name}
+            <span className="ml-1 text-xs text-[#8A867C]">{t('(guide)')}</span>
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!ada.off}
+            title={t('Guidance')}
+            onClick={() => setAdaOff(!ada.off)}
+            className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
+              ${ada.off ? 'bg-[#D8D5CD]' : 'bg-[#C8452D]'}`}
+          >
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
+                ${ada.off ? 'left-0.5' : 'left-[18px]'}`}
+            />
+          </button>
+        </div>
+
+        {all.filter((p) => p.id !== -2).map((p) => (
           <button
             key={p.id}
             type="button"

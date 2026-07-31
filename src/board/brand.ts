@@ -4,6 +4,11 @@ export const PRODUCT = {
   mark: 'T',
 }
 
+export const GUIDE = {
+  name: 'Ada',
+  color: '#5E9A8A',
+}
+
 export const COLOR = {
   ink: '#141310',
   inkSoft: '#4A463E',

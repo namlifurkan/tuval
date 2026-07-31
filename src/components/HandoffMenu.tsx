@@ -55,7 +55,7 @@ export function HandoffMenu() {
   const scope = selection.length ? t('Selection ({n})', { n: selection.length }) : t('Whole board')
 
   return (
-    <div className="relative">
+    <div className="relative" data-ada="handoff">
       <IconButton
         title={t('Hand off to AI')}
         active={pop.open}
