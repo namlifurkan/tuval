@@ -63,11 +63,38 @@ export async function signInWithPassword(email: string, password: string) {
   if (!supabase) throw new Error('Supabase is not configured')
   const { error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw error
+  // Signing in this way is proof enough for accounts that set a password before the flag existed.
+  if (!getUser()?.user_metadata?.has_password) {
+    void supabase.auth.updateUser({ data: { has_password: true } })
+  }
+}
+
+// Supabase does not say whether an account has a password, so the answer is kept where it
+// travels with the session: the user's own metadata.
+export const hasPassword = () => {
+  const user = getUser()
+  if (!user) return true
+  if (user.app_metadata?.provider && user.app_metadata.provider !== 'email') return true
+  return !!user.user_metadata?.has_password
 }
 
 export async function setPassword(password: string) {
   if (!supabase) throw new Error('Supabase is not configured')
-  const { error } = await supabase.auth.updateUser({ password })
+  const { error } = await supabase.auth.updateUser({
+    password,
+    data: { has_password: true },
+  })
+  if (error) throw error
+}
+
+export type Provider = 'github' | 'google' | 'apple'
+
+export async function signInWith(provider: Provider) {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: location.origin + location.pathname },
+  })
   if (error) throw error
 }
 

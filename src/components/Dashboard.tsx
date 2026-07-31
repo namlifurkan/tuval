@@ -10,6 +10,7 @@ import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { TEMPLATES } from '../board/templates'
 import { t } from '../i18n'
 import { Account } from './Account'
+import { PasswordGate } from './PasswordGate'
 import { Wordmark } from './Logo'
 
 function when(at: number) {
@@ -124,6 +125,7 @@ export function Dashboard() {
 
   return (
     <div className="h-dvh overflow-y-auto bg-[#F2EFE9]">
+      <PasswordGate />
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px] sm:px-10">
         <a href="/" aria-label={t('Home')} className="rounded-md focus-visible:outline-2 focus-visible:outline-[#C8452D]">
           <Wordmark height={18} />

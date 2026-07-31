@@ -19,6 +19,7 @@ import { Presentation } from './components/Presentation'
 import { SearchPanel } from './components/SearchPanel'
 import { TextEditor } from './components/TextEditor'
 import { TopBar } from './components/TopBar'
+import { PasswordGate } from './components/PasswordGate'
 import { Inspector } from './components/Inspector'
 import { Minimap } from './components/Minimap'
 import { readRoute } from './board/boards'
@@ -74,7 +75,8 @@ export default function App() {
       <TextEditor />
       {presenting === null && (
         <>
-          <TopBar />
+          <div className="pointer-events-auto absolute inset-x-0 top-0 z-50"><PasswordGate /></div>
+      <TopBar />
           <Inspector />
           <Dock />
           <MinimapCorner />

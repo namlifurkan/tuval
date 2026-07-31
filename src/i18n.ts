@@ -310,14 +310,18 @@ const tr: Record<string, string> = {
   'Check {email} for a sign-in link.': 'Giriş bağlantısı için {email} adresine bak.',
   'Your boards are saved to the cloud and reachable from any device.':
     'Board\'ların buluta kaydediliyor ve her cihazdan erişilebiliyor.',
-  'First time: leave the password empty and confirm the link we email you. Then set a password from this menu and sign in with it. Without signing in Tuval keeps working, but boards stay in this browser only.':
-    'İlk seferde parolayı boş bırak, e-postana gelen bağlantıyı onayla. Sonra bu menüden bir parola belirle ve bundan sonra onunla gir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
+  'First time with an address: leave the password empty, confirm the link we email you, then pick a password. Without signing in Tuval keeps working, but boards stay in this browser only.':
+    'Bir adresle ilk girişte parolayı boş bırak, e-postana gelen bağlantıyı onayla, sonra bir parola seç. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
   'That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.':
     'Bu giriş bağlantısı artık geçerli değil: {reason} Bağlantılar tek kullanımlıktır ve süresi dolar. Aşağıdan yenisini iste.',
   'Open a file': 'Dosya aç',
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'or': 'veya',
+  'Finish setting up your account': 'Hesabını tamamla',
+  'The email link confirmed {email}. Choose a password and you can sign in with it from now on.':
+    'E-posta bağlantısı {email} adresini doğruladı. Bir parola belirle, bundan sonra onunla gir.',
   'Your session expired and could not be renewed. Sign in again.':
     'Oturumun süresi doldu ve yenilenemedi. Tekrar giriş yap.',
   'Open source infinite canvas': 'Açık kaynak sonsuz tuval',
