@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } fro
 import { ChevronRight, CornerUpLeft, FileText, Plus, Table2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { relatedTo } from '../board/database'
+import { duplicatePage } from '../board/duplicatePage'
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
@@ -30,6 +31,7 @@ export function Page() {
   const [ready, setReady] = useState(false)
   const name = useRef<HTMLInputElement>(null)
   const [links, setLinks] = useState<Backlink[]>([])
+  const [copying, setCopying] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -93,6 +95,19 @@ export function Page() {
       <div className="-ml-2 mb-1 flex items-center gap-1">
         <IconPicker value={icon} onPick={(emoji) => patchRecord(id, { icon: emoji })} />
         {!cover && <Cover id={id} path="" />}
+        <button
+          type="button"
+          disabled={copying}
+          onClick={() => {
+            setCopying(true)
+            void duplicatePage(id)
+              .then((made) => { if (made) go(`/d/${made}`); else setCopying(false) })
+              .catch(() => setCopying(false))
+          }}
+          className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-40"
+        >
+          {copying ? t('Copying…') : t('Duplicate')}
+        </button>
       </div>
 
       <input

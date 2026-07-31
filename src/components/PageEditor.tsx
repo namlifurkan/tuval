@@ -19,6 +19,7 @@ import { listTeam } from '../board/workspace'
 import { ancestors, createRecord, getRecords, subscribeRecords } from '../board/records'
 import { displayName, getUser } from '../board/supabase'
 import { t } from '../i18n'
+import { PageHistory } from './PageHistory'
 
 const docs = () => getRecords('doc')
 
@@ -121,6 +122,10 @@ export function PageEditor() {
   const mine = here.kind === 'page' ? here.id : ''
 
   return (
+    <>
+    <div className="mb-1 ml-[54px] flex justify-end">
+      <PageHistory editor={editor as unknown as Parameters<typeof PageHistory>[0]['editor']} />
+    </div>
     <BlockNoteView editor={editor} theme={paper}>
       {!!myId && <FloatingComposerController />}
       {!!myId && <FloatingThreadController />}
@@ -158,5 +163,6 @@ export function PageEditor() {
         }}
       />
     </BlockNoteView>
+    </>
   )
 }

@@ -398,6 +398,13 @@ const tr: Record<string, string> = {
   'Archive': 'Arşivle',
   'Open': 'Aç',
   'Pages': 'Sayfalar',
+  'History': 'Geçmiş',
+  'Save this version': 'Bu sürümü kaydet',
+  'block': 'blok',
+  'blocks': 'blok',
+  'No versions yet. One is kept whenever you come back to a page you have written in.':
+    'Henüz sürüm yok. Yazdığın bir sayfaya geri döndüğünde biri saklanır.',
+  'Copying…': 'Kopyalanıyor…',
   'In the text': 'Metinde',
   'Related to this': 'Buna bağlı olanlar',
   'Emptied automatically after {n} days. Until then a page here can be brought back exactly as it was.':
