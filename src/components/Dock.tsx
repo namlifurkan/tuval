@@ -10,6 +10,7 @@ import {
 } from '../board/dockPrefs'
 import type { DockItemId, DockSize } from '../board/dockPrefs'
 import { addImage } from '../board/images'
+import { addPdf, isPdf } from '../board/pdf'
 import { makeEmbed, makeFrame, makeText } from '../board/items'
 import { insertItems } from '../board/interaction'
 import { boxOf } from '../board/render'
@@ -553,12 +554,15 @@ export function Dock() {
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/*,application/pdf"
           multiple
           hidden
           onChange={(e) => {
             const center = viewportCenter()
-            for (const file of e.target.files ?? []) void addImage(file, center)
+            for (const file of e.target.files ?? []) {
+              if (isPdf(file)) void addPdf(file, center)
+              else void addImage(file, center)
+            }
             e.target.value = ''
           }}
         />

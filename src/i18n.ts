@@ -66,6 +66,9 @@ const tr: Record<string, string> = {
   'Templates': 'Şablonlar',
   'Image': 'Görsel',
   'Upload image': 'Görsel yükle',
+  'Upload image or PDF': 'Görsel veya PDF yükle',
+  'Only the first {n} pages were placed; {skipped} more are in the file.':
+    'Yalnızca ilk {n} sayfa yerleştirildi; dosyada {skipped} sayfa daha var.',
   'More': 'Daha fazla',
   'Minimap': 'Minimap',
   'Fit to content': 'İçeriğe sığdır',

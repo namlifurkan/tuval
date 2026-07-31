@@ -12,7 +12,9 @@ import {
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
   quickCreateFromSelection, reorder, ungroupSelection, wheel,
 } from '../board/interaction'
+import { t } from '../i18n'
 import { addImage } from '../board/images'
+import { addPdf, isPdf, MAX_PAGES } from '../board/pdf'
 import { cloneItems, makeEmbed, makeSticky, makeText, withPreview } from '../board/items'
 import { me, subscribeMe } from '../board/me'
 import { boxOf, render } from '../board/render'
@@ -418,7 +420,10 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
     const r = ref.current!.getBoundingClientRect()
     const p = toBoard(useBoardStore.getState().camera, e.clientX - r.left, e.clientY - r.top)
     for (const file of e.dataTransfer.files) {
-      if (file.type.startsWith('image/')) readImage(file, p)
+      if (isPdf(file)) void addPdf(file, p).then(({ skipped }) => {
+        if (skipped) alert(t('Only the first {n} pages were placed; {skipped} more are in the file.', { n: MAX_PAGES, skipped }))
+      })
+      else if (file.type.startsWith('image/')) readImage(file, p)
       else if (file.type.startsWith('text/')) file.text().then((t) => {
         const item = makeText(p.x, p.y, 400, useBoardStore.getState().textStyle)
         item.text = t.slice(0, 2000)
