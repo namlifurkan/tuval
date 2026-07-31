@@ -1,5 +1,7 @@
 import { useState, useSyncExternalStore } from 'react'
-import { cloudEnabled, displayName, getUser, signIn, signOut, subscribeAuth } from '../board/supabase'
+import {
+  cloudEnabled, displayName, getUser, setPassword, signIn, signInWithPassword, signOut, subscribeAuth,
+} from '../board/supabase'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -10,20 +12,42 @@ export function Account() {
   const user = useSyncExternalStore(subscribeAuth, readUser, readUser)
   const pop = usePopover()
   const [email, setEmail] = useState('')
+  const [password, setPass] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [reason, setReason] = useState('')
+  const [fresh, setFresh] = useState('')
+  const [note, setNote] = useState('')
 
   if (!cloudEnabled) return null
 
   const send = async () => {
-    if (!email.trim()) return
+    const mail = email.trim()
+    if (!mail) return
     setState('sending')
     try {
-      await signIn(email.trim())
-      setState('sent')
+      if (password) {
+        await signInWithPassword(mail, password)
+        setPass('')
+        setState('idle')
+      } else {
+        await signIn(mail)
+        setState('sent')
+      }
     } catch (e) {
       setReason(e instanceof Error ? e.message : String(e))
       setState('error')
+    }
+  }
+
+  const save = async () => {
+    if (fresh.length < 8) { setNote(t('At least 8 characters.')); return }
+    setNote(t('Saving…'))
+    try {
+      await setPassword(fresh)
+      setFresh('')
+      setNote(t('Password saved. Next time you can sign in with it.'))
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : String(e))
     }
   }
 
@@ -54,6 +78,28 @@ export function Account() {
               <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
             </div>
             <div className="my-1 h-px bg-[#EAE6DD]" />
+            <div className="px-2.5 pb-1.5 text-xs font-semibold text-[#8A867C]">{t('Password')}</div>
+            <input
+              value={fresh}
+              onChange={(e) => setFresh(e.target.value)}
+              onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void save() }}
+              type="password"
+              autoComplete="new-password"
+              placeholder={t('New password')}
+              className="mx-1 mb-1.5 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+            />
+            <button
+              type="button"
+              disabled={!fresh}
+              onClick={() => void save()}
+              className="mx-1 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:bg-[#EFEBE2] disabled:opacity-40"
+            >
+              {t('Save password')}
+            </button>
+            {note && (
+              <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#8A867C]">{note}</p>
+            )}
+            <div className="my-1.5 h-px bg-[#EAE6DD]" />
             <p className="px-2.5 pb-2 text-[11px] leading-snug text-[#8A867C]">
               {t('Your boards are saved to the cloud and reachable from any device.')}
             </p>
@@ -83,13 +129,22 @@ export function Account() {
                   spellCheck={false}
                   className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
                 />
+                <input
+                  value={password}
+                  onChange={(e) => setPass(e.target.value)}
+                  onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void send() }}
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder={t('Password (leave empty for a link)')}
+                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+                />
                 <button
                   type="button"
                   disabled={state === 'sending' || !email.trim()}
                   onClick={() => void send()}
                   className="mx-1 w-[calc(100%-8px)] rounded-lg bg-[#C8452D] px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
                 >
-                  {state === 'sending' ? t('Sending…') : t('Send link')}
+                  {state === 'sending' ? t('Sending…') : password ? t('Sign in') : t('Send link')}
                 </button>
               </>
             )}
@@ -97,7 +152,7 @@ export function Account() {
               <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#DC2626]">{reason}</p>
             )}
             <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
-              {t('No password. You get a link by email. Without signing in Tuval keeps working, but boards stay in this browser only.')}
+              {t('First time: leave the password empty and confirm the link we email you. Then set a password from this menu and sign in with it. Without signing in Tuval keeps working, but boards stay in this browser only.')}
             </p>
           </>
         )}

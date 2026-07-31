@@ -310,8 +310,16 @@ const tr: Record<string, string> = {
   'Check {email} for a sign-in link.': 'Giriş bağlantısı için {email} adresine bak.',
   'Your boards are saved to the cloud and reachable from any device.':
     'Board\'ların buluta kaydediliyor ve her cihazdan erişilebiliyor.',
-  'No password. You get a link by email. Without signing in Tuval keeps working, but boards stay in this browser only.':
-    'Parola yok, e-postana bir bağlantı gelir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
+  'First time: leave the password empty and confirm the link we email you. Then set a password from this menu and sign in with it. Without signing in Tuval keeps working, but boards stay in this browser only.':
+    'İlk seferde parolayı boş bırak, e-postana gelen bağlantıyı onayla. Sonra bu menüden bir parola belirle ve bundan sonra onunla gir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
+  'Password': 'Parola',
+  'New password': 'Yeni parola',
+  'Password (leave empty for a link)': 'Parola (boş bırakırsan bağlantı gelir)',
+  'Save password': 'Parolayı kaydet',
+  'Saving…': 'Kaydediliyor…',
+  'At least 8 characters.': 'En az 8 karakter.',
+  'Password saved. Next time you can sign in with it.':
+    'Parola kaydedildi. Bundan sonra onunla girebilirsin.',
   'Cloud': 'Bulut',
   'This browser': 'Bu tarayıcı',
   'Delete "{name}" for everyone? This cannot be undone.':
