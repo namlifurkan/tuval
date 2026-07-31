@@ -5,9 +5,10 @@
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/namlifurkan/tuval"
   },
   "type": "module",
+  "packageManager": "npm@11.6.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
