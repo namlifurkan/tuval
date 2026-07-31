@@ -214,6 +214,20 @@ npx supabase migration new what_changed
 Write it so it can run twice (`create or replace`, `if not exists`, `drop policy if exists`),
 because self-hosters apply these by hand.
 
+### Signing in with Apple
+
+GitHub and Google are a client id and a secret pasted into Supabase. Apple is not: it never
+hands out a secret, you sign one yourself with the `.p8` key from the developer portal, and
+Apple caps it at six months.
+
+```bash
+node scripts/apple-secret.mjs <team-id> <key-id> <services-id> AuthKey_XXXX.p8
+```
+
+Paste the output into **Secret Key (for OAuth)** under the Apple provider. Put a reminder in
+the calendar for the expiry the script prints: nothing warns you when it lapses, sign-in
+simply stops working.
+
 ## Coming from Miro
 
 There is no lock-in on either side. Pull a board out of Miro and rebuild it here:
