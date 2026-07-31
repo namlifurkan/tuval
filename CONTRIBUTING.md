@@ -43,9 +43,12 @@ in CI.
 
 ## Deploys
 
-The build writes the commit it came from to `dist/version.json`, and the **Deployed** workflow
-waits for `https://tuval.dev/version.json` to report that commit. A build that fails silently
-looks exactly like one that worked, so this is what catches it.
+The build writes the commit it came from to `dist/version.json`. A build that fails silently
+looks exactly like one that worked, so when in doubt, ask the site what it is running:
+
+```bash
+curl -s https://tuval.dev/version.json
+```
 
 ## Before opening a pull request
 
