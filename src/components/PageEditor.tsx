@@ -1,11 +1,16 @@
 import { useSyncExternalStore } from 'react'
 import { BlockNoteSchema } from '@blocknote/core'
+import {
+  getMultiColumnSlashMenuItems, locales as columnLocales, multiColumnDropCursor, withMultiColumn,
+} from '@blocknote/xl-multi-column'
 import { CommentsExtension } from '@blocknote/core/comments'
 import { withCollaboration } from '@blocknote/core/yjs'
 import {
   createReactInlineContentSpec, FloatingComposerController, FloatingThreadController,
-  SuggestionMenuController, useCreateBlockNote,
+  getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote,
 } from '@blocknote/react'
+import { filterSuggestionItems } from '@blocknote/core'
+import { en } from '@blocknote/core/locales'
 import { BlockNoteView } from '@blocknote/mantine'
 import type { Theme } from '@blocknote/mantine'
 import '@blocknote/mantine/style.css'
@@ -19,6 +24,7 @@ import { listTeam } from '../board/workspace'
 import { ancestors, createRecord, getRecords, subscribeRecords } from '../board/records'
 import { displayName, getUser } from '../board/supabase'
 import { t } from '../i18n'
+import { PageExport } from './PageExport'
 import { PageHistory } from './PageHistory'
 
 const docs = () => getRecords('doc')
@@ -76,7 +82,11 @@ const Mention = createReactInlineContentSpec(
   },
 )
 
-const schema = BlockNoteSchema.create().extend({ inlineContentSpecs: { [MENTION]: Mention } })
+// Side-by-side blocks come from BlockNote's own multi-column package rather than from us.
+// It is GPL-3.0, which an AGPL-3.0 project may include.
+const schema = withMultiColumn(
+  BlockNoteSchema.create().extend({ inlineContentSpecs: { [MENTION]: Mention } }),
+)
 
 // Everyone the workspace knows, asked for once and answered from memory after that. BlockNote
 // asks for the people it does not have rather than for all of them.
@@ -95,7 +105,7 @@ async function resolveUsers(ids: string[]) {
   return ids.map((id) => ({ id, ...(faces.get(id) ?? { username: t('Member'), avatarUrl: '' }) }))
 }
 
-export function PageEditor() {
+export function PageEditor({ title }: { title: string }) {
   const pages = useSyncExternalStore(subscribeRecords, docs, docs)
   const myId = getUser()?.id ?? ''
 
@@ -111,6 +121,10 @@ export function PageEditor() {
     // Restoring a document is a change from nothing to everything, so every heading on a
     // reloaded page came back at body size. Nobody asked for the animation.
     animations: false,
+    dropCursor: multiColumnDropCursor,
+    // The column items read their own labels out of the editor's dictionary, so the package's
+    // words have to be handed over with it or the menu simply has no columns in it.
+    dictionary: { ...en, multi_column: columnLocales.en },
     collaboration: {
       fragment: pageFragment(),
       provider: { awareness: pageAwareness() },
@@ -123,12 +137,23 @@ export function PageEditor() {
 
   return (
     <>
-    <div className="mb-1 ml-[54px] flex justify-end">
+    <div className="mb-1 ml-[54px] flex justify-end gap-1">
+      <PageExport editor={editor as unknown as Parameters<typeof PageExport>[0]['editor']} title={title} />
       <PageHistory editor={editor as unknown as Parameters<typeof PageHistory>[0]['editor']} />
     </div>
     <BlockNoteView editor={editor} theme={paper}>
       {!!myId && <FloatingComposerController />}
       {!!myId && <FloatingThreadController />}
+      {/* The default menu plus the column items, because a schema that can hold columns and a
+          menu that cannot offer them is a feature nobody finds. */}
+      <SuggestionMenuController
+        triggerCharacter="/"
+        getItems={async (query) => filterSuggestionItems(
+          [...getDefaultReactSlashMenuItems(editor), ...getMultiColumnSlashMenuItems(editor)],
+          query,
+        )}
+      />
+
       <SuggestionMenuController
         triggerCharacter="@"
         getItems={async (query) => {

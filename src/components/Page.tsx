@@ -122,7 +122,7 @@ export function Page() {
         ? <Database db={here} />
         : (
           <div className="mt-5 -ml-[54px]">
-            {ready && <Suspense fallback={null}><PageEditor /></Suspense>}
+            {ready && <Suspense fallback={null}><PageEditor title={title} /></Suspense>}
           </div>
         )}
 

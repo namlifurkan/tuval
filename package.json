@@ -21,6 +21,8 @@
     "@blocknote/core": "^0.52.1",
     "@blocknote/mantine": "^0.52.1",
     "@blocknote/react": "^0.52.1",
+    "@blocknote/xl-multi-column": "^0.52.1",
+    "@blocknote/xl-pdf-exporter": "^0.52.1",
     "@emoji-mart/data": "^1.2.1",
     "@supabase/supabase-js": "^2.111.0",
     "emoji-mart": "^5.6.0",
