@@ -8,7 +8,7 @@ import { initials, me } from '../board/me'
 import { requestRender, useBoardStore } from '../board/store'
 import { Popover, usePopover } from './ui'
 
-interface Peer { id: number; name: string; color: string }
+interface Peer { id: number; name: string; color: string; avatar?: string }
 
 export function Collaborators() {
   const [peers, setPeers] = useState<Peer[]>([])
@@ -22,8 +22,8 @@ export function Collaborators() {
       const out: Peer[] = []
       awareness.getStates().forEach((state, id) => {
         if (id === awareness.clientID) return
-        const user = (state as { user?: { name: string; color: string } }).user
-        if (user) out.push({ id, name: user.name, color: user.color })
+        const user = (state as { user?: Peer }).user
+        if (user) out.push({ id, name: user.name, color: user.color, avatar: user.avatar })
       })
       setPeers(out)
     }
@@ -43,10 +43,12 @@ export function Collaborators() {
 
   const chip = (p: Peer, size: number) => (
     <span
-      className="grid shrink-0 place-items-center rounded-md font-bold text-white"
+      className="grid shrink-0 place-items-center overflow-hidden rounded-md font-bold text-white"
       style={{ background: p.color, width: size, height: size, fontSize: size * 0.36 }}
     >
-      {initials(p.name)}
+      {p.avatar
+        ? <img src={p.avatar} alt="" className="h-full w-full object-cover" />
+        : initials(p.name)}
     </span>
   )
 
@@ -61,11 +63,13 @@ export function Collaborators() {
         {shown.map((p, i) => (
           <span
             key={p.id}
-            className={`relative grid h-8 w-8 place-items-center rounded-md border-2 text-[11px] font-bold text-white
+            className={`relative grid h-8 w-8 place-items-center overflow-hidden rounded-md border-2 text-[11px] font-bold text-white
               ${following === p.id ? 'border-[#C8452D]' : 'border-[#FCFBF8]'}`}
             style={{ background: p.color, marginLeft: i ? -8 : 0, zIndex: 10 - i }}
           >
-            {initials(p.name)}
+            {p.avatar
+              ? <img src={p.avatar} alt="" className="h-full w-full rounded-[4px] object-cover" />
+              : initials(p.name)}
             {following === p.id && (
               <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-md bg-[#C8452D]">
                 <Eye size={9} strokeWidth={3} className="text-white" />

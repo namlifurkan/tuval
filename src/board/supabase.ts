@@ -157,8 +157,11 @@ export async function signOut() {
 
 // A GitHub account can keep its address private, and then the email prefix is nothing to go
 // by. The name the provider hands over is the better answer when there is one.
+// A name the person chose wins over whatever a provider handed over, which in turn beats the
+// email prefix. A GitHub account can keep its address private, so the prefix is a last resort.
 export const displayName = (email: string | undefined) => {
   const meta = getUser()?.user_metadata as Record<string, string> | undefined
-  const given = meta?.user_name || meta?.preferred_username || meta?.full_name || meta?.name
+  const given = meta?.display_name?.trim()
+    || meta?.user_name || meta?.preferred_username || meta?.full_name || meta?.name
   return given || (email ?? '').split('@')[0] || 'user'
 }

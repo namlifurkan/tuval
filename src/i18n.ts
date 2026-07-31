@@ -356,6 +356,22 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Account': 'Hesap',
+  'Account settings': 'Hesap ayarları',
+  'Profile': 'Profil',
+  'This is the name and face the rest of your team sees on a board.':
+    'Board\'da ekibin geri kalanının gördüğü ad ve resim bu.',
+  'Your name': 'Adın',
+  'Change': 'Değiştir',
+  'Save': 'Kaydet',
+  'Saved': 'Kaydedildi',
+  'This account has no password yet, so an emailed link is the only way in.':
+    'Bu hesabın henüz parolası yok, tek giriş yolu e-postayla gelen bağlantı.',
+  'Connect a provider here rather than signing in with it: an account is chosen, not guessed.':
+    'Sağlayıcıyı girişte değil burada bağla: hesap tahmin edilmez, seçilir.',
+  'Signing out': 'Çıkış',
+  'Boards stay in the cloud; this browser simply forgets who you are.':
+    'Board\'lar bulutta kalır; bu tarayıcı sadece kim olduğunu unutur.',
   'Sign-in methods': 'Giriş yöntemleri',
   'Connect {name}': '{name} bağla',
   'Disconnect': 'Bağlantıyı kes',

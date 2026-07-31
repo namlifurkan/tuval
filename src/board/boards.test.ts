@@ -77,6 +77,9 @@ describe('room from url', () => {
     at('/dashboard')
     expect(currentRoom()).toBe('')
     expect(readRoute().kind).toBe('dashboard')
+    at('/settings')
+    expect(currentRoom()).toBe('')
+    expect(readRoute().kind).toBe('settings')
   })
 
   it('decodes a room that needed escaping', () => {

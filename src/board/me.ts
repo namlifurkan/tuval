@@ -1,11 +1,12 @@
 import { nanoid } from 'nanoid'
 import { GUIDE } from './brand'
+import { avatarUrl } from './profile'
 import { displayName, getUser, subscribeAuth } from './supabase'
 
 const NAMES = ['Kerem', 'Deniz', 'Mina', 'Poyraz', 'Zeynep', 'Efe', 'Lara', 'Bora']
 const COLORS = ['#C8452D', '#3E5C93', '#5E9A8A', '#8A7FB0', '#DE9A4E', '#B9718A']
 
-export interface Me { id: string; name: string; color: string }
+export interface Me { id: string; name: string; color: string; avatar?: string }
 
 function load(): Me {
   try {
@@ -34,10 +35,16 @@ export const subscribeMe = (fn: () => void) => {
 function adopt() {
   const user = getUser()
   const wanted = user ? displayName(user.email) : null
+  const face = user ? avatarUrl() : ''
+  const changed = (wanted && me.name !== wanted)
+    || (!wanted && me.name === GUIDE.name)
+    || (me.avatar ?? '') !== face
+
   if (wanted && me.name !== wanted) renameMe(wanted)
   else if (!wanted && me.name === GUIDE.name) renameMe(NAMES[0])
-  else return
-  listeners.forEach((l) => l())
+  me.avatar = face || undefined
+
+  if (changed) listeners.forEach((l) => l())
 }
 
 adopt()

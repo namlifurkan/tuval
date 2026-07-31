@@ -1,10 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  authError, authTrouble, cloudEnabled, isStaleLink, passwordProblem, displayName, getUser, setPassword, signIn, signInWith,
+  authError, authTrouble, cloudEnabled, isStaleLink, displayName, getUser, signIn, signInWith,
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { go } from '../board/boards'
-import { Identities } from './Identities'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -36,9 +35,6 @@ export function Account() {
   const [password, setPass] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [reason, setReason] = useState('')
-  const [fresh, setFresh] = useState('')
-  const [freshAgain, setFreshAgain] = useState('')
-  const [note, setNote] = useState('')
 
   const { setOpen } = pop
   useEffect(() => {
@@ -65,20 +61,6 @@ export function Account() {
     } catch (e) {
       setReason(e instanceof Error ? e.message : String(e))
       setState('error')
-    }
-  }
-
-  const save = async () => {
-    const problem = passwordProblem(fresh, freshAgain)
-    if (problem) { setNote(t(problem)); return }
-    setNote(t('Saving…'))
-    try {
-      await setPassword(fresh)
-      setFresh('')
-      setFreshAgain('')
-      setNote(t('Password saved. Next time you can sign in with it.'))
-    } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e))
     }
   }
 
@@ -109,42 +91,13 @@ export function Account() {
               <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
             </div>
             <div className="my-1 h-px bg-[#EAE6DD]" />
-            <div className="px-2.5 pb-1.5 text-xs font-semibold text-[#8A867C]">{t('Password')}</div>
-            <input
-              value={fresh}
-              onChange={(e) => setFresh(e.target.value)}
-              onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void save() }}
-              type="password"
-              autoComplete="new-password"
-              placeholder={t('New password')}
-              className="mx-1 mb-1.5 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
-            />
-            <input
-              value={freshAgain}
-              onChange={(e) => setFreshAgain(e.target.value)}
-              onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') void save() }}
-              type="password"
-              autoComplete="new-password"
-              placeholder={t('Again')}
-              className="mx-1 mb-1.5 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
-            />
             <button
               type="button"
-              disabled={!fresh || !freshAgain}
-              onClick={() => void save()}
-              className="mx-1 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:bg-[#EFEBE2] disabled:opacity-40"
+              onClick={() => go('/settings')}
+              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
             >
-              {t('Save password')}
+              {t('Account settings')}
             </button>
-            {note && (
-              <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#8A867C]">{note}</p>
-            )}
-            <div className="my-1.5 h-px bg-[#EAE6DD]" />
-            <Identities />
-            <div className="my-1.5 h-px bg-[#EAE6DD]" />
-            <p className="px-2.5 pb-2 text-[11px] leading-snug text-[#8A867C]">
-              {t('Your boards are saved to the cloud and reachable from any device.')}
-            </p>
             <button
               type="button"
               onClick={() => { void signOut(); pop.close() }}
