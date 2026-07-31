@@ -50,7 +50,10 @@ looks exactly like one that worked, so when in doubt, ask the site what it is ru
 curl -s https://tuval.dev/version.json
 ```
 
-## Before opening a pull request
+## Before every push
+
+CI does not run on its own while the repository is private, because Actions minutes are billed
+there. These four are the gate, and they have to pass before anything is pushed:
 
 ```bash
 npx tsc -b --noEmit
