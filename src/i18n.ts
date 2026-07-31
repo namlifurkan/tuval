@@ -404,8 +404,8 @@ const tr: Record<string, string> = {
   'No account needed to try it.': 'Denemek için hesap gerekmiyor.',
   // dashboard
   'In this browser': 'Bu tarayıcıda',
-  'These were made before signing in, so they belong to this browser rather than to an account. Open one and it moves to the cloud under {email}.':
-    'Bunlar giriş yapmadan önce oluşturulmuş, yani bir hesaba değil bu tarayıcıya ait. Birini açtığında {email} hesabıyla buluta taşınır.',
+  'Not part of any account: these were made before signing in and stay with this browser whoever is signed in. Open one and it moves to the cloud under {email}.':
+    'Hiçbir hesaba ait değil: giriş yapılmadan oluşturulmuşlar ve kim girerse girsin bu tarayıcıda kalırlar. Birini açtığında {email} hesabıyla buluta taşınır.',
   'These live in this browser. Sign in and they follow you to any device.':
     'Bunlar bu tarayıcıda duruyor. Giriş yaparsan her cihazda peşinden gelirler.',
   'Your boards': 'Board\'ların',

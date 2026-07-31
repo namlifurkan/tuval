@@ -79,9 +79,14 @@ function Tile({ board, mine, onForget }: {
   )
 }
 
-const Band = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const Band = ({ title, note, children }: {
+  title: string
+  note?: string
+  children: React.ReactNode
+}) => (
   <section className="mt-10">
     <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">{title}</h2>
+    {note && <p className="mt-1.5 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">{note}</p>}
     <div className="mt-3 grid gap-x-5 gap-y-7 [grid-template-columns:repeat(auto-fill,minmax(232px,1fr))]">
       {children}
     </div>
@@ -185,16 +190,14 @@ export function Dashboard() {
         )}
 
         {!loading && !!here.length && (
-          <>
-            <Band title={t('In this browser')}>
-              {here.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, false)} />)}
-            </Band>
-            <p className="mt-3 max-w-[62ch] text-[11px] leading-relaxed text-[#8A867C]">
-              {user
-                ? t('These were made before signing in, so they belong to this browser rather than to an account. Open one and it moves to the cloud under {email}.', { email: user.email ?? '' })
-                : t('These live in this browser. Sign in and they follow you to any device.')}
-            </p>
-          </>
+          <Band
+            title={t('In this browser')}
+            note={user
+              ? t('Not part of any account: these were made before signing in and stay with this browser whoever is signed in. Open one and it moves to the cloud under {email}.', { email: user.email ?? '' })
+              : t('These live in this browser. Sign in and they follow you to any device.')}
+          >
+            {here.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, false)} />)}
+          </Band>
         )}
 
         {!!shared.length && (
