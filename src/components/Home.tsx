@@ -2,6 +2,7 @@ import { readRoute } from '../board/boards'
 import { lazy, Suspense } from 'react'
 import { AuthPage } from './AuthPage'
 import { Dashboard } from './Dashboard'
+import { Issues } from './Issues'
 import { Settings } from './Settings'
 const Landing = lazy(() => import('./Landing').then((m) => ({ default: m.Landing })))
 
@@ -11,6 +12,7 @@ export function Home() {
   const route = readRoute()
   if (route.kind === 'auth') return <AuthPage />
   if (route.kind === 'settings') return <Settings />
+  if (route.kind === 'issues') return <Issues />
   if (route.kind === 'dashboard') return <Dashboard />
   return <Suspense fallback={null}><Landing /></Suspense>
 }

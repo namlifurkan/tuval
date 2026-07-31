@@ -170,6 +170,37 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@elsewhere.te
 select pg_temp.check('an invitation is not usable by another address',
   false, exists(select 1 from public.workspace_invites));
 
+-- Records belong to a workspace, and stay there ----------------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.records (id, workspace_id, kind, title, status, created_by)
+values ('dddddddd-0000-4000-8000-000000000004', 'cccccccc-0000-4000-8000-000000000003',
+        'issue', 'Ship the thing', 'todo', 'aaaaaaaa-0000-4000-8000-000000000001');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('owner sees the record',  true, exists(select 1 from public.records));
+select pg_temp.check('owner may write records', true, public.can_write_workspace('cccccccc-0000-4000-8000-000000000003'));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a stranger sees no records', false, exists(select 1 from public.records));
+select pg_temp.check('a stranger may not write',   false, public.can_write_workspace('cccccccc-0000-4000-8000-000000000003'));
+
+set local role postgres;
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'guest', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a guest reads records',      true,  exists(select 1 from public.records));
+select pg_temp.check('a guest cannot write them',  false, public.can_write_workspace('cccccccc-0000-4000-8000-000000000003'));
+
+set local role postgres;
+update public.workspace_members set role = 'member'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a member may write records', true, public.can_write_workspace('cccccccc-0000-4000-8000-000000000003'));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
