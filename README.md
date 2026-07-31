@@ -5,7 +5,7 @@ Open source infinite canvas. Canvas 2D renderer + Yjs CRDT, local-first, self-ho
 An open alternative to Miro, FigJam and the like. All code, design and branding are our own;
 no visual identity or asset is copied from any commercial product.
 
-[Türkçe README](README.tr.md) · [Design system](DESIGN.md) · [Contributing](CONTRIBUTING.md)
+[Türkçe README](README.tr.md) · [Contributing](CONTRIBUTING.md)
 
 ## Why
 

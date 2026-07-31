@@ -4,7 +4,6 @@ Açık kaynak sonsuz tuval. Canvas 2D renderer + Yjs CRDT.
 
 Miro, FigJam ve benzeri araçlara açık kaynak bir alternatif. Kod, tasarım ve marka
 tamamen kendimize ait; hiçbir ticari üründen görsel kimlik veya varlık kopyalanmamıştır.
-Tasarım sistemi için [DESIGN.md](DESIGN.md).
 
 ## Lisans
 

@@ -25,6 +25,7 @@ dist-ssr
 
 # Internal working docs — product strategy, agent instructions, local tooling
 CLAUDE.md
+DESIGN.md
 PRODUCT.md
 .claude/
 
