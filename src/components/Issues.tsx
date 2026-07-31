@@ -6,6 +6,8 @@ import type { Teammate } from '../board/workspace'
 import { initials } from '../board/me'
 import { t } from '../i18n'
 import { Trash2 } from 'lucide-react'
+import { IssueBoard } from './IssueBoard'
+import { IssueDetail } from './IssueDetail'
 import { Shell } from './Shell'
 
 const TONE: { [K in Status]: string } = {
@@ -32,6 +34,8 @@ export function Issues() {
   const [team, setTeam] = useState<Teammate[]>([])
   const [title, setTitle] = useState('')
   const [filter, setFilter] = useState<Status | 'all'>('all')
+  const [view, setView] = useState<'list' | 'board'>('list')
+  const [openId, setOpenId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!workspace) return
@@ -58,7 +62,19 @@ export function Issues() {
 
   return (
     <Shell title={t('Issues')}>
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="mb-4 flex gap-1">
+        {(['list', 'board'] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
+              ${view === v ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+          >{t(v)}</button>
+        ))}
+      </div>
+
+      <div className={`flex flex-wrap items-center gap-1.5 ${view === 'board' ? 'hidden' : ''}`}>
         {(['all', ...STATUSES] as const).map((s) => (
           <button
             key={s}
@@ -85,7 +101,11 @@ export function Issues() {
         className="mt-5 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]"
       />
 
-      <div className="mt-5 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+      {view === 'board' && (
+        <IssueBoard issues={records} nameOf={nameOf} onOpen={(i) => setOpenId(i.id)} />
+      )}
+
+      <div className={`mt-5 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD] ${view === 'board' ? 'hidden' : ''}`}>
         {shown.map((issue) => (
           <div key={issue.id} className="group flex items-center gap-3 py-2.5">
             <Dot status={issue.status} />
@@ -136,7 +156,16 @@ export function Issues() {
         ))}
       </div>
 
-      {!shown.length && (
+      {openId && records.some((r) => r.id === openId) && (
+        <IssueDetail
+          issue={records.find((r) => r.id === openId)!}
+          team={team}
+          nameOf={nameOf}
+          onClose={() => setOpenId(null)}
+        />
+      )}
+
+      {view === 'list' && !shown.length && (
         <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
           {records.length
             ? t('Nothing with that status.')
