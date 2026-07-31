@@ -12,17 +12,18 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
   if (!supabase || !user) return []
   const { data, error } = await supabase
     .from('boards')
-    .select('id, name, owner, updated_at, board_snapshots(items, frames)')
+    .select('id, name, owner, updated_at, board_snapshots(items, frames, thumb)')
     .order('updated_at', { ascending: false })
   if (error || !data) return []
   return data.map((row) => {
-    const snap = (row.board_snapshots as { items: number; frames: number }[] | null)?.[0]
+    const snap = (row.board_snapshots as { items: number; frames: number; thumb: string | null }[] | null)?.[0]
     return {
       room: row.id as string,
       name: (row.name as string) ?? '',
       opened: Date.parse(row.updated_at as string) || 0,
       items: snap?.items ?? 0,
       frames: snap?.frames ?? 0,
+      thumb: snap?.thumb ?? '',
       owned: row.owner === user.id,
     }
   })
@@ -59,7 +60,7 @@ export async function deleteCloudBoard(room: string) {
 }
 
 export async function pushSnapshot(
-  room: string, doc: Uint8Array, items: number, frames: number,
+  room: string, doc: Uint8Array, items: number, frames: number, thumb?: string,
 ): Promise<string | null> {
   if (!supabase || !getUser()) return null
   const { error } = await supabase.from('board_snapshots').upsert({
@@ -67,6 +68,7 @@ export async function pushSnapshot(
     doc: `\\x${[...doc].map((b) => b.toString(16).padStart(2, '0')).join('')}`,
     items,
     frames,
+    ...(thumb ? { thumb } : {}),
     updated_at: new Date().toISOString(),
   })
   return error ? error.message : null
@@ -212,6 +214,14 @@ export async function touchMembership(room: string) {
 
 export async function setMemberRole(room: string, userId: string, role: 'editor' | 'viewer') {
   await supabase?.from('board_members').update({ role }).eq('board_id', room).eq('user_id', userId)
+}
+
+export async function myRoles(): Promise<Record<string, string>> {
+  const user = getUser()
+  if (!supabase || !user) return {}
+  const { data } = await supabase
+    .from('board_members').select('board_id, role').eq('user_id', user.id)
+  return Object.fromEntries((data ?? []).map((r) => [r.board_id as string, r.role as string]))
 }
 
 export async function myRole(room: string): Promise<'owner' | 'editor' | 'viewer' | null> {

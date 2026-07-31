@@ -1,5 +1,5 @@
 import { readOnly } from './access'
-import { toBoard, toScreen, zoomAt } from './camera'
+import { fitRect, toBoard, toScreen, zoomAt } from './camera'
 import type { Camera } from './camera'
 import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
@@ -1118,3 +1118,23 @@ export function reorder(dir: 'front' | 'back' | 'forward' | 'backward') {
 export const anchorScreen = (item: Item, side: AnchorSide, c: Camera) =>
   toScreen(c, anchorPoint(item, side).x, anchorPoint(item, side).y)
 
+
+// Shared by the dock, the template hand-off from the board list and anything else that drops a
+// ready-made group of items onto the canvas.
+export function insertItems(list: Item[], fit: boolean, el: HTMLCanvasElement | null) {
+  createItems(list)
+  // Templates and mind maps ship their own frames; attach whatever landed inside one so
+  // dragging the frame carries its contents.
+  reparentToFrames(list.map((i) => i.id))
+  const s = store()
+  if (fit && el) {
+    // Fit the stored items, not the freshly built ones: a connector is born with a zero rect
+    // and only gets real bounds once the doc rebuilds. Fitting the raw list stretches the box
+    // back to the world origin and throws the camera off.
+    const index = getIndex()
+    const stored = list.map((i) => index.get(i.id) ?? i)
+    s.setCamera(fitRect(boxOf(stored), el.clientWidth, el.clientHeight))
+    s.setSelection([])
+  } else s.setSelection(list.map((i) => i.id))
+  requestRender()
+}

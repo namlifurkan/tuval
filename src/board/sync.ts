@@ -1,6 +1,8 @@
 import * as Y from 'yjs'
 import { getItems, room, ydoc } from './doc'
 import { readOnly } from './access'
+import { surfaceColor } from './brand'
+import { makeThumb } from './thumb'
 import { claimBoard, claimInvites, pullSnapshot, pushSnapshot } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
@@ -29,7 +31,7 @@ async function save() {
   const { items, frames } = counts()
   const name = (getMeta().name as string) ?? ''
   lastError = await claimBoard(room, name)
-    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames)
+    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems(), surfaceColor(String(getMeta().surface ?? 'paper'))))
   if (lastError) console.warn('[tuval] cloud save failed:', lastError)
 }
 

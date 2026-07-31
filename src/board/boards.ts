@@ -6,6 +6,7 @@ export interface BoardEntry {
   opened: number
   items: number
   frames: number
+  thumb?: string
 }
 
 const KEY = 'tuval:boards'
@@ -60,7 +61,16 @@ export function forgetBoard(room: string) {
 
 export const newRoom = () => nanoid(10)
 
-export function openBoard(room: string) {
+const PENDING = 'tuval:pending-template'
+
+export function takeTemplate() {
+  const id = sessionStorage.getItem(PENDING)
+  if (id) sessionStorage.removeItem(PENDING)
+  return id
+}
+
+export function openBoard(room: string, template?: string) {
+  if (template) sessionStorage.setItem(PENDING, template)
   if (room === currentRoom()) return
   location.hash = room
   // doc.ts binds its Y.Doc at module load, so switching rooms means a fresh page.

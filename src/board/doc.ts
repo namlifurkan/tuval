@@ -8,15 +8,16 @@ import { currentRoom } from './boards'
 import { connectorBounds, makeResolver } from './geometry'
 import type { Id, Item } from './types'
 
-export const room = currentRoom() || 'demo-board'
+export const room = currentRoom()
 export const ydoc = new Y.Doc()
 export const yitems = ydoc.getMap<Y.Map<unknown>>('items')
 export const ymeta = ydoc.getMap<unknown>('meta')
 export const undoManager = new Y.UndoManager([yitems, ymeta], { captureTimeout: 350 })
-export const persistence = new IndexeddbPersistence(`tuval:${room}`, ydoc)
+// No room means the home screen, or the landing hero: a document that is never stored.
+export const persistence = room ? new IndexeddbPersistence(`tuval:${room}`, ydoc) : null
 
 const collabUrl = import.meta.env.VITE_COLLAB_URL as string | undefined
-export const provider = collabUrl ? new WebsocketProvider(collabUrl, room, ydoc) : null
+export const provider = collabUrl && room ? new WebsocketProvider(collabUrl, room, ydoc) : null
 export const awareness: Awareness = provider?.awareness ?? new Awareness(ydoc)
 
 let snapshot: Item[] = []
@@ -51,7 +52,7 @@ function rebuildMeta() {
   metaListeners.forEach((l) => l())
 }
 ymeta.observe(rebuildMeta)
-persistence.on('synced', rebuildMeta)
+persistence?.on('synced', rebuildMeta)
 rebuildMeta()
 
 export const subscribeMeta = (fn: () => void) => {
@@ -62,7 +63,7 @@ export const getMeta = () => meta
 export const setMeta = (key: string, value: unknown) => { if (!readOnly()) ymeta.set(key, value) }
 
 yitems.observeDeep(rebuild)
-persistence.on('synced', rebuild)
+persistence?.on('synced', rebuild)
 rebuild()
 
 export const subscribeDoc = (fn: () => void) => {

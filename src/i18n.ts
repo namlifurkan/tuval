@@ -316,6 +316,42 @@ const tr: Record<string, string> = {
     'Bu giriş bağlantısı artık geçerli değil: {reason} Bağlantılar tek kullanımlıktır ve süresi dolar. Aşağıdan yenisini iste.',
   'Open a file': 'Dosya aç',
   'skipped': 'atlandı',
+  // home
+  'Open source infinite canvas': 'Açık kaynak sonsuz tuval',
+  'Open a board': 'Board aç',
+  'A surface for thinking,': 'Düşünmek için bir yüzey,',
+  'that an agent can read.': 'ajanın okuyabildiği.',
+  'This is the real editor, not a picture of one. Move something.':
+    'Bu editörün resmi değil, kendisi. Bir şeyi tut ve oynat.',
+  'Drag a sticky': 'Bir sticky sürükle',
+  'Try me': 'Dene',
+  'An idea lands here': 'Bir fikir buraya düşer',
+  'Drag me anywhere': 'Beni istediğin yere sürükle',
+  'Double click to write': 'Yazmak için çift tıkla',
+  'Nothing here is saved. Sign in and it is your board.':
+    'Burada hiçbir şey kaydedilmiyor. Giriş yap, board senin olsun.',
+  'What is different': 'Farkımız',
+  'Hand the board to an agent.': 'Board\'u bir ajana devret.',
+  'Where it runs': 'Nerede çalışır',
+  'On your own server, or on nobody’s.': 'Kendi sunucunda, ya da hiç kimsenin sunucusunda.',
+  'How it is built': 'Nasıl kurulu',
+  'One canvas, one document, no magic.': 'Tek tuval, tek doküman, sihir yok.',
+  'Rendering': 'Render',
+  'Document': 'Doküman',
+  'Access': 'Erişim',
+  'Licence': 'Lisans',
+  'Read the source': 'Kaynağı oku',
+  'No account needed to try it.': 'Denemek için hesap gerekmiyor.',
+  // dashboard
+  'Your boards': 'Board\'ların',
+  'Good to see you, {name}': 'Hoş geldin, {name}',
+  'Shared with you': 'Sana açılanlar',
+  'no preview yet': 'önizleme yok',
+  'empty': 'boş',
+  'Nothing here yet. A board is an endless sheet: drop a sticky, connect two of them, and hand the result to an agent when it is ready.':
+    'Henüz bir şey yok. Board sonsuz bir kağıt: bir sticky bırak, ikisini birbirine bağla, hazır olunca sonucu bir ajana devret.',
+  'These boards live in this browser only. Sign in and they follow you to any device.':
+    'Bu board\'lar yalnızca bu tarayıcıda. Giriş yaparsan her cihazda peşinden gelirler.',
   // access
   'View only': 'Salt görüntüleme',
   'The owner shared this board with you as a viewer. Ask them for edit access.':

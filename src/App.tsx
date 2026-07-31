@@ -1,6 +1,7 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { getLang, subscribeLang } from './i18n'
 import { Ada } from './components/Ada'
+import { Home } from './components/Home'
 import { Canvas } from './components/Canvas'
 import { BoardsPanel } from './components/BoardsPanel'
 import { BriefImport } from './components/BriefImport'
@@ -20,6 +21,10 @@ import { TextEditor } from './components/TextEditor'
 import { TopBar } from './components/TopBar'
 import { Inspector } from './components/Inspector'
 import { Minimap } from './components/Minimap'
+import { room } from './board/doc'
+import { takeTemplate } from './board/boards'
+import { insertItems } from './board/interaction'
+import { TEMPLATES } from './board/templates'
 import { useBoardStore } from './board/store'
 import { getDockPrefs, subscribeDock } from './board/dockPrefs'
 
@@ -42,10 +47,26 @@ function MinimapCorner() {
   )
 }
 
+// A board chosen from the board list can carry a template across the reload that binds the
+// new document.
+function usePendingTemplate() {
+  useEffect(() => {
+    const id = takeTemplate()
+    const tpl = id && TEMPLATES.find((x) => x.id === id)
+    const el = document.querySelector('canvas')
+    if (!tpl || !el) return
+    insertItems(tpl.build({ x: 0, y: 0 }), true, el)
+  }, [])
+}
+
 export default function App() {
   const presenting = useBoardStore((s) => s.presenting)
   // Remount on language change: t() is read during render, not through a hook.
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
+  usePendingTemplate()
+
+  if (!room) return <div key={lang}><Home /></div>
+
   return (
     <div key={lang} className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
       <Canvas />
