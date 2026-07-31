@@ -1,7 +1,7 @@
 import { getUser, supabase } from './supabase'
 import { getWorkspace } from './workspace'
 
-export type Kind = 'issue' | 'doc' | 'person' | 'company' | 'project' | 'event' | 'file'
+export type Kind = 'issue' | 'doc' | 'database' | 'person' | 'company' | 'project' | 'event' | 'file'
 export type Status = 'todo' | 'doing' | 'blocked' | 'done' | 'cancelled'
 
 export const STATUSES: Status[] = ['todo', 'doing', 'blocked', 'done', 'cancelled']
@@ -20,10 +20,13 @@ export interface Record {
   due_at: string | null
   position: number
   updated_at: string
+  // Whatever a kind needs and a column would not earn: a database keeps its fields and views
+  // here, a row of one keeps its values.
+  data: { [key: string]: unknown }
 }
 
 const COLUMNS =
-  'id, kind, title, description, icon, parent_id, status, assignee, priority, due_at, position, updated_at'
+  'id, kind, title, description, icon, parent_id, status, assignee, priority, due_at, position, updated_at, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so
 // the two are loaded at the same time and a single list would have them overwriting each other.
@@ -42,10 +45,21 @@ const kindOf = (id: string): Kind | null => {
   return null
 }
 
+// Pages and databases are both things the tree draws and both things a page can sit under, so
+// they are read as one list. Merged on write rather than on read: a getter that built a new
+// array every call would tell React the world changed on every render.
+let merged: Record[] = []
+export const getPages = () => merged
+
 function publish(kind: Kind, next: Record[]) {
   cache.set(kind, next)
+  if (kind === 'doc' || kind === 'database') {
+    merged = [...(cache.get('doc') ?? []), ...(cache.get('database') ?? [])]
+  }
   listeners.forEach((l) => l())
 }
+
+export const loadPages = () => Promise.all([loadRecords('doc'), loadRecords('database')])
 
 // A change is applied wherever the record already is, so an edit made in one view is seen by
 // the others without either knowing about the other.

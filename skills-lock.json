@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "building-tables": {
+      "source": "ancoleman/ai-design-components",
+      "sourceType": "github",
+      "skillPath": "skills/building-tables/SKILL.md",
+      "computedHash": "4958f0f361f72a866c27255e6cdb0fa6f025ed43aa1c29ce74f092095c8cc0c1"
+    },
     "sidebar": {
       "source": "thedaviddias/ux-patterns-for-developers",
       "sourceType": "github",

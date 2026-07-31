@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { go, newRoom, openBoard, touchBoard } from '../board/boards'
-import { ancestors, createRecord, getRecords, loadRecords, subscribeRecords } from '../board/records'
+import { ancestors, createRecord, getPages, getRecords, loadRecords, subscribeRecords } from '../board/records'
 import { t } from '../i18n'
 
 interface Action { id: string; label: string; note?: string; hint?: string; run: () => void }
 
-const pages = () => getRecords('doc')
+const pages = getPages
 const issues = () => getRecords('issue')
 
 // Everything reachable without the mouse. Linear's reputation is not its feature list, it is

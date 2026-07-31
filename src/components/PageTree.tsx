@@ -1,12 +1,12 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, Plus, Table2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
-import { ancestors, createRecord, getRecords, loadRecords, subscribeRecords } from '../board/records'
+import { ancestors, createRecord, getPages, loadPages, subscribeRecords } from '../board/records'
 import type { Record } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 
-const pages = () => getRecords('doc')
+const pages = getPages
 
 const OPEN = 'tuval:tree-open'
 
@@ -27,7 +27,8 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
   toggle: (id: string) => void
   add: (parent: string) => void
 }) {
-  const children = kids.get(page.id) ?? []
+  // A database draws its rows itself. Repeating them in the tree would bury the pages.
+  const children = page.kind === 'database' ? [] : kids.get(page.id) ?? []
   const expanded = open.has(page.id)
   const active = here === page.id
 
@@ -55,8 +56,10 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
           onClick={(e) => { e.preventDefault(); go(`/d/${page.id}`) }}
           className="min-w-0 flex-1 truncate py-1 text-left text-[13px] font-medium"
         >
-          {page.icon && <span className="mr-1.5">{page.icon}</span>}
-          {page.title || t('Untitled page')}
+          {page.icon
+            ? <span className="mr-1.5">{page.icon}</span>
+            : page.kind === 'database' && <Table2 size={12} className="mr-1.5 inline text-[#8A867C]" />}
+          {page.title || t(page.kind === 'database' ? 'Untitled database' : 'Untitled page')}
         </a>
 
         <button
@@ -98,7 +101,7 @@ export function PageTree() {
   const here = route.kind === 'page' ? route.id : ''
   const [open, setOpen] = useState(readOpen)
 
-  useEffect(() => { if (workspace) void loadRecords('doc') }, [workspace])
+  useEffect(() => { if (workspace) void loadPages() }, [workspace])
 
   const kids = new Map<string | null, Record[]>()
   const known = new Set(rows.map((r) => r.id))
@@ -146,14 +149,25 @@ export function PageTree() {
         <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
           {t('Pages')}
         </span>
-        <button
-          type="button"
-          aria-label={t('New page')}
-          onClick={() => add(null)}
-          className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
-        >
-          <Plus size={13} />
-        </button>
+        <span className="flex items-center gap-0.5">
+          <button
+            type="button"
+            aria-label={t('New database')}
+            title={t('New database')}
+            onClick={() => void createRecord('', 'database', null).then((id) => id && go(`/d/${id}`))}
+            className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          >
+            <Table2 size={13} />
+          </button>
+          <button
+            type="button"
+            aria-label={t('New page')}
+            onClick={() => add(null)}
+            className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          >
+            <Plus size={13} />
+          </button>
+        </span>
       </div>
 
       {roots.length

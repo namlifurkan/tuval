@@ -5,17 +5,18 @@ import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
 import {
-  ancestors, createRecord, getRecords, loadRecords, patchRecord, subscribeRecords,
+  ancestors, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
 } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
+import { Database } from './Database'
 import { IconPicker } from './IconPicker'
 import { Shell } from './Shell'
 
 // The editor is a third of the bundle and only a page needs it.
 const PageEditor = lazy(() => import('./PageEditor').then((m) => ({ default: m.PageEditor })))
 
-const pages = () => getRecords('doc')
+const pages = getPages
 
 export function Page() {
   const route = readRoute()
@@ -36,8 +37,8 @@ export function Page() {
 
   useEffect(() => {
     if (!workspace || !id) return
-    void loadRecords('doc').then(() => {
-      const row = getRecords('doc').find((r) => r.id === id)
+    void loadPages().then(() => {
+      const row = getPages().find((r) => r.id === id)
       setTitle(row?.title ?? '')
       // A page that has never been named was made a moment ago, and naming it is the next thing
       // anyone does. A page with a title is one you came back to read.
@@ -57,8 +58,10 @@ export function Page() {
   if (!id) return null
 
   const trail = ancestors(rows, id)
-  const children = rows.filter((r) => r.parent_id === id)
-  const icon = rows.find((r) => r.id === id)?.icon ?? ''
+  const here = rows.find((r) => r.id === id)
+  const database = here?.kind === 'database'
+  const children = database ? [] : rows.filter((r) => r.parent_id === id)
+  const icon = here?.icon ?? ''
 
   return (
     <Shell title={title || t('Untitled page')}>
@@ -88,13 +91,17 @@ export function Page() {
         ref={name}
         value={title}
         onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
-        placeholder={t('Untitled page')}
+        placeholder={t(database ? 'Untitled database' : 'Untitled page')}
         className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
       />
 
-      <div className="mt-5 -ml-[54px]">
-        {ready && <Suspense fallback={null}><PageEditor /></Suspense>}
-      </div>
+      {database
+        ? <Database db={here} />
+        : (
+          <div className="mt-5 -ml-[54px]">
+            {ready && <Suspense fallback={null}><PageEditor /></Suspense>}
+          </div>
+        )}
 
       {!!links.length && (
         <section className="mt-10 border-t border-[#EAE6DD] pt-4">
@@ -118,6 +125,7 @@ export function Page() {
         </section>
       )}
 
+      {!database && (
       <section className="mt-10 border-t border-[#EAE6DD] pt-4">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
           {t('Inside this page')}
@@ -146,6 +154,7 @@ export function Page() {
           <Plus size={14} /> {t('Add a page inside')}
         </button>
       </section>
+      )}
     </Shell>
   )
 }

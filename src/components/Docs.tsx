@@ -2,13 +2,13 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Plus } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  ancestors, archiveRecord, createRecord, getRecords, loadRecords, subscribeRecords,
+  ancestors, archiveRecord, createRecord, getPages, loadPages, subscribeRecords,
 } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Shell } from './Shell'
 
-const pages = () => getRecords('doc')
+const pages = getPages
 
 function when(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -24,7 +24,7 @@ export function Docs() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const records = useSyncExternalStore(subscribeRecords, pages, pages)
 
-  useEffect(() => { if (workspace) void loadRecords('doc') }, [workspace])
+  useEffect(() => { if (workspace) void loadPages() }, [workspace])
 
   const [busy, setBusy] = useState(false)
   const add = async () => {
