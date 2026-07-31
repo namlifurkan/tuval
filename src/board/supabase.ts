@@ -103,4 +103,10 @@ export async function signOut() {
   await supabase?.auth.signOut()
 }
 
-export const displayName = (email: string | undefined) => (email ?? '').split('@')[0] || 'user'
+// A GitHub account can keep its address private, and then the email prefix is nothing to go
+// by. The name the provider hands over is the better answer when there is one.
+export const displayName = (email: string | undefined) => {
+  const meta = getUser()?.user_metadata as Record<string, string> | undefined
+  const given = meta?.user_name || meta?.preferred_username || meta?.full_name || meta?.name
+  return given || (email ?? '').split('@')[0] || 'user'
+}
