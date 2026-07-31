@@ -346,6 +346,11 @@ const tr: Record<string, string> = {
   'Read the source': 'Kaynağı oku',
   'No account needed to try it.': 'Denemek için hesap gerekmiyor.',
   // dashboard
+  'In this browser': 'Bu tarayıcıda',
+  'These were made before signing in, so they belong to this browser rather than to an account. Open one and it moves to the cloud under {email}.':
+    'Bunlar giriş yapmadan önce oluşturulmuş, yani bir hesaba değil bu tarayıcıya ait. Birini açtığında {email} hesabıyla buluta taşınır.',
+  'These live in this browser. Sign in and they follow you to any device.':
+    'Bunlar bu tarayıcıda duruyor. Giriş yaparsan her cihazda peşinden gelirler.',
   'Your boards': 'Board\'ların',
   'Good to see you, {name}': 'Hoş geldin, {name}',
   'Shared with you': 'Sana açılanlar',

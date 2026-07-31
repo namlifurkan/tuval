@@ -103,7 +103,10 @@ export function Dashboard() {
   }, [user])
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
-  const mine = [...cloud.filter((b) => b.owned), ...local.filter((b) => !cloudRooms.has(b.room))]
+  // Local boards belong to the browser, not to the account: signing in as somebody else does
+  // not change them, and mixing them into your own boards makes that look like a bug.
+  const mine = user ? cloud.filter((b) => b.owned) : []
+  const here = local.filter((b) => !cloudRooms.has(b.room))
   const shared = cloud.filter((b) => !b.owned)
 
   const drop = (board: BoardEntry, inCloud: boolean) => () => {
@@ -167,23 +170,29 @@ export function Dashboard() {
           </Band>
         )}
 
-        {!loading && (
+        {!loading && !!mine.length && (
           <Band title={t('Your boards')}>
-            {mine.map((b) => (
-              <Tile
-                key={b.room}
-                board={b}
-                mine
-                onForget={drop(b, cloudRooms.has(b.room))}
-              />
-            ))}
+            {mine.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, true)} />)}
           </Band>
         )}
 
-        {!loading && !mine.length && (
+        {!loading && !mine.length && !here.length && (
           <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
             {t('Nothing here yet. A board is an endless sheet: drop a sticky, connect two of them, and hand the result to an agent when it is ready.')}
           </p>
+        )}
+
+        {!loading && !!here.length && (
+          <>
+            <Band title={t('In this browser')}>
+              {here.map((b) => <Tile key={b.room} board={b} mine onForget={drop(b, false)} />)}
+            </Band>
+            <p className="mt-3 max-w-[62ch] text-[11px] leading-relaxed text-[#8A867C]">
+              {user
+                ? t('These were made before signing in, so they belong to this browser rather than to an account. Open one and it moves to the cloud under {email}.', { email: user.email ?? '' })
+                : t('These live in this browser. Sign in and they follow you to any device.')}
+            </p>
+          </>
         )}
 
         {!!shared.length && (
@@ -192,11 +201,6 @@ export function Dashboard() {
           </Band>
         )}
 
-        {!user && cloudEnabled && (
-          <p className="mt-10 max-w-[62ch] text-sm leading-relaxed text-[#8A867C]">
-            {t('These boards live in this browser only. Sign in and they follow you to any device.')}
-          </p>
-        )}
       </main>
     </div>
   )
