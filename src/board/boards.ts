@@ -18,7 +18,7 @@ let cache: BoardEntry[] = read()
 function read(): BoardEntry[] {
   try {
     const raw = localStorage.getItem(KEY)
-    const parsed = raw ? (JSON.parse(raw) as BoardEntry[]) : []
+    const parsed = (raw ? (JSON.parse(raw) as BoardEntry[]) : []).filter((b) => b?.room)
     return Array.isArray(parsed) ? parsed.filter((b) => b && typeof b.room === 'string') : []
   } catch {
     return []
@@ -39,6 +39,7 @@ export function subscribeBoards(fn: () => void) {
 }
 
 export function touchBoard(room: string, patch: Partial<Omit<BoardEntry, 'room'>>) {
+  if (!room) return
   const rest = cache.filter((b) => b.room !== room)
   const current = cache.find((b) => b.room === room)
   const next: BoardEntry = {
@@ -70,9 +71,12 @@ export function takeTemplate() {
 }
 
 export function openBoard(room: string, template?: string) {
+  if (!room) return
   if (template) sessionStorage.setItem(PENDING, template)
   if (room === currentRoom()) return
-  location.hash = room
+  // replaceState never navigates, so the reload below is guaranteed to load the new url.
+  // Assigning location.href starts a navigation that the reload then races.
+  history.replaceState(null, '', `${location.pathname}#${room}`)
   // doc.ts binds its Y.Doc at module load, so switching rooms means a fresh page.
   location.reload()
 }
