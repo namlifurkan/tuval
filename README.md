@@ -106,6 +106,18 @@ For multiplayer put `VITE_COLLAB_URL=ws://localhost:1234` in `.env.local`, start
 server and restart the dev server (Vite reads env at boot). Open two tabs: items, selection
 and live cursors sync. The board room comes from the URL hash: `http://localhost:5173/#team-board`.
 
+## Deploy
+
+`npm run build` produces a static `dist/`. Any static host works; there is no server to run.
+Board rooms live in the URL hash, so no SPA rewrite rules are needed.
+
+After the site is up, point Supabase at it: **Authentication → URL Configuration**, set
+Site URL to your origin and add it to Redirect URLs. Sign-in links break without this.
+
+Multiplayer needs the y-websocket server hosted separately over `wss://` and
+`VITE_COLLAB_URL` set at build time. Without it Tuval still saves to Supabase, boards just
+do not update live between people.
+
 ## Architecture
 
 Single `<canvas>` with a dirty-flag rAF loop. DOM overlays only where they earn it: text

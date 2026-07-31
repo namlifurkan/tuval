@@ -24,6 +24,18 @@ ile sunucuyu başlat ve dev server'ı yeniden başlat (Vite env'i açılışta o
 item'lar, seçim ve canlı imleçler senkronize olur.
 Board odası URL hash'inden gelir: `http://localhost:5173/#takim-board`.
 
+## Yayına alma
+
+`npm run build` statik bir `dist/` üretir. Çalışacak sunucu yok, herhangi bir statik host olur.
+Board odaları URL hash'inde durduğu için SPA yönlendirme kuralı gerekmiyor.
+
+Site ayağa kalkınca Supabase'i ona yönlendir: **Authentication → URL Configuration**, Site URL
+kendi adresin olsun ve Redirect URLs listesine ekle. Bu olmadan giriş bağlantıları çalışmaz.
+
+Çoklu kullanıcı için y-websocket sunucusu ayrıca `wss://` üzerinden barındırılmalı ve
+`VITE_COLLAB_URL` build sırasında verilmeli. Olmadan da Tuval Supabase'e kaydeder, sadece
+board'lar kişiler arasında canlı güncellenmez.
+
 ## Mimari
 
 | Dosya | Sorumluluk |
