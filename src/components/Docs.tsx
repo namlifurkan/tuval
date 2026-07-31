@@ -64,6 +64,7 @@ export function Docs() {
                 className="min-w-0 flex-1 text-left"
               >
                 <span className="block truncate text-sm text-[#141310] group-hover:text-[#C8452D]">
+                  {page.icon && <span className="mr-1.5">{page.icon}</span>}
                   {page.title || t('Untitled page')}
                 </span>
                 {!!trail.length && (

@@ -64,7 +64,7 @@ export function Palette() {
     const found: Action[] = [
       ...docs.filter((p) => hit(p.title || t('Untitled page'))).slice(0, 8).map((p) => ({
         id: `d:${p.id}`,
-        label: p.title || t('Untitled page'),
+        label: `${p.icon ? `${p.icon} ` : ''}${p.title || t('Untitled page')}`,
         note: ancestors(docs, p.id).map((up) => up.title || t('Untitled page')).join(' / '),
         hint: t('Page'),
         run: () => go(`/d/${p.id}`),

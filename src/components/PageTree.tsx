@@ -55,6 +55,7 @@ function Row({ page, kids, depth, here, open, toggle, add }: {
           onClick={(e) => { e.preventDefault(); go(`/d/${page.id}`) }}
           className="min-w-0 flex-1 truncate py-1 text-left text-[13px] font-medium"
         >
+          {page.icon && <span className="mr-1.5">{page.icon}</span>}
           {page.title || t('Untitled page')}
         </a>
 

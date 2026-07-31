@@ -9,6 +9,7 @@ import {
 } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
+import { IconPicker } from './IconPicker'
 import { Shell } from './Shell'
 
 // The editor is a third of the bundle and only a page needs it.
@@ -57,6 +58,7 @@ export function Page() {
 
   const trail = ancestors(rows, id)
   const children = rows.filter((r) => r.parent_id === id)
+  const icon = rows.find((r) => r.id === id)?.icon ?? ''
 
   return (
     <Shell title={title || t('Untitled page')}>
@@ -69,6 +71,7 @@ export function Page() {
                 onClick={(e) => { e.preventDefault(); go(`/d/${up.id}`) }}
                 className="max-w-[22ch] truncate text-[12px] font-medium text-[#8A867C] hover:text-[#C8452D]"
               >
+                {up.icon && <span className="mr-1">{up.icon}</span>}
                 {up.title || t('Untitled page')}
               </a>
               <ChevronRight size={12} className="text-[#C6C2B6]" />
@@ -76,6 +79,10 @@ export function Page() {
           ))}
         </nav>
       )}
+
+      <div className="-ml-2 mb-1">
+        <IconPicker value={icon} onPick={(emoji) => patchRecord(id, { icon: emoji })} />
+      </div>
 
       <input
         ref={name}
@@ -123,7 +130,9 @@ export function Page() {
                 onClick={(e) => { e.preventDefault(); go(`/d/${kid.id}`) }}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
               >
-                <FileText size={14} className="shrink-0 text-[#8A867C]" />
+                {kid.icon
+                  ? <span className="w-[14px] shrink-0 text-center leading-none">{kid.icon}</span>
+                  : <FileText size={14} className="shrink-0 text-[#8A867C]" />}
                 {kid.title || t('Untitled page')}
               </a>
             </li>
