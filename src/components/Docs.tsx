@@ -2,13 +2,18 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Plus } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  ancestors, archiveRecord, createRecord, getPages, loadPages, subscribeRecords,
+  ancestors, archiveRecord, createRecord, deleteRecord, emptyOldTrash, getPages, getTrash,
+  loadPages, loadTrash, restoreRecord, subscribeRecords,
 } from '../board/records'
+import type { Record as Row } from '../board/records'
+import { removeCover } from '../board/cover'
+import { TRASH_DAYS } from '../board/cloud'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Shell } from './Shell'
 
 const pages = getPages
+const trash = getTrash
 
 function when(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -23,8 +28,13 @@ function when(iso: string) {
 export function Docs() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const records = useSyncExternalStore(subscribeRecords, pages, pages)
+  const binned = useSyncExternalStore(subscribeRecords, trash, trash)
 
-  useEffect(() => { if (workspace) void loadPages() }, [workspace])
+  useEffect(() => {
+    if (!workspace) return
+    void loadPages()
+    void loadTrash().then(() => emptyOldTrash(removeCover))
+  }, [workspace])
 
   const [busy, setBusy] = useState(false)
   const add = async () => {
@@ -76,7 +86,7 @@ export function Docs() {
               <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(page.updated_at)}</span>
               <button
                 type="button"
-                onClick={() => void archiveRecord(page.id)}
+                onClick={() => void archiveRecord(page.id).then(loadTrash)}
                 className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
               >
                 {t('Archive')}
@@ -85,6 +95,42 @@ export function Docs() {
           )
         })}
       </div>
+
+      {!!binned.length && (
+        <>
+          <h2 className="mt-9 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+            {t('Trash')}
+          </h2>
+          <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+            {t('Emptied automatically after {n} days. Until then a page here can be brought back exactly as it was.', { n: TRASH_DAYS })}
+          </p>
+          <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+            {binned.map((page: Row) => (
+              <div key={page.id} className="flex items-center gap-3 py-2.5">
+                <span className="min-w-0 flex-1 truncate text-sm text-[#8A867C]">
+                  {page.icon && <span className="mr-1.5">{page.icon}</span>}
+                  {page.title || t(page.kind === 'database' ? 'Untitled database' : 'Untitled page')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void restoreRecord(page)}
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                >{t('Restore')}</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name = page.title || t('Untitled page')
+                    if (confirm(t('Delete "{name}" for good? This cannot be undone.', { name }))) {
+                      void deleteRecord(page, removeCover)
+                    }
+                  }}
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                >{t('Delete for good')}</button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {!records.length && (
         <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">

@@ -1,4 +1,5 @@
 import { getUser, supabase } from './supabase'
+import { TRASH_DAYS } from './cloud'
 import { getWorkspace } from './workspace'
 
 export type Kind = 'issue' | 'doc' | 'database' | 'person' | 'company' | 'project' | 'event' | 'file'
@@ -140,6 +141,57 @@ export async function flushRecord(id: string) {
 export const flushRecords = () => Promise.all([...queued.keys()].map(flushRecord))
 
 addEventListener('pagehide', () => { void flushRecords() })
+
+// What was archived, newest first. Kept apart from the live lists: the tree and the palette ask
+// "what is there", and this asks "what did I throw away", which is a different question with a
+// different answer for the same rows.
+let binned: Record[] = []
+export const getTrash = () => binned
+
+export async function loadTrash() {
+  const ws = getWorkspace()
+  if (!supabase || !ws) return
+  const { data } = await supabase
+    .from('records').select(`${COLUMNS}, archived_at`)
+    .eq('workspace_id', ws.id).in('kind', ['doc', 'database'])
+    .not('archived_at', 'is', null)
+    .order('archived_at', { ascending: false })
+    .limit(200)
+  binned = (data ?? []) as unknown as Record[]
+  listeners.forEach((l) => l())
+}
+
+// One archiving stamps every page it took with the same instant, so undoing it is one question
+// asked of that instant rather than a walk back down a tree that is no longer drawn.
+export async function restoreRecord(row: Record) {
+  const stamp = (row as unknown as { archived_at?: string }).archived_at
+  if (!supabase || !stamp) return
+  binned = binned.filter((r) => (r as unknown as { archived_at?: string }).archived_at !== stamp)
+  listeners.forEach((l) => l())
+  await supabase.from('records').update({ archived_at: null })
+    .eq('archived_at', stamp).in('kind', ['doc', 'database'])
+  await loadPages()
+}
+
+// The row goes, and the FK takes its children and its body with it. The cover is a file rather
+// than a row, so nothing would take it: it is removed here or it is left paid for and unreachable.
+export async function deleteRecord(row: Record, dropCover: (path: string) => Promise<void>) {
+  if (!supabase) return
+  const doomed = [row, ...binned.filter((r) => r.parent_id === row.id)]
+  binned = binned.filter((r) => !doomed.some((d) => d.id === r.id))
+  listeners.forEach((l) => l())
+  await Promise.all(doomed.filter((r) => r.cover).map((r) => dropCover(r.cover)))
+  await supabase.from('records').delete().eq('id', row.id)
+}
+
+export async function emptyOldTrash(dropCover: (path: string) => Promise<void>) {
+  const cutoff = Date.now() - TRASH_DAYS * 24 * 60 * 60 * 1000
+  const stale = binned.filter((r) => {
+    const at = (r as unknown as { archived_at?: string }).archived_at
+    return at && new Date(at).getTime() < cutoff && !r.parent_id
+  })
+  for (const row of stale) await deleteRecord(row, dropCover)
+}
 
 // Archiving a page archives what is under it. Leaving the children behind would strand them:
 // nothing points at them and no tree draws them, so they exist only as rows.
