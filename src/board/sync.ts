@@ -1,5 +1,6 @@
 import * as Y from 'yjs'
 import { getItems, room, ydoc } from './doc'
+import { readOnly } from './access'
 import { claimBoard, claimInvites, pullSnapshot, pushSnapshot } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
@@ -23,7 +24,7 @@ export const cloudError = () => lastError
 
 async function save() {
   timer = 0
-  if (!dirty || !getUser()) return
+  if (!dirty || !getUser() || readOnly()) return
   dirty = false
   const { items, frames } = counts()
   const name = (getMeta().name as string) ?? ''

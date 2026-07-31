@@ -16,6 +16,7 @@ import { Account } from './Account'
 import { Share } from './Share'
 import { Collaborators } from './Collaborators'
 import { HandoffMenu } from './HandoffMenu'
+import { ViewOnly } from './ViewOnly'
 import { IconButton, Popover, usePopover } from './ui'
 
 function Caption({ children }: { children: ReactNode }) {
@@ -46,6 +47,7 @@ function Caption({ children }: { children: ReactNode }) {
         <span className="font-semibold uppercase tracking-[0.14em] text-[#C8452D]">{PRODUCT.name}</span>
         <span aria-hidden>·</span>
         {parts.join(' · ')}
+        <ViewOnly />
       </p>
     </div>
   )

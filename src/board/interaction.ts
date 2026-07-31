@@ -1,3 +1,4 @@
+import { readOnly } from './access'
 import { toBoard, toScreen, zoomAt } from './camera'
 import type { Camera } from './camera'
 import {
@@ -318,6 +319,16 @@ export function pointerDown(e: PointerEvent, screen: Vec) {
     if (under?.id !== s.openComment) s.update({ openComment: null })
   }
   if (s.activeEmbed) s.update({ activeEmbed: null })
+
+  if (readOnly()) {
+    const under = pickAt(p)
+    if (under) s.setSelection(expandGroups([under.id]))
+    else {
+      if (!e.shiftKey) s.setSelection([])
+      drag = { kind: 'marquee', origin: p, additive: e.shiftKey, base: e.shiftKey ? s.selection : [] }
+    }
+    return
+  }
 
   if (s.tool === 'pen') {
     if (s.pen.eraser) {

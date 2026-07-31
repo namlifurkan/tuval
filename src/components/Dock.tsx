@@ -1,8 +1,9 @@
 import { Minus, Plus, Redo2, RotateCcw, Settings2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
+import { readOnly, subscribeAccess } from '../board/access'
 import { clampZoom, fitRect, zoomAt } from '../board/camera'
-import { createItems, getIndex, getItems, undoManager } from '../board/doc'
+import { createItems, getIndex, getItems, redo, undo } from '../board/doc'
 import {
   DEFAULT_ORDER, DOCK_LABELS, DOCK_SIDES, getDockPrefs, moveDockItem, resetDock, setDockSide,
   setDockSize, setMagnify, SIZE_PX, subscribeDock, toggleDockItem, visibleDockItems,
@@ -28,6 +29,8 @@ const EMOJI = [
   '💡', '⚠️', '❓', '🚀', '🐛', '📌', '⏳', '🎉',
 ]
 
+const VIEW_SAFE = new Set<DockItemId>(['select', 'minimap', 'fit', 'zoom'])
+
 const MAGNIFY_AMPLITUDE = 0.5
 const MAGNIFY_SPREAD = 66
 
@@ -49,6 +52,7 @@ export function ShapeGlyph({ kind, size = 20 }: { kind: ShapeKind; size?: number
 export function Dock() {
   const prefs = useSyncExternalStore(subscribeDock, getDockPrefs, getDockPrefs)
   const items = useSyncExternalStore(subscribeDock, visibleDockItems, visibleDockItems)
+  const ro = useSyncExternalStore(subscribeAccess, readOnly, readOnly)
 
   const tool = useBoardStore((s) => s.tool)
   const setTool = useBoardStore((s) => s.setTool)
@@ -200,8 +204,8 @@ export function Dock() {
 
   const renderItem = (id: DockItemId): ReactNode => {
     switch (id) {
-      case 'undo': return button(`${t('Undo')} — ⌘Z`, false, () => undoManager.undo(), <Undo2 size={glyph} strokeWidth={1.8} />)
-      case 'redo': return button(`${t('Redo')} — ⌘⇧Z`, false, () => undoManager.redo(), <Redo2 size={glyph} strokeWidth={1.8} />)
+      case 'undo': return button(`${t('Undo')} — ⌘Z`, false, () => undo(), <Undo2 size={glyph} strokeWidth={1.8} />)
+      case 'redo': return button(`${t('Redo')} — ⌘⇧Z`, false, () => redo(), <Redo2 size={glyph} strokeWidth={1.8} />)
       case 'select': return button(`${t('Select')} — V`, tool === 'select', pick('select'), <Select size={glyph} />)
       case 'text': return button(`${t('Text')} — T`, tool === 'text', pick('text'), <TextTool size={glyph} />)
       case 'connector': return button(`${t('Connector')} — L`, tool === 'connector', pick('connector'), <Connector size={glyph} />)
@@ -480,7 +484,8 @@ export function Dock() {
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => { if (dragId && dragId !== id) moveDockItem(dragId, id); setDragId(null) }}
             style={{ transition: 'transform 130ms cubic-bezier(0.22, 1, 0.36, 1)' }}
-            className={`shrink-0 ${originClass} ${dragId === id ? 'opacity-40' : ''}`}
+            className={`shrink-0 ${originClass} ${dragId === id ? 'opacity-40' : ''}
+              ${ro && !VIEW_SAFE.has(id) ? 'pointer-events-none opacity-30' : ''}`}
           >
             {renderItem(id)}
           </div>

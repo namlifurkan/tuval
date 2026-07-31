@@ -1,3 +1,4 @@
+import { readOnly } from './access'
 import { getItems } from './doc'
 import { cloudEnabled, getUser } from './supabase'
 
@@ -106,7 +107,7 @@ export function facts(): Facts {
 }
 
 export function nextTip(anchored: (anchor: string) => boolean): Tip | null {
-  if (state.off) return null
+  if (state.off || readOnly()) return null
   const f = facts()
   return TIPS.find((t) => !state.seen.includes(t.id) && t.when(f) && anchored(t.anchor)) ?? null
 }

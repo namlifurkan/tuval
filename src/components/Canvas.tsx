@@ -6,7 +6,7 @@ import { uploadImage } from '../board/cloud'
 import { getUser } from '../board/supabase'
 import { flushCamera, saveCamera } from '../board/viewport'
 import { fitRect, toBoard } from '../board/camera'
-import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, undoManager } from '../board/doc'
+import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, redo, undo } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
@@ -269,7 +269,7 @@ export function Canvas() {
       }
       if (mod && e.key.toLowerCase() === 'z') {
         e.preventDefault()
-        e.shiftKey ? undoManager.redo() : undoManager.undo()
+        e.shiftKey ? redo() : undo()
         return
       }
       if (mod && e.key.toLowerCase() === 'a') {

@@ -314,6 +314,10 @@ const tr: Record<string, string> = {
     'İlk seferde parolayı boş bırak, e-postana gelen bağlantıyı onayla. Sonra bu menüden bir parola belirle ve bundan sonra onunla gir. Giriş yapmadan da Tuval çalışır ama board\'lar yalnızca bu tarayıcıda kalır.',
   'That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.':
     'Bu giriş bağlantısı artık geçerli değil: {reason} Bağlantılar tek kullanımlıktır ve süresi dolar. Aşağıdan yenisini iste.',
+  // access
+  'View only': 'Salt görüntüleme',
+  'The owner shared this board with you as a viewer. Ask them for edit access.':
+    'Sahibi bu board\'u sana görüntüleyici olarak açtı. Düzenleme için ondan yetki iste.',
   // guide
   '(guide)': '(rehber)',
   'Guidance': 'Yönlendirme',

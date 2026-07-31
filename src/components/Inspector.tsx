@@ -1,3 +1,4 @@
+import { readOnly, subscribeAccess } from '../board/access'
 import { boardPeople, isAssigned, toggleAssignee } from '../board/people'
 import { initials } from '../board/me'
 import { isNode, layoutMindmap, rootOf } from '../board/mindmap'
@@ -71,10 +72,11 @@ export function Inspector() {
   const dockSide = useSyncExternalStore(subscribeDock, readDockSide, readDockSide)
   const showMinimap = useBoardStore((s) => s.showMinimap)
   const dragging = useBoardStore((s) => s.dragging)
+  const ro = useSyncExternalStore(subscribeAccess, readOnly, readOnly)
 
   // The panel stays up while text is being edited: changing fill or font size mid-sentence is
   // the common case, and hiding it read as "the panel does not open when I add something".
-  if (!selected.length || dragging) return null
+  if (!selected.length || dragging || ro) return null
   if (selected.every((i) => i.type === 'comment')) return null
 
   const first = selected[0] as Item & Record<string, unknown>

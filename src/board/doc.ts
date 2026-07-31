@@ -3,6 +3,7 @@ import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
 import { Awareness } from 'y-protocols/awareness'
 import { nanoid } from 'nanoid'
+import { readOnly } from './access'
 import { currentRoom } from './boards'
 import { connectorBounds, makeResolver } from './geometry'
 import type { Id, Item } from './types'
@@ -58,7 +59,7 @@ export const subscribeMeta = (fn: () => void) => {
   return () => { metaListeners.delete(fn) }
 }
 export const getMeta = () => meta
-export const setMeta = (key: string, value: unknown) => ymeta.set(key, value)
+export const setMeta = (key: string, value: unknown) => { if (!readOnly()) ymeta.set(key, value) }
 
 yitems.observeDeep(rebuild)
 persistence.on('synced', rebuild)
@@ -88,6 +89,7 @@ export function minZ() {
 }
 
 export function createItems(items: Item[]) {
+  if (readOnly()) return
   ydoc.transact(() => {
     for (const item of items) yitems.set(item.id, new Y.Map(Object.entries(item)))
   })
@@ -98,6 +100,7 @@ export function patchItem(id: Id, changes: Record<string, unknown>) {
 }
 
 export function patchItems(entries: [Id, Record<string, unknown>][]) {
+  if (readOnly()) return
   ydoc.transact(() => {
     for (const [id, changes] of entries) {
       const m = yitems.get(id)
@@ -108,6 +111,7 @@ export function patchItems(entries: [Id, Record<string, unknown>][]) {
 }
 
 export function removeItems(ids: Id[]) {
+  if (readOnly()) return
   const set = new Set(ids)
   ydoc.transact(() => {
     for (const id of ids) yitems.delete(id)
@@ -135,6 +139,10 @@ if (import.meta.hot) {
   import.meta.hot.accept(() => import.meta.hot!.invalidate())
 }
 
+export const undo = () => { if (!readOnly()) undoManager.undo() }
+export const redo = () => { if (!readOnly()) undoManager.redo() }
+
 export function transact(fn: () => void) {
+  if (readOnly()) return
   ydoc.transact(fn)
 }
