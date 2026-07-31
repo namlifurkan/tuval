@@ -4,6 +4,7 @@ import {
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { go } from '../board/boards'
+import { Identities } from './Identities'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -126,6 +127,8 @@ export function Account() {
             {note && (
               <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#8A867C]">{note}</p>
             )}
+            <div className="my-1.5 h-px bg-[#EAE6DD]" />
+            <Identities />
             <div className="my-1.5 h-px bg-[#EAE6DD]" />
             <p className="px-2.5 pb-2 text-[11px] leading-snug text-[#8A867C]">
               {t('Your boards are saved to the cloud and reachable from any device.')}

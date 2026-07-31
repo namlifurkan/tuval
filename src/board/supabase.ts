@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Session, SupabaseClient } from '@supabase/supabase-js'
+import type { Session, SupabaseClient, UserIdentity } from '@supabase/supabase-js'
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
@@ -111,6 +111,29 @@ export async function sendReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${location.origin}/reset`,
   })
+  if (error) throw error
+}
+
+// Letting the server guess which account an OAuth identity belongs to is what fails when more
+// than one identity already carries the address. Signed in, there is nothing to guess: the
+// identity is attached to the account that asked for it.
+export async function listIdentities() {
+  const { data } = await supabase?.auth.getUserIdentities() ?? { data: null }
+  return data?.identities ?? []
+}
+
+export async function linkProvider(provider: Provider) {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { error } = await supabase.auth.linkIdentity({
+    provider,
+    options: { redirectTo: location.origin + location.pathname },
+  })
+  if (error) throw error
+}
+
+export async function unlinkProvider(identity: UserIdentity) {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { error } = await supabase.auth.unlinkIdentity(identity)
   if (error) throw error
 }
 

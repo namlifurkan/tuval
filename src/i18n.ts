@@ -356,6 +356,11 @@ const tr: Record<string, string> = {
   'skipped': 'atlandı',
   // home
   'Home': 'Anasayfa',
+  'Sign-in methods': 'Giriş yöntemleri',
+  'Connect {name}': '{name} bağla',
+  'Disconnect': 'Bağlantıyı kes',
+  'Email': 'E-posta',
+  'This is the only way you can sign in.': 'Giriş yapabildiğin tek yol bu.',
   'Create an account': 'Hesap oluştur',
   'No password to begin with: confirm the address by email, then choose one.':
     'Başlarken parola yok: adresi e-postayla doğrula, sonra bir tane seç.',
