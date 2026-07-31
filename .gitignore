@@ -27,3 +27,6 @@ dist-ssr
 CLAUDE.md
 PRODUCT.md
 .claude/
+
+# Supabase CLI
+supabase/.temp
