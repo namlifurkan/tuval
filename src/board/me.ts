@@ -1,4 +1,6 @@
 import { nanoid } from 'nanoid'
+import { GUIDE } from './brand'
+import { displayName, getUser, subscribeAuth } from './supabase'
 
 const NAMES = ['Kerem', 'Deniz', 'Mina', 'Poyraz', 'Zeynep', 'Efe', 'Lara', 'Bora']
 const COLORS = ['#C8452D', '#3E5C93', '#5E9A8A', '#8A7FB0', '#DE9A4E', '#B9718A']
@@ -20,6 +22,26 @@ function load(): Me {
 }
 
 export const me = load()
+
+const listeners = new Set<() => void>()
+export const subscribeMe = (fn: () => void) => {
+  listeners.add(fn)
+  return () => { listeners.delete(fn) }
+}
+
+// Signing in replaces the alias: appearing to your own team under a random first name is a
+// puzzle, not a nicety. An older alias could also collide with the guide, so it is dropped.
+function adopt() {
+  const user = getUser()
+  const wanted = user ? displayName(user.email) : null
+  if (wanted && me.name !== wanted) renameMe(wanted)
+  else if (!wanted && me.name === GUIDE.name) renameMe(NAMES[0])
+  else return
+  listeners.forEach((l) => l())
+}
+
+adopt()
+subscribeAuth(adopt)
 
 export function renameMe(name: string) {
   me.name = name

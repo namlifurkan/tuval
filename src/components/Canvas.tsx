@@ -13,7 +13,7 @@ import {
   quickCreateFromSelection, reorder, ungroupSelection, wheel,
 } from '../board/interaction'
 import { cloneItems, makeEmbed, makeImage, makeSticky, makeText, withPreview } from '../board/items'
-import { me } from '../board/me'
+import { me, subscribeMe } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
@@ -201,7 +201,12 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
   }, [embedded])
 
   useEffect(() => {
-    awareness.setLocalStateField('user', me)
+    const publish = () => awareness.setLocalStateField('user', { ...me })
+    publish()
+    return subscribeMe(publish)
+  }, [])
+
+  useEffect(() => {
     const onChange = () => {
       const states = [...awareness.getStates().entries()]
       session.remote = states
