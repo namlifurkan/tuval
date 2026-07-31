@@ -27,6 +27,20 @@ To add a language, copy the `tr` catalogue and register it in `CATALOG` and `LAN
 Migrations in `supabase/migrations/` are append-only. Never edit a file that has been applied;
 add a new one, and write it so it can run twice, because self-hosters apply them by hand.
 
+## Dependencies
+
+After adding or removing one, regenerate the lockfile with the npm the build image runs, not
+whatever is on your machine:
+
+```bash
+rm -rf node_modules package-lock.json
+npx npm@10 install --package-lock-only
+npx npm@10 ci --dry-run
+```
+
+A lockfile written by a newer npm is rejected by an older one, and the failure only shows up
+in CI.
+
 ## Before opening a pull request
 
 ```bash
