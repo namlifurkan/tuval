@@ -1,8 +1,9 @@
-import { X } from 'lucide-react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Upload, X } from 'lucide-react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { fitRect } from '../board/camera'
 import { createItems, getMeta, setMeta } from '../board/doc'
 import { briefToItems, parseBrief } from '../board/importer'
+import { miroToItems } from '../board/miro'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import { t } from '../i18n'
@@ -38,12 +39,25 @@ export function BriefImport() {
   const camera = useBoardStore((s) => s.camera)
   const [text, setText] = useState('')
   const ref = useRef<HTMLTextAreaElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useLayoutEffect(() => { if (open) ref.current?.focus() }, [open])
+
+  // A Miro export is JSON, a brief is Markdown. The first non-space character decides.
+  const miro = useMemo(() => {
+    if (!text.trimStart().startsWith('{') && !text.trimStart().startsWith('[')) return null
+    try {
+      const out = miroToItems(JSON.parse(text))
+      return out.items.length ? out : null
+    } catch { return null }
+  }, [text])
+
   if (!open) return null
 
-  const preview = text.trim() ? parseBrief(text) : null
-  const nodeCount = preview?.sections.reduce((n, s) => n + s.nodes.length, 0) ?? 0
+  const preview = !miro && text.trim() ? parseBrief(text) : null
+  const nodeCount = miro
+    ? miro.items.filter((i) => i.type !== 'connector' && i.type !== 'frame').length
+    : preview?.sections.reduce((n, s) => n + s.nodes.length, 0) ?? 0
 
   const create = () => {
     const el = document.querySelector('canvas')
@@ -52,7 +66,9 @@ export function BriefImport() {
       x: camera.x + el.clientWidth / 2 / camera.z - 400,
       y: camera.y + el.clientHeight / 2 / camera.z - 300,
     }
-    const { items, title } = briefToItems(text, origin)
+    const { items, title } = miro
+      ? { items: miro.items, title: '' }
+      : briefToItems(text, origin)
     if (!items.length) return
     createItems(items)
     if (title && !getMeta().name) setMeta('name', title)
@@ -98,10 +114,35 @@ export function BriefImport() {
         >
           {t('Paste an example')}
         </button>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+        >
+          <Upload size={12} /> {t('Open a file')}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,.md,.markdown,.txt,application/json,text/markdown"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            e.target.value = ''
+            if (file) void file.text().then(setText)
+          }}
+        />
         <span className="ml-auto text-xs text-[#8A867C]">
-          {preview
-            ? `${preview.sections.length} ${t('frames')} · ${nodeCount} ${t('items')} · ${preview.edges.length} ${t('connections')}`
-            : t('Nothing to read yet')}
+          {miro
+            ? [
+              `${miro.items.filter((i) => i.type === 'frame').length} ${t('frames')}`,
+              `${nodeCount} ${t('items')}`,
+              `${miro.items.filter((i) => i.type === 'connector').length} ${t('connections')}`,
+              ...Object.entries(miro.skipped).map(([k, n]) => `${n} ${k} ${t('skipped')}`),
+            ].join(' · ')
+            : preview
+              ? `${preview.sections.length} ${t('frames')} · ${nodeCount} ${t('items')} · ${preview.edges.length} ${t('connections')}`
+              : t('Nothing to read yet')}
         </span>
         <button
           type="button"

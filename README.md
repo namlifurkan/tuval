@@ -211,3 +211,21 @@ npx supabase migration new what_changed
 
 Write it so it can run twice (`create or replace`, `if not exists`, `drop policy if exists`),
 because self-hosters apply these by hand.
+
+## Coming from Miro
+
+There is no lock-in on either side. Pull a board out of Miro and rebuild it here:
+
+```bash
+MIRO_TOKEN=xxx node scripts/miro-export.mjs <board-id> board.json
+```
+
+The token is created at *miro.com → Settings → Your apps* (a developer team app with
+`boards:read`) and never leaves your shell: Tuval does not talk to Miro, and the browser
+never sees the token.
+
+Then **Hand off to AI → Build a board from a brief → Open a file** and pick the JSON.
+Frames, sticky notes, text, shapes, images, cards and connectors come over; positions are
+converted from Miro's centre origin to top-left, items keep their frame, and colours land on
+the nearest tone of our palette rather than being copied. Anything unsupported is counted and
+named in the panel instead of being dropped silently.
