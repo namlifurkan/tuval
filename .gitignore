@@ -32,3 +32,4 @@ PRODUCT.md
 # Supabase CLI
 supabase/.temp
 WORKSPACE.md
+.rls-run-*.sql

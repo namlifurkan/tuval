@@ -50,6 +50,21 @@ looks exactly like one that worked, so when in doubt, ask the site what it is ru
 curl -s https://tuval.dev/version.json
 ```
 
+## Access
+
+Anything that changes who can read or write something is proven before it is applied, not
+after. The suite creates two users, puts them through every combination the policies are meant
+to allow and refuse, and rolls back:
+
+```bash
+node scripts/rls-test.mjs                                   # against the schema as applied
+node scripts/rls-test.mjs supabase/migrations/xxxx.sql      # with a migration not yet pushed
+```
+
+The second form runs the migration inside the same transaction as the tests, so a change can be
+proven before `db push` touches anything. A mistake here does not look like a bug: it looks like
+everything working, while somebody reads data that is not theirs.
+
 ## Before every push
 
 CI does not run on its own while the repository is private, because Actions minutes are billed
