@@ -1,5 +1,5 @@
 import {
-  Clock, Download, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2,
+  Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2,
 } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
@@ -63,6 +63,7 @@ export function TopBar() {
   const dark = isDarkSurface(paint)
   const texture = useSyncExternalStore(subscribeMeta, readTexture, readTexture)
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
+  const boardsPanel = useBoardStore((s) => s.boardsPanel)
   const update = useBoardStore((s) => s.update)
   const menu = usePopover()
 
@@ -77,10 +78,14 @@ export function TopBar() {
       />
       <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
         <div className="pointer-events-auto flex min-w-0 items-start gap-1.5">
+          <IconButton title={t('Home')} className="mt-0.5" onClick={goHome}>
+            <House size={18} strokeWidth={1.8} />
+          </IconButton>
           <IconButton
             title={t('Boards')}
+            active={boardsPanel}
             className="mt-0.5"
-            onClick={goHome}
+            onClick={() => update({ boardsPanel: !boardsPanel })}
           >
             <LayoutGrid size={18} strokeWidth={1.8} />
           </IconButton>

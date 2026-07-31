@@ -3,6 +3,7 @@ import { getLang, subscribeLang } from './i18n'
 import { Ada } from './components/Ada'
 import { Home } from './components/Home'
 import { Canvas } from './components/Canvas'
+import { BoardsPanel } from './components/BoardsPanel'
 import { BriefImport } from './components/BriefImport'
 import { CommentsPanel } from './components/CommentsPanel'
 import { CursorChat } from './components/CursorChat'
@@ -79,6 +80,7 @@ export default function App() {
           <MinimapCorner />
           <ContextMenu />
           <CommentThread />
+          <BoardsPanel />
           <BriefImport />
           <CommentsPanel />
           <SearchPanel />

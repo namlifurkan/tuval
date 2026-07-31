@@ -122,7 +122,9 @@ export function Dashboard() {
   return (
     <div className="h-dvh overflow-y-auto bg-[#F2EFE9]">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px] sm:px-10">
-        <Wordmark height={18} />
+        <a href="/" aria-label={t('Home')} className="rounded-md focus-visible:outline-2 focus-visible:outline-[#C8452D]">
+          <Wordmark height={18} />
+        </a>
         <Account />
       </header>
 

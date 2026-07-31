@@ -317,6 +317,7 @@ const tr: Record<string, string> = {
   'Open a file': 'Dosya aç',
   'skipped': 'atlandı',
   // home
+  'Home': 'Anasayfa',
   'Open source infinite canvas': 'Açık kaynak sonsuz tuval',
   'Open a board': 'Board aç',
   'A surface for thinking,': 'Düşünmek için bir yüzey,',
