@@ -10,9 +10,10 @@ import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
   groupSelection, mindmapBranch, nudge, pasteStyle, pointerDown, pointerMove, pointerUp,
-  quickCreateFromSelection, reorder, ungroupSelection, wheel,
+  quickCreateFromSelection, reorder, reparentToFrames, ungroupSelection, wheel,
 } from '../board/interaction'
 import { t } from '../i18n'
+import { readClip, rehomePastedImages, writeClip } from '../board/clipboard'
 import { addImage } from '../board/images'
 import { addPdf, isPdf, MAX_PAGES } from '../board/pdf'
 import { cloneItems, makeEmbed, makeSticky, makeText, withPreview } from '../board/items'
@@ -28,7 +29,6 @@ const TOOL_KEYS: Record<string, Tool> = {
   l: 'connector', p: 'pen', f: 'frame', c: 'comment',
 }
 
-let clipboard: Item[] = []
 
 // `embedded` is the landing hero: the canvas shares the page with a scroll, so it must not
 // swallow the wheel or the vertical touch gesture. Items still drag, draw and type.
@@ -311,17 +311,22 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
       }
       if (mod && (e.key === 'c' || e.key === 'x')) {
         const index = getIndex()
-        clipboard = s.selection.map((id) => index.get(id)).filter(Boolean) as Item[]
+        writeClip(s.selection.map((id) => index.get(id)).filter(Boolean) as Item[])
         if (e.key === 'x') deleteSelection()
         return
       }
       if (mod && e.key === 'v') {
-        if (!clipboard.length) return
+        const clip = readClip()
+        if (!clip) return
         const p = getPointer()
-        const b = boxOf(clipboard)
-        const copies = cloneItems(clipboard, p.x - b.x - b.w / 2, p.y - b.y - b.h / 2)
-        createItems(copies)
-        s.setSelection(copies.map((c) => c.id))
+        const b = boxOf(clip.items)
+        void rehomePastedImages(clip.items, clip.room).then((items) => {
+          const copies = cloneItems(items, p.x - b.x - b.w / 2, p.y - b.y - b.h / 2)
+          createItems(copies)
+          reparentToFrames(copies.map((c) => c.id))
+          s.setSelection(copies.map((c) => c.id))
+          requestRender()
+        })
         return
       }
       if (mod && e.key.toLowerCase() === 'g') {
@@ -396,7 +401,7 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
         return
       }
       const text = e.clipboardData?.getData('text/plain')?.trim()
-      if (text && !clipboard.length) {
+      if (text && !readClip()) {
         e.preventDefault()
         const looksLikeUrl = /^(https?:\/\/|www\.)\S+$/i.test(text)
         const item = looksLikeUrl ? makeEmbed(p.x, p.y, text) : makeSticky(p.x - 114, p.y - 114, s.stickyFill, text)
