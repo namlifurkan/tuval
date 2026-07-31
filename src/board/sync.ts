@@ -1,9 +1,10 @@
 import * as Y from 'yjs'
 import { getItems, room, ydoc } from './doc'
 import { readOnly } from './access'
+import { storagePath } from './storage'
 import { surfaceColor } from './brand'
 import { makeThumb } from './thumb'
-import { claimBoard, claimInvites, pullSnapshot, pushSnapshot } from './cloud'
+import { claimBoard, claimInvites, pullSnapshot, pushSnapshot, sweepImages } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
 
@@ -37,6 +38,23 @@ async function save() {
 
 // Opening a board is enough to want a picture of it: a board nobody has edited since the
 // feature shipped would otherwise stay blank in the list for ever.
+// Run once the document is on screen, not on every save: it lists a folder, and what it
+// removes has been unreferenced for a day already.
+export async function sweepOrphanImages() {
+  if (!room || readOnly()) return
+  // A document that failed to load looks exactly like an empty one, and on an empty one every
+  // image is unreferenced. Nothing is removed until there is something to compare against.
+  if (!getItems().length) return
+  const referenced = new Set(
+    getItems()
+      .filter((i) => i.type === 'image')
+      .map((i) => storagePath(i.src))
+      .filter((p): p is string => !!p),
+  )
+  const gone = await sweepImages(room, referenced)
+  if (gone) console.info(`[tuval] removed ${gone} unreferenced image(s)`)
+}
+
 export function refreshThumb() {
   schedule()
 }

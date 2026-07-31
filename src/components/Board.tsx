@@ -22,7 +22,7 @@ import { PasswordGate } from './PasswordGate'
 import { Inspector } from './Inspector'
 import { Minimap } from './Minimap'
 import { startRealtime } from '../board/realtime'
-import { startCloudSync } from '../board/sync'
+import { startCloudSync, sweepOrphanImages } from '../board/sync'
 import { takeTemplate } from '../board/boards'
 import { insertItems } from '../board/interaction'
 import { TEMPLATES } from '../board/templates'
@@ -69,6 +69,10 @@ export default function Board() {
   useEffect(() => {
     startCloudSync()
     startRealtime()
+    // Once, after the document has had time to arrive: sweeping an empty document would look
+    // like every image on the board is unreferenced.
+    const id = setTimeout(() => void sweepOrphanImages(), 8000)
+    return () => clearTimeout(id)
   }, [])
 
   return (

@@ -69,7 +69,45 @@ export async function renameCloudBoard(room: string, name: string) {
 
 export async function deleteCloudBoard(room: string) {
   if (!supabase || !getUser()) return
+  // Rows cascade from the board; objects in the bucket do not, so the folder goes first while
+  // the policies still recognise the board.
+  const { data } = await supabase.storage.from(BUCKET).list(room, { limit: 1000 })
+  const names = (data ?? []).map((o) => `${room}/${o.name}`)
+  if (names.length) await supabase.storage.from(BUCKET).remove(names)
   await table()?.delete().eq('id', room)
+}
+
+// An image can outlive the item that introduced it: a copy shares the same object, and an
+// undo brings a deleted item back. So nothing is removed when an item goes. Instead, whatever
+// the board no longer refers to is collected later, and only once it is old enough that it
+// cannot be an upload whose item has not been saved yet.
+const SWEEP_AFTER = 24 * 60 * 60 * 1000
+
+export interface StoredObject { name: string; created_at?: string | null }
+
+export function orphansIn(
+  room: string, objects: StoredObject[], referenced: Set<string>, now = Date.now(),
+): string[] {
+  const old = now - SWEEP_AFTER
+  return objects
+    .filter((o) => !referenced.has(`${room}/${o.name}`))
+    // An object with no timestamp is left alone: unknown age is not the same as old.
+    .filter((o) => {
+      const at = Date.parse(o.created_at ?? '')
+      return Number.isFinite(at) && at < old
+    })
+    .map((o) => `${room}/${o.name}`)
+}
+
+export async function sweepImages(room: string, referenced: Set<string>): Promise<number> {
+  if (!supabase || !getUser() || !room) return 0
+  const { data, error } = await supabase.storage.from(BUCKET).list(room, { limit: 1000 })
+  if (error || !data) return 0
+
+  const orphans = orphansIn(room, data, referenced)
+  if (!orphans.length) return 0
+  const { error: failed } = await supabase.storage.from(BUCKET).remove(orphans)
+  return failed ? 0 : orphans.length
 }
 
 export async function pushSnapshot(
