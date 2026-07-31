@@ -2,12 +2,21 @@ import { nanoid } from 'nanoid'
 import { getRecords, patchRecord } from './records'
 import type { Record as Row } from './records'
 
-export type FieldType = 'text' | 'number' | 'select' | 'date' | 'checkbox' | 'person' | 'url'
+export type FieldType = 'text' | 'number' | 'select' | 'date' | 'checkbox' | 'person' | 'url' | 'relation'
 
-export const FIELD_TYPES: FieldType[] = ['text', 'number', 'select', 'date', 'checkbox', 'person', 'url']
+export const FIELD_TYPES: FieldType[] =
+  ['text', 'number', 'select', 'date', 'checkbox', 'person', 'url', 'relation']
 
 export interface Choice { id: string; name: string; tone: string }
-export interface Field { id: string; name: string; type: FieldType; choices?: Choice[] }
+// `db` is the database a relation points at. A relation with none yet is a column waiting to
+// be told what it relates to, not a broken one.
+export interface Field {
+  id: string
+  name: string
+  type: FieldType
+  choices?: Choice[]
+  db?: string
+}
 
 export type Op =
   | 'contains' | 'is' | 'isNot' | 'empty' | 'notEmpty'
@@ -41,6 +50,7 @@ const OPS: { [K in FieldType | 'title']: Op[] } = {
   date: ['is', 'before', 'after', 'empty', 'notEmpty'],
   checkbox: ['checked', 'unchecked'],
   person: ['is', 'empty', 'notEmpty'],
+  relation: ['is', 'empty', 'notEmpty'],
 }
 
 export const opsFor = (field: Field | null) => OPS[field?.type ?? 'title']
@@ -146,6 +156,18 @@ export function addView(db: Row, kind: ViewKind, name: string) {
 
 // Dates are kept the way a date input hands them over, as YYYY-MM-DD, so a day is compared by
 // string and no clock or timezone gets a say in which day a row lands on.
+// A relation is a list of record ids. Read through a helper because a column that used to be
+// text and was changed to a relation still has a string in some rows.
+export const linksOf = (row: Row, fieldId: string): string[] => {
+  const value = cellsOf(row)[fieldId]
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : []
+}
+
+export function toggleLink(row: Row, fieldId: string, id: string) {
+  const now = linksOf(row, fieldId)
+  setCell(row, fieldId, now.includes(id) ? now.filter((x) => x !== id) : [...now, id])
+}
+
 export const dayOf = (row: Row, fieldId: string | undefined): string =>
   (fieldId && typeof cellsOf(row)[fieldId] === 'string' ? String(cellsOf(row)[fieldId]) : '').slice(0, 10)
 
@@ -207,6 +229,16 @@ const same = (a: unknown, b: string) => String(a ?? '').toLowerCase() === b.toLo
 function passes(row: Row, filter: Filter): boolean {
   const value = held(row, filter.field)
   const want = filter.value ?? ''
+  // A relation holds a list, so "is" asks whether the list names it and "empty" asks whether
+  // the list is there at all.
+  if (Array.isArray(value)) {
+    switch (filter.op) {
+      case 'empty': return !value.length
+      case 'notEmpty': return value.length > 0
+      case 'is': return value.includes(want)
+      default: return true
+    }
+  }
   switch (filter.op) {
     case 'empty': return value === undefined || value === null || value === ''
     case 'notEmpty': return !(value === undefined || value === null || value === '')

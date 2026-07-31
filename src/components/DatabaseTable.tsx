@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addChoice, cellsOf, editField, FIELD_TYPES, removeField, setCell,
+  addChoice, cellsOf, editField, FIELD_TYPES, linksOf, removeField, rowsOf, setCell, toggleLink,
 } from '../board/database'
 import type { Choice, Field, FieldType } from '../board/database'
-import { archiveRecord, createRecord, patchRecord } from '../board/records'
+import { archiveRecord, createRecord, getRecords, patchRecord } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
@@ -85,10 +85,83 @@ function SelectCell({ db, row, field }: { db: Row; row: Row; field: Field }) {
   )
 }
 
+function Chip({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return (
+    <span
+      role={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className="max-w-[130px] truncate rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-1.5 py-0.5 text-[12px] text-[#141310] hover:border-[#C8452D]"
+    >{children}</span>
+  )
+}
+
+// A row of one database pointing at rows of another. Notion's most useful column and the reason
+// several databases are one workspace rather than several lists.
+function RelationCell({ row, field }: { row: Row; field: Field }) {
+  const [typed, setTyped] = useState('')
+  const linked = linksOf(row, field.id)
+  const target = field.db ? rowsOf(field.db) : []
+  const named = (id: string) =>
+    getRecords('doc').find((r) => r.id === id)?.title || t('Untitled')
+
+  if (!field.db) {
+    return <span className="block px-2.5 py-1.5 text-[12px] text-[#C6C2B6]">{t('Pick a database')}</span>
+  }
+
+  return (
+    <Popover
+      width={220}
+      trigger={({ toggle }) => (
+        <button
+          type="button"
+          onClick={toggle}
+          className="flex w-full flex-wrap items-center gap-1 px-2.5 py-1.5 text-left hover:bg-[#F2EFE9]"
+        >
+          {linked.length
+            ? linked.map((id) => <Chip key={id}>{named(id)}</Chip>)
+            : <span className="text-sm text-[#C6C2B6]">—</span>}
+        </button>
+      )}
+    >
+      {() => (
+        <>
+          <input
+            autoFocus
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder={t('Find a row')}
+            className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+          />
+          {target
+            .filter((r) => (r.title || t('Untitled')).toLowerCase().includes(typed.trim().toLowerCase()))
+            .slice(0, 12)
+            .map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => toggleLink(row, field.id, r.id)}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+              >
+                <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
+                  ${linked.includes(r.id) ? 'border-[#C8452D] bg-[#C8452D] text-white' : 'border-[#D8D5CD]'}`}
+                >{linked.includes(r.id) ? '✓' : ''}</span>
+                <span className="min-w-0 flex-1 truncate">{r.title || t('Untitled')}</span>
+              </button>
+            ))}
+          {!target.length && (
+            <p className="px-2 py-1 text-[12px] text-[#8A867C]">{t('That database has no rows yet.')}</p>
+          )}
+        </>
+      )}
+    </Popover>
+  )
+}
+
 function Cell({ db, row, field, team }: { db: Row; row: Row; field: Field; team: Teammate[] }) {
   const held = cellsOf(row)[field.id]
 
   if (field.type === 'select') return <SelectCell db={db} row={row} field={field} />
+  if (field.type === 'relation') return <RelationCell row={row} field={field} />
 
   if (field.type === 'checkbox') {
     return (
@@ -166,6 +239,18 @@ function Head({ db, field }: { db: Row; field: Field }) {
             >
               {FIELD_TYPES.map((type) => <option key={type} value={type}>{t(type)}</option>)}
             </select>
+            {field.type === 'relation' && (
+              <select
+                value={field.db ?? ''}
+                onChange={(e) => editField(db, field.id, { db: e.target.value || undefined })}
+                className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none"
+              >
+                <option value="">{t('Pick a database')}</option>
+                {getRecords('database').filter((d) => d.id !== db.id).map((d) => (
+                  <option key={d.id} value={d.id}>{d.title || t('Untitled database')}</option>
+                ))}
+              </select>
+            )}
             <button
               type="button"
               onClick={() => { removeField(db, field.id); close() }}

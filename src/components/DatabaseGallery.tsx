@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react'
 import { go } from '../board/boards'
-import { cellsOf } from '../board/database'
+import { cellsOf, linksOf } from '../board/database'
 import type { Field } from '../board/database'
-import { createRecord } from '../board/records'
+import { createRecord, getRecords } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
@@ -24,6 +24,13 @@ function Value({ row, field, team }: { row: Row; field: Field; team: Teammate[] 
 
   if (field.type === 'checkbox') {
     return <span className="text-[11px] text-[#8A867C]">{held === true ? `☑ ${field.name}` : null}</span>
+  }
+
+  if (field.type === 'relation') {
+    const names = linksOf(row, field.id)
+      .map((id) => getRecords('doc').find((r) => r.id === id)?.title || t('Untitled'))
+    if (!names.length) return null
+    return <span className="truncate text-[11px] text-[#8A867C]">{names.join(', ')}</span>
   }
 
   if (field.type === 'person') {

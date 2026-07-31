@@ -96,6 +96,22 @@ describe('applyView', () => {
     expect(down.at(-1)!.id).toBe('b')
   })
 
+  it('treats a relation as the list it is', () => {
+    const linked = [
+      row('x', 'X', { rel: ['r1', 'r2'] }),
+      row('y', 'Y', { rel: [] }),
+      row('z', 'Z'),
+    ]
+    const is = applyView(linked, view({ filters: [{ id: 'f', field: 'rel', op: 'is', value: 'r2' }] }))
+    expect(is.map((r) => r.id)).toEqual(['x'])
+
+    const empty = applyView(linked, view({ filters: [{ id: 'f', field: 'rel', op: 'empty' }] }))
+    expect(empty.map((r) => r.id)).toEqual(['y', 'z'])
+
+    const some = applyView(linked, view({ filters: [{ id: 'f', field: 'rel', op: 'notEmpty' }] }))
+    expect(some.map((r) => r.id)).toEqual(['x'])
+  })
+
   it('leaves the original list alone', () => {
     applyView(rows, view({ sorts: [{ field: 'n', dir: 'desc' }] }))
     expect(rows.map((r) => r.id)).toEqual(['a', 'b', 'c'])
