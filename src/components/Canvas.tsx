@@ -27,7 +27,9 @@ const TOOL_KEYS: Record<string, Tool> = {
 
 let clipboard: Item[] = []
 
-export function Canvas() {
+// `embedded` is the landing hero: the canvas shares the page with a scroll, so it must not
+// swallow the wheel or the vertical touch gesture. Items still drag, draw and type.
+export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
   const ref = useRef<HTMLCanvasElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const items = useItems()
@@ -183,7 +185,7 @@ export function Canvas() {
     canvas.addEventListener('pointercancel', up)
     canvas.addEventListener('pointerleave', (e) => { if (e.buttons === 0) up(e) })
     canvas.addEventListener('dblclick', dbl)
-    canvas.addEventListener('wheel', onWheel, { passive: false })
+    if (!embedded) canvas.addEventListener('wheel', onWheel, { passive: false })
     canvas.addEventListener('contextmenu', menu)
     return () => {
       window.removeEventListener('blur', abandon)
@@ -196,7 +198,7 @@ export function Canvas() {
       canvas.removeEventListener('wheel', onWheel)
       canvas.removeEventListener('contextmenu', menu)
     }
-  }, [])
+  }, [embedded])
 
   useEffect(() => {
     awareness.setLocalStateField('user', me)
@@ -416,7 +418,7 @@ export function Canvas() {
       onDrop={onDrop}
       onDragOver={(e) => e.preventDefault()}
     >
-      <canvas ref={ref} className="block h-full w-full touch-none" />
+      <canvas ref={ref} className={`block h-full w-full ${embedded ? 'touch-pan-y' : 'touch-none'}`} />
     </div>
   )
 }

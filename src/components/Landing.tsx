@@ -150,7 +150,7 @@ export function Landing() {
         onPointerDown={() => setTouched(true)}
         className="relative h-[min(74vh,640px)] w-full border-b border-[#E2DED5]"
       >
-        <Canvas />
+        <Canvas embedded />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-5 sm:p-8">
           <div className="pointer-events-auto max-w-[38ch] rounded-xl border border-[#E2DED5] bg-[#FCFBF8]/95 p-5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
