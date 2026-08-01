@@ -246,9 +246,9 @@ function Compare({ compare }: { compare: NonNullable<Page['compare']> }) {
         </table>
       </div>
       <p className="mt-4 max-w-[70ch] text-[12.5px] leading-relaxed text-[#8A867C]">
-        Checked {compare.checked}. {compare.against} is a trademark of its owner;
-        {' '}{PRODUCT.name} is not affiliated with, endorsed by or sponsored by them.
-        {' '}Their product changes; if a row here has gone stale, tell us and it will be corrected.
+        {compare.note ?? `Checked ${compare.checked}. ${compare.against} is a trademark of its owner;`
+          + ` ${PRODUCT.name} is not affiliated with, endorsed by or sponsored by them.`
+          + ' Their product changes; if a row here has gone stale, tell us and it will be corrected.'}
       </p>
     </div>
   )
@@ -731,6 +731,7 @@ export function SitePage() {
   useEffect(() => {
     document.title = page.title
     document.querySelector('meta[name="description"]')?.setAttribute('content', page.description)
+    document.documentElement.lang = page.lang ?? 'en'
     window.scrollTo(0, 0)
   }, [page])
 

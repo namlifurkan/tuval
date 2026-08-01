@@ -131,7 +131,8 @@
         "/databases",
         "/issues",
         "/self-hosting",
-        "/pricing"
+        "/pricing",
+        "/import/miro"
       ]
     },
     {
@@ -180,7 +181,8 @@
         "/databases",
         "/issues",
         "/for/software-teams",
-        "/self-hosting"
+        "/self-hosting",
+        "/import/miro"
       ]
     },
     {
@@ -229,7 +231,8 @@
         "/canvas",
         "/issues",
         "/for/client-work",
-        "/pricing"
+        "/pricing",
+        "/import/notion"
       ]
     },
     {
@@ -498,6 +501,210 @@
       ]
     },
     {
+      "path": "/import/miro",
+      "title": "Import a Miro board — frames, stickies and connectors | Tuval",
+      "description": "Pull a Miro board through Miro's own API and open it here: frames, sticky notes, shapes, text, images, cards and connectors, laid out where you left them. Your token stays in your shell.",
+      "claim": "Your Miro board, opened here.",
+      "lede": "One command pulls the board through Miro's own API into a JSON file, and Tuval reads that file. The token never leaves your shell, the browser never talks to Miro, and the board arrives with its geometry intact rather than as a picture of itself.",
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Two commands and a drop",
+          "body": "Make a developer token with boards:read at miro.com, run the export script with the board id, and drop the JSON on a board here. Nothing is uploaded to us in between: the file is written on your machine and read in your browser."
+        },
+        {
+          "heading": "What comes across",
+          "points": [
+            {
+              "title": "Frames, and what is inside them",
+              "body": "Frames arrive as frames and keep their name. Items nested in a frame stay nested, resolved after every id is known so a child listed before its parent still lands in the right place."
+            },
+            {
+              "title": "Sticky notes, shapes and text",
+              "body": "A sticky keeps its size and the nearest colour from our palette rather than a colour we do not have. Shapes and text keep their box. Cards and app cards become sticky notes, since that is what they are once the tracker they pointed at is gone."
+            },
+            {
+              "title": "Images and documents",
+              "body": "Placed at the same size and position, from the URL Miro gives them."
+            },
+            {
+              "title": "Connectors, last",
+              "body": "Drawn after everything else, because both ends have to exist here first. A connector whose endpoint did not come across is counted rather than drawn between the wrong two things."
+            },
+            {
+              "title": "What does not come across",
+              "body": "Anything Miro has that this list does not name — a widget type we do not draw. It is counted by type and reported when the import finishes, so you know what to go back for instead of finding out in a meeting."
+            }
+          ]
+        },
+        {
+          "tone": "pigment",
+          "heading": "The point is to stop paying for the board, not to keep a copy of it",
+          "body": "An export you cannot open is a hostage note. This one opens, and once it is open the sticky notes on it can become issues without being retyped."
+        }
+      ],
+      "next": [
+        "/import/notion",
+        "/canvas",
+        "/pricing"
+      ]
+    },
+    {
+      "path": "/import/notion",
+      "title": "Import a Notion export — pages and databases | Tuval",
+      "description": "Drop the zip Notion gives you and the pages come in as pages, with headings, lists, code, tables and nesting intact. CSV databases arrive as databases with their column types worked out, not as flat text.",
+      "claim": "The Notion export, read as pages and databases.",
+      "lede": "Notion hands you a zip of Markdown and CSV. Most tools take the Markdown and lose the databases. Here the folders become the page tree, the Markdown becomes pages, and every CSV becomes a database with columns that have types.",
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Drop the zip in, unopened",
+          "body": "A large export arrives as a zip of zips — Part-1.zip, Part-2.zip — and unpacking goes round again rather than asking you to do it by hand. A plain folder of .md and .csv files imports exactly as well."
+        },
+        {
+          "heading": "What comes across",
+          "points": [
+            {
+              "title": "The page tree",
+              "body": "A folder becomes the parent of the pages inside it, so the nesting you built in Notion is the nesting you land in here. Notion's id suffix is stripped off every title."
+            },
+            {
+              "title": "Pages, with their formatting",
+              "body": "Headings, lists, code blocks, tables, quotes and links come through as blocks, not as a wall of text. The duplicated title at the top of every Notion export is removed, because a page whose first line repeats its own name reads like a bug."
+            },
+            {
+              "title": "Databases as databases",
+              "body": "A CSV becomes a database, and each column gets a type read from what is actually in it: number, date, checkbox, or a select with its choices when the values repeat. The rest stay text. Rows arrive as rows you can filter, group and put on a board."
+            },
+            {
+              "title": "Where it stops",
+              "body": "Three hundred files in one import, and anything left over is counted and reported rather than dropped quietly. Comments, permissions, synced blocks and Notion's own AI blocks are not in the export, so they cannot be in the import."
+            }
+          ]
+        },
+        {
+          "tone": "pigment",
+          "heading": "Then it is yours",
+          "body": "The pages are rows in your Postgres and the databases are rows in the same table. Back the whole workspace up to one file, or run the thing on your own machine and never ask anybody for an export again."
+        }
+      ],
+      "next": [
+        "/import/miro",
+        "/databases",
+        "/self-hosting"
+      ]
+    },
+    {
+      "path": "/tr/miro-alternatifi",
+      "lang": "tr",
+      "alt": "/alternatives/miro",
+      "title": "Açık kaynak Miro alternatifi | Tuval",
+      "description": "Kendi sunucunda çalıştırabileceğin, AGPL-3.0 lisanslı sonsuz tuval. Yanında sayfalar ve iş takibi. Miro ile dürüst bir karşılaştırma — kaybettiğimiz yerler dahil.",
+      "claim": "Açık kaynak Miro alternatifi",
+      "lede": "Çerçeveleri, bağlayıcıları ve otuz iki şekil türüyle bir tuval; yanında panonun beslediği iş takibi ve sayfalar. Kendi Postgres'inde çalışır, koltuk başına fatura gelmez.",
+      "compare": {
+        "against": "Miro",
+        "checked": "1 Ağustos 2026",
+        "note": "1 Ağustos 2026 tarihinde kontrol edildi. Miro sahibinin ticari markasıdır; Tuval onlarla bağlantılı değildir, onlar tarafından desteklenmez ve sponsor edilmez. Onların ürünü değişir; buradaki bir satır eskidiyse bize söyleyin, düzeltilir.",
+        "rows": [
+          {
+            "feature": "Lisans",
+            "tuval": "AGPL-3.0. Kaynak deposu yakında yayınlanıyor; ayrı bir sürüm ya da kapatılmış özellik yok.",
+            "them": "Kapalı kaynak, barındırılan hizmet olarak sunuluyor."
+          },
+          {
+            "feature": "Kendi sunucunda çalıştırma",
+            "tuval": "Kendi Postgres'in ve S3 uyumlu herhangi bir kova. Tek bir ayar kurulumu \"kendi sunucun\" olarak işaretler; koltuk, depolama ve API sınırları uygulanmayı bırakır.",
+            "them": "Sunulmuyor."
+          },
+          {
+            "feature": "Fiyat",
+            "tuval": "3 kişiye ve 1 GB dosyaya kadar ücretsiz. Barındırılan plan {price} / {per} / {period}, KDV dahil, yaklaşık {about}.",
+            "them": "Kullanıcı başına abonelik, dolar üzerinden. Güncel tutamayacağımız bir rakamı buraya yazmıyoruz; kendi fiyat sayfalarına bakın."
+          },
+          {
+            "feature": "Tuvalin üzerine ne konuyor",
+            "tuval": "Yapışkan not, metin, otuz iki şekil türü, birden çok etiketli bağlayıcı, kalem ve fosforlu, görsel, otuz sayfaya kadar PDF, hücreleri birleştirilebilen tablo, kod bloğu, gömülü içerik, zihin haritası, yorum iğnesi, sunum modu, mini harita.",
+            "them": "Benzer bir nesne kümesi, üstüne Tuval'in yazmadığı diyagram ve sunum özellikleri."
+          },
+          {
+            "feature": "Şablonlar",
+            "tuval": "Sekiz pano şablonu ve dört veritabanı seti.",
+            "them": "Büyük bir birinci parti galeri ve halka açık topluluk kütüphanesi. Sekizden çok daha fazlası."
+          },
+          {
+            "feature": "Eş zamanlı düzenleme",
+            "tuval": "Supabase Realtime üzerinde Yjs CRDT; kanal özel ve panonun kendisiyle aynı satır seviyesi politikalardan geçiyor. Canlı imleçler ve takip modu yazıldı, ama iki kişilik bir oturumdan hiç geçmedi.",
+            "them": "Yıllardır üretimde kullanılan çok kullanıcılı düzenleme."
+          },
+          {
+            "feature": "Mobil ve tablet",
+            "tuval": "Yok. Yalnızca masaüstü tarayıcı — eksiklikten değil, karardan.",
+            "them": "Yerel iOS ve Android uygulamaları."
+          },
+          {
+            "feature": "Sürüm geçmişi",
+            "tuval": "Pano dokümanının içinde anlık görüntüler; on dakikada bir otomatik, son yirmisi saklanıyor.",
+            "them": "Ücretli planlarda sürüm geçmişi, daha uzun saklama süresiyle."
+          },
+          {
+            "feature": "Panoyu içeri almak",
+            "tuval": "Miro panosunu kendi REST API'leri üzerinden alır; verdiğiniz token kabuğunuzda kalır, tarayıcı Miro ile hiç konuşmaz. Ayrıca görsel, PDF ve Markdown brief.",
+            "them": "Geçerli değil."
+          },
+          {
+            "feature": "İşi dışarı almak",
+            "tuval": "Herhangi bir seçimin PNG'si, geri yüklenebilen tek dosyalık JSON yedeği, ve panoyu bir yapay zekâ ajanının işleyebileceği mermaid akışlı markdown brief'e çeviren tek tık.",
+            "them": "Görsel ve PDF dışa aktarma, ve belgelenmiş bir REST API."
+          },
+          {
+            "feature": "Entegrasyonlar",
+            "tuval": "REST API, webhook ve kod ajanları için MCP sunucusu. Uygulama dizini yok; hazır Slack, Jira veya Figma bağlantısı yok.",
+            "them": "Büyük bir uygulama pazarı ve çoğu ekibin zaten kullandığı araçlarla birinci parti entegrasyonlar."
+          },
+          {
+            "feature": "Erişim denetimi",
+            "tuval": "Postgres satır seviyesi güvenlikte zorlanıyor: editör ve görüntüleyici rolleri, e-posta alan adıyla erişim, herkese açık salt-okunur bağlantılar, sayfa başına yetki. SAML SSO ve SCIM yok.",
+            "them": "SAML SSO ve SCIM sağlama dahil kurumsal kimlik denetimleri."
+          }
+        ]
+      },
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Neden geçmeyebilirsin",
+          "body": "Çünkü on yıllık bir ürün müşterinin önünde çökmez, bizimki ise iki kişilik bir oturumdan hiç geçmedi. Bunu satış sayfasının sonuna saklamak yerine başına yazıyoruz: bir eksiği kabul etmek, geri kalan yirmi iddiayı inandırıcı yapan şeydir."
+        },
+        {
+          "tone": "paper",
+          "heading": "Bizim daha iyi yaptığımız üç şey",
+          "body": "Tuval ayrı bir ürün değil: bir yapışkan notu seçip işe dönüştürüyorsun, kart düşüncenin durduğu yerde kalıyor ve aynı iş döngüde beliriyor. Pano bir resim olarak değil, bir ajanın gerçekten işleyebileceği brief olarak dışarı çıkıyor; MCP sunucusu Claude Code veya Cursor'ın çalışma alanını doğrudan okumasını sağlıyor. Ve her şeyi AGPL-3.0 altında kendi Postgres'inde, kendi kovanda, hiçbir şey kısılmadan çalıştırabiliyorsun."
+        },
+        {
+          "tone": "paper",
+          "heading": "Miro'nun daha iyi yaptıkları",
+          "body": "Olgunlukla ilgili neredeyse her şey. Onların çok kullanıcılı düzenlemesi yıllardır atölye taşıyor; bizimki yazılmış ama odada iki kişiyle kanıtlanmamış. Onların yerel mobil ve tablet uygulamaları var; biz telefon yerleşimini hiç yapmamaya karar verdik. Binlerce şablonları ve bir uygulama pazarları var; bizde sekiz şablon ve bir REST API var. Bir destek organizasyonları, yayınlanmış güvenlik sertifikaları ve kurumsal kimlik sağlamaları var; bizde bir issue takipçisi ve tek bir bakımcı var."
+        },
+        {
+          "tone": "paper",
+          "heading": "Kimin geçmemesi gerekir",
+          "body": "Beyaz tahtası müşteriye dönük ve provasız olan. Ekibi toplantıya telefondan ya da tabletten katılan. Yazılımın onaylanması için SAML SSO, SCIM veya imzalı destek anlaşması isteyen. İş akışı şablon galerisine ya da Jira, Slack, Figma bağlantılarına dayanan. Ve bir Postgres veritabanıyla bir kovayı çalıştıracak kimseyi ayıramayan."
+        },
+        {
+          "tone": "paper",
+          "heading": "Geçmeye karar verdiysen",
+          "body": "Miro panosunu kendi API'leri üzerinden çeken betik depoda duruyor ve token'ın kabuğundan çıkmıyor. Çerçeveler çerçeve, yapışkan notlar yapışkan not, bağlayıcılar bağlayıcı olarak geliyor; gelmeyen ne varsa türüne göre sayılıp sana söyleniyor — sessizce düşürülmüyor. Panonun açıldığı gün üzerindeki notlar yeniden yazılmadan işe dönüşebiliyor."
+        }
+      ],
+      "next": [
+        "/import/miro",
+        "/canvas",
+        "/pricing",
+        "/self-hosting",
+        "/alternatives/miro"
+      ]
+    },
+    {
       "path": "/alternatives/miro",
       "title": "A self-hostable alternative to Miro | Tuval",
       "description": "An infinite canvas you can self-host under AGPL-3.0, with pages and an issue tracker beside it. An honest comparison with Miro, including where we lose.",
@@ -597,8 +804,10 @@
         "/databases",
         "/issues",
         "/pricing",
-        "/self-hosting"
-      ]
+        "/self-hosting",
+        "/import/miro"
+      ],
+      "alt": "/tr/miro-alternatifi"
     },
     {
       "path": "/alternatives/notion",
@@ -700,7 +909,8 @@
         "/databases",
         "/issues",
         "/pricing",
-        "/self-hosting"
+        "/self-hosting",
+        "/import/notion"
       ]
     },
     {

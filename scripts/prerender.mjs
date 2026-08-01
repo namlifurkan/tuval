@@ -74,10 +74,20 @@ for (const page of all) {
     ? [`<script type="application/ld+json">${application}</script>`]
     : []
 
+  // Two pages that say the same thing in two languages are one page to a search engine, and only
+  // if they both point at each other. One-sided alternates are read as two thin pages competing.
+  const twin = page.alt ? all.find((other) => other.path === page.alt) : null
+  const alternates = twin ? [page, twin].map((one) =>
+    `<link rel="alternate" hreflang="${one.lang ?? 'en'}" `
+    + `href="${SITE}${one.path === '/' ? '' : one.path}" />`)
+    .concat(`<link rel="alternate" hreflang="x-default" href="${SITE}${page.lang ? twin.path : page.path}" />`)
+    : []
+
   const head = [
     `<title>${escape(page.title)}</title>`,
     `<meta name="description" content="${escape(page.description)}" />`,
     `<link rel="canonical" href="${url}" />`,
+    ...alternates,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:site_name" content="Tuval" />`,
     `<meta property="og:url" content="${url}" />`,
@@ -100,7 +110,9 @@ for (const page of all) {
       ...page.compare.rows.map((row) =>
         `<tr><th>${escape(row.feature)}</th><td>${escape(row.tuval)}</td><td>${escape(row.them)}</td></tr>`),
       '</tbody></table>',
-      `<p>Checked ${escape(page.compare.checked)}. ${escape(page.compare.against)} is a trademark of its owner; Tuval is not affiliated with, endorsed by or sponsored by them.</p>`,
+      `<p>${escape(page.compare.note
+        ?? `Checked ${page.compare.checked}. ${page.compare.against} is a trademark of its owner;`
+        + ' Tuval is not affiliated with, endorsed by or sponsored by them.')}</p>`,
     ] : []),
     ...page.bands.flatMap((band) => [
       `<h2>${escape(band.heading)}</h2>`,
@@ -131,6 +143,7 @@ for (const page of all) {
   ].join('')
 
   const html = shell
+    .replace('<html lang="en">', `<html lang="${page.lang ?? 'en'}">`)
     .replace('<title>Tuval</title>', head)
     .replace(
       /<meta name="description"[^>]*\/>\n?\s*/,

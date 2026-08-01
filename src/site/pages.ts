@@ -30,11 +30,18 @@ export interface Band {
 export interface Compare {
   against: string
   checked: string
+  // The trademark and staleness line. Written out when the page is not in English, because a
+  // legal sentence in the wrong language is the one sentence a reader stops on.
+  note?: string
   rows: { feature: string; tuval: string; them: string }[]
 }
 
 export interface Page {
   path: string
+  // Absent means English. A page that exists in two languages names its counterpart in `alt`, and
+  // the pair is what lets hreflang say they are the same page rather than two thin ones.
+  lang?: string
+  alt?: string
   compare?: Compare
   // What the tab and the search result say. Kept under 60 characters so it is not cut off.
   title: string
