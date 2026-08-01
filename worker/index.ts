@@ -67,14 +67,37 @@ async function cardFor(url: URL): Promise<Card | null> {
   if (kind === 'b') {
     const board = await ask('boards', `id=eq.${encodeURIComponent(name)}&public_at=not.is.null&deleted_at=is.null&select=name`)
     if (!board) return null
+    // The preview the board list already draws, if there is one: a card showing the actual work
+    // is the difference between a link somebody clicks and a link somebody scrolls past.
+    const shot = await ask('board_snapshots', `board_id=eq.${encodeURIComponent(name)}&select=thumb&order=updated_at.desc&limit=1`)
     return {
       title: `${(board.name as string) || 'Untitled board'} · ${SITE}`,
       note: 'An infinite canvas, open to read. The brief behind it can be copied off the page.',
-      picture: PICTURE,
+      picture: (shot?.thumb as string)?.startsWith('data:') ? `/og/b/${encodeURIComponent(name)}` : PICTURE,
     }
   }
 
   return null
+}
+
+// The thumbnail is kept as a data URL, which is fine for a list on a page and useless as an
+// og:image — a crawler wants an address it can fetch. This is that address.
+async function preview(name: string): Promise<Response | null> {
+  const board = await ask('boards', `id=eq.${encodeURIComponent(name)}&public_at=not.is.null&deleted_at=is.null&select=id`)
+  if (!board) return null
+  const shot = await ask('board_snapshots', `board_id=eq.${encodeURIComponent(name)}&select=thumb&order=updated_at.desc&limit=1`)
+  const held = shot?.thumb as string | undefined
+  const at = held?.indexOf(',') ?? -1
+  if (!held || at < 0) return null
+
+  const type = held.slice(5, held.indexOf(';'))
+  const raw = atob(held.slice(at + 1))
+  const bytes = new Uint8Array(raw.length)
+  for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i)
+
+  return new Response(bytes, {
+    headers: { 'content-type': type, 'cache-control': 'public, max-age=300' },
+  })
 }
 
 const tags = (card: Card, url: string) => [
@@ -93,7 +116,13 @@ const tags = (card: Card, url: string) => [
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
-    const kind = url.pathname.split('/')[1]
+    const [, kind, second, third] = url.pathname.split('/')
+
+    if (kind === 'og' && second === 'b' && third) {
+      const shot = await preview(decodeURIComponent(third)).catch(() => null)
+      if (shot) return shot
+      return Response.redirect(new URL(PICTURE, url).href, 302)
+    }
 
     if (!['u', 'p', 'b'].includes(kind) || request.method !== 'GET') {
       return env.ASSETS.fetch(request)
