@@ -398,6 +398,8 @@ const tr: Record<string, string> = {
   'Tags': 'Etiketler',
   'Untitled project': 'Adsız proje',
   'Empty the trash ({n})': 'Çöpü boşalt ({n})',
+  'Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.':
+    '"{name}" çöpe taşınsın mı? İçindekiler de gider, {days} gün boyunca geri getirilebilir.',
   'Delete {n} boards in the trash for good? This cannot be undone.':
     'Çöpteki {n} board kalıcı silinsin mi? Bu geri alınamaz.',
   'New issue in {name}': '{name} içinde yeni iş',

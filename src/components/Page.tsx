@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import {
-  ChevronRight, CornerUpLeft, FileText, Lock, Plus, Star, StretchHorizontal, Table2, Unlock,
+  ChevronRight, CornerUpLeft, FileText, Lock, Plus, Star, StretchHorizontal, Table2, Trash2, Unlock,
 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { relatedTo } from '../board/database'
@@ -11,8 +11,9 @@ import { getFavourites, loadFavourites, subscribeFavourites, toggleFavourite } f
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
+import { TRASH_DAYS } from '../board/cloud'
 import {
-  ancestors, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
+  ancestors, archiveRecord, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
 } from '../board/records'
 import { getRecords } from '../board/records'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
@@ -160,6 +161,20 @@ export function Page() {
                 ${isWide(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
             >
               <StretchHorizontal size={13} />
+            </button>
+            {/* A page could be made from four screens and thrown away from one. Where you are is
+                where you decide you were wrong about making it. */}
+            <button
+              type="button"
+              title={t('Move to trash')}
+              onClick={() => {
+                const shown = title || t('Untitled page')
+                if (!confirm(t('Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.', { name: shown, days: TRASH_DAYS }))) return
+                void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/docs'))
+              }}
+              className="grid h-7 w-7 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+            >
+              <Trash2 size={13} />
             </button>
           </>
         )}
