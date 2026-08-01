@@ -72,9 +72,15 @@ for (const page of all) {
       ]),
     ]).filter(Boolean),
     '<nav>',
-    ...all
-      .filter((other) => other.path !== page.path)
-      .map((other) => `<a href="${other.path}">${escape(names[other.path] ?? other.path)}</a>`),
+    // The module curates which page points at which, and this used to throw that away and dump
+    // every sibling on every page with the same anchor text. The served HTML and the rendered
+    // page then disagreed about the shape of the site, which is exactly the drift the top of
+    // this file says cannot happen. The anchor is the destination's claim, not its label: a link
+    // that reads "Canvas" on eleven pages says nothing about why it is there.
+    ...(page.next ?? [])
+      .map((to) => all.find((other) => other.path === to))
+      .filter(Boolean)
+      .map((other) => `<a href="${other.path}">${escape(other.claim)}</a>`),
     '</nav>',
     '</main>',
   ].join('')

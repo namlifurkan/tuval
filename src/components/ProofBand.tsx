@@ -160,7 +160,10 @@ export function ProofBand() {
     const rows: { key: string; title: string }[] = []
     notes.forEach((note, at) => {
       const title = ('text' in note ? note.text : '') || 'Untitled'
-      const card = makeRecordItem(note.x, note.y, `demo-${at}`, title, 'todo', '#FCFBF8')
+      const card = makeRecordItem(
+        note.x, note.y, `demo-${at}`, title, 'todo',
+        'fill' in note ? note.fill : '#FCFBF8',
+      )
       card.w = Math.max(note.w, RECORD_W)
       card.h = RECORD_H
       card.parentId = note.parentId
@@ -204,6 +207,14 @@ export function ProofBand() {
   const readBack = () => {
     setBrief(JSON.stringify(inEnglish(() => boardToGraph(getItems(), 'retro-this-morning')), null, 2))
     setShown('mcp')
+  }
+
+  // Without a way back, the last two buttons ran on a board the copy no longer described.
+  const again = () => {
+    transact(() => removeItems(getItems().map((i) => i.id)))
+    seed()
+    setMade([])
+    setShown('none')
   }
 
   const typed = useTyped(brief, shown === 'agent' || shown === 'mcp')
@@ -273,6 +284,13 @@ export function ProofBand() {
           <button type="button" onClick={readBack} className={key(shown === 'mcp')}>
             Read it back
           </button>
+          {shown !== 'none' && (
+            <button
+              type="button"
+              onClick={again}
+              className="rounded-xl px-3 py-2.5 text-[13.5px] font-semibold text-[#8A867C] hover:text-[#141310]"
+            >Start over</button>
+          )}
           <p className="ml-auto max-w-[46ch] text-[12.5px] leading-snug text-[#8A867C]">
             The brief and the graph are the product's own functions, run on the board above.
             Turning stickies into issues is done here rather than in a workspace, because you do
