@@ -53,7 +53,7 @@ export const TEMPLATES: Template[] = [
         [t('User interviews'), t('Pricing page')],
         [t('Onboarding flow')],
         [],
-        ['Landing yenileme'],
+        [t('Landing page refresh')],
       ]
       seed.forEach((notes, c) => {
         notes.forEach((text, r) => {
@@ -72,7 +72,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: 'retro',
-    name: 'Retrospektif',
+    name: 'Retrospective',
     description: 'Start / Stop / Continue',
     build: (o) => columnLabels(
       o, ['Start', 'Stop', 'Continue'], ['#8FA96B', '#C8664A', '#7FA5BE'], 320, 48, 'Retrospektif',
@@ -136,7 +136,7 @@ export const TEMPLATES: Template[] = [
   {
     id: 'mindmap',
     name: 'Mind map',
-    description: 'Merkez fikir + 5 dal',
+    description: 'A centre and five branches',
     build: (o) => {
       const items: Item[] = []
       const core = makeShape(o.x - 150, o.y - 60, 300, 120, {

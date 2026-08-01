@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { fitRect } from '../board/camera'
 import { boxOf, render } from '../board/render'
+import { inEnglish } from '../i18n'
 import { TEMPLATES } from '../board/templates'
 import type { Item } from '../board/types'
 
@@ -18,7 +19,7 @@ const built = new Map<string, Item[]>()
 const itemsFor = (template: string): Item[] => {
   const held = built.get(template)
   if (held) return held
-  const made = TEMPLATES.find((t) => t.id === template)?.build({ x: 0, y: 0 }) ?? []
+  const made = inEnglish(() => TEMPLATES.find((one) => one.id === template)?.build({ x: 0, y: 0 }) ?? [])
   built.set(template, made)
   return made
 }
@@ -95,7 +96,7 @@ export function BoardPicture({ template, className = '', surface = '#F2EFE9' }: 
     return () => watch.disconnect()
   }, [template, surface])
 
-  const name = TEMPLATES.find((t) => t.id === template)?.name ?? template
+  const name = TEMPLATES.find((one) => one.id === template)?.name ?? template
   // The frame takes the board's own proportions. A fixed ratio letterboxes: a wide kanban in a
   // 16/10 box is a small picture floating in a lot of paper, which reads as a placeholder again.
   const world = boxOf(itemsFor(template))

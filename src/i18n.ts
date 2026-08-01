@@ -397,6 +397,9 @@ const tr: Record<string, string> = {
   'Find': 'Bul',
   'Tags': 'Etiketler',
   'Untitled project': 'Adsız proje',
+  'Retrospective': 'Retrospektif',
+  'A centre and five branches': 'Merkez fikir + 5 dal',
+  'Landing page refresh': 'Landing yenileme',
   'Open this project': 'Bu projeyi aç',
   'All projects': 'Tüm projeler',
   'Empty the trash ({n})': 'Çöpü boşalt ({n})',
@@ -1106,6 +1109,15 @@ export function setLang(next: Lang) {
 export function subscribeLang(fn: () => void) {
   listeners.add(fn)
   return () => { listeners.delete(fn) }
+}
+
+// The marketing site is written in English and draws real boards to illustrate itself, so those
+// boards have to be built in English whichever language the app is set to. Synchronous by
+// contract: the swap is only safe because nothing renders between the two lines.
+export function inEnglish<T>(make: () => T): T {
+  const held = lang
+  lang = 'en'
+  try { return make() } finally { lang = held }
 }
 
 export function t(source: string, vars?: Record<string, string | number>): string {

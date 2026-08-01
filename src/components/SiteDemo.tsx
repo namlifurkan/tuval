@@ -8,6 +8,7 @@ import type { Record as Row, Status } from '../board/records'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import { DEFAULT_TEXT_STYLE } from '../board/types'
+import { inEnglish } from '../i18n'
 import { TEMPLATES } from '../board/templates'
 import type { Demo } from '../site/pages'
 import { Canvas } from './Canvas'
@@ -30,9 +31,9 @@ const TOOLS = [
 // software team on a kanban, and the two pages stop being the same page with different words.
 function seed(template?: string) {
   if (getItems().length) return
-  const found = template && TEMPLATES.find((t) => t.id === template)
+  const found = template && TEMPLATES.find((one) => one.id === template)
   if (found) {
-    createItems(found.build({ x: 0, y: 0 }))
+    createItems(inEnglish(() => found.build({ x: 0, y: 0 })))
     requestRender()
     return
   }
