@@ -388,7 +388,7 @@
         {
           "tone": "pigment",
           "heading": "Read-only means read-only",
-          "body": "Viewer access is enforced in the database, not hidden in the interface. A viewer who opens the console still cannot write."
+          "body": "Viewer access is decided by the database, not hidden in the interface: a viewer who opens the console is refused by the same policy the screen obeys. Every one of those policies is checked by a suite that runs against the real schema before a change ships."
         }
       ],
       "next": [
@@ -426,7 +426,7 @@
         {
           "tone": "pigment",
           "heading": "Nothing is held back",
-          "body": "No enterprise edition, no feature flags, no telemetry. The limits on the hosted plan are seats and disk, because those are what cost money to serve. Run it yourself and you set both."
+          "body": "No separate edition and no feature flags. Seats, storage and the API are limited on the hosted plan because those are what cost money to serve; on an install you run yourself they are not limited at all."
         },
         {
           "tone": "paper",
@@ -466,8 +466,8 @@
               "body": "Images, PDFs and attachments across the workspace."
             },
             {
-              "title": "Every feature",
-              "body": "Every board, page, database and issue. Publishing, forms and booking links included."
+              "title": "Every board, page and issue",
+              "body": "Databases, publishing, forms and booking links included. The API and webhooks are the one thing held for the paid plan, and they are open on an install you run yourself."
             }
           ]
         },

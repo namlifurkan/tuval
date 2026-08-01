@@ -911,6 +911,35 @@ update public.boards set project_id = null where id = 'rls-team-board';
 select pg_temp.check('and belonging nowhere is still allowed', true,
   exists(select 1 from public.boards where id = 'rls-team-board' and project_id is null));
 
+-- An install nobody is billing for -----------------------------------------------------------------
+
+set local role postgres;
+insert into public.api_keys (workspace_id, name, token_sha)
+values ('cccccccc-0000-4000-8000-000000000003', 'self host',
+        encode(extensions.digest('tuv_selfhost_token', 'sha256'), 'hex'))
+on conflict do nothing;
+update public.workspaces set plan = 'free', plan_until = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.check('a free workspace on the hosted install has no API', true,
+  public.workspace_for_key('tuv_selfhost_token') is null);
+
+update public.tuval_settings set self_hosted = true where id = 1;
+
+select pg_temp.check('the same workspace self-hosted has one', true,
+  public.workspace_for_key('tuv_selfhost_token') = 'cccccccc-0000-4000-8000-000000000003');
+select pg_temp.check('and the plan reads as team without anybody paying', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'team');
+select pg_temp.check('seats stop being capped', true,
+  (select seats from public.plan_limits('free', 1)) > 1000000);
+select pg_temp.check('and so does storage', true,
+  (select bytes from public.plan_limits('free', 1)) > 1000000000000::bigint);
+
+set local role postgres;
+update public.tuval_settings set self_hosted = false where id = 1;
+select pg_temp.check('turning it off puts the limits back', true,
+  (select seats from public.plan_limits('free', 1)) = 3);
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
