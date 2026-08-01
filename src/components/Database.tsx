@@ -15,6 +15,7 @@ import { DatabaseGallery } from './DatabaseGallery'
 import { DatabaseList } from './DatabaseList'
 import { DatabaseTable } from './DatabaseTable'
 import { DatabaseTimeline } from './DatabaseTimeline'
+import { FormPanel } from './FormPanel'
 import { ViewBar } from './ViewBar'
 
 const pages = getPages
@@ -162,6 +163,8 @@ export function Database({ db }: { db: Row }) {
             )}
           </span>
         ))}
+
+        <FormPanel db={db} fields={schema.fields} />
 
         {(['table', 'list', 'board', 'gallery', 'calendar', 'timeline'] as const).map((kind) => (
           <button

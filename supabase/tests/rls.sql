@@ -569,6 +569,64 @@ select pg_temp.check('a record still saves with a broken hook registered', true,
 select pg_temp.check('and it is really there', true,
   exists(select 1 from public.records where title = 'Saved anyway'));
 
+-- A form is answered by somebody with no account ----------------------------------------------------
+
+set local role postgres;
+delete from public.webhooks;
+insert into public.records (id, workspace_id, kind, title, data)
+values ('44444444-0000-4000-8000-000000000044', 'cccccccc-0000-4000-8000-000000000003',
+        'database', 'Basvurular',
+        '{"fields":[{"id":"f1","name":"Sayi","type":"number"},
+                    {"id":"f2","name":"Not","type":"text"},
+                    {"id":"f3","name":"Gizli","type":"text"}]}'::jsonb);
+insert into public.forms (workspace_id, database_id, slug, asks)
+values ('cccccccc-0000-4000-8000-000000000003', '44444444-0000-4000-8000-000000000044',
+        'basvuru', array['__title__', 'f1', 'f2']);
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a live form can be read without an account', true,
+  exists(select 1 from public.forms where slug = 'basvuru'));
+select pg_temp.check('but not the rows of what it writes into', false,
+  exists(select 1 from public.records where id = '44444444-0000-4000-8000-000000000044'));
+
+select pg_temp.check('the questions can be read without the answers', true,
+  jsonb_array_length(public.form_questions('basvuru')) = 3);
+
+select public.submit_form('basvuru',
+  '{"__title__":"Ayse","f1":"12,5","f2":"merhaba","f3":"gizlice"}'::jsonb);
+
+set local role postgres;
+select pg_temp.check('the answer became a row', true,
+  exists(select 1 from public.records
+         where parent_id = '44444444-0000-4000-8000-000000000044' and title = 'Ayse'));
+select pg_temp.check('a number arrived as a number', true,
+  (select (data -> 'f1')::text = '12.5' from public.records
+   where parent_id = '44444444-0000-4000-8000-000000000044' and title = 'Ayse'));
+select pg_temp.check('a column the form did not ask for is dropped', true,
+  (select not (data ? 'f3') from public.records
+   where parent_id = '44444444-0000-4000-8000-000000000044' and title = 'Ayse'));
+
+-- Filling the trap writes nothing, and says nothing about having been caught.
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select public.submit_form('basvuru', '{"__title__":"Bot"}'::jsonb, 'i am a robot');
+
+set local role postgres;
+select pg_temp.check('what fills the trap does not become a row', false,
+  exists(select 1 from public.records
+         where parent_id = '44444444-0000-4000-8000-000000000044' and title = 'Bot'));
+
+update public.forms set active = false where slug = 'basvuru';
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a closed form cannot be read', false,
+  exists(select 1 from public.forms where slug = 'basvuru'));
+select pg_temp.check('nor answered', true,
+  public.submit_form('basvuru', '{"__title__":"Gec kalan"}'::jsonb) is null);
+select pg_temp.check('and a closed form has no questions either', true,
+  public.form_questions('basvuru') is null);
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
