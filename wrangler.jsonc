@@ -10,9 +10,14 @@
   "compatibility_date": "2026-07-31",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./worker/index.ts",
+  // Every page here writes its canonical without a trailing slash, and the default asset
+  // handling answered that exact URL with a 307 to the slashed one. So the address we asked
+  // search engines to index was never the address that served the page. This makes the
+  // unslashed form the one that answers 200, and the slashed form the redirect.
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
     "not_found_handling": "single-page-application"
   }
 }
