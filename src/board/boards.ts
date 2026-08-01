@@ -195,6 +195,8 @@ export function readRoute(): Route {
   if (issue) return { kind: 'issue', id: decodeURIComponent(issue[1]) }
   const auth = AUTH_PAGES.find((p) => path === `/${p}`)
   if (auth) return { kind: 'auth', page: auth }
+  // Every marketing address, including the front door, is the same kind of thing: a page of
+  // words the site module owns. An address nobody wrote a page for falls back to the front door.
   return { kind: 'landing' }
 }
 

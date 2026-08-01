@@ -14,7 +14,7 @@ import { Issues } from './Issues'
 import { Projects } from './Projects'
 import { Page } from './Page'
 import { Settings } from './Settings'
-const Landing = lazy(() => import('./Landing').then((m) => ({ default: m.Landing })))
+const SitePage = lazy(() => import('./SitePage').then((m) => ({ default: m.SitePage })))
 
 // The front door is the front door for everybody. Signing in does not replace the page that
 // explains the product; the board list has its own address.
@@ -35,5 +35,5 @@ export function Home() {
   if (route.kind === 'profile') return <Suspense fallback={null}><Profile key={route.handle} /></Suspense>
   if (route.kind === 'project') return <Suspense fallback={null}><Project key={route.id} /></Suspense>
   if (route.kind === 'dashboard') return <Dashboard />
-  return <Suspense fallback={null}><Landing /></Suspense>
+  return <Suspense fallback={null}><SitePage key={routePath()} /></Suspense>
 }

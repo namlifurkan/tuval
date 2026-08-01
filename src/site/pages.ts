@@ -1,0 +1,606 @@
+// What the marketing site says ---------------------------------------------------------------
+// One module, read twice: by the React pages a visitor lands on, and by the build script that
+// writes a real HTML file for each of these addresses. A crawler that runs no JavaScript still
+// gets the headings, the prose and the links, and the two can never drift because there is only
+// one copy of the words.
+//
+// English throughout. The audience for an open-source workspace reads English, and the app's own
+// interface is translated separately.
+
+export type Demo = 'canvas' | 'database' | 'issues' | 'none'
+
+export interface Band {
+  // A full-bleed pigment band or a paper one. The alternation is the voice: the app is the
+  // quiet gallery, this is the poster outside it.
+  tone: 'pigment' | 'paper'
+  heading: string
+  body?: string
+  // Numbered lines rather than a card grid. Three at most; four reads as a list nobody finishes.
+  points?: { title: string; body: string }[]
+  demo?: Demo
+}
+
+export interface Page {
+  path: string
+  // What the tab and the search result say. Kept under 60 characters so it is not cut off.
+  title: string
+  description: string
+  // The one sentence, set enormous, that the page opens with.
+  claim: string
+  lede: string
+  bands: Band[]
+  // Where this page sends a reader next. Internal linking is most of what a small site can do
+  // about being found at all.
+  next: string[]
+}
+
+const SITE = 'Tuval'
+
+export const HOME: Page = {
+  path: '/',
+  title: `${SITE} — the board, the page and the work in one place`,
+  description:
+    'An open-source workspace where an infinite canvas, your documents and your issue tracker '
+    + 'are three views of the same records. Run it yourself, or let us keep the disks spinning.',
+  claim: 'One record. Three ways to look at it.',
+  lede:
+    'A sticky on a canvas, a row in a database and an issue in a sprint are usually three tools '
+    + 'and three subscriptions. Here they are the same thing, seen from three sides.',
+  bands: [
+    {
+      tone: 'paper',
+      heading: 'This is the editor, not a picture of one',
+      body: 'Drag something. Nothing here is saved until you say so.',
+      demo: 'canvas',
+    },
+    {
+      tone: 'pigment',
+      heading: 'The idea you had on Tuesday is the ticket you close on Friday',
+      body:
+        'Select a sticky, turn it into an issue, and it keeps its place on the board while it '
+        + 'turns up in the sprint. Nothing is retyped, because nothing was ever copied.',
+    },
+    {
+      tone: 'paper',
+      heading: 'What it replaces',
+      points: [
+        {
+          title: 'The whiteboard',
+          body: 'Infinite canvas, frames, connectors, sticky notes, pen, tables, mind maps, '
+            + 'templates, presentation mode, comments and live cursors.',
+        },
+        {
+          title: 'The wiki',
+          body: 'Pages with real blocks, databases with eighteen field types, six views over '
+            + 'them, formulas, rollups, relations, publishing and version history.',
+        },
+        {
+          title: 'The tracker',
+          body: 'Issues with keys, cycles, projects, estimates, labels, sub-issues, blocking '
+            + 'relations, a board view and a burn-down.',
+        },
+      ],
+    },
+    {
+      tone: 'pigment',
+      heading: 'And it hands the whole thing to an agent',
+      body:
+        'A board is already a brief: frames become sections, arrows become a flow, code blocks '
+        + 'stay fenced. One button turns a canvas into the prompt you meant to write. An MCP '
+        + 'server lets the agent go the other way and read the workspace itself.',
+    },
+    {
+      tone: 'paper',
+      heading: 'Yours either way',
+      body:
+        'The code is AGPL. Run it on your own machine and every limit is yours to set. Pay only '
+        + 'if you would rather somebody else kept the disks spinning.',
+    },
+  ],
+  next: ['/canvas', '/docs', '/issues', '/self-hosting', '/pricing'],
+}
+
+export const SURFACES: Page[] = [
+  {
+    path: '/canvas',
+    title: 'Infinite canvas — open source whiteboard | Tuval',
+    description:
+      'An infinite canvas with frames, connectors, sticky notes, tables and mind maps. Drawn on '
+      + 'one canvas element, works offline, and every idea on it can become a tracked issue.',
+    claim: 'A surface with no edges and no lag.',
+    lede:
+      'One canvas element, a dirty-flag render loop, and a document that lives in your browser '
+      + 'before it lives anywhere else. Pan, zoom, and keep going.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Try it here',
+        body: 'Press N for a sticky, L for a connector, P for a pen. Nothing is saved.',
+        demo: 'canvas',
+      },
+      {
+        tone: 'pigment',
+        heading: 'The shortcuts you already know',
+        body:
+          'V, N, T, S, L, P, F. Marquee select, snap to neighbours, alt-drag to duplicate, '
+          + 'space to pan. A tool people have to learn twice is a tool they abandon once.',
+      },
+      {
+        tone: 'paper',
+        heading: 'What is on it',
+        points: [
+          {
+            title: 'Things',
+            body: 'Sticky notes, text, twenty shapes, connectors with labels, freehand pen and '
+              + 'highlighter, images, PDFs page by page, tables with merged cells, code blocks, '
+              + 'embeds and mind maps that lay themselves out.',
+          },
+          {
+            title: 'Ways to hold them',
+            body: 'Frames that carry their contents, layers, locking, alignment and '
+              + 'distribution, snapping with spacing guides, and a minimap for the far corners.',
+          },
+          {
+            title: 'People on it',
+            body: 'Live cursors, follow mode, comment pins with threads, and a presentation mode '
+              + 'that walks the frames in order.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'It works with the network unplugged',
+        body:
+          'The document is a CRDT in your browser. The server is where it goes to meet other '
+          + 'people, not where it lives.',
+      },
+    ],
+    next: ['/docs', '/issues', '/for/software-teams', '/self-hosting'],
+  },
+  {
+    path: '/docs',
+    title: 'Pages and databases — open source Notion alternative | Tuval',
+    description:
+      'Pages with real blocks and databases with eighteen field types, formulas, rollups and '
+      + 'relations. Table, board, calendar, gallery, timeline and list views over the same rows.',
+    claim: 'Write it down. Then ask it questions.',
+    lede:
+      'A page is a page until you give it columns. Then it is a database, and the same rows can '
+      + 'be a table, a board, a calendar, a gallery or a timeline without being copied.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Eighteen kinds of column',
+        body: 'Sort it, group it, filter it. This is the real table.',
+        demo: 'database',
+      },
+      {
+        tone: 'pigment',
+        heading: 'A formula is a column that works out its own answer',
+        body:
+          'Add days to a date, roll a related table up into a sum, count what is still open. '
+          + 'Created, edited, who by, and the row number are all columns you never have to fill '
+          + 'in.',
+      },
+      {
+        tone: 'paper',
+        heading: 'What a page can hold',
+        points: [
+          {
+            title: 'Blocks',
+            body: 'Headings, lists, toggles, callouts, quotes, code with highlighting, tables, '
+              + 'columns, equations in LaTeX, mermaid diagrams, bookmarks, embeds and a table of '
+              + 'contents that reads itself from the headings.',
+          },
+          {
+            title: 'Links between things',
+            body: 'Mention a page and it links; the page you mentioned shows who pointed at it. '
+              + 'Mention a person and they hear about it.',
+          },
+          {
+            title: 'Ways out',
+            body: 'Markdown, HTML, a real text PDF, and a backup of the whole workspace in one '
+              + 'file that can be put back.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'Collections are questions, not folders',
+        body:
+          'Everything of mine that is late. Everything tagged decision. Nothing is filed into a '
+          + 'collection and nothing falls out of one when it changes.',
+      },
+    ],
+    next: ['/canvas', '/issues', '/for/consultants', '/pricing'],
+  },
+  {
+    path: '/issues',
+    title: 'Issues, cycles and projects — a tracker in your workspace | Tuval',
+    description:
+      'Issues with keys, two-week cycles, projects, estimates, labels, sub-issues and blocking '
+      + 'relations. In the same workspace as the board the idea came from.',
+    claim: 'The work, where the thinking already is.',
+    lede:
+      'A tracker in a different tab is a tracker somebody forgets to open. This one holds the '
+      + 'same records the canvas and the pages hold.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Group it however the question is shaped',
+        body: 'By status, by person, by priority, by cycle, by project.',
+        demo: 'issues',
+      },
+      {
+        tone: 'pigment',
+        heading: 'A cycle is two weeks of work',
+        body:
+          'The next one starts where the last one ended. What did not finish moves, the burn-down '
+          + 'says whether it was ever going to, and nobody runs a meeting to find out.',
+      },
+      {
+        tone: 'paper',
+        heading: 'The parts that usually go missing',
+        points: [
+          {
+            title: 'Keys that mean something',
+            body: 'TUV-14 is the fourteenth issue in this workspace, taken on insert, never '
+              + 'reused, and safe to write in a commit message.',
+          },
+          {
+            title: 'Relations that read both ways',
+            body: 'This blocks that, so that is blocked by this. Stored once, so the two can '
+              + 'never disagree about which way round it is.',
+          },
+          {
+            title: 'Time, without typing it twice',
+            body: 'Log a stint against an issue and the week adds itself up. Repeating work is '
+              + 'asked for every night, so a missed night catches up.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'It came from somewhere',
+        body:
+          'Select a sticky on a board, turn it into an issue, and the card stays exactly where '
+          + 'the thought was. Open the issue and the board is one click away.',
+      },
+    ],
+    next: ['/canvas', '/docs', '/for/software-teams', '/pricing'],
+  },
+]
+
+export const TRADES: Page[] = [
+  {
+    path: '/for/software-teams',
+    title: 'For software teams — planning, retros and architecture | Tuval',
+    description:
+      'Sprint planning, retrospectives, architecture drawings and the issue tracker in one '
+      + 'workspace. The sticky from the retro becomes the ticket in the cycle.',
+    claim: 'The retro sticky and the sprint ticket are the same object.',
+    lede:
+      'Most teams run the workshop in one tool and the work in another, then spend an hour '
+      + 'moving the first into the second. Skip that hour.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Start where you already start',
+        body: 'Kanban, retrospective, brainwriting, flowchart, mind map, architecture, five whys.',
+        demo: 'canvas',
+      },
+      {
+        tone: 'pigment',
+        heading: 'Monday morning, in order',
+        body:
+          'Open last cycle on a board. Drag what did not finish into the next one. Turn the three '
+          + 'new stickies into issues without leaving the canvas. Close the tab.',
+      },
+      {
+        tone: 'paper',
+        heading: 'What the week looks like',
+        points: [
+          {
+            title: 'Planning',
+            body: 'Cycles of two weeks, estimates in points, a burn-down that counts the same '
+              + 'set the list shows.',
+          },
+          {
+            title: 'Design',
+            body: 'Architecture on the canvas, mermaid in the doc, and one button that hands the '
+              + 'whole flow to an agent as a brief.',
+          },
+          {
+            title: 'Afterwards',
+            body: 'A retro board, decisions written down as pages, and an incident record that '
+              + 'links to the decision it changed.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'The API is a door, not a demo',
+        body:
+          'API keys, webhooks and an MCP server, so n8n, a script or a coding agent can read and '
+          + 'write the workspace. We integrate rather than clone.',
+      },
+    ],
+    next: ['/issues', '/canvas', '/self-hosting', '/pricing'],
+  },
+  {
+    path: '/for/agencies',
+    title: 'For agencies — workshops, delivery and client access | Tuval',
+    description:
+      'Run the client workshop on a shared canvas, keep the delivery in the same workspace, and '
+      + 'give the client a read-only link without an account.',
+    claim: 'The client sees the room, not the filing cabinet.',
+    lede:
+      'A workshop is worth what survives it. Here the board the client watched being drawn is '
+      + 'the same board the work is tracked against.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'The room, on a screen everyone can see',
+        body: 'Live cursors, follow mode, comment pins, presentation mode through the frames.',
+        demo: 'canvas',
+      },
+      {
+        tone: 'pigment',
+        heading: 'A link, not an invitation to install something',
+        body:
+          'Open a board to anybody with the link and it opens read-only, with no account. Or '
+          + 'invite by email, or let a whole email domain in at once.',
+      },
+      {
+        tone: 'paper',
+        heading: 'After the workshop',
+        points: [
+          {
+            title: 'The record',
+            body: 'People, companies and deals in a database you did not have to buy a CRM for. '
+              + 'A form on a public link drops answers straight into it.',
+          },
+          {
+            title: 'The delivery',
+            body: 'A project holds its boards, its pages and its issues, and the switch at the '
+              + 'top of the sidebar makes everything else disappear until you switch back.',
+          },
+          {
+            title: 'The proof',
+            body: 'Log time against issues and the week adds itself up, per person, per day.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'A booking page, so the meeting books itself',
+        body: 'Your hours on an address anybody can open. A booking becomes a record like any other.',
+      },
+    ],
+    next: ['/canvas', '/docs', '/pricing', '/for/consultants'],
+  },
+  {
+    path: '/for/freelancers',
+    title: 'For freelancers — one workspace instead of four | Tuval',
+    description:
+      'Notes, client work, invoicing records and the canvas you think on, in one place, for '
+      + 'nothing. Run it yourself or use the free plan.',
+    claim: 'Four subscriptions is three too many.',
+    lede:
+      'Working alone does not mean needing less. It means the tax of moving between tools is '
+      + 'paid by exactly one person: you.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Think here first',
+        body: 'The canvas is where the shape of the job turns up before the job does.',
+        demo: 'canvas',
+      },
+      {
+        tone: 'pigment',
+        heading: 'Free is not a trial',
+        body:
+          'Three people, a gigabyte of files, and every board, page, database and issue there is. '
+          + 'No feature is held back to make the paid plan look thin.',
+      },
+      {
+        tone: 'paper',
+        heading: 'The parts of the job nobody bills for',
+        points: [
+          {
+            title: 'Keeping track',
+            body: 'A daily journal one keystroke away, a clock against each piece of work, and a '
+              + 'week that adds itself up.',
+          },
+          {
+            title: 'Showing the work',
+            body: 'Publish a page to a public address, or open a board to the world and let a '
+              + 'reader copy the brief off it.',
+          },
+          {
+            title: 'Getting paid attention',
+            body: 'A page of your own with everything you have opened on it, and links to '
+              + 'wherever people support your work.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'And it is yours',
+        body: 'AGPL. Download the whole workspace as one file whenever you like, and put it back.',
+      },
+    ],
+    next: ['/pricing', '/self-hosting', '/docs', '/canvas'],
+  },
+  {
+    path: '/for/consultants',
+    title: 'For consultants — analysis, findings and handover | Tuval',
+    description:
+      'Map the situation on a canvas, keep findings as pages with properties, and hand over a '
+      + 'workspace the client can actually keep.',
+    claim: 'A finding is worth what the client can still read next year.',
+    lede:
+      'The deliverable is usually a deck nobody opens twice. This is the alternative: a workspace '
+      + 'that stays readable, searchable and exportable after you leave.',
+    bands: [
+      {
+        tone: 'paper',
+        heading: 'Map it before you write it',
+        body: 'Five whys, customer journey, architecture. The templates are there.',
+        demo: 'canvas',
+      },
+      {
+        tone: 'pigment',
+        heading: 'A finding is a record, not a slide',
+        body:
+          'Give it a status, an owner, a date and a tag. Then a collection answers "everything '
+          + 'still open" for the rest of the engagement without anybody maintaining a list.',
+      },
+      {
+        tone: 'paper',
+        heading: 'Handover that survives you',
+        points: [
+          {
+            title: 'Decisions with their reasons',
+            body: 'What was chosen, what it was chosen instead of, and why. Linked to the '
+              + 'incident that prompted it.',
+          },
+          {
+            title: 'Everything, in one file',
+            body: 'A backup of every page, issue, database, tag and link, which can be restored '
+              + 'into their own workspace, self-hosted, with no licence to buy.',
+          },
+          {
+            title: 'Or a real PDF',
+            body: 'Text you can select and search, not a screenshot of a document.',
+          },
+        ],
+      },
+      {
+        tone: 'pigment',
+        heading: 'Read-only means read-only',
+        body:
+          'Viewer access is enforced in the database, not hidden in the interface. A viewer who '
+          + 'opens the console still cannot write.',
+      },
+    ],
+    next: ['/docs', '/self-hosting', '/for/agencies', '/pricing'],
+  },
+]
+
+export const SELF_HOSTING: Page = {
+  path: '/self-hosting',
+  title: 'Self-hosting — run the whole workspace yourself | Tuval',
+  description:
+    'AGPL-3.0. Run Tuval on your own machine with your own Postgres and storage. Every limit is '
+    + 'yours to set, and the data never leaves.',
+  claim: 'Your machine. Your database. Your problem, and that is the point.',
+  lede:
+    'The hosted plan is a convenience, not a lock. The same code that runs the hosted one is the '
+    + 'code you can run, and there is no edition with the good parts missing.',
+  bands: [
+    {
+      tone: 'paper',
+      heading: 'What it needs',
+      points: [
+        {
+          title: 'A Postgres',
+          body: 'Supabase, or a plain Postgres with the same extensions. The schema is a folder '
+            + 'of migrations you can read before you run them.',
+        },
+        {
+          title: 'Somewhere for files',
+          body: 'Any S3-compatible bucket. Images and attachments are signed URLs, never public '
+            + 'ones.',
+        },
+        {
+          title: 'A static host',
+          body: 'The app builds to a folder of files. Anything that can serve them will do.',
+        },
+      ],
+    },
+    {
+      tone: 'pigment',
+      heading: 'Nothing is held back',
+      body:
+        'No enterprise edition, no feature flags, no telemetry. The limits on the hosted plan are '
+        + 'seats and disk, because those are what cost money to serve. Run it yourself and you '
+        + 'set both.',
+    },
+    {
+      tone: 'paper',
+      heading: 'Access is decided by the database',
+      body:
+        'Every rule about who may read or write what is a row-level security policy, proven by a '
+        + 'suite of access checks that runs against the real schema before any change ships. An '
+        + 'interface that hides a button is not security; this is.',
+    },
+    {
+      tone: 'pigment',
+      heading: 'And you can leave',
+      body: 'One file holds every page, issue, database, tag and link, and restores into any workspace.',
+    },
+  ],
+  next: ['/pricing', '/canvas', '/docs', '/for/software-teams'],
+}
+
+export const PRICING: Page = {
+  path: '/pricing',
+  title: 'Pricing — free for small teams, paid to be hosted | Tuval',
+  description:
+    'Free for up to three people with every feature. The paid plan is for people who would '
+    + 'rather not run the servers. The code is AGPL and self-hosting is unlimited.',
+  claim: 'The code is free. The disks are not.',
+  lede:
+    'What is priced here is somebody else running it: the disks, the bandwidth and the answering. '
+    + 'So what is limited is what actually costs money to serve, and nothing else.',
+  bands: [
+    {
+      tone: 'paper',
+      heading: 'Free',
+      points: [
+        { title: 'Up to three people', body: 'Everybody in the workspace, not per board.' },
+        { title: 'A gigabyte of files', body: 'Images, PDFs and attachments across the workspace.' },
+        {
+          title: 'Every feature',
+          body: 'Every board, page, database and issue. Publishing, forms and booking links '
+            + 'included.',
+        },
+      ],
+    },
+    {
+      tone: 'pigment',
+      heading: 'Team',
+      body:
+        'As many people as you like, ten gigabytes of files for each of them, and the API and '
+        + 'webhooks so n8n and the rest can reach it. Everything on the free plan as well.',
+    },
+    {
+      tone: 'paper',
+      heading: 'Or none of the above',
+      body:
+        'Run it on your own machine and every limit here is yours to set. That is not a downgrade '
+        + 'path; it is the same code.',
+    },
+  ],
+  next: ['/self-hosting', '/for/freelancers', '/canvas', '/docs'],
+}
+
+export const PAGES: Page[] = [HOME, ...SURFACES, ...TRADES, SELF_HOSTING, PRICING]
+
+export const findPage = (path: string) =>
+  PAGES.find((p) => p.path === (path.replace(/\/+$/, '') || '/'))
+
+// The label a link to this page wears, taken from the address rather than written twice.
+export const LINK_NAMES: { [path: string]: string } = {
+  '/': 'What it is',
+  '/canvas': 'Canvas',
+  '/docs': 'Pages and databases',
+  '/issues': 'Issues',
+  '/for/software-teams': 'For software teams',
+  '/for/agencies': 'For agencies',
+  '/for/freelancers': 'For freelancers',
+  '/for/consultants': 'For consultants',
+  '/self-hosting': 'Self-hosting',
+  '/pricing': 'Pricing',
+}
