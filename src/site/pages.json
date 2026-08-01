@@ -22,7 +22,7 @@
             },
             {
               "title": "The wiki",
-              "body": "Pages with real blocks, databases with eighteen field types, six views over them, formulas, rollups, relations, publishing and version history."
+              "body": "Pages with real blocks, databases with twenty column types, six views over them, formulas, rollups, relations, publishing and version history."
             },
             {
               "title": "The tracker",
@@ -68,7 +68,7 @@
           "points": [
             {
               "title": "What you can put on it",
-              "body": "Sticky notes, text, twenty shapes, connectors with labels, freehand pen and highlighter, images, PDFs page by page, tables with merged cells, code blocks, embeds and mind maps that lay themselves out."
+              "body": "Sticky notes, text, thirty-two shapes, connectors with labels, freehand pen and highlighter, images, PDFs page by page, tables with merged cells, code blocks, embeds and mind maps that lay themselves out."
             },
             {
               "title": "Frames, layers and snapping",
@@ -96,13 +96,13 @@
     {
       "path": "/docs",
       "title": "Pages and databases — open source Notion alternative | Tuval",
-      "description": "Pages with real blocks and databases with eighteen field types, formulas, rollups and relations. Table, board, calendar, gallery, timeline and list views over the same rows.",
+      "description": "Pages with real blocks and databases with twenty column types, formulas, rollups and relations. Table, board, calendar, gallery, timeline and list views over the same rows.",
       "claim": "Write it down. Then ask it questions.",
       "lede": "A page is a page until you give it columns. Then it is a database, and the same rows can be a table, a board, a calendar, a gallery or a timeline without being copied.",
       "bands": [
         {
           "tone": "paper",
-          "heading": "Eighteen kinds of column",
+          "heading": "Twenty kinds of column",
           "body": "Sort it, group it, filter it. This is the real table.",
           "demo": "database"
         },
@@ -272,7 +272,7 @@
             },
             {
               "title": "Everything, in one file",
-              "body": "A backup of every page, issue, database, tag and link, which can be restored into their own workspace, self-hosted, with no licence to buy."
+              "body": "A backup of every page, board, issue, database, tag and link, which can be restored into their own workspace, self-hosted, with no licence to buy."
             }
           ]
         },
@@ -327,7 +327,7 @@
         {
           "tone": "pigment",
           "heading": "And you can leave",
-          "body": "One file holds every page, issue, database, tag and link, and restores into any workspace."
+          "body": "One file holds every page, board, issue, database, tag and link, and restores into any workspace."
         }
       ],
       "next": [
@@ -365,7 +365,7 @@
         {
           "tone": "pigment",
           "heading": "Team",
-          "body": "As many people as you like, ten gigabytes of files each, and the API, webhooks and MCP server so n8n or a coding agent can reach the workspace. Everything on the free plan as well."
+          "body": "Up to two hundred people, ten gigabytes of files each, and the API, webhooks and MCP server so n8n or a coding agent can reach the workspace. Everything on the free plan as well. Run it yourself and the seat count stops applying."
         },
         {
           "tone": "paper",
@@ -383,6 +383,315 @@
         "/canvas",
         "/docs"
       ]
+    },
+    {
+      "path": "/alternatives/miro",
+      "title": "An open-source alternative to Miro | Tuval",
+      "description": "An infinite canvas you can self-host under AGPL-3.0, with pages and an issue tracker beside it. An honest comparison with Miro, including where we lose.",
+      "claim": "An open-source alternative to Miro",
+      "lede": "A canvas with frames, connectors and thirty-two shape kinds, plus the tracker and the pages the board feeds into. Run it on your own Postgres.",
+      "compare": {
+        "against": "Miro",
+        "checked": "1 August 2026",
+        "rows": [
+          {
+            "feature": "Licence",
+            "tuval": "AGPL-3.0. Source on GitHub, no separate edition and no feature flags.",
+            "them": "Proprietary, delivered as a hosted service."
+          },
+          {
+            "feature": "Self-hosting",
+            "tuval": "Your own Postgres and any S3-compatible bucket. One setting marks the install self-hosted and the seat, storage and API limits stop applying.",
+            "them": "Not offered."
+          },
+          {
+            "feature": "Price",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
+          },
+          {
+            "feature": "What goes on the canvas",
+            "tuval": "Sticky notes, text, thirty-two shape kinds, connectors with more than one label, pen and highlighter, images, PDF import up to thirty pages, tables with merged cells, code blocks, embeds, mind maps, comment pins, presentation mode, minimap.",
+            "them": "A comparable set of objects, plus diagramming and presentation features Tuval has not built."
+          },
+          {
+            "feature": "Templates",
+            "tuval": "Eight board templates and four database kits.",
+            "them": "A large first-party gallery plus a public community library. Far more than eight."
+          },
+          {
+            "feature": "Real-time editing",
+            "tuval": "Yjs CRDT over Supabase Realtime, on private channels checked by the same row-level policies as the board. Live cursors and follow mode are written and have never been run through a two-person session.",
+            "them": "Multiplayer editing in production use for years."
+          },
+          {
+            "feature": "Mobile and tablet",
+            "tuval": "None. Desktop browser only, by decision rather than backlog.",
+            "them": "Native iOS and Android apps."
+          },
+          {
+            "feature": "Board version history",
+            "tuval": "Snapshots inside the board document, automatic every ten minutes, last twenty kept.",
+            "them": "Version history on paid plans, with longer retention."
+          },
+          {
+            "feature": "Getting a board in",
+            "tuval": "Imports a Miro board through their REST API with a token you supply that stays in your shell. Also images, PDFs and a Markdown brief.",
+            "them": "Not applicable."
+          },
+          {
+            "feature": "Getting work out",
+            "tuval": "PNG of any selection, one JSON backup of the whole workspace that restores, and a one-click brief that turns the board into markdown with a mermaid flow for an AI agent.",
+            "them": "Image and PDF export and a documented REST API."
+          },
+          {
+            "feature": "Integrations",
+            "tuval": "REST API, webhooks and an MCP server for coding agents. No app directory and no built-in Slack, Jira or Figma connectors.",
+            "them": "A large app marketplace and first-party integrations with the tools most teams already run."
+          },
+          {
+            "feature": "Access control",
+            "tuval": "Enforced in Postgres row-level security: editor and viewer roles, access by email domain, public read-only links, per-page roles. No SAML SSO and no SCIM.",
+            "them": "Enterprise identity controls including SAML SSO and SCIM provisioning."
+          }
+        ]
+      },
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Why you might not",
+          "body": "Because a decade-old product will not fall over in front of your client, and ours has never been through a two-person session."
+        },
+        {
+          "tone": "paper",
+          "heading": "What we do better",
+          "body": "Three things. The canvas is not a separate product: select a sticky, turn it into an issue, and the card stays exactly where the thought was while the issue appears in the cycle. The board exports as a brief an agent can act on rather than a picture, and an MCP server lets Claude Code or Cursor read the workspace directly. And you can run the whole thing yourself under AGPL-3.0, on your own Postgres and your own bucket, with nothing held back."
+        },
+        {
+          "tone": "paper",
+          "heading": "What Miro does better",
+          "body": "Almost everything to do with maturity. Their multiplayer has been carrying workshops for years; ours is written and unproven with two people in the room. They have native mobile and tablet apps; we have decided not to build a phone layout at all. They have thousands of templates and an app marketplace; we have eight templates and a REST API. They have a support organisation, published security certifications and enterprise identity provisioning; we have an issue tracker and one maintainer."
+        },
+        {
+          "tone": "paper",
+          "heading": "Who should not switch",
+          "body": "Anyone whose whiteboard is client-facing and unrehearsed. Anyone whose team joins from phones or tablets. Anyone who needs SAML SSO, SCIM or a signed support agreement to get software approved. Anyone whose workflow depends on the template gallery or on connectors to Jira, Slack or Figma. And anyone who cannot spare a person to run a Postgres database and a bucket."
+        }
+      ],
+      "next": [
+        "/",
+        "/canvas",
+        "/docs",
+        "/issues",
+        "/pricing",
+        "/self-hosting"
+      ]
+    },
+    {
+      "path": "/alternatives/notion",
+      "title": "An open-source alternative to Notion | Tuval",
+      "description": "Pages and databases with twenty column types, six views, formulas, rollups and relations, self-hostable under AGPL-3.0. An honest comparison with Notion.",
+      "claim": "An open-source alternative to Notion",
+      "lede": "Pages on a block editor, databases with twenty column types and six views over the same rows, and an infinite canvas those records can sit on.",
+      "compare": {
+        "against": "Notion",
+        "checked": "1 August 2026",
+        "rows": [
+          {
+            "feature": "Licence and hosting",
+            "tuval": "AGPL-3.0. Run it on your own Postgres and bucket; a setting marks the install self-hosted and the limits stop applying.",
+            "them": "Proprietary, hosted only."
+          },
+          {
+            "feature": "Price",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
+          },
+          {
+            "feature": "Database column types",
+            "tuval": "Twenty. Thirteen you fill in and seven worked out, including formula, rollup, created by and edited by.",
+            "them": "A comparable set, including several Tuval has no equivalent for."
+          },
+          {
+            "feature": "Views over one database",
+            "tuval": "Six: table, board, gallery, calendar, timeline, list. Filters, one sort at a time, grouping, per-column footers.",
+            "them": "A comparable set and more view types than Tuval offers."
+          },
+          {
+            "feature": "Page blocks",
+            "tuval": "Headings, toggle headings, lists, callouts, quotes, highlighted code, tables, multi-column layouts, LaTeX equations, mermaid diagrams, bookmarks, embeds, table of contents.",
+            "them": "A wider block set. Synced blocks and links to a specific block are things Tuval has not built."
+          },
+          {
+            "feature": "Importing from Notion",
+            "tuval": "Reads the export as it arrives: the zip of Markdown pages and CSV databases, including the multi-part zips a large export comes as. Folder nesting becomes page nesting.",
+            "them": "Not applicable."
+          },
+          {
+            "feature": "Getting your work out",
+            "tuval": "Per page: Markdown, HTML and a real text PDF. Whole workspace: one JSON file that restores into another install. Uploaded files are not in it, and the screen says so.",
+            "them": "Markdown, HTML, PDF and CSV export."
+          },
+          {
+            "feature": "Two people in the same page",
+            "tuval": "No. A page is a CRDT that saves every two seconds and merges on open, so two people converge rather than overwrite, but you do not see each other type.",
+            "them": "Live co-editing with presence."
+          },
+          {
+            "feature": "Comments",
+            "tuval": "Threads live inside the page document, so they cannot drift from the text they mark. The cost: the server cannot read them, so there is no workspace-wide list of comments waiting on you.",
+            "them": "Comments the workspace can query, with an inbox."
+          },
+          {
+            "feature": "Size it is built for",
+            "tuval": "Loads up to five hundred records per kind and filters them in the browser. Right for hundreds of rows.",
+            "them": "Databases far larger than that, queried server-side."
+          },
+          {
+            "feature": "Beyond pages",
+            "tuval": "The same records open as an issue with a key, cycle and estimate, or as a card on an infinite canvas. Forms drop answers into a database; booking pages and published pages are included.",
+            "them": "Pages, databases and forms, with no infinite canvas of its own."
+          },
+          {
+            "feature": "Mobile and AI",
+            "tuval": "Neither. No phone layout, by decision, and no AI assistant in the product.",
+            "them": "Native iOS and Android apps and built-in AI features."
+          }
+        ]
+      },
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Why you might not",
+          "body": "Because your workspace is bigger than a few hundred rows, or your team writes in the same page at the same second; we merge, we do not co-edit."
+        },
+        {
+          "tone": "paper",
+          "heading": "What we do better",
+          "body": "A page here is a record, and so is an issue, and so is a card on a canvas: one row seen from three screens. A decision written up in a page can be the same object as the ticket that implements it, and a database of projects can be dropped onto a whiteboard as cards without being copied. The export is real: one JSON file holds every page, board, issue, database, tag and link and restores into an install you run yourself, under a licence that cannot be withdrawn."
+        },
+        {
+          "tone": "paper",
+          "heading": "What Notion does better",
+          "body": "Live co-editing, which we do not have. Scale, which we do not pretend to have: five hundred records per kind, filtered in your browser, is a small-team ceiling. A comment system the server can see, so there is an inbox of what is waiting on you. A richer block set, synced blocks and links to individual blocks. Mobile apps. AI. And an ecosystem that took years and a company to build."
+        },
+        {
+          "tone": "paper",
+          "heading": "Who should not switch",
+          "body": "Anyone with a wiki of thousands of pages or a database of tens of thousands of rows: the in-browser filtering will not hold, and we would rather say so now. Anyone whose team drafts documents together in real time. Anyone who reads and edits on a phone. Anyone who has built a workflow on AI writing, synced blocks or an integration directory."
+        }
+      ],
+      "next": [
+        "/",
+        "/canvas",
+        "/docs",
+        "/issues",
+        "/pricing",
+        "/self-hosting"
+      ]
+    },
+    {
+      "path": "/alternatives/linear",
+      "title": "An open-source alternative to Linear | Tuval",
+      "description": "Issues with keys, cycles and estimates, in the same workspace as your boards and pages. AGPL-3.0 and self-hostable. An honest comparison with Linear.",
+      "claim": "An open-source alternative to Linear",
+      "lede": "Issues with workspace keys, two-week cycles, projects, estimates, labels, sub-issues and blocking links, on the same records as the board the idea came from.",
+      "compare": {
+        "against": "Linear",
+        "checked": "1 August 2026",
+        "rows": [
+          {
+            "feature": "Licence and hosting",
+            "tuval": "AGPL-3.0. Run it on your own Postgres and bucket; a setting marks the install self-hosted and the limits stop applying.",
+            "them": "Proprietary, hosted only."
+          },
+          {
+            "feature": "Price",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
+          },
+          {
+            "feature": "What an issue holds",
+            "tuval": "A workspace key taken on insert and never reused, four priorities, a numeric estimate, labels, an assignee, a due date, sub-issues by parent, and blocking and relates-to links stored once so the two sides cannot disagree.",
+            "them": "The same fields and more, including custom fields Tuval does not have."
+          },
+          {
+            "feature": "Workflow states",
+            "tuval": "A fixed set of seven. You cannot add, rename or reorder them.",
+            "them": "Workflow states you define, per team."
+          },
+          {
+            "feature": "Cycles",
+            "tuval": "Fixed fourteen-day cycles one after the other, with a burn-down of points closed against points taken on. The length is a constant in the source.",
+            "them": "Configurable cycle length and a fuller planning model around it."
+          },
+          {
+            "feature": "Teams and keys",
+            "tuval": "One workspace, one issue prefix. There are projects, but no teams with their own prefixes, workflows or cycles.",
+            "them": "Teams, each with its own key prefix, workflow and cycles."
+          },
+          {
+            "feature": "Keyboard",
+            "tuval": "j and k to move, c to create, x to select, Enter to open, a command palette, and g-then-key to jump between screens. Nothing fires while you are typing.",
+            "them": "A deeper and more complete keyboard model, which is what the product is known for."
+          },
+          {
+            "feature": "One record, several views",
+            "tuval": "An issue is the same row as the page and the canvas card. Turn a sticky from the retro into a ticket in place; drop existing issues onto a board as cards that refresh their title and status.",
+            "them": "Issues, projects and documents, with no infinite canvas."
+          },
+          {
+            "feature": "Time and repeating work",
+            "tuval": "Log a stint in minutes against any record and the week adds itself up. Rules create recurring issues daily, weekly or monthly, keyed on the date so asking twice makes nothing twice.",
+            "them": "Not part of the core product; teams add it with third-party tools."
+          },
+          {
+            "feature": "Importing your existing issues",
+            "tuval": "There is none. The CSV importer lands rows in a database, not in the tracker, so an export does not become Tuval issues. This is the hardest thing about switching.",
+            "them": "Importers from the common trackers."
+          },
+          {
+            "feature": "Integrations",
+            "tuval": "REST API with keys hashed at rest, webhooks, and an MCP server so a coding agent can read and write the workspace. No GitHub, GitLab, Slack or Figma integration; branch and pull-request linking does not exist.",
+            "them": "Git provider, chat and design-tool integrations, including the pull-request linking most teams build their habits on."
+          },
+          {
+            "feature": "Mobile",
+            "tuval": "No phone or tablet layout, by decision. Desktop browser only.",
+            "them": "Native iOS and Android apps."
+          }
+        ]
+      },
+      "bands": [
+        {
+          "tone": "pigment",
+          "heading": "Why you might not",
+          "body": "Because there is no importer, the seven workflow states are fixed and nothing talks to GitHub; switching costs you your history and your automation."
+        },
+        {
+          "tone": "paper",
+          "heading": "What we do better",
+          "body": "The tracker is not in a different tab from the thinking. A sticky on the retro board becomes an issue where it stands, keeping its place in the frame and its connectors, and the issue links back to the board it came from. The same record opens as a page or as a row in a database with formulas and rollups over it. Time logging and recurring work are built in rather than bolted on."
+        },
+        {
+          "tone": "paper",
+          "heading": "What Linear does better",
+          "body": "Nearly everything a tracker is judged on. Custom workflow states, teams with their own keys and cycles, configurable cycle lengths, saved views and insights: we have a fixed seven states, one prefix and a fourteen-day constant. Their keyboard model is deeper than ours and it is what the product is famous for. They have importers, so moving in takes an afternoon; we have none. They link branches and pull requests; we do not talk to GitHub at all."
+        },
+        {
+          "tone": "paper",
+          "heading": "Who should not switch",
+          "body": "Any team with issue history worth keeping: there is no importer, and asking people to retype a backlog is how a migration fails. Any team whose process needs its own states, its own team prefixes, or a cycle that is not two weeks. Anyone whose review flow runs through branch and pull-request linking. Anyone who triages from a phone."
+        }
+      ],
+      "next": [
+        "/",
+        "/canvas",
+        "/docs",
+        "/issues",
+        "/pricing",
+        "/self-hosting"
+      ]
     }
   ],
   "names": {
@@ -393,6 +702,9 @@
     "/for/software-teams": "For software teams",
     "/for/client-work": "For client work",
     "/self-hosting": "Self-hosting",
-    "/pricing": "Pricing"
+    "/pricing": "Pricing",
+    "/alternatives/miro": "Compared with Miro",
+    "/alternatives/notion": "Compared with Notion",
+    "/alternatives/linear": "Compared with Linear"
   }
 }

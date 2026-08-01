@@ -9,7 +9,7 @@ import { getWorkspace } from './workspace'
 // into one JSON would fall over. Everything written in Tuval is here; everything dragged into it
 // is still in the bucket.
 
-export const BACKUP_VERSION = 1
+export const BACKUP_VERSION = 2
 
 export interface Backup {
   version: number
@@ -21,6 +21,10 @@ export interface Backup {
   record_labels: { record_id: string; label_id: string }[]
   record_links: { from_id: string; to_id: string; kind: string }[]
   cycles: Row[]
+  // The canvases. Left out of the first version, which made "the whole workspace in one file" a
+  // sentence with a hole in it: every page came back and every board stayed behind.
+  boards: Row[]
+  board_docs: { board_id: string; doc: string }[]
 }
 
 type Row = { [key: string]: unknown }
@@ -62,12 +66,16 @@ export async function exportWorkspace(): Promise<Backup> {
   const records = await belonging('records', ws.id)
   const ids = records.map((r) => r.id as string)
 
-  const [docs, labels, worn, links, cycles] = await Promise.all([
+  const boards = await belonging('boards', ws.id)
+  const rooms = boards.map((b) => b.id as string)
+
+  const [docs, labels, worn, links, cycles, canvases] = await Promise.all([
     about('record_docs', 'record_id, doc', 'record_id', ids),
     belonging('labels', ws.id),
     about('record_labels', 'record_id, label_id', 'record_id', ids),
     about('record_links', 'from_id, to_id, kind', 'from_id', ids),
     belonging('cycles', ws.id),
+    about('board_snapshots', 'board_id, doc', 'board_id', rooms),
   ])
 
   return {
@@ -80,6 +88,8 @@ export async function exportWorkspace(): Promise<Backup> {
     record_labels: worn as Backup['record_labels'],
     record_links: links as Backup['record_links'],
     cycles,
+    boards,
+    board_docs: canvases as Backup['board_docs'],
   }
 }
 
@@ -111,7 +121,7 @@ const LATER = ['parent_id', 'project_id', 'cycle_id'] as const
 
 // The number an issue wears is assigned by a trigger on insert, which would renumber a restored
 // workspace and break every TUV-12 anybody had written down. It is put back afterwards.
-export async function importWorkspace(backup: Backup): Promise<{ records: number }> {
+export async function importWorkspace(backup: Backup): Promise<{ records: number; boards: number }> {
   const ws = getWorkspace()
   if (!supabase || !ws) throw new Error('Not signed in')
 
@@ -124,6 +134,18 @@ export async function importWorkspace(backup: Backup): Promise<{ records: number
     await supabase.from('cycles')
       .upsert(backup.cycles.map((c) => ({ ...c, workspace_id: ws.id })), { onConflict: 'id' })
       .throwOnError()
+  }
+
+  // A board belongs to whoever restores it: its old owner may not be a person on this install.
+  const user = (await supabase.auth.getUser()).data.user
+  for (const board of backup.boards ?? []) {
+    await supabase.from('boards')
+      .upsert({ ...board, workspace_id: ws.id, owner: user?.id ?? board.owner }, { onConflict: 'id' })
+      .throwOnError()
+  }
+  for (let at = 0; at < (backup.board_docs ?? []).length; at += 50) {
+    await supabase.from('board_snapshots')
+      .upsert(backup.board_docs.slice(at, at + 50)).throwOnError()
   }
 
   const flat: Row[] = backup.records.map((r) => {
@@ -151,5 +173,5 @@ export async function importWorkspace(backup: Backup): Promise<{ records: number
     }
   }
 
-  return { records: backup.records.length }
+  return { records: backup.records.length, boards: (backup.boards ?? []).length }
 }

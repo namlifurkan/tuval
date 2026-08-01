@@ -21,7 +21,9 @@ export function BackupPanel() {
     void exportWorkspace()
       .then((backup) => {
         downloadBackup(backup, workspace.name)
-        setSaid(t('{n} records written to the file.', { n: backup.records.length }))
+        setSaid(t('{n} records and {b} boards written to the file.', {
+          n: backup.records.length, b: backup.boards.length,
+        }))
       })
       .catch((e: Error) => setSaid(e.message))
       .finally(() => setBusy(''))
@@ -32,8 +34,8 @@ export function BackupPanel() {
     setSaid('')
     void chosen.text()
       .then((text) => importWorkspace(readBackup(text)))
-      .then(({ records }) => {
-        setSaid(t('{n} records put back.', { n: records }))
+      .then(({ records, boards }) => {
+        setSaid(t('{n} records and {b} boards put back.', { n: records, b: boards }))
         return Promise.all([loadPages(), loadRecords('issue'), loadRecords('project')])
       })
       .catch((e: Error) => setSaid(e.message))

@@ -17,10 +17,10 @@ import { TextEditor } from './TextEditor'
 // Every workspace claims its parts are joined up. Saying it again is worth nothing, so this does
 // not say it: one board, and three buttons that turn it into the three things it already is.
 //
-// Two of the three run the production code. graphToMarkdown(boardToGraph(items)) is the function
-// behind the app's own "hand off to an agent" button, and the MCP answer is the same graph an
-// agent receives. The first is done here rather than through promoteToIssue because that writes
-// to a workspace and a visitor has no account; the page says so rather than implying otherwise.
+// Two of the three run the production code: graphToMarkdown(boardToGraph(items)) is the function
+// behind the app's own handoff button, and the graph below it is that function's own first step.
+// The third is done here rather than through promoteToIssue, because writing a record needs a
+// workspace and a visitor has none. The page says which is which rather than implying otherwise.
 
 type Shown = 'none' | 'issues' | 'agent' | 'mcp'
 
@@ -198,18 +198,11 @@ export function ProofBand() {
     setShown('agent')
   }
 
+  // The graph itself, which is the thing an agent ends up holding. An earlier version of this
+  // panel hand-wrote a plausible-looking tool call and captioned it "what Cursor sees", which was
+  // a drawing of the answer rather than the answer. This is boardToGraph's real output.
   const readBack = () => {
-    const graph = boardToGraph(getItems(), 'retro-this-morning')
-    setBrief([
-      '// what a coding agent calls',
-      JSON.stringify({ tool: 'search', arguments: { query: 'onboarding' } }, null, 2),
-      '',
-      '// what it gets back',
-      JSON.stringify(
-        { sections: graph.sections.length, edges: graph.edges.length, board: graph.board },
-        null, 2,
-      ),
-    ].join('\n'))
+    setBrief(JSON.stringify(inEnglish(() => boardToGraph(getItems(), 'retro-this-morning')), null, 2))
     setShown('mcp')
   }
 
@@ -262,8 +255,8 @@ export function ProofBand() {
 
           {shown === 'mcp' && (
             <Panel
-              title="Through MCP"
-              note="what Claude Code or Cursor sees"
+              title="The graph"
+              note="what an agent holds after reading this board"
               body={typed}
               mono
             />
@@ -281,7 +274,7 @@ export function ProofBand() {
             Read it back
           </button>
           <p className="ml-auto max-w-[46ch] text-[12.5px] leading-snug text-[#8A867C]">
-            The brief and the MCP answer are the product's own functions, run on the board above.
+            The brief and the graph are the product's own functions, run on the board above.
             Turning stickies into issues is done here rather than in a workspace, because you do
             not have one yet.
           </p>

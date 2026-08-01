@@ -455,8 +455,8 @@ const tr: Record<string, string> = {
   'Download everything': 'Hepsini indir',
   'Restore from a file': 'Dosyadan geri yükle',
   'Working…': 'Çalışıyor…',
-  '{n} records written to the file.': '{n} kayıt dosyaya yazıldı.',
-  '{n} records put back.': '{n} kayıt geri yüklendi.',
+  '{n} records and {b} boards written to the file.': '{n} kayıt ve {b} board dosyaya yazıldı.',
+  '{n} records and {b} boards put back.': '{n} kayıt ve {b} board geri yüklendi.',
   'Restoring writes over anything with the same id, which is what makes it a restore rather than a second copy. Uploaded files are not in the file — they live in storage and can run to gigabytes.':
     'Geri yükleme aynı id\'ye sahip olanın üzerine yazar; ikinci bir kopya değil, geri yükleme olmasının sebebi bu. Yüklenen dosyalar bu dosyada değil — depoda duruyorlar ve gigabaytlara çıkabilir.',
   'Collections': 'Koleksiyonlar',

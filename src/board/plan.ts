@@ -72,7 +72,7 @@ export const WHAT_YOU_GET: { [K in Plan]: string[] } = {
     'Publishing, forms and booking links',
   ],
   team: [
-    'As many people as you like',
+    'Up to {seats} people',
     '{bytes} of files for each of them',
     'The API and webhooks, so n8n and the rest can reach it',
     'Everything on the free plan',
