@@ -6,6 +6,7 @@ import { PRICE } from '../board/plan'
 import { findPage, LINK_NAMES, PAGES } from '../site/pages'
 import type { Page } from '../site/pages'
 import { Account } from './Account'
+import { BoardPicture } from './BoardPicture'
 import { SiteDemo } from './SiteDemo'
 import { Wordmark } from './Logo'
 
@@ -137,24 +138,37 @@ function Index({ points }: { points: { title: string; body: string }[] }) {
 
 // One statement, drenched, with nothing else on it. This is the only place the pigment is used
 // at full strength, so it stays an event rather than a background.
-function Statement({ heading, body }: { heading: string; body?: string }) {
+function Statement({ heading, body, picture }: {
+  heading: string
+  body?: string
+  picture?: string
+}) {
   return (
     <section style={{ background: DEEP, color: PAPER }}>
-      <div className="mx-auto max-w-[80rem] px-6 py-28 sm:py-36">
-        <h2
-          className="max-w-[18ch] font-bold leading-[1.02] tracking-[-0.038em]"
-          style={{ fontSize: 'clamp(2.2rem, 5.4vw, 4.2rem)' }}
-        >{heading}</h2>
-        {body && (
-          <p
-            className="mt-8 max-w-[56ch]"
-            style={{
-              fontFamily: '"Instrument Sans", system-ui, sans-serif',
-              fontSize: '19px',
-              lineHeight: 1.68,
-              color: 'rgba(242,239,233,0.86)',
-            }}
-          >{body}</p>
+      <div className={`mx-auto max-w-[80rem] px-6 py-24 sm:py-28 ${picture ? 'grid items-center gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : ''}`}>
+        <div>
+          <h2
+            className="max-w-[17ch] font-bold leading-[1.02] tracking-[-0.038em]"
+            style={{ fontSize: picture ? 'clamp(1.9rem, 3.6vw, 2.9rem)' : 'clamp(2.2rem, 5.4vw, 4.2rem)' }}
+          >{heading}</h2>
+          {body && (
+            <p
+              className="mt-6 max-w-[52ch]"
+              style={{
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                fontSize: '18px',
+                lineHeight: 1.66,
+                color: 'rgba(242,239,233,0.86)',
+              }}
+            >{body}</p>
+          )}
+        </div>
+        {picture && (
+          <BoardPicture
+            template={picture}
+            surface="#FAF6F3"
+            className="shadow-[0_24px_60px_-30px_rgba(20,19,16,0.8)]"
+          />
         )}
       </div>
     </section>
@@ -414,9 +428,9 @@ function HomeLayout({ page }: { page: Page }) {
       <Hero page={page} wide />
       <SiteDemo kind="canvas" template={BOARD['/']} tall />
       <Caption title="This is the editor, not a picture of one" body="Drag something. Nothing here is saved." />
-      {said[0] && <Statement heading={said[0].heading} body={said[0].body} />}
+      {said[0] && <Statement heading={said[0].heading} body={said[0].body} picture="kanban" />}
       {index?.points && <Index points={index.points} />}
-      {said[1] && <Statement heading={said[1].heading} body={said[1].body} />}
+      {said[1] && <Statement heading={said[1].heading} body={said[1].body} picture="flow" />}
       {last && last.tone === 'paper' && (
         <div className="mx-auto max-w-[62rem] px-6 py-20">
           <h2 className="max-w-[16ch] font-bold leading-[1.06] tracking-[-0.035em]" style={{ fontSize: 'clamp(1.7rem,3.2vw,2.6rem)' }}>
