@@ -33,5 +33,6 @@ PRODUCT.md
 supabase/.temp
 WORKSPACE.md
 LEGAL.md
+PANEL.md
 .rls-run-*.sql
 worker/env.generated.ts

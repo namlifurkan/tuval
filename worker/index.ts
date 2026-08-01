@@ -82,6 +82,8 @@ async function cardFor(url: URL): Promise<Card | null> {
 
 // The thumbnail is kept as a data URL, which is fine for a list on a page and useless as an
 // og:image — a crawler wants an address it can fetch. This is that address.
+const PICTURES = ['image/webp', 'image/png', 'image/jpeg'] as const
+
 async function preview(name: string): Promise<Response | null> {
   const board = await ask('boards', `id=eq.${encodeURIComponent(name)}&public_at=not.is.null&deleted_at=is.null&select=id`)
   if (!board) return null
@@ -90,13 +92,28 @@ async function preview(name: string): Promise<Response | null> {
   const at = held?.indexOf(',') ?? -1
   if (!held || at < 0) return null
 
-  const type = held.slice(5, held.indexOf(';'))
-  const raw = atob(held.slice(at + 1))
-  const bytes = new Uint8Array(raw.length)
-  for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i)
+  // The type comes off a list we wrote, never off the column. `thumb` is free text written by
+  // whoever can edit the board, so echoing its own mime back served attacker HTML from our own
+  // origin, with the session in localStorage next to it.
+  const type = PICTURES.find((allowed) => held.startsWith(`data:${allowed};base64,`))
+  if (!type) return null
+
+  let bytes: Uint8Array
+  try {
+    const raw = atob(held.slice(at + 1))
+    bytes = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i)
+  } catch {
+    return null
+  }
 
   return new Response(bytes, {
-    headers: { 'content-type': type, 'cache-control': 'public, max-age=300' },
+    headers: {
+      'content-type': type,
+      'content-security-policy': "default-src 'none'; sandbox",
+      'x-content-type-options': 'nosniff',
+      'cache-control': 'public, max-age=300',
+    },
   })
 }
 
