@@ -396,6 +396,16 @@ const tr: Record<string, string> = {
   'Diagram': 'Diyagram',
   'Find': 'Bul',
   'Tags': 'Etiketler',
+  'Backup': 'Yedek',
+  'Every page, issue, database, tag and link in one file. The code is AGPL and the data is yours; this is the proof rather than the promise.':
+    'Her sayfa, iş, veritabanı, etiket ve bağ tek dosyada. Kod AGPL, veri senin; bu da sözün değil kanıtı.',
+  'Download everything': 'Hepsini indir',
+  'Restore from a file': 'Dosyadan geri yükle',
+  'Working…': 'Çalışıyor…',
+  '{n} records written to the file.': '{n} kayıt dosyaya yazıldı.',
+  '{n} records put back.': '{n} kayıt geri yüklendi.',
+  'Restoring writes over anything with the same id, which is what makes it a restore rather than a second copy. Uploaded files are not in the file — they live in storage and can run to gigabytes.':
+    'Geri yükleme aynı id\'ye sahip olanın üzerine yazar; ikinci bir kopya değil, geri yükleme olmasının sebebi bu. Yüklenen dosyalar bu dosyada değil — depoda duruyorlar ve gigabaytlara çıkabilir.',
   'Collections': 'Koleksiyonlar',
   'New collection': 'Yeni koleksiyon',
   'Untitled collection': 'Adsız koleksiyon',

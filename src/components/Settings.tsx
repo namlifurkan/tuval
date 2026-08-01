@@ -8,6 +8,7 @@ import {
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
+import { BackupPanel } from './BackupPanel'
 import { BookingSetup } from './BookingSetup'
 import { PlanPanel } from './PlanPanel'
 import { Recurring } from './Recurring'
@@ -213,6 +214,13 @@ export function Settings() {
           note={t('The plan for this product is to integrate rather than clone — n8n for automation, Gmail for mail. This is what they talk to.')}
         >
           <ApiAccess />
+        </Row>
+
+        <Row
+          title={t('Backup')}
+          note={t('Every page, issue, database, tag and link in one file. The code is AGPL and the data is yours; this is the proof rather than the promise.')}
+        >
+          <BackupPanel />
         </Row>
 
         <Row
