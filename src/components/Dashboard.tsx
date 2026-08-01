@@ -182,6 +182,17 @@ export function Dashboard() {
     ...here.filter((b) => !b.items && !b.frames).map((b) => [b, false] as const),
   ]
 
+  // The trash empties itself after a month; this is for somebody who has decided sooner. Named
+  // with the count, because "empty the trash" and "delete eleven boards" are the same sentence
+  // and only one of them makes you stop and read it.
+  const burn = () => {
+    if (!confirm(t('Delete {n} boards in the trash for good? This cannot be undone.', { n: trash.length }))) return
+    const rooms = new Set(trash.filter((b) => cloudRooms.has(b.room)).map((b) => b.room))
+    for (const board of trash) forgetBoard(board.room)
+    setCloud((list) => list.filter((x) => !rooms.has(x.room)))
+    for (const room of rooms) void deleteCloudBoard(room)
+  }
+
   const sweep = () => {
     if (!confirm(t('Delete {n} empty boards for good? Nothing was ever put on them.', { n: bare.length }))) return
     const rooms = new Set(bare.filter(([, inCloud]) => inCloud).map(([b]) => b.room))
@@ -278,6 +289,12 @@ export function Dashboard() {
         )}
 
         {!!trash.length && (
+          <>
+          <button
+            type="button"
+            onClick={burn}
+            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          >{t('Empty the trash ({n})', { n: trash.length })}</button>
           <Band
             title={t('Trash')}
             note={t('Emptied automatically after {n} days. Until then a board here can be brought back exactly as it was.', { n: TRASH_DAYS })}
@@ -305,6 +322,7 @@ export function Dashboard() {
               </div>
             ))}
           </Band>
+          </>
         )}
       </div>
     </Shell>

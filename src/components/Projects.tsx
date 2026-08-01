@@ -88,7 +88,7 @@ function Roadmap({ rows }: { rows: Row[] }) {
           <div key={project.id} className="flex items-center border-b border-[#EAE6DD] last:border-0">
             <button
               type="button"
-              onClick={() => go(`/projects/${project.id}`)}
+              onClick={() => go(`/w/${project.id}`)}
               style={{ width: NAMES }}
               className="shrink-0 truncate px-2.5 py-2 text-left text-[13px] text-[#141310] hover:text-[#C8452D]"
             >
@@ -195,9 +195,9 @@ export function Projects() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => go(`/issues?project=${project.id}`)}
+                    onClick={() => go(`/w/${project.id}`)}
                     className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] opacity-0 hover:text-[#C8452D] group-hover:opacity-100"
-                  >{t('Issues')}</button>
+                  >{t('Open')}</button>
                   <button
                     type="button"
                     onClick={() => void archiveRecord(project.id)}

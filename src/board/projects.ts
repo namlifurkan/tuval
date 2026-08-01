@@ -1,7 +1,8 @@
 import { addDays, today } from './database'
 import { isClosed } from './issues'
-import { createRecord, getRecords, patchCells } from './records'
+import { createRecord, getPages, getRecords, patchCells } from './records'
 import type { Record as Row, Status } from './records'
+import { supabase } from './supabase'
 
 // A project is a record, so it is searchable, mentionable and can be dropped on a canvas like
 // anything else. What makes it a project is that issues point at it and it has two dates.
@@ -24,6 +25,33 @@ export async function addProject(title: string): Promise<string | null> {
   const id = await createRecord(title, 'project')
   if (id) patchCells(id, { starts_on: today(), ends_on: addDays(today(), LENGTH) })
   return id
+}
+
+// What else belongs to it. Optional on purpose: the quick note and the scratch board are the
+// reason a tool that insists everything lives inside something is a tool people work around.
+export const pagesIn = (project: string) =>
+  getPages().filter((r) => r.project_id === project)
+
+export const projectsIn = (project: string) =>
+  getRecords('project').filter((r) => r.project_id === project)
+
+export async function boardsIn(project: string): Promise<{ id: string; name: string }[]> {
+  if (!supabase) return []
+  const { data } = await supabase
+    .from('boards').select('id, name').eq('project_id', project).is('deleted_at', null)
+    .order('updated_at', { ascending: false })
+  return (data ?? []) as { id: string; name: string }[]
+}
+
+export async function setBoardProject(board: string, project: string | null) {
+  if (!supabase) return
+  await supabase.from('boards').update({ project_id: project }).eq('id', board)
+}
+
+export async function boardProject(board: string): Promise<string | null> {
+  if (!supabase) return null
+  const { data } = await supabase.from('boards').select('project_id').eq('id', board).maybeSingle()
+  return (data as { project_id: string | null } | null)?.project_id ?? null
 }
 
 export interface Progress { done: number; total: number; points: number; closed: number }

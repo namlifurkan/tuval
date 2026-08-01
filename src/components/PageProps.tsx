@@ -10,6 +10,7 @@ import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 import { Popover } from './Popover'
+import { ProjectPicker } from './ProjectPicker'
 
 const labels = getLabels
 
@@ -66,6 +67,16 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
               <option key={m.userId} value={m.userId}>{displayName(m.email) || t('Member')}</option>
             ))}
           </select>
+        </dd>
+      </div>
+
+      <div className="flex items-center">
+        <dt className={label}>{t('Project')}</dt>
+        <dd>
+          <ProjectPicker
+            value={row.project_id}
+            onPick={(project) => set({ project_id: project })}
+          />
         </dd>
       </div>
 

@@ -881,6 +881,36 @@ set local role anon;
 select pg_temp.check('closing it shuts the door again', false,
   exists(select 1 from public.boards where id = 'rls-team-board'));
 
+-- Somewhere for a thing to belong ------------------------------------------------------------------
+
+set local role postgres;
+insert into public.records (id, workspace_id, kind, title)
+values ('11111111-0000-4000-8000-000000000011',
+        'cccccccc-0000-4000-8000-000000000003', 'project', 'Rebuild');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+
+update public.boards set project_id = '11111111-0000-4000-8000-000000000011'
+where id = 'rls-team-board';
+select pg_temp.check('a board can belong to a project', true,
+  exists(select 1 from public.boards
+         where id = 'rls-team-board' and project_id = '11111111-0000-4000-8000-000000000011'));
+
+select pg_temp.check('but not to something that is not one', true,
+  pg_temp.refused($$update public.boards
+                    set project_id = 'dddddddd-0000-4000-8000-000000000004'
+                    where id = 'rls-team-board'$$));
+
+select pg_temp.check('and a project is not inside itself', true,
+  pg_temp.refused($$update public.records
+                    set project_id = '11111111-0000-4000-8000-000000000011'
+                    where id = '11111111-0000-4000-8000-000000000011'$$));
+
+-- Belonging nowhere stays allowed: the quick note and the scratch board are why.
+update public.boards set project_id = null where id = 'rls-team-board';
+select pg_temp.check('and belonging nowhere is still allowed', true,
+  exists(select 1 from public.boards where id = 'rls-team-board' and project_id is null));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

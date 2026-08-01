@@ -9,6 +9,7 @@ const Published = lazy(() => import('./Published').then((m) => ({ default: m.Pub
 const PublicForm = lazy(() => import('./PublicForm').then((m) => ({ default: m.PublicForm })))
 const PublicBooking = lazy(() => import('./PublicBooking').then((m) => ({ default: m.PublicBooking })))
 const Profile = lazy(() => import('./Profile').then((m) => ({ default: m.Profile })))
+const Project = lazy(() => import('./Project').then((m) => ({ default: m.Project })))
 import { Issues } from './Issues'
 import { Projects } from './Projects'
 import { Page } from './Page'
@@ -32,6 +33,7 @@ export function Home() {
   if (route.kind === 'page') return <Page key={route.id} />
   if (route.kind === 'collection') return <Collection key={route.id} />
   if (route.kind === 'profile') return <Suspense fallback={null}><Profile key={route.handle} /></Suspense>
+  if (route.kind === 'project') return <Suspense fallback={null}><Project key={route.id} /></Suspense>
   if (route.kind === 'dashboard') return <Dashboard />
   return <Suspense fallback={null}><Landing /></Suspense>
 }

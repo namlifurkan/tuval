@@ -1,11 +1,12 @@
 import {
   Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2, Wand2,
 } from 'lucide-react'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import type { ReactNode } from 'react'
 import { isDarkSurface, PRODUCT, SURFACES, surfaceColor } from '../board/brand'
 import { getItems, getMeta, removeItems, room, setMeta, subscribeMeta } from '../board/doc'
+import { boardProject, setBoardProject } from '../board/projects'
 import { exportPng } from '../board/export'
 import { printFrames } from '../board/print'
 import { TEXTURES } from '../board/paper'
@@ -18,6 +19,7 @@ import { Share } from './Share'
 import { Collaborators } from './Collaborators'
 import { goHome } from '../board/boards'
 import { HandoffMenu } from './HandoffMenu'
+import { ProjectPicker } from './ProjectPicker'
 import { ViewOnly } from './ViewOnly'
 import { IconButton, Popover, usePopover } from './ui'
 
@@ -68,6 +70,9 @@ export function TopBar() {
   const update = useBoardStore((s) => s.update)
   const setSelection = useBoardStore((s) => s.setSelection)
   const menu = usePopover()
+  const [project, setProject] = useState<string | null>(null)
+
+  useEffect(() => { if (menu.open) void boardProject(room).then(setProject) }, [menu.open])
 
   return (
     <>
@@ -167,6 +172,16 @@ export function TopBar() {
                   >{l.name}</button>
                 ))}
               </div>
+              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
+                <span className="shrink-0 text-xs font-semibold text-[#8A867C]">{t('Project')}</span>
+                <ProjectPicker
+                  value={project}
+                  onPick={(next) => { setProject(next); void setBoardProject(room, next) }}
+                  className="min-w-0 flex-1 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-[12px] outline-none focus:border-[#C8452D]"
+                />
+              </div>
+
               <div className="my-1 h-px bg-[#EAE6DD]" />
               <button
                 type="button"

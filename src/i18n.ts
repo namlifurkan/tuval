@@ -396,6 +396,12 @@ const tr: Record<string, string> = {
   'Diagram': 'Diyagram',
   'Find': 'Bul',
   'Tags': 'Etiketler',
+  'Untitled project': 'Adsız proje',
+  'Empty the trash ({n})': 'Çöpü boşalt ({n})',
+  'Delete {n} boards in the trash for good? This cannot be undone.':
+    'Çöpteki {n} board kalıcı silinsin mi? Bu geri alınamaz.',
+  'New issue in {name}': '{name} içinde yeni iş',
+  '{done} of {total} done': '{total} işin {done} tanesi bitti',
   'Your page': 'Kendi sayfan',
   'An address of your own, with whatever you have opened to the world on it. Off until you choose a name. There is no feed here and no way to be found from inside: this is what you link to from wherever your readers already are.':
     'Dünyaya açtığın ne varsa üzerinde duran, sana ait bir adres. Bir ad seçene kadar kapalı. Burada akış yok, içeriden keşfedilmek de yok: okuyucularının zaten olduğu yerden buraya link verirsin.',
