@@ -56,6 +56,13 @@ for (const page of all) {
     '<main>',
     `<h1>${escape(page.claim)}</h1>`,
     `<p>${escape(page.lede)}</p>`,
+    ...(page.compare ? [
+      `<table><thead><tr><th>Feature</th><th>Tuval</th><th>${escape(page.compare.against)}</th></tr></thead><tbody>`,
+      ...page.compare.rows.map((row) =>
+        `<tr><th>${escape(row.feature)}</th><td>${escape(row.tuval)}</td><td>${escape(row.them)}</td></tr>`),
+      '</tbody></table>',
+      `<p>Checked ${escape(page.compare.checked)}. ${escape(page.compare.against)} is a trademark of its owner; Tuval is not affiliated with, endorsed by or sponsored by them.</p>`,
+    ] : []),
     ...page.bands.flatMap((band) => [
       `<h2>${escape(band.heading)}</h2>`,
       band.body ? `<p>${escape(band.body)}</p>` : '',

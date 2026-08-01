@@ -20,8 +20,17 @@ export interface Band {
   demo?: Demo
 }
 
+// A comparison page carries a table and the two things a table needs to be honest: the day it
+// was checked, and whose trademark is being named.
+export interface Compare {
+  against: string
+  checked: string
+  rows: { feature: string; tuval: string; them: string }[]
+}
+
 export interface Page {
   path: string
+  compare?: Compare
   // What the tab and the search result say. Kept under 60 characters so it is not cut off.
   title: string
   description: string

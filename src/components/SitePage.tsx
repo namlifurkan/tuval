@@ -176,6 +176,49 @@ function Statement({ heading, body, picture }: {
   )
 }
 
+// A comparison, which is the only shape an "alternative to X" page can honestly take. The rows
+// that go against us are in it: a table with no losing row is an advertisement, and a reader who
+// spots the omission stops believing the rest of the page.
+function Compare({ compare }: { compare: NonNullable<Page['compare']> }) {
+  return (
+    <div className="mx-auto max-w-[80rem] px-6 pt-4 pb-24">
+      <div className="overflow-x-auto rounded-2xl border border-[#141310]/12 bg-[#FCFBF8] shadow-[5px_5px_0_rgba(20,19,16,0.07)]">
+        <table className="w-full min-w-[46rem] border-collapse text-left">
+          <thead>
+            <tr>
+              <th scope="col" className="w-[34%] border-b border-[#141310] px-5 py-3.5 text-[12px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+                Feature
+              </th>
+              <th scope="col" className="w-[33%] border-b border-[#141310] px-5 py-3.5 text-[13px] font-bold text-[#C8452D]">
+                {PRODUCT.name}
+              </th>
+              <th scope="col" className="w-[33%] border-b border-[#141310] px-5 py-3.5 text-[13px] font-bold text-[#141310]">
+                {compare.against}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {compare.rows.map((row) => (
+              <tr key={row.feature} className="border-b border-[#141310]/8 last:border-0">
+                <th scope="row" className="px-5 py-3.5 align-top text-[14px] font-semibold">
+                  {row.feature}
+                </th>
+                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{row.tuval}</td>
+                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{row.them}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-4 max-w-[70ch] text-[12.5px] leading-relaxed text-[#8A867C]">
+        Checked {compare.checked}. {compare.against} is a trademark of its owner;
+        {' '}{PRODUCT.name} is not affiliated with, endorsed by or sponsored by them.
+        {' '}Their product changes; if a row here has gone stale, tell us and it will be corrected.
+      </p>
+    </div>
+  )
+}
+
 // The trade pages are a week, not a feature list. Read across, not down.
 function Week({ points }: { points: { title: string; body: string }[] }) {
   return (
@@ -377,6 +420,33 @@ function PricingLayout({ page }: { page: Page }) {
   )
 }
 
+function CompareLayout({ page }: { page: Page }) {
+  const said = page.bands.filter((b) => b.tone === 'pigment')
+  const prose = page.bands.filter((b) => b.tone === 'paper')
+  return (
+    <>
+      <Hero page={page} />
+      {page.compare && <Compare compare={page.compare} />}
+      {said[0] && <Statement heading={said[0].heading} body={said[0].body} />}
+      <div className="mx-auto max-w-[80rem] px-6 pt-20 pb-24">
+        <dl className="grid gap-x-14 gap-y-12 md:grid-cols-3">
+          {prose.map((one, at) => (
+            <div key={one.heading} data-reveal style={{ '--step': at } as React.CSSProperties}>
+              <dt className="border-b border-[#141310] pb-2.5 text-[19px] font-bold tracking-[-0.02em]">
+                {one.heading}
+              </dt>
+              <dd
+                className="mt-3 text-[14.5px] leading-[1.7] text-[#4A463E]"
+                style={{ fontFamily: '"Instrument Sans", system-ui, sans-serif' }}
+              >{one.body}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </>
+  )
+}
+
 // A specification sheet. Nothing to demonstrate here, so the page is what it is about: the
 // requirements, plainly, in the order somebody would meet them.
 function SpecLayout({ page }: { page: Page }) {
@@ -483,7 +553,8 @@ export function SitePage() {
 
   if (route.kind !== 'landing') return null
 
-  const body = page.path === '/' ? <HomeLayout page={page} />
+  const body = page.compare ? <CompareLayout page={page} />
+    : page.path === '/' ? <HomeLayout page={page} />
     : page.path === '/pricing' ? <PricingLayout page={page} />
       : page.path === '/self-hosting' ? <SpecLayout page={page} />
         : page.path.startsWith('/for/') ? <TradeLayout page={page} />
