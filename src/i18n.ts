@@ -471,8 +471,9 @@ const tr: Record<string, string> = {
   'No grouping': 'Gruplama yok',
   'Write an issue and press enter — or press c': 'Bir iş yaz ve enter\'a bas — ya da c\'ye',
   'Keys': 'Kısayollar',
-  'j k move · enter opens · c writes · x archives · 1–7 set the state · g then i p d b n s': 
-    'j k gezinir · enter açar · c yazar · x arşivler · 1–7 durumu değiştirir · g sonra i p d b n s',
+  'j k move · enter opens · c writes · x chooses · delete archives · 1–7 set the state · g then i p d b n s':
+    'j k gezinir · enter açar · c yazar · x seçer · delete arşivler · 1–7 durumu değiştirir · g sonra i p d b n s',
+  '{n} chosen': '{n} seçili',
   'Projects': 'Projeler',
   'roadmap': 'yol haritası',
   'No projects yet.': 'Henüz proje yok.',

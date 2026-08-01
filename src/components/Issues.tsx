@@ -54,6 +54,7 @@ export function Issues() {
   const [group, setGroup] = useState<GroupBy>('status')
   const [cycleOnly, setCycleOnly] = useState('')
   const [at, setAt] = useState(-1)
+  const [picked, setPicked] = useState<string[]>([])
   const box = useRef<HTMLInputElement>(null)
 
   // The open issue is the address, not a piece of state beside it. That is what makes it
@@ -131,20 +132,31 @@ export function Issues() {
       const step = (by: number) =>
         setAt((was) => Math.max(0, Math.min(walk.length - 1, (was < 0 ? -1 : was) + by)))
 
+      if (e.key === 'Escape' && picked.length) { setPicked([]); return }
       if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); step(1) }
       else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); step(-1) }
       else if (e.key === 'c') { e.preventDefault(); box.current?.focus() }
       else if (e.key === 'Enter' && walk[at]) { e.preventDefault(); setOpenId(walk[at].id) }
-      else if (e.key === 'x' && walk[at]) { e.preventDefault(); void archiveRecord(walk[at].id) }
-      else if (/^[1-7]$/.test(e.key) && walk[at]) {
+      else if (e.key === 'x' && walk[at]) {
         e.preventDefault()
-        patchRecord(walk[at].id, { status: STATUSES[Number(e.key) - 1] })
+        const id = walk[at].id
+        setPicked((was) => (was.includes(id) ? was.filter((x) => x !== id) : [...was, id]))
+      } else if ((e.key === 'Backspace' || e.key === 'Delete')) {
+        e.preventDefault()
+        const doomed = picked.length ? picked : walk[at] ? [walk[at].id] : []
+        doomed.forEach((id) => void archiveRecord(id))
+        setPicked([])
+      } else if (/^[1-7]$/.test(e.key)) {
+        e.preventDefault()
+        const status = STATUSES[Number(e.key) - 1]
+        const held = picked.length ? picked : walk[at] ? [walk[at].id] : []
+        held.forEach((id) => patchRecord(id, { status }))
       }
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walk, at, openId])
+  }, [walk, at, openId, picked])
 
   const now = currentCycle(today())
 
@@ -233,8 +245,20 @@ export function Issues() {
                   key={issue.id}
                   onMouseEnter={() => setAt(walk.indexOf(issue))}
                   className={`group flex items-center gap-2.5 py-2.5
-                    ${walk[at]?.id === issue.id ? 'bg-[#F7E9E4]' : ''}`}
+                    ${picked.includes(issue.id) ? 'bg-[#F7E9E4]' : walk[at]?.id === issue.id ? 'bg-[#EFEBE2]' : ''}`}
                 >
+                  <button
+                    type="button"
+                    aria-pressed={picked.includes(issue.id)}
+                    aria-label={t('Select')}
+                    onClick={() => setPicked((was) =>
+                      was.includes(issue.id) ? was.filter((x) => x !== issue.id) : [...was, issue.id])}
+                    className={`grid h-4 w-4 shrink-0 place-items-center rounded-[3px] border text-[9px] transition-opacity
+                      ${picked.includes(issue.id)
+                        ? 'border-[#C8452D] bg-[#C8452D] text-white opacity-100'
+                        : 'border-[#D8D5CD] opacity-0 group-hover:opacity-100'}`}
+                  >{picked.includes(issue.id) ? '✓' : ''}</button>
+
                   <Dot status={issue.status} />
 
                   <span className="w-[68px] shrink-0 font-mono text-[11px] text-[#B6B1A6]">
@@ -315,9 +339,64 @@ export function Issues() {
         />
       )}
 
+      {!!picked.length && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex flex-wrap items-center gap-2 border-t border-[#E2DED5] bg-[#FCFBF8] px-6 py-2.5 shadow-[0_-3px_0_rgba(20,19,16,0.06)]">
+          <span className="text-[12px] font-semibold text-[#141310]">
+            {t('{n} chosen', { n: picked.length })}
+          </span>
+          <select
+            value=""
+            onChange={(e) => {
+              picked.forEach((id) => patchRecord(id, { status: e.target.value as Status }))
+              setPicked([])
+            }}
+            className={pill}
+          >
+            <option value="">{t('Status')}</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{t(s)}</option>)}
+          </select>
+          <select
+            value=""
+            onChange={(e) => {
+              picked.forEach((id) => patchRecord(id, { assignee: e.target.value || null }))
+              setPicked([])
+            }}
+            className={pill}
+          >
+            <option value="">{t('Assignee')}</option>
+            {team.map((m) => (
+              <option key={m.userId} value={m.userId}>{m.email.split('@')[0] || t('Member')}</option>
+            ))}
+          </select>
+          <select
+            value=""
+            onChange={(e) => {
+              picked.forEach((id) => patchRecord(id, { cycle_id: e.target.value || null }))
+              setPicked([])
+            }}
+            className={pill}
+          >
+            <option value="">{t('Cycle')}</option>
+            {getCycles().map((c) => (
+              <option key={c.id} value={c.id}>{c.name || t('Cycle {n}', { n: c.number })}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => { picked.forEach((id) => void archiveRecord(id)); setPicked([]) }}
+            className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          >{t('Archive')}</button>
+          <button
+            type="button"
+            onClick={() => setPicked([])}
+            className="ml-auto rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD]"
+          >{t('Clear')}</button>
+        </div>
+      )}
+
       {view === 'list' && !!shown.length && (
         <p className="mt-4 text-[11px] text-[#B6B1A6]">
-          {t('j k move · enter opens · c writes · x archives · 1–7 set the state · g then i p d b n s')}
+          {t('j k move · enter opens · c writes · x chooses · delete archives · 1–7 set the state · g then i p d b n s')}
         </p>
       )}
 
