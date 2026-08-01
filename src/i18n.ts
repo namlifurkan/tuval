@@ -469,6 +469,25 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'API and webhooks': 'API ve webhook',
+  'The plan for this product is to integrate rather than clone — n8n for automation, Gmail for mail. This is what they talk to.':
+    'Bu ürünün planı klonlamak değil entegre etmek — otomasyon için n8n, posta için Gmail. Onların konuştuğu yer burası.',
+  'A key lets something outside read and write this workspace. Send it as a bearer token to {url}':
+    'Bir anahtar, dışarıdaki bir şeyin bu çalışma alanını okuyup yazmasını sağlar. Bearer token olarak {url} adresine gönder.',
+  'What is it for?': 'Ne için?',
+  'New key': 'Yeni anahtar',
+  'Copy it now — it is not shown again.': 'Şimdi kopyala — bir daha gösterilmiyor.',
+  'No keys yet.': 'Henüz anahtar yok.',
+  'never used': 'hiç kullanılmadı',
+  'used': 'kullanıldı',
+  'Revoke': 'İptal et',
+  'A webhook is told when a record changes, so an integration does not have to keep asking. Every call carries an X-Tuval-Signature of the body.':
+    'Webhook, bir kayıt değiştiğinde haber alır; entegrasyonun sürekli sorması gerekmez. Her çağrı gövdenin X-Tuval-Signature imzasını taşır.',
+  'That has to be an https address.': 'https ile başlayan bir adres olmalı.',
+  'No webhooks yet.': 'Henüz webhook yok.',
+  'signing secret': 'imza anahtarı',
+  'never sent': 'hiç gönderilmedi',
+  'sent': 'gönderildi',
   'Write an issue and press enter — or press c': 'Bir iş yaz ve enter\'a bas — ya da c\'ye',
   'Keys': 'Kısayollar',
   'j k move · enter opens · c writes · x chooses · delete archives · 1–7 set the state · g then i p d b n s':

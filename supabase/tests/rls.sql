@@ -509,6 +509,66 @@ select pg_temp.check('a guest cannot make one', true, pg_temp.refused(
   $q$insert into public.labels (workspace_id, name)
      values ('cccccccc-0000-4000-8000-000000000003', 'sneaked')$q$));
 
+-- A key and a hook are workspace administration -----------------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.api_keys (workspace_id, name, hint, token_sha)
+values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab', 
+        encode(extensions.digest('tuv_secret_token', 'sha256'), 'hex'));
+insert into public.webhooks (id, workspace_id, url)
+values ('33333333-0000-4000-8000-000000000033', 'cccccccc-0000-4000-8000-000000000003',
+        'https://example.test/hook');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a stranger sees no keys', false, exists(select 1 from public.api_keys));
+select pg_temp.check('a stranger sees no hooks', false, exists(select 1 from public.webhooks));
+
+set local role postgres;
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'guest', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a guest of the workspace still sees no keys', false,
+  exists(select 1 from public.api_keys));
+
+set local role postgres;
+update public.workspace_members set role = 'member'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('somebody who may write the workspace sees them', true,
+  exists(select 1 from public.api_keys));
+
+-- The token itself never opens anything by being guessed at ------------------------------------------
+
+set local role postgres;
+select pg_temp.check('a key names its workspace', true,
+  public.workspace_for_key('tuv_secret_token') = 'cccccccc-0000-4000-8000-000000000003');
+select pg_temp.check('a wrong token names nothing', true,
+  public.workspace_for_key('tuv_not_the_token') is null);
+
+update public.api_keys set revoked_at = now();
+select pg_temp.check('a revoked key names nothing', true,
+  public.workspace_for_key('tuv_secret_token') is null);
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('and nobody signed in may ask that question at all', true, pg_temp.refused(
+  $q$select public.workspace_for_key('tuv_secret_token')$q$));
+
+-- A webhook nobody can reach does not stop work being saved -----------------------------------------
+
+set local role postgres;
+update public.webhooks set active = true, url = 'https://127.0.0.1:9/nowhere'
+where id = '33333333-0000-4000-8000-000000000033';
+
+select pg_temp.check('a record still saves with a broken hook registered', true,
+  not pg_temp.refused(
+    $q$insert into public.records (workspace_id, kind, title)
+       values ('cccccccc-0000-4000-8000-000000000003', 'issue', 'Saved anyway')$q$));
+select pg_temp.check('and it is really there', true,
+  exists(select 1 from public.records where title = 'Saved anyway'));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
