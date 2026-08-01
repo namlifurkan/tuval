@@ -6,6 +6,7 @@ import {
   displayName, getUser, hasPassword, passwordProblem, setPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
+import { Activity } from './Activity'
 import { Identities } from './Identities'
 import { Team } from './Team'
 import { Shell } from './Shell'
@@ -172,6 +173,13 @@ export function Settings() {
           note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
         >
           <Team />
+        </Row>
+
+        <Row
+          title={t('Activity')}
+          note={t('The last change to everything in this workspace. Not every change to it: what a page said before is in that page\'s own history.')}
+        >
+          <Activity />
         </Row>
 
         <Row title={t('Sign-in methods')} note={t('Connect a provider here rather than signing in with it: an account is chosen, not guessed.')}>
