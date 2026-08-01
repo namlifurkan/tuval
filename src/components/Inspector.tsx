@@ -1,6 +1,10 @@
 import { readOnly, subscribeAccess } from '../board/access'
 import { go } from '../board/boards'
-import { canPromote, promoteToIssue } from '../board/promote'
+import { canPromote, promoteToIssue, recordHref } from '../board/promote'
+
+const CARD_TITLES: { [kind: string]: string } = {
+  issue: 'Issue', doc: 'Page', database: 'Database', project: 'Project',
+}
 import { patchRecord, STATUSES } from '../board/records'
 import { boardPeople, isAssigned, toggleAssignee } from '../board/people'
 import { initials } from '../board/me'
@@ -449,27 +453,29 @@ export function Inspector() {
       )}
 
       {card && (
-        <Section title={t('Issue')}>
-          <div className="grid grid-cols-3 gap-1">
-            {STATUSES.map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => {
-                  void patchRecord(card.recordId, { status: st })
-                  patchItem(card.id, { snapshot: { ...card.snapshot, status: st } })
-                  requestRender()
-                }}
-                className={`rounded-lg px-1 py-1.5 text-[11px] font-semibold capitalize
-                  ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
-              >{t(st)}</button>
-            ))}
-          </div>
+        <Section title={t(CARD_TITLES[card.kind] ?? 'Issue')}>
+          {(card.kind === 'issue' || card.kind === 'project') && (
+            <div className="grid grid-cols-3 gap-1">
+              {STATUSES.map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => {
+                    void patchRecord(card.recordId, { status: st })
+                    patchItem(card.id, { snapshot: { ...card.snapshot, status: st } })
+                    requestRender()
+                  }}
+                  className={`rounded-lg px-1 py-1.5 text-[11px] font-semibold capitalize
+                    ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                >{t(st)}</button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => go('/issues')}
+            onClick={() => go(recordHref(card))}
             className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
-          >{t('Open in issues')}</button>
+          >{t('Open it')}</button>
         </Section>
       )}
 

@@ -117,12 +117,13 @@ export const RECORD_H = 96
 
 export function makeRecordItem(
   x: number, y: number, recordId: string, title: string, status: string | null, fill = '#FCFBF8',
+  kind = 'issue',
 ): RecordItem {
   return {
     ...base(x, y, RECORD_W, RECORD_H),
     type: 'record',
     recordId,
-    kind: 'issue',
+    kind,
     fill,
     snapshot: { title, status },
     ...DEFAULT_TEXT_STYLE,

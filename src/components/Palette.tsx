@@ -4,6 +4,7 @@ import {
   ancestors, createRecord, getPages, getRecords, loadRecords, searchBodies, subscribeRecords,
 } from '../board/records'
 import type { Hit } from '../board/records'
+import { openJournal } from '../board/journal'
 import { t } from '../i18n'
 
 // What the question is about. Narrowing is the difference between a palette and a search: with
@@ -74,6 +75,7 @@ export function Palette() {
     { id: 'issues', label: t('Go to issues'), hint: '/issues', run: () => go('/issues') },
     { id: 'docs', label: t('Go to docs'), hint: '/docs', run: () => go('/docs') },
     { id: 'settings', label: t('Go to settings'), hint: '/settings', run: () => go('/settings') },
+    { id: 'journal', label: t("Today's journal"), hint: 'g j', run: () => void openJournal() },
     {
       id: 'new-board',
       label: t('New board'),

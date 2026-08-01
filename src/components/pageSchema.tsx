@@ -6,7 +6,7 @@ import '@blocknote/mantine/style.css'
 import { go } from '../board/boards'
 import { COLOR, PIGMENTS } from '../board/brand'
 import { MENTION } from '../board/mention'
-import { Bookmark, Callout, Contents, Equation, Frame } from './pageBlocks'
+import { Bookmark, Callout, Contents, Diagram, Equation, Frame } from './pageBlocks'
 
 // BlockNote ships its own look and its own font. Neither is ours, so the whole surface is
 // restated in the tokens the rest of the product uses: paper, ink, one hairline, one pigment.
@@ -84,6 +84,7 @@ export const schema = withMultiColumn(
     blockSpecs: {
       callout: Callout(),
       equation: Equation(),
+      diagram: Diagram(),
       toc: Contents(),
       bookmark: Bookmark(),
       embed: Frame(),

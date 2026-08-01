@@ -32,6 +32,13 @@ export function ourSlashItems(editor: Editor) {
       onItemClick: insert({ type: 'equation' }),
     },
     {
+      title: t('Diagram'),
+      subtext: t('A flow written in mermaid'),
+      aliases: ['diagram', 'mermaid', 'flow', 'chart', 'diyagram', 'akis', 'şema'],
+      group,
+      onItemClick: insert({ type: 'diagram' }),
+    },
+    {
       title: t('Table of contents'),
       subtext: t('The headings of this page'),
       aliases: ['toc', 'contents', 'icindekiler'],

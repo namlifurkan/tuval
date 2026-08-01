@@ -11,7 +11,8 @@ import {
 import type { DockItemId, DockSize } from '../board/dockPrefs'
 import { addImage } from '../board/images'
 import { addPdf, isPdf } from '../board/pdf'
-import { makeEmbed, makeFrame, makeText } from '../board/items'
+import { makeEmbed, makeFrame, makeText, RECORD_H, RECORD_W } from '../board/items'
+import { recordItemsFor } from '../board/promote'
 import { insertItems } from '../board/interaction'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
@@ -22,8 +23,9 @@ import { t } from '../i18n'
 import { LINE_COLORS, STICKY_COLORS, type Item, type ShapeKind } from '../board/types'
 import {
   CodeTool, Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
-  Nib, Select, Sticky, TableTool, Templates, TextTool,
+  Nib, RecordTool, Select, Sticky, TableTool, Templates, TextTool,
 } from './icons'
+import { RecordPicker } from './RecordPicker'
 import { ColorGrid, IconButton, Popover, usePopover } from './ui'
 
 const EMOJI = [
@@ -71,6 +73,7 @@ export function Dock() {
   const penPop = usePopover()
   const templatePop = usePopover()
   const framePop = usePopover()
+  const recordPop = usePopover()
   const morePop = usePopover()
   const zoomPop = usePopover()
   const settingsPop = usePopover()
@@ -100,7 +103,7 @@ export function Dock() {
   // A popover covers the bar, so no pointermove/leave reaches it and the last
   // magnification transform would stick after the popover closes.
   const popoverOpen = stickyPop.open || shapePop.open || penPop.open || templatePop.open
-    || framePop.open || morePop.open || zoomPop.open || settingsPop.open
+    || framePop.open || recordPop.open || morePop.open || zoomPop.open || settingsPop.open
   useEffect(() => { if (popoverOpen) resetScale() }, [popoverOpen, resetScale])
 
   const onMove = (e: React.PointerEvent) => {
@@ -337,6 +340,22 @@ export function Dock() {
                   <div className="text-xs text-[#8A867C]">{t.description}</div>
                 </button>
               ))}
+            </Popover>
+          </div>
+        )
+
+      case 'record':
+        return (
+          <div className="relative">
+            {button(t('Existing work'), recordPop.open, recordPop.toggle, <RecordTool size={glyph} />)}
+            <Popover open={recordPop.open} onClose={recordPop.close} anchor={popSide} className="w-[300px]">
+              <RecordPicker
+                onPick={(rows) => {
+                  const c = viewportCenter()
+                  insert(recordItemsFor(rows, c.x - RECORD_W / 2, c.y - RECORD_H / 2))
+                  recordPop.close()
+                }}
+              />
             </Popover>
           </div>
         )

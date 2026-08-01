@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
+import { openJournal } from '../board/journal'
 import { armed } from '../board/keys'
 import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
@@ -41,6 +42,7 @@ export function Shell({ title, wide, action, children }: {
       i: '/issues', p: '/projects', d: '/docs', b: '/dashboard', n: '/inbox', s: '/settings',
     }
     const key = armed('g', (second) => {
+      if (second === 'j') { void openJournal(); return true }
       const to = where[second]
       if (to) go(to)
       return !!to

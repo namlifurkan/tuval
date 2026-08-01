@@ -20,7 +20,8 @@ describe('ourSlashItems', () => {
     })
 
     expect(made.map((b) => b.type)).toEqual([
-      'callout', 'equation', 'toc', 'bookmark', 'embed', 'heading', 'heading', 'heading',
+      'callout', 'equation', 'diagram', 'toc', 'bookmark', 'embed',
+      'heading', 'heading', 'heading',
     ])
   })
 

@@ -15,7 +15,9 @@ import {
   makeCode, makeSticky, makeTable, makeText, anchorTowards, connectorEnds, STICKY_SIZE, TABLE_CELL_H,
   TABLE_CELL_W,
 } from './items'
+import { go } from './boards'
 import { addMindNode, isNode, layoutMindmap, makeMindRoot, rootOf } from './mindmap'
+import { recordHref } from './promote'
 import { firstUrl, layoutText } from './text'
 import {
   boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
@@ -913,6 +915,12 @@ export function doubleClick(screen: Vec) {
     const cell = cellAt(hit, p)
     s.setSelection([hit.id])
     s.setEditing({ id: hit.id, selectAll: true, cell: cell ?? [0, 0] })
+    return
+  }
+  // A record card holds no text of its own, so opening it means opening the row it stands for.
+  if (hit?.type === 'record') {
+    s.setSelection([hit.id])
+    go(recordHref(hit))
     return
   }
   if (hit && hit.type !== 'draw' && hit.type !== 'image') {

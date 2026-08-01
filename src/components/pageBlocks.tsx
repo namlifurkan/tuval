@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createReactBlockSpec } from '@blocknote/react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import { PIGMENTS } from '../board/brand'
+import { renderDiagram } from '../board/diagram'
 import { t } from '../i18n'
 
 // Blocks BlockNote does not ship and a document written in Notion expects to find. Each is the
@@ -90,6 +91,64 @@ export const Equation = createReactBlockSpec(
             __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
           }}
         />
+      )
+    },
+  },
+)
+
+// A diagram written as text. The text is what is stored, so it stays readable, diffable and
+// pasteable into anything else that speaks mermaid — including the brief this board hands to an
+// agent, which is where most of these are written in the first place.
+export const Diagram = createReactBlockSpec(
+  { type: 'diagram', propSchema: { code: { default: '' } }, content: 'none' },
+  {
+    render: ({ block, editor }) => {
+      const code = block.props.code
+      const [open, setOpen] = useState(!code)
+      const [drawn, setDrawn] = useState<{ svg: string; fault: string }>({ svg: '', fault: '' })
+
+      useEffect(() => {
+        let live = true
+        void renderDiagram(code).then((r) => { if (live) setDrawn(r) })
+        return () => { live = false }
+      }, [code])
+
+      if (open) {
+        return (
+          <div className="w-full" contentEditable={false}>
+            <textarea
+              autoFocus
+              rows={Math.max(4, code.split('\n').length + 1)}
+              defaultValue={code}
+              spellCheck={false}
+              placeholder={'graph TD\n  A[Idea] --> B[Work]'}
+              onBlur={(e) => {
+                editor.updateBlock(block, { props: { code: e.target.value } })
+                setOpen(false)
+              }}
+              className="w-full resize-y rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 font-mono text-[13px] leading-relaxed outline-none focus:border-[#C8452D]"
+            />
+            <p className="mt-1 text-[11px] text-[#8A867C]">
+              {t('Mermaid. Click away to draw it.')}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <div
+          className="w-full cursor-text rounded-md px-1 py-2 hover:bg-[#F2EFE9]"
+          contentEditable={false}
+          onClick={() => setOpen(true)}
+        >
+          {drawn.fault ? (
+            <p className="rounded-md bg-[#F7E9E4] px-2 py-1.5 font-mono text-[12px] text-[#C8452D]">
+              {drawn.fault}
+            </p>
+          ) : (
+            <div className="overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto [&_svg]:max-w-full" dangerouslySetInnerHTML={{ __html: drawn.svg }} />
+          )}
+        </div>
       )
     },
   },

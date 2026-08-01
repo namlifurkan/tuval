@@ -1,19 +1,19 @@
 export type DockItemId =
   | 'undo' | 'redo' | 'select' | 'sticky' | 'text' | 'shape' | 'connector' | 'pen'
-  | 'table' | 'mindmap' | 'frame' | 'comment' | 'code' | 'templates' | 'image' | 'more'
+  | 'table' | 'mindmap' | 'frame' | 'comment' | 'code' | 'templates' | 'image' | 'record' | 'more'
   | 'minimap' | 'fit' | 'zoom'
 
 export const DOCK_LABELS: Record<DockItemId, string> = {
   undo: 'Undo', redo: 'Redo', select: 'Select', sticky: 'Sticky', text: 'Text',
   shape: 'Shape', connector: 'Connector', pen: 'Pen', table: 'Table', mindmap: 'Mind map',
   frame: 'Frame', comment: 'Comment', code: 'Code block', templates: 'Templates', image: 'Image',
-  more: 'More',
+  record: 'Existing work', more: 'More',
   minimap: 'Minimap', fit: 'Fit to content', zoom: 'Zoom',
 }
 
 export const DEFAULT_ORDER: DockItemId[] = [
   'undo', 'redo', 'select', 'sticky', 'text', 'shape', 'connector', 'pen',
-  'table', 'mindmap', 'frame', 'comment', 'code', 'templates', 'image', 'more',
+  'table', 'mindmap', 'frame', 'comment', 'code', 'templates', 'image', 'record', 'more',
   'minimap', 'fit', 'zoom',
 ]
 

@@ -1,6 +1,7 @@
 import { createItems, getItems, patchItems, removeItems, transact } from './doc'
-import { makeRecordItem } from './items'
+import { makeRecordItem, RECORD_H, RECORD_W } from './items'
 import { createRecord, getRecords, loadRecords } from './records'
+import type { Kind, Record as Row } from './records'
 import { requestRender, useBoardStore } from './store'
 import { getWorkspace } from './workspace'
 import type { Id, Item } from './types'
@@ -44,6 +45,20 @@ export async function promoteToIssue(ids: Id[]) {
   requestRender()
 }
 
+// The other half of the same idea: a piece of work that already exists is put on a canvas, so a
+// board can be drawn out of the things the team is actually doing rather than a copy of them.
+export const recordItemsFor = (rows: Row[], x: number, y: number): Item[] =>
+  rows.map((row, i) => makeRecordItem(
+    x + (i % 3) * (RECORD_W + 20),
+    y + Math.floor(i / 3) * (RECORD_H + 20),
+    row.id, row.title || 'Untitled', row.status, '#FCFBF8', row.kind,
+  ))
+
+// Where the card leads when it is opened. A page and an issue are the same kind of thing here
+// and different screens there.
+export const recordHref = (item: Item & { type: 'record' }) =>
+  (item.kind === 'doc' || item.kind === 'database' ? `/d/${item.recordId}` : `/i/${item.recordId}`)
+
 // The row is the truth and the snapshot is a copy, so on arriving at a board the copies are
 // brought up to date. Only what actually differs is written: an unconditional write would put
 // a change into every board on every load.
@@ -51,8 +66,9 @@ export async function refreshSnapshots() {
   const cards = getItems().filter((i) => i.type === 'record')
   if (!cards.length || !getWorkspace()) return
 
-  await loadRecords('issue')
-  const rows = new Map(getRecords('issue').map((r) => [r.id, r]))
+  const kinds = [...new Set(cards.map((c) => c.kind as Kind))]
+  await Promise.all(kinds.map((k) => loadRecords(k)))
+  const rows = new Map(kinds.flatMap((k) => getRecords(k)).map((r) => [r.id, r]))
 
   const stale: [Id, Record<string, unknown>][] = []
   for (const card of cards) {
