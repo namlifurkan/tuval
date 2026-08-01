@@ -32,17 +32,30 @@ const labels = getLabels
 
 const GROUPS: GroupBy[] = ['status', 'assignee', 'priority', 'cycle', 'project', 'none']
 
-function Dot({ status }: { status: Status | null }) {
+// The state, as a dot you can also press. It used to be a dot beside a full select box on every
+// line, which said the same thing twice and left the title about a hundred pixels to be read in:
+// half the list showed "Pricing p" where it meant "Pricing page".
+const pill = 'shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-xs outline-none'
+
+function Dot({ status, onPick }: { status: Status | null; onPick?: (next: Status) => void }) {
+  const tone = status ? STATUS_TONE[status] : '#D6D1C6'
+  if (!onPick) {
+    return <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: tone }} />
+  }
   return (
-    <span
-      aria-hidden
-      className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-      style={{ background: status ? STATUS_TONE[status] : '#D6D1C6' }}
-    />
+    <span className="relative grid h-4 w-4 shrink-0 place-items-center">
+      <span aria-hidden className="h-2.5 w-2.5 rounded-[3px]" style={{ background: tone }} />
+      <select
+        aria-label={t('Status')}
+        value={status ?? 'todo'}
+        onChange={(e) => onPick(e.target.value as Status)}
+        className="absolute inset-0 cursor-pointer opacity-0"
+      >
+        {STATUSES.map((s) => <option key={s} value={s}>{t(s)}</option>)}
+      </select>
+    </span>
   )
 }
-
-const pill = 'shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0.5 text-xs outline-none'
 
 export function Issues() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
@@ -268,16 +281,19 @@ export function Issues() {
                         : 'border-[#D8D5CD] opacity-0 group-hover:opacity-100'}`}
                   >{picked.includes(issue.id) ? '✓' : ''}</button>
 
-                  <Dot status={issue.status} />
+                  <Dot
+                    status={issue.status}
+                    onPick={(next) => void patchRecord(issue.id, { status: next })}
+                  />
 
-                  <span className="w-[68px] shrink-0 font-mono text-[11px] text-[#B6B1A6]">
+                  <span className="w-[62px] shrink-0 font-mono text-[11px] tabular-nums text-[#B6B1A6]">
                     {issueKey(issue, prefix)}
                   </span>
 
                   <input
                     value={issue.title}
                     onChange={(e) => void patchRecord(issue.id, { title: e.target.value })}
-                    className="min-w-0 flex-1 bg-transparent text-sm text-[#141310] outline-none focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
+                    className="min-w-0 flex-[1_1_18rem] bg-transparent text-[14.5px] font-medium text-[#141310] outline-none focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
                   />
 
                   <LabelChips known={known} worn={labelsOn(issue.id)} />
@@ -305,14 +321,6 @@ export function Issues() {
                       {initials(nameOf(issue.assignee) || '?')}
                     </span>
                   )}
-
-                  <select
-                    value={issue.status ?? 'todo'}
-                    onChange={(e) => void patchRecord(issue.id, { status: e.target.value as Status })}
-                    className={pill}
-                  >
-                    {STATUSES.map((s) => <option key={s} value={s}>{t(s)}</option>)}
-                  </select>
 
                   <button
                     type="button"

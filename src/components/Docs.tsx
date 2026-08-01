@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { FileText, Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
   ancestors, archiveRecord, createRecord, deleteRecord, emptyOldTrash, emptyPages, emptyTrash,
@@ -82,40 +82,44 @@ export function Docs() {
         </button>
         <ImportButton />
         <KitPicker />
+      </div>
+
+      <div className="mt-10 flex items-baseline justify-between gap-4">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+          {t('Recently edited')}
+        </h2>
         <button
           type="button"
           onClick={() => void sweep()}
-          className="flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-2 text-xs font-semibold text-[#8A867C] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
         >
-          <Trash2 size={13} /> {t('Clear out empty pages')}
+          <Trash2 size={12} /> {t('Clear out empty pages')}
         </button>
       </div>
-
-      <h2 className="mt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
-        {t('Recently edited')}
-      </h2>
 
       <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
         {recent.map((page) => {
           const trail = ancestors(records, page.id)
           return (
-            <div key={page.id} className="group flex items-center gap-3 py-2.5">
+            <div key={page.id} className="group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[#EAE6DD]/60">
               <button
                 type="button"
                 onClick={() => go(`/d/${page.id}`)}
                 className="min-w-0 flex-1 text-left"
               >
-                <span className="block truncate text-sm text-[#141310] group-hover:text-[#C8452D]">
-                  {page.icon && <span className="mr-1.5">{page.icon}</span>}
+                <span className="block truncate text-[14.5px] font-medium text-[#141310] group-hover:text-[#C8452D]">
+                  {page.icon
+                    ? <span className="mr-2">{page.icon}</span>
+                    : <FileText size={13} className="mr-2 inline-block -translate-y-px text-[#C6C2B6]" />}
                   {page.title || t('Untitled page')}
                 </span>
                 {!!trail.length && (
-                  <span className="mt-0.5 block truncate text-[11px] text-[#8A867C]">
+                  <span className="mt-0.5 block truncate pl-[1.35rem] text-[11.5px] text-[#B6B1A6]">
                     {trail.map((up) => up.title || t('Untitled page')).join(' / ')}
                   </span>
                 )}
               </button>
-              <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(page.updated_at)}</span>
+              <span className="shrink-0 text-[11.5px] tabular-nums text-[#C6C2B6]">{when(page.updated_at)}</span>
               <button
                 type="button"
                 onClick={() => void archiveRecord(page.id).then(loadTrash)}

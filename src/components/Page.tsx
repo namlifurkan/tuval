@@ -82,7 +82,7 @@ export function Page() {
   const related = here ? relatedTo(here, getRecords('database'), rows) : []
 
   return (
-    <Shell title={title || t('Untitled page')} wide={isWide(here)}>
+    <Shell title={title || t('Untitled page')} wide={isWide(here)} bare>
       {!!cover && <Cover id={id} path={cover} />}
 
       {!!trail.length && (

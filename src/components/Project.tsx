@@ -41,7 +41,7 @@ export function Project() {
 
   if (!id) return null
   if (!here) {
-    return <Shell title={t('Project')}><p className="text-sm text-[#8A867C]">{t('Reading…')}</p></Shell>
+    return <Shell title={t('Project')} bare><p className="text-sm text-[#8A867C]">{t('Reading…')}</p></Shell>
   }
 
   const issues = getRecords('issue').filter((r) => r.project_id === id)
@@ -62,7 +62,7 @@ export function Project() {
   const add = 'flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]'
 
   return (
-    <Shell title={title || t('Untitled project')}>
+    <Shell title={title || t('Untitled project')} bare>
       <div className="flex items-start gap-2">
         <Target size={20} className="mt-1.5 shrink-0" style={{ color: PHASE_TONE[phase] }} />
         <input

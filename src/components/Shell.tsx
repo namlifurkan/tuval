@@ -25,9 +25,12 @@ const NAV = [
 
 // One frame around everything that is not a board. A board fills the window on its own, because
 // the canvas is the work; everywhere else there is a workspace to move around in.
-export function Shell({ title, wide, action, children }: {
+export function Shell({ title, wide, bare, action, children }: {
   title: string
   wide?: boolean
+  // A screen that draws its own title — a page, a project, a collection — asks for the heading
+  // to be left out rather than being given one twice.
+  bare?: boolean
   action?: React.ReactNode
   children: React.ReactNode
 }) {
@@ -97,15 +100,23 @@ export function Shell({ title, wide, action, children }: {
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        {/* The bar names where you are; it is not the page's title. Putting the only heading in
+            a 15px sticky strip is how every screen ended up with a button as its largest type. */}
         <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-6 py-3 backdrop-blur-[2px]">
-          <h1 className="truncate text-[15px] font-semibold text-[#141310]">{title}</h1>
+          <p className="truncate text-[13px] font-semibold text-[#8A867C]">{title}</p>
           <div className="flex shrink-0 items-center gap-2">
             {action}
             <Account />
           </div>
         </header>
 
-        <main className={`mx-auto w-full px-6 pb-24 pt-7 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
+        <main className={`mx-auto w-full px-6 pb-24 pt-8 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
+          {!bare && (
+            <h1
+              className="mb-7 font-bold leading-[1.02] tracking-[-0.035em] text-[#141310]"
+              style={{ fontSize: 'clamp(1.9rem, 3.4vw, 2.6rem)' }}
+            >{title}</h1>
+          )}
           {children}
         </main>
       </div>

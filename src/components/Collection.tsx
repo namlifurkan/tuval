@@ -60,7 +60,7 @@ export function Collection() {
   if (!id) return null
   if (!here) {
     return (
-      <Shell title={t('Collection')}>
+      <Shell title={t('Collection')} bare>
         <p className="text-sm text-[#8A867C]">{t('Reading…')}</p>
       </Shell>
     )
@@ -80,7 +80,7 @@ export function Collection() {
   const field = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-[13px] outline-none focus:border-[#C8452D]'
 
   return (
-    <Shell title={title || t('Untitled collection')}>
+    <Shell title={title || t('Untitled collection')} bare>
       <div className="flex items-start gap-2">
         <Filter size={20} className="mt-1.5 shrink-0 text-[#C8452D]" />
         <input
