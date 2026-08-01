@@ -152,6 +152,7 @@ export type Route =
   | { kind: 'settings' }
   | { kind: 'issues' }
   | { kind: 'issue'; id: string }
+  | { kind: 'projects' }
   | { kind: 'docs' }
   | { kind: 'inbox' }
   | { kind: 'published'; slug: string }
@@ -168,6 +169,7 @@ export function readRoute(): Route {
   if (path === '/dashboard') return { kind: 'dashboard' }
   if (path === '/settings') return { kind: 'settings' }
   if (path === '/issues') return { kind: 'issues' }
+  if (path === '/projects') return { kind: 'projects' }
   if (path === '/docs') return { kind: 'docs' }
   if (path === '/inbox') return { kind: 'inbox' }
   const shown = /^\/p\/(.+)$/.exec(path)

@@ -6,6 +6,7 @@ import { Docs } from './Docs'
 import { Inbox } from './Inbox'
 const Published = lazy(() => import('./Published').then((m) => ({ default: m.Published })))
 import { Issues } from './Issues'
+import { Projects } from './Projects'
 import { Page } from './Page'
 import { Settings } from './Settings'
 const Landing = lazy(() => import('./Landing').then((m) => ({ default: m.Landing })))
@@ -18,6 +19,7 @@ export function Home() {
   if (route.kind === 'auth') return <AuthPage />
   if (route.kind === 'settings') return <Settings />
   if (route.kind === 'issues' || route.kind === 'issue') return <Issues />
+  if (route.kind === 'projects') return <Projects />
   if (route.kind === 'docs') return <Docs />
   if (route.kind === 'inbox') return <Inbox />
   if (route.kind === 'published') return <Suspense fallback={null}><Published /></Suspense>
