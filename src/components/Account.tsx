@@ -6,6 +6,7 @@ import {
 import { go } from '../board/boards'
 import { initials } from '../board/me'
 import { avatarUrl } from '../board/profile'
+import { myProfile } from '../board/publicProfile'
 import { t } from '../i18n'
 import { IconButton, Popover, usePopover } from './ui'
 import { LogIn } from 'lucide-react'
@@ -37,6 +38,13 @@ export function Account() {
   const [password, setPass] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [reason, setReason] = useState('')
+  // The address somebody hands out is not one they should have to go to settings to find again.
+  const [mine, setMine] = useState('')
+
+  useEffect(() => {
+    if (!user) { setMine(''); return }
+    void myProfile().then((found) => setMine(found?.handle ?? ''))
+  }, [user])
 
   const { setOpen } = pop
   useEffect(() => {
@@ -99,6 +107,14 @@ export function Account() {
               </div>
             </div>
             <div className="my-1 h-px bg-[#EAE6DD]" />
+            {mine && (
+              <a
+                href={`/u/${mine}`}
+                className="block w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+              >
+                {t('Your page')}
+              </a>
+            )}
             <button
               type="button"
               onClick={() => go('/settings')}

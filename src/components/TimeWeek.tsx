@@ -63,7 +63,9 @@ export function TimeWeek() {
         <p className="text-sm text-[#8A867C]">{t('Nobody has logged any time this week.')}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-[#E2DED5] bg-[#FCFBF8]">
-          <table className="w-full border-collapse text-[12px]">
+          {/* Its natural width, not the container's: nine columns squeezed into a settings panel
+              is nine columns nobody can read. The box beside it scrolls instead. */}
+          <table className="w-full min-w-max border-collapse whitespace-nowrap text-[12px]">
             <thead>
               <tr>
                 <th scope="col" className="border-b border-[#E2DED5] px-3 py-2 text-left font-bold uppercase tracking-[0.1em] text-[#8A867C]">
