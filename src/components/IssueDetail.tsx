@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { X } from 'lucide-react'
 import {
   addLabel, getCycles, getLabels, issueKey, labelsOn, subscribeIssues, toggleLabel,
@@ -7,11 +7,15 @@ import { archiveRecord, getRecords, patchRecord, PRIORITIES, STATUSES } from '..
 import type { Record as Issue, Status } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
+import { openIssueBody } from '../board/issueBody'
 import { IssueLinks } from './IssueLinks'
 import { Popover } from './Popover'
 
 const cycles = getCycles
 const labels = getLabels
+
+// The editor is a third of the bundle, and a list of issues does not need it until one is open.
+const PageEditor = lazy(() => import('./PageEditor').then((m) => ({ default: m.PageEditor })))
 
 const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]'
 
@@ -31,9 +35,20 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
   const worn = labelsOn(issue.id)
   const set = (changes: Parameters<typeof patchRecord>[1]) => patchRecord(issue.id, changes)
   const projects = getRecords('project')
+  const [ready, setReady] = useState(false)
+
+  // The body is bound after it has loaded, for the same reason a page is: an editor mounted on
+  // an empty document writes an empty paragraph into it, and that paragraph outlives the load.
+  useEffect(() => {
+    let live = true
+    setReady(false)
+    void openIssueBody(issue).then(() => { if (live) setReady(true) })
+    return () => { live = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [issue.id])
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[380px] overflow-y-auto border-l border-[#E2DED5] bg-[#FCFBF8] p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
+    <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[560px] overflow-y-auto border-l border-[#E2DED5] bg-[#FCFBF8] p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
       <div className="mb-1 flex items-center gap-2">
         <span className="font-mono text-[11px] text-[#B6B1A6]">{issueKey(issue, prefix)}</span>
       </div>
@@ -54,13 +69,13 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
         </button>
       </div>
 
-      <textarea
-        value={issue.description}
-        onChange={(e) => set({ description: e.target.value })}
-        rows={6}
-        placeholder={t('What needs doing, and what done looks like')}
-        className="mt-3 w-full resize-none bg-transparent text-sm leading-[1.65] text-[#4A463E] outline-none placeholder:text-[#C6C2B6]"
-      />
+      <div className="mt-2 -ml-[54px]">
+        {ready && (
+          <Suspense fallback={null}>
+            <PageEditor key={issue.id} title={issue.title} />
+          </Suspense>
+        )}
+      </div>
 
       <dl className="mt-2 grid grid-cols-[5.5rem_1fr] items-center gap-x-3 gap-y-2.5">
         <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Status')}</dt>

@@ -130,7 +130,7 @@ function cellsFrom(fields: Field[], line: string[]): { [id: string]: unknown } {
 
 // Markdown into the shared type the editor reads, without an editor being on screen. The
 // document is built in a detached BlockNote and handed to Yjs as a whole.
-function bodyOf(markdown: string): { update: Uint8Array; text: string } | null {
+export function bodyOf(markdown: string): { update: Uint8Array; text: string } | null {
   const editor = BlockNoteEditor.create({ schema: withMultiColumn(BlockNoteSchema.create()) })
   const blocks = editor.tryParseMarkdownToBlocks(markdown)
   if (!blocks.length) return null
