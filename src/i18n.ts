@@ -469,6 +469,15 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Time': 'Süre',
+  '45, 1h30, 2h': '45, 1s30, 2s',
+  'What on?': 'Ne üzerine?',
+  'no note': 'not yok',
+  'This week': 'Bu hafta',
+  'Total': 'Toplam',
+  'What the week went on, read from the stints logged against issues. Nothing is typed twice.':
+    'Haftanın nereye gittiği — işlere girilen sürelerden okunuyor. Hiçbir şey iki kez yazılmıyor.',
+  'Nobody has logged any time this week.': 'Bu hafta kimse süre girmemiş.',
   'Form': 'Form',
   'A form asks for some of these columns and turns an answer into a row here.':
     'Form bu sütunların bazılarını sorar ve gelen cevabı buraya bir satır olarak yazar.',

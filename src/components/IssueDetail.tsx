@@ -9,6 +9,7 @@ import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 import { openIssueBody } from '../board/issueBody'
 import { IssueLinks } from './IssueLinks'
+import { TimeLog } from './TimeLog'
 import { Popover } from './Popover'
 
 const cycles = getCycles
@@ -222,6 +223,8 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           </Popover>
         </div>
       </div>
+
+      <TimeLog record={issue.id} team={team} />
 
       <IssueLinks issue={issue} prefix={prefix} />
 

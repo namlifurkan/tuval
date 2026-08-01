@@ -627,6 +627,37 @@ select pg_temp.check('nor answered', true,
 select pg_temp.check('and a closed form has no questions either', true,
   public.form_questions('basvuru') is null);
 
+-- Hours are everybody's to read and only yours to write ---------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+insert into public.time_entries (workspace_id, record_id, user_id, minutes)
+values ('cccccccc-0000-4000-8000-000000000003', 'dddddddd-0000-4000-8000-000000000004',
+        'aaaaaaaa-0000-4000-8000-000000000001', 90);
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('the team can see where the hours went', true,
+  exists(select 1 from public.time_entries));
+select pg_temp.check('but cannot log hours in somebody else name', true, pg_temp.refused(
+  $q$insert into public.time_entries (workspace_id, record_id, user_id, minutes)
+     values ('cccccccc-0000-4000-8000-000000000003', 'dddddddd-0000-4000-8000-000000000004',
+             'aaaaaaaa-0000-4000-8000-000000000001', 30)$q$));
+
+update public.time_entries set minutes = 5;
+set local role postgres;
+select pg_temp.check('nor change what somebody else logged', true,
+  (select minutes = 90 from public.time_entries limit 1));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a stint of no time at all is refused', true, pg_temp.refused(
+  $q$insert into public.time_entries (workspace_id, record_id, user_id, minutes)
+     values ('cccccccc-0000-4000-8000-000000000003', 'dddddddd-0000-4000-8000-000000000004',
+             'bbbbbbbb-0000-4000-8000-000000000002', 0)$q$));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

@@ -8,6 +8,7 @@ import {
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
+import { TimeWeek } from './TimeWeek'
 import { Identities } from './Identities'
 import { Team } from './Team'
 import { Shell } from './Shell'
@@ -174,6 +175,13 @@ export function Settings() {
           note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
         >
           <Team />
+        </Row>
+
+        <Row
+          title={t('Time')}
+          note={t('What the week went on, read from the stints logged against issues. Nothing is typed twice.')}
+        >
+          <TimeWeek />
         </Row>
 
         <Row

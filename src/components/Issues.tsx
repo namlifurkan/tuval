@@ -8,6 +8,7 @@ import {
 } from '../board/issues'
 import type { GroupBy } from '../board/issues'
 import { plain } from '../board/keys'
+import { loadTime } from '../board/time'
 import { initials } from '../board/me'
 import { loadRelations, progressOf } from '../board/relations'
 import {
@@ -71,6 +72,7 @@ export function Issues() {
     void loadLabels()
     void loadWorn()
     void loadRelations()
+    void loadTime()
     void listTeam().then(setTeam)
   }, [workspace])
 
