@@ -54,6 +54,17 @@ end $$;
 create or replace function pg_temp.check(name text, expected boolean, actual boolean) returns void
 language sql as $$ insert into result values (name, expected, coalesce(actual, false)) $$;
 
+-- Refusing a write is an error, not an empty result, and an error at the top level would take the
+-- whole run down. Run it in here and report whether it was refused.
+create or replace function pg_temp.refused(statement text) returns boolean
+language plpgsql as $$
+begin
+  execute statement;
+  return false;
+exception when others then
+  return true;
+end $$;
+
 -- The owner ------------------------------------------------------------------------------------
 
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
@@ -448,6 +459,55 @@ select public.merge_cells('dddddddd-0000-4000-8000-000000000004', '{"c": 7}'::js
 set local role postgres;
 select pg_temp.check('a guest cannot write a cell either', false,
   (select data ? 'c' from public.records where id = 'dddddddd-0000-4000-8000-000000000004'));
+
+-- An issue gets a number, and only an issue --------------------------------------------------------
+
+set local role postgres;
+delete from public.record_members;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+insert into public.records (workspace_id, kind, title, status)
+values ('cccccccc-0000-4000-8000-000000000003', 'issue', 'First', 'todo'),
+       ('cccccccc-0000-4000-8000-000000000003', 'issue', 'Second', 'todo'),
+       ('cccccccc-0000-4000-8000-000000000003', 'doc', 'A page', null);
+
+set local role postgres;
+select pg_temp.check('every issue gets its own number', true,
+  (select count(distinct seq) = count(*) from public.records
+   where kind = 'issue' and workspace_id = 'cccccccc-0000-4000-8000-000000000003'));
+select pg_temp.check('a page does not get one', true,
+  (select seq is null from public.records where title = 'A page'));
+select pg_temp.check('the workspace has a prefix to put in front of it', true,
+  (select prefix ~ '^[A-Z]{1,5}$' from public.workspaces
+   where id = 'cccccccc-0000-4000-8000-000000000003'));
+
+-- Cycles and labels follow the workspace -------------------------------------------------------
+
+set local role postgres;
+insert into public.cycles (id, workspace_id, number, starts_on, ends_on)
+values ('11111111-0000-4000-8000-000000000011', 'cccccccc-0000-4000-8000-000000000003',
+        1, '2026-08-01', '2026-08-14');
+insert into public.labels (id, workspace_id, name, tone)
+values ('22222222-0000-4000-8000-000000000022', 'cccccccc-0000-4000-8000-000000000003', 'bug', '#C8664A');
+insert into public.record_labels (record_id, label_id)
+values ('dddddddd-0000-4000-8000-000000000004', '22222222-0000-4000-8000-000000000022');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a stranger sees no cycles', false, exists(select 1 from public.cycles));
+select pg_temp.check('a stranger sees no labels', false, exists(select 1 from public.labels));
+select pg_temp.check('a stranger sees nothing labelled', false, exists(select 1 from public.record_labels));
+
+set local role postgres;
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'guest', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a guest reads the cycles', true, exists(select 1 from public.cycles));
+select pg_temp.check('a guest reads what is labelled', true, exists(select 1 from public.record_labels));
+select pg_temp.check('a guest cannot make one', true, pg_temp.refused(
+  $q$insert into public.labels (workspace_id, name)
+     values ('cccccccc-0000-4000-8000-000000000003', 'sneaked')$q$));
 
 -- What went wrong, if anything --------------------------------------------------------------------
 

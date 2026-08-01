@@ -3,9 +3,13 @@ import { TRASH_DAYS } from './cloud'
 import { getWorkspace } from './workspace'
 
 export type Kind = 'issue' | 'doc' | 'database' | 'person' | 'company' | 'project' | 'event' | 'file'
-export type Status = 'todo' | 'doing' | 'blocked' | 'done' | 'cancelled'
+export type Status = 'backlog' | 'todo' | 'doing' | 'review' | 'blocked' | 'done' | 'cancelled'
 
-export const STATUSES: Status[] = ['todo', 'doing', 'blocked', 'done', 'cancelled']
+export const STATUSES: Status[] =
+  ['backlog', 'todo', 'doing', 'review', 'blocked', 'done', 'cancelled']
+
+// What counts as finished, for a burn-down and for the strike through a title.
+export const CLOSED: Status[] = ['done', 'cancelled']
 export const PRIORITIES = ['none', 'low', 'medium', 'high'] as const
 
 export interface Record {
@@ -29,6 +33,11 @@ export interface Record {
   created_at: string
   created_by: string | null
   updated_by: string | null
+  // An issue's number within its workspace. TUV-12 is the workspace prefix and this.
+  seq: number | null
+  estimate: number | null
+  cycle_id: string | null
+  project_id: string | null
   // Whatever a kind needs and a column would not earn: a database keeps its fields and views
   // here, a row of one keeps its values.
   data: { [key: string]: unknown }
@@ -36,7 +45,8 @@ export interface Record {
 
 const COLUMNS =
   'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, '
-  + 'position, created_at, created_by, updated_at, updated_by, published_at, public_slug, data'
+  + 'position, created_at, created_by, updated_at, updated_by, published_at, public_slug, '
+  + 'seq, estimate, cycle_id, project_id, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so
 // the two are loaded at the same time and a single list would have them overwriting each other.

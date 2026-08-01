@@ -3,7 +3,7 @@ import { getUser, subscribeAuth, supabase } from './supabase'
 
 export type WorkspaceRole = 'admin' | 'member' | 'guest'
 
-export interface Workspace { id: string; name: string; slug: string; owner: string }
+export interface Workspace { id: string; name: string; slug: string; owner: string; prefix: string }
 export interface Teammate { userId: string; email: string; role: WorkspaceRole; owner: boolean }
 
 export const ROLES: WorkspaceRole[] = ['admin', 'member', 'guest']
@@ -29,7 +29,7 @@ export async function loadWorkspace(): Promise<Workspace | null> {
   if (!id) return null
 
   const { data } = await supabase
-    .from('workspaces').select('id, name, slug, owner').eq('id', id).maybeSingle()
+    .from('workspaces').select('id, name, slug, owner, prefix').eq('id', id).maybeSingle()
   current = (data as Workspace) ?? null
   listeners.forEach((l) => l())
   return current

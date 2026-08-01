@@ -1,16 +1,9 @@
 import { useState } from 'react'
 import { between, patchRecord, STATUSES } from '../board/records'
 import type { Record as Issue, Status } from '../board/records'
+import { STATUS_TONE as TONE } from '../board/issues'
 import { initials } from '../board/me'
 import { t } from '../i18n'
-
-const TONE: { [K in Status]: string } = {
-  todo: '#8A867C',
-  doing: '#DE9A4E',
-  blocked: '#C8664A',
-  done: '#5E9A8A',
-  cancelled: '#C6C2B6',
-}
 
 // The same rows the list shows, grouped by the column they are in. No new data: a view is a
 // question asked of the records, not a copy of them.
