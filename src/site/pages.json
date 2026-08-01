@@ -8,12 +8,6 @@
       "lede": "Not three apps behind one login. A sticky on a board, a row in a table and a ticket in a sprint are the same object, and editing any of them edits all of them.",
       "bands": [
         {
-          "tone": "paper",
-          "heading": "Drag it. This is the real editor",
-          "body": "Drag something. Nothing here is saved until you say so.",
-          "demo": "canvas"
-        },
-        {
           "tone": "pigment",
           "heading": "Tuesday's sticky is Friday's ticket",
           "body": "Select a sticky, turn it into an issue, and it keeps its place on the board while it turns up in the sprint. Nothing is retyped, because nothing was ever copied."
@@ -35,11 +29,6 @@
               "body": "Issues with keys, cycles, projects, estimates, labels, sub-issues, blocking relations, a board view and a burn-down."
             }
           ]
-        },
-        {
-          "tone": "pigment",
-          "heading": "Turn any board into an agent brief",
-          "body": "A board is already a brief: frames become sections, arrows become a flow, code blocks stay fenced. One button turns a canvas into the prompt you meant to write. An MCP server lets the agent go the other way and read the workspace itself."
         },
         {
           "tone": "paper",

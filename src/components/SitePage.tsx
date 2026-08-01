@@ -7,6 +7,7 @@ import { findPage, LINK_NAMES, PAGES } from '../site/pages'
 import type { Page } from '../site/pages'
 import { Account } from './Account'
 import { BoardPicture } from './BoardPicture'
+import { ProofBand } from './ProofBand'
 import { SiteDemo } from './SiteDemo'
 import { Wordmark } from './Logo'
 
@@ -428,13 +429,9 @@ function HomeLayout({ page }: { page: Page }) {
   return (
     <>
       <Hero page={page} />
-      <div className="bg-[#EBE7DE] py-12">
-        <SiteDemo kind="canvas" template={BOARD['/']} tall />
-        <Caption title="This is the editor, not a picture of one" body="Drag something. Nothing here is saved." />
-      </div>
-      {said[0] && <Statement heading={said[0].heading} body={said[0].body} picture="kanban" />}
+      <ProofBand />
+      {said[0] && <Statement heading={said[0].heading} body={said[0].body} />}
       {index?.points && <Index points={index.points} />}
-      {said[1] && <Statement heading={said[1].heading} body={said[1].body} picture="flow" />}
       {last && last.tone === 'paper' && (
         <div className="mx-auto max-w-[80rem] px-6 pt-24 pb-28">
           <h2 className="max-w-[16ch] font-bold leading-[1.06] tracking-[-0.035em]" style={{ fontSize: 'clamp(1.7rem,3.2vw,2.6rem)' }}>
