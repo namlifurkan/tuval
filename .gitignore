@@ -32,5 +32,6 @@ PRODUCT.md
 # Supabase CLI
 supabase/.temp
 WORKSPACE.md
+LEGAL.md
 .rls-run-*.sql
 worker/env.generated.ts

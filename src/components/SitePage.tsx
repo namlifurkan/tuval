@@ -356,7 +356,8 @@ function PricingLayout({ page }: { page: Page }) {
             {PRICE.amount}{PRICE.currency}
           </p>
           <p className="mt-2 text-[14px] text-[#F2EFE9]/70">
-            per {PRICE.per}, per {PRICE.period} · about {PRICE.about}
+            per {PRICE.per}, per {PRICE.period}{PRICE.taxIncluded ? ', VAT included' : ''}
+            {' · '}about {PRICE.about}
           </p>
           <p
             className="mt-8 text-[16px] leading-[1.7] text-[#F2EFE9]/90"

@@ -22,6 +22,10 @@ export const PRICE = {
   per: 'member',
   period: 'month',
   about: '$7',
+  // Turkish consumer law requires the price a buyer is shown to be the price they pay, tax
+  // included. Saying so is not decoration: a figure with the tax left off is the shape of a
+  // complaint.
+  taxIncluded: true,
 }
 
 export interface Usage {
