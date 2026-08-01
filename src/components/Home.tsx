@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { arrive } from '../board/arrive'
 import { readRoute, routePath, subscribeRoute } from '../board/boards'
 import { lazy, Suspense, useSyncExternalStore } from 'react'
 import { AuthPage } from './AuthPage'
@@ -20,8 +22,11 @@ const SitePage = lazy(() => import('./SitePage').then((m) => ({ default: m.SiteP
 // The front door is the front door for everybody. Signing in does not replace the page that
 // explains the product; the board list has its own address.
 export function Home() {
-  useSyncExternalStore(subscribeRoute, routePath, routePath)
+  const here = useSyncExternalStore(subscribeRoute, routePath, routePath)
   const route = readRoute()
+
+  // Every page, not just the marketing renderer: the rule that hides a section is global.
+  useEffect(arrive, [here])
   if (route.kind === 'auth') return <AuthPage />
   if (route.kind === 'settings') return <Settings />
   if (route.kind === 'issues' || route.kind === 'issue') return <Issues />

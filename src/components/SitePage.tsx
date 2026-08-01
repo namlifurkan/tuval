@@ -518,32 +518,9 @@ function HomeLayout({ page }: { page: Page }) {
   )
 }
 
-function useArrival(on: unknown) {
-  useEffect(() => {
-    const marks = [...document.querySelectorAll<HTMLElement>('[data-reveal],[data-arrive]')]
-    if (!marks.length) return
-    // A page that never scrolls, or a browser with no observer, must still be readable.
-    if (typeof IntersectionObserver !== 'function') {
-      marks.forEach((el) => el.classList.add('seen'))
-      return
-    }
-    const watch = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue
-        entry.target.classList.add('seen')
-        watch.unobserve(entry.target)
-      }
-    }, { rootMargin: '0px 0px -12% 0px' })
-    marks.forEach((el) => watch.observe(el))
-    return () => watch.disconnect()
-  }, [on])
-}
-
 export function SitePage() {
   const route = readRoute()
   const page = findPage(routePath()) ?? findPage('/')!
-
-  useArrival(page.path)
 
   useEffect(() => {
     document.title = page.title
