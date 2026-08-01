@@ -1,5 +1,5 @@
 import {
-  Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2,
+  Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2, Wand2,
 } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
@@ -11,6 +11,7 @@ import { printFrames } from '../board/print'
 import { TEXTURES } from '../board/paper'
 import { readTexture } from '../board/paperPrefs'
 import { requestRender, useBoardStore } from '../board/store'
+import { leftovers } from '../board/tidy'
 import { useItems } from '../board/useBoard'
 import { Account } from './Account'
 import { Share } from './Share'
@@ -65,6 +66,7 @@ export function TopBar() {
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
   const boardsPanel = useBoardStore((s) => s.boardsPanel)
   const update = useBoardStore((s) => s.update)
+  const setSelection = useBoardStore((s) => s.setSelection)
   const menu = usePopover()
 
   return (
@@ -165,6 +167,23 @@ export function TopBar() {
                   >{l.name}</button>
                 ))}
               </div>
+              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <button
+                type="button"
+                onClick={() => {
+                  const strays = leftovers(getItems())
+                  setSelection(strays)
+                  requestRender()
+                  menu.close()
+                  if (!strays.length) alert(t('Nothing left over — the board is tidy.'))
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+              >
+                <Wand2 size={15} /> {t('Select leftovers')}
+              </button>
+              <p className="px-2.5 pb-1 text-[11px] leading-snug text-[#8A867C]">
+                {t('Empty text and stickies, pen specks, connectors joined to nothing, unnamed empty frames. Selected rather than deleted, so you see what is going.')}
+              </p>
               <div className="my-1 h-px bg-[#EAE6DD]" />
               <button
                 type="button"

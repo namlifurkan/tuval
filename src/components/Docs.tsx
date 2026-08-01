@@ -1,9 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  ancestors, archiveRecord, createRecord, deleteRecord, emptyOldTrash, getPages, getTrash,
-  loadPages, loadTrash, restoreRecord, subscribeRecords,
+  ancestors, archiveRecord, createRecord, deleteRecord, emptyOldTrash, emptyPages, emptyTrash,
+  getPages, getTrash, loadPages, loadTrash, restoreRecord, subscribeRecords,
 } from '../board/records'
 import type { Record as Row } from '../board/records'
 import { removeCover } from '../board/cover'
@@ -50,6 +50,20 @@ export function Docs() {
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
     .slice(0, 40)
 
+  const sweep = async () => {
+    const bare = await emptyPages()
+    if (!bare.length) { alert(t('No empty pages — everything here has something on it.')); return }
+    if (!confirm(t('Move {n} empty pages to the trash? Nothing is written on any of them, and the trash keeps them for {days} days.', { n: bare.length, days: TRASH_DAYS }))) return
+    for (const page of bare) await archiveRecord(page.id)
+    await Promise.all([loadPages(), loadTrash()])
+  }
+
+  const burn = async () => {
+    if (!confirm(t('Empty the trash? {n} pages go for good.', { n: binned.length }))) return
+    await emptyTrash(removeCover)
+    await loadTrash()
+  }
+
   return (
     <Shell title={t('Docs')}>
       <div className="flex flex-wrap items-center gap-2">
@@ -63,6 +77,13 @@ export function Docs() {
         </button>
         <ImportButton />
         <KitPicker />
+        <button
+          type="button"
+          onClick={() => void sweep()}
+          className="flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-2 text-xs font-semibold text-[#8A867C] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+        >
+          <Trash2 size={13} /> {t('Clear out empty pages')}
+        </button>
       </div>
 
       <h2 className="mt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
@@ -110,6 +131,11 @@ export function Docs() {
           <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
             {t('Emptied automatically after {n} days. Until then a page here can be brought back exactly as it was.', { n: TRASH_DAYS })}
           </p>
+          <button
+            type="button"
+            onClick={() => void burn()}
+            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          >{t('Empty it now')}</button>
           <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
             {binned.map((page: Row) => (
               <div key={page.id} className="flex items-center gap-3 py-2.5">

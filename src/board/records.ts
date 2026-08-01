@@ -245,6 +245,28 @@ export async function deleteRecord(row: Record, dropCover: (path: string) => Pro
   await supabase.from('records').delete().eq('id', row.id)
 }
 
+// Pages with nothing written on them and nothing filed under them. The body is not carried
+// around with the rest of the row, so the question goes to the server; whether anything lives
+// under a page is answered from the tree that is already here.
+//
+// They go to the trash rather than out of existence. Being sure enough to clear forty in one
+// click is not the same as being sure enough to lose them, and the trash costs nothing.
+export async function emptyPages(): Promise<{ id: string; title: string }[]> {
+  const ws = getWorkspace()
+  if (!supabase || !ws) return []
+  const { data } = await supabase
+    .from('records').select('id, title')
+    .eq('workspace_id', ws.id).eq('kind', 'doc').is('archived_at', null)
+    .or('body.is.null,body.eq.')
+
+  const parents = new Set(merged.map((r) => r.parent_id).filter(Boolean))
+  return ((data ?? []) as { id: string; title: string }[]).filter((r) => !parents.has(r.id))
+}
+
+export async function emptyTrash(dropCover: (path: string) => Promise<void>) {
+  for (const row of binned.filter((r) => !r.parent_id)) await deleteRecord(row, dropCover)
+}
+
 export async function emptyOldTrash(dropCover: (path: string) => Promise<void>) {
   const cutoff = Date.now() - TRASH_DAYS * 24 * 60 * 60 * 1000
   const stale = binned.filter((r) => {

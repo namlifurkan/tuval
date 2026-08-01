@@ -175,6 +175,21 @@ export function Dashboard() {
     }
   }
 
+  // A board opened by accident and closed again. There is nothing on it to lose, which is what
+  // makes clearing the lot in one go safe enough to offer.
+  const bare = [
+    ...mine.filter((b) => !b.items && !b.frames).map((b) => [b, true] as const),
+    ...here.filter((b) => !b.items && !b.frames).map((b) => [b, false] as const),
+  ]
+
+  const sweep = () => {
+    if (!confirm(t('Delete {n} empty boards for good? Nothing was ever put on them.', { n: bare.length }))) return
+    const rooms = new Set(bare.filter(([, inCloud]) => inCloud).map(([b]) => b.room))
+    for (const [board] of bare) forgetBoard(board.room)
+    setCloud((list) => list.filter((x) => !rooms.has(x.room)))
+    for (const room of rooms) void deleteCloudBoard(room)
+  }
+
   return (
     <Shell title={t('Boards')} wide>
       <PasswordGate />
@@ -197,6 +212,16 @@ export function Dashboard() {
             <Plus size={15} strokeWidth={2.4} /> {t('New board')}
           </button>
         </div>
+
+        {!loading && bare.length > 1 && (
+          <button
+            type="button"
+            onClick={sweep}
+            className="mt-4 flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-xs font-semibold text-[#8A867C] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+          >
+            <Trash2 size={13} /> {t('Delete {n} empty boards', { n: bare.length })}
+          </button>
+        )}
 
         <div className="mt-5 flex flex-wrap gap-2">
           {TEMPLATES.map((tpl) => (

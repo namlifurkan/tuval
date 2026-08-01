@@ -396,6 +396,20 @@ const tr: Record<string, string> = {
   'Diagram': 'Diyagram',
   'Find': 'Bul',
   'Tags': 'Etiketler',
+  'Select leftovers': 'Artıkları seç',
+  'Empty text and stickies, pen specks, connectors joined to nothing, unnamed empty frames. Selected rather than deleted, so you see what is going.':
+    'Boş metin ve sticky\'ler, kalem lekeleri, hiçbir yere bağlanmayan konektörler, adsız boş frame\'ler. Silinmez, seçilir — neyin gideceğini görürsün.',
+  'Nothing left over — the board is tidy.': 'Artık yok — board temiz.',
+  'Delete {n} empty boards': '{n} boş board\'u sil',
+  'Delete {n} empty boards for good? Nothing was ever put on them.':
+    '{n} boş board kalıcı silinsin mi? Hiçbirine bir şey konmamış.',
+  'Clear out empty pages': 'Boş sayfaları temizle',
+  'No empty pages — everything here has something on it.':
+    'Boş sayfa yok — buradaki her şeyin içinde bir şey var.',
+  'Move {n} empty pages to the trash? Nothing is written on any of them, and the trash keeps them for {days} days.':
+    '{n} boş sayfa çöpe taşınsın mı? Hiçbirinde yazı yok, çöp de {days} gün saklıyor.',
+  'Empty it now': 'Şimdi boşalt',
+  'Empty the trash? {n} pages go for good.': 'Çöp boşaltılsın mı? {n} sayfa kalıcı gider.',
   'Backup': 'Yedek',
   'Every page, issue, database, tag and link in one file. The code is AGPL and the data is yours; this is the proof rather than the promise.':
     'Her sayfa, iş, veritabanı, etiket ve bağ tek dosyada. Kod AGPL, veri senin; bu da sözün değil kanıtı.',
