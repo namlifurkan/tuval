@@ -71,7 +71,7 @@ export type Op =
 export interface Filter { id: string; field: string; op: Op; value?: string }
 export interface Sort { field: string; dir: 'asc' | 'desc' }
 
-export type ViewKind = 'table' | 'board' | 'gallery' | 'calendar' | 'timeline'
+export type ViewKind = 'table' | 'board' | 'gallery' | 'calendar' | 'timeline' | 'list'
 
 // `dateBy` places a row on a calendar and starts its bar on a timeline; `endBy` is the second
 // date a timeline needs. A row with no end is a bar one day wide, not a row with no bar.

@@ -12,6 +12,7 @@ import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 import { DatabaseCalendar } from './DatabaseCalendar'
 import { DatabaseGallery } from './DatabaseGallery'
+import { DatabaseList } from './DatabaseList'
 import { DatabaseTable } from './DatabaseTable'
 import { DatabaseTimeline } from './DatabaseTimeline'
 import { ViewBar } from './ViewBar'
@@ -21,7 +22,8 @@ const pages = getPages
 const UNSET = '__none__'
 
 const KIND_NAME = {
-  table: 'Table', board: 'Board', gallery: 'Gallery', calendar: 'Calendar', timeline: 'Timeline',
+  table: 'Table', list: 'List', board: 'Board', gallery: 'Gallery', calendar: 'Calendar',
+  timeline: 'Timeline',
 } as const
 
 function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
@@ -161,7 +163,7 @@ export function Database({ db }: { db: Row }) {
           </span>
         ))}
 
-        {(['table', 'board', 'gallery', 'calendar', 'timeline'] as const).map((kind) => (
+        {(['table', 'list', 'board', 'gallery', 'calendar', 'timeline'] as const).map((kind) => (
           <button
             key={kind}
             type="button"
@@ -196,7 +198,7 @@ export function Database({ db }: { db: Row }) {
           </select>
         )}
 
-        {view?.kind === 'timeline' && (
+      {view?.kind === 'timeline' && (
           <select
             value={view.endBy ?? ''}
             onChange={(e) => editView(db, view.id, { endBy: e.target.value || undefined })}
@@ -219,6 +221,7 @@ export function Database({ db }: { db: Row }) {
       {view?.kind === 'calendar' && (
         <DatabaseCalendar db={db} rows={mine} view={view} fields={schema.fields} />
       )}
+      {view?.kind === 'list' && <DatabaseList rows={mine} fields={schema.fields} />}
       {view?.kind === 'timeline' && (
         <DatabaseTimeline rows={mine} view={view} fields={schema.fields} />
       )}

@@ -45,7 +45,7 @@ async function resolveUsers(ids: string[]) {
   return ids.map((id) => ({ id, ...(faces.get(id) ?? { username: t('Member'), avatarUrl: '' }) }))
 }
 
-export function PageEditor({ title }: { title: string }) {
+export function PageEditor({ title, locked }: { title: string; locked?: boolean }) {
   const pages = useSyncExternalStore(subscribeRecords, docs, docs)
   const myId = getUser()?.id ?? ''
   const [team, setTeam] = useState<Teammate[]>([])
@@ -84,7 +84,7 @@ export function PageEditor({ title }: { title: string }) {
       <PageExport editor={editor as unknown as Parameters<typeof PageExport>[0]['editor']} title={title} />
       <PageHistory editor={editor as unknown as Parameters<typeof PageHistory>[0]['editor']} />
     </div>
-    <BlockNoteView editor={editor} theme={paper}>
+    <BlockNoteView editor={editor} theme={paper} editable={!locked}>
       {!!myId && <FloatingComposerController />}
       {!!myId && <FloatingThreadController />}
       {/* The default menu plus the column items, because a schema that can hold columns and a

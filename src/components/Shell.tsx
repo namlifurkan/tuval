@@ -5,6 +5,7 @@ import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
+import { Favourites } from './Favourites'
 import { PageTree } from './PageTree'
 import { Palette } from './Palette'
 import { Wordmark } from './Logo'
@@ -61,6 +62,8 @@ export function Shell({ title, wide, action, children }: {
             )}
           </button>
         ))}
+
+        <Favourites />
 
         <div className="mt-5"><PageTree /></div>
 

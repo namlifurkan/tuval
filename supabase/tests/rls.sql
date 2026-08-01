@@ -397,6 +397,20 @@ set local role anon;
 select pg_temp.check('unpublishing closes it again', false,
   exists(select 1 from public.records where public_slug = 'quiet-page'));
 
+-- What you keep at hand is yours alone -------------------------------------------------------------
+
+set local role postgres;
+insert into public.record_favourites (user_id, record_id)
+values ('aaaaaaaa-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000004');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('you see your own favourites', true,
+  exists(select 1 from public.record_favourites));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('and nobody else sees them', false,
+  exists(select 1 from public.record_favourites));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

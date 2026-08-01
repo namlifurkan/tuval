@@ -1,9 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { ChevronRight, CornerUpLeft, FileText, Plus, Table2 } from 'lucide-react'
+import {
+  ChevronRight, CornerUpLeft, FileText, Lock, Plus, Star, StretchHorizontal, Table2, Unlock,
+} from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { relatedTo } from '../board/database'
 import { duplicatePage } from '../board/duplicatePage'
 import { isTemplate, setTemplate } from '../board/pageTemplates'
+import { isLocked, isWide, setLocked, setWide } from '../board/pageOptions'
+import { getFavourites, loadFavourites, subscribeFavourites, toggleFavourite } from '../board/favourites'
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
 import { openPage } from '../board/page'
@@ -34,6 +38,7 @@ export function Page() {
   const name = useRef<HTMLInputElement>(null)
   const [links, setLinks] = useState<Backlink[]>([])
   const [copying, setCopying] = useState(false)
+  const starred = useSyncExternalStore(subscribeFavourites, getFavourites, getFavourites)
 
   useEffect(() => {
     if (!id) return
@@ -41,6 +46,8 @@ export function Page() {
     void openPage(id).then(() => { if (live) setReady(true) })
     return () => { live = false }
   }, [id])
+
+  useEffect(() => { if (workspace) void loadFavourites() }, [workspace])
 
   useEffect(() => {
     if (!workspace || !id) return
@@ -73,7 +80,7 @@ export function Page() {
   const related = here ? relatedTo(here, getRecords('database'), rows) : []
 
   return (
-    <Shell title={title || t('Untitled page')}>
+    <Shell title={title || t('Untitled page')} wide={isWide(here)}>
       {!!cover && <Cover id={id} path={cover} />}
 
       {!!trail.length && (
@@ -121,11 +128,46 @@ export function Page() {
           {copying ? t('Copying…') : t('Duplicate')}
         </button>
         {here && <PageShare record={here} />}
+        {here && (
+          <>
+            <button
+              type="button"
+              aria-pressed={starred.has(id)}
+              title={starred.has(id) ? t('Remove from favourites') : t('Add to favourites')}
+              onClick={() => void toggleFavourite(id)}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
+                ${starred.has(id) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+            >
+              <Star size={13} fill={starred.has(id) ? 'currentColor' : 'none'} />
+            </button>
+            <button
+              type="button"
+              aria-pressed={isLocked(here)}
+              title={isLocked(here) ? t('Unlock this page') : t('Lock this page')}
+              onClick={() => setLocked(here, !isLocked(here))}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
+                ${isLocked(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+            >
+              {isLocked(here) ? <Lock size={13} /> : <Unlock size={13} />}
+            </button>
+            <button
+              type="button"
+              aria-pressed={isWide(here)}
+              title={t('Full width')}
+              onClick={() => setWide(here, !isWide(here))}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
+                ${isWide(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+            >
+              <StretchHorizontal size={13} />
+            </button>
+          </>
+        )}
       </div>
 
       <input
         ref={name}
         value={title}
+        readOnly={isLocked(here)}
         onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
         placeholder={t(database ? 'Untitled database' : 'Untitled page')}
         className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
@@ -135,7 +177,11 @@ export function Page() {
         ? <Database db={here} />
         : (
           <div className="mt-5 -ml-[54px]">
-            {ready && <Suspense fallback={null}><PageEditor title={title} /></Suspense>}
+            {ready && (
+              <Suspense fallback={null}>
+                <PageEditor title={title} locked={isLocked(here)} />
+              </Suspense>
+            )}
           </div>
         )}
 
