@@ -543,6 +543,11 @@ select pg_temp.check('somebody who may write the workspace sees them', true,
 -- The token itself never opens anything by being guessed at ------------------------------------------
 
 set local role postgres;
+-- The door for robots is a paid one, so the workspace is put on that plan before it is asked to
+-- open. That it stays shut on the free plan is checked further down.
+update public.workspaces set plan = 'team', plan_until = now() + interval '30 days'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
 select pg_temp.check('a key names its workspace', true,
   public.workspace_for_key('tuv_secret_token') = 'cccccccc-0000-4000-8000-000000000003');
 select pg_temp.check('a wrong token names nothing', true,
@@ -737,6 +742,75 @@ select set_config('request.jwt.claims', null, true);
 set local role anon;
 select pg_temp.check('but who booked it is not readable from outside', false,
   exists(select 1 from public.bookings));
+
+-- What the hosted one costs -------------------------------------------------------------------------
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+delete from public.workspace_invites where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+update public.workspaces set plan = 'free', plan_until = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.check('a new workspace is on the free plan', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'free');
+select pg_temp.check('the owner is the first seat', true,
+  public.workspace_seats('cccccccc-0000-4000-8000-000000000003') = 1);
+
+-- Three seats on free: the owner and two more.
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+insert into public.workspace_invites (workspace_id, email, role, invited_by)
+values ('cccccccc-0000-4000-8000-000000000003', 'third@other.test', 'member', 'aaaaaaaa-0000-4000-8000-000000000001');
+
+select pg_temp.check('an invitation sent takes a seat', true,
+  public.workspace_seats('cccccccc-0000-4000-8000-000000000003') = 3);
+select pg_temp.check('the fourth is refused', true, pg_temp.refused(
+  $q$insert into public.workspace_invites (workspace_id, email, role, invited_by)
+     values ('cccccccc-0000-4000-8000-000000000003', 'fourth@other.test', 'member',
+             'aaaaaaaa-0000-4000-8000-000000000001')$q$));
+
+update public.workspaces set plan = 'team', plan_until = now() + interval '30 days'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.check('on the paid plan it is allowed', true, not pg_temp.refused(
+  $q$insert into public.workspace_invites (workspace_id, email, role, invited_by)
+     values ('cccccccc-0000-4000-8000-000000000003', 'fourth@other.test', 'member',
+             'aaaaaaaa-0000-4000-8000-000000000001')$q$));
+
+-- A plan that has run out is the free plan again, not a workspace that stops working.
+update public.workspaces set plan_until = now() - interval '1 day'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+select pg_temp.check('a lapsed plan reads as free', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'free');
+select pg_temp.check('and what was written is all still there', true,
+  exists(select 1 from public.records where workspace_id = 'cccccccc-0000-4000-8000-000000000003'));
+
+-- The door for robots opens on the paid plan and not before.
+delete from public.api_keys;
+insert into public.api_keys (workspace_id, name, hint, token_sha)
+values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab',
+        encode(extensions.digest('tuv_plan_token', 'sha256'), 'hex'));
+
+select pg_temp.check('a key on the free plan opens nothing', true,
+  public.workspace_for_key('tuv_plan_token') is null);
+
+update public.workspaces set plan = 'team', plan_until = now() + interval '30 days'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+select pg_temp.check('and works again once it is paid for', true,
+  public.workspace_for_key('tuv_plan_token') = 'cccccccc-0000-4000-8000-000000000003');
+
+-- What the screen is told is what the triggers use.
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('the usage answer says which plan and how many seats', true,
+  (public.workspace_usage('cccccccc-0000-4000-8000-000000000003') ->> 'plan') = 'team');
+
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+delete from public.workspace_invites where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'nobody@elsewhere.test');
+select pg_temp.check('and says nothing to somebody outside', true,
+  public.workspace_usage('cccccccc-0000-4000-8000-000000000003') is null);
 
 -- What went wrong, if anything --------------------------------------------------------------------
 

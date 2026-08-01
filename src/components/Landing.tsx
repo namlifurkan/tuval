@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { PRODUCT } from '../board/brand'
+import { PRICE } from '../board/plan'
 import { fitRect } from '../board/camera'
 import { createItems, getItems } from '../board/doc'
 import { boxOf } from '../board/render'
@@ -168,7 +169,7 @@ export function Landing() {
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[#E2DED5] bg-[#F2EFE9]/92 px-5 py-3 backdrop-blur-[2px] sm:px-8">
         <Wordmark height={18} />
         <span className="ml-1 hidden text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C] sm:inline">
-          {t('Open source infinite canvas')}
+          {t('Open source workspace')}
         </span>
         <a
           href={REPO}
@@ -195,8 +196,8 @@ export function Landing() {
               {PRODUCT.name}
             </span>
             <h1 className="mt-2 text-[clamp(1.75rem,4.2vw,2.75rem)] font-bold leading-[1.05] tracking-[-0.02em]">
-              {t('A surface for thinking,')}<br />
-              {t('that an agent can read.')}
+              {t('The board, the page')}<br />
+              {t('and the work. One record.')}
             </h1>
             <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-[#4A463E]">
               {t('This is the real editor, not a picture of one. Move something.')}
@@ -216,6 +217,29 @@ export function Landing() {
       </div>
 
       <main className="mx-auto w-full max-w-[860px] px-6 pb-28 pt-14 sm:px-10">
+        <Section label={t('What is in it')}>
+          <h2 className="max-w-[24ch] text-[clamp(1.375rem,3vw,1.875rem)] font-bold leading-[1.12] tracking-[-0.015em]">
+            {t('Three tools most companies pay for separately.')}
+          </h2>
+          <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+            {t('Not three products behind one login. One record model underneath, so a sticky on a board, a row in a database and an issue in a cycle can be the same thing seen from three sides.')}
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              ['Infinite canvas', 'Stickies, frames, connectors, drawings, tables, code blocks, embeds. Templates, presenting, comments, version history.'],
+              ['Pages and databases', 'A block editor with columns, callouts, equations and comments. Databases in six views, eighteen column types, formulas and rollups.'],
+              ['Issues and projects', 'Numbered issues, estimates, cycles with a burn line, sub-issues, blocking, labels, projects on a roadmap. Keyboard first.'],
+            ].map(([title, body]) => (
+              <div key={title} className="rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-4">
+                <span className="text-[13px] font-semibold text-[#141310]">{t(title)}</span>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-[#4A463E]">{t(body)}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Spine />
+
         <Section label={t('What is different')}>
           <div className="rounded-2xl bg-[#C8452D] p-7 text-[#FBEDE9] sm:p-10">
             <h2 className="max-w-[20ch] text-[clamp(1.5rem,3.4vw,2.25rem)] font-bold leading-[1.1] tracking-[-0.015em] text-white">
@@ -233,6 +257,29 @@ export function Landing() {
               ))}
             </div>
           </div>
+        </Section>
+
+        <Spine />
+
+        <Section label={t('The rest of the week')}>
+          <h2 className="max-w-[26ch] text-[clamp(1.375rem,3vw,1.875rem)] font-bold leading-[1.12] tracking-[-0.015em]">
+            {t('The small things a week is actually made of.')}
+          </h2>
+          <dl className="mt-5 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+            {[
+              ['Forms', 'A database with one side turned outwards. An answer becomes a row — in the table, on the board, on the calendar, the moment it arrives.'],
+              ['Booking', 'Your hours on a page anybody can open. A booking becomes an event in the workspace like any other record.'],
+              ['Time', 'Hours logged against issues, and a week read back from them. Nothing is typed twice.'],
+              ['Repeating work', 'The standup note, the invoice, the backup check. Made on a schedule, caught up if a night is missed.'],
+              ['API and webhooks', 'The plan here is to integrate rather than clone. n8n for automation, Gmail for mail, Forgejo for git — this is what they talk to.'],
+              ['Import', 'A Notion export, a Miro board, a folder of Markdown, a spreadsheet. Out again as Markdown, HTML, PDF or PNG.'],
+            ].map(([term, body]) => (
+              <div key={term} className="grid gap-1 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                <dt className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">{t(term)}</dt>
+                <dd className="max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">{t(body)}</dd>
+              </div>
+            ))}
+          </dl>
         </Section>
 
         <Spine />
@@ -271,6 +318,56 @@ npm install && npm run dev`}
               </div>
             ))}
           </dl>
+        </Section>
+
+        <Spine />
+
+        <Section label={t('What it costs')}>
+          <h2 className="max-w-[26ch] text-[clamp(1.375rem,3vw,1.875rem)] font-bold leading-[1.12] tracking-[-0.015em]">
+            {t('Free to run yourself. Priced only when we run it.')}
+          </h2>
+          <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+            {t('Nothing is held back to make a plan look thin. Every feature is on every plan, including the one you host. What the hosted price covers is the part that actually costs money: the disks, the bandwidth and the answering.')}
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                name: t('Self-hosted'),
+                price: t('nothing, forever'),
+                lines: ['Everything, with no limits', 'Your machine, your data', 'AGPL-3.0-or-later'],
+              },
+              {
+                name: t('Free'),
+                price: t('nothing'),
+                lines: ['Up to 3 people', '1 GB of files', 'Every board, page, database and issue'],
+              },
+              {
+                name: t('Team'),
+                price: `${PRICE.amount}${PRICE.currency} / ${t('member')} / ${t('month')}`,
+                lines: ['As many people as you like', '10 GB of files each', 'The API and webhooks'],
+                lit: true,
+              },
+            ].map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-xl border p-4
+                  ${plan.lit ? 'border-[#C8452D] bg-[#F7E9E4]' : 'border-[#E2DED5] bg-[#FCFBF8]'}`}
+              >
+                <span className="block text-[13px] font-semibold text-[#141310]">{plan.name}</span>
+                <span className="mt-0.5 block text-[12px] text-[#8A867C]">{plan.price}</span>
+                <ul className="mt-3 space-y-1">
+                  {plan.lines.map((line) => (
+                    <li key={line} className="text-[12px] leading-snug text-[#4A463E]">{t(line)}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-4 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+            {t('Reaching a limit refuses the next person or the next file. It never deletes what is already there.')}
+          </p>
         </Section>
 
         <div className="mt-14 flex flex-wrap items-center gap-3">

@@ -469,6 +469,82 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Plan': 'Plan',
+  'The board, the page': 'Board, sayfa',
+  'and the work. One record.': 've iş. Tek kayıt.',
+  'What is in it': 'İçinde ne var',
+  'Three tools most companies pay for separately.':
+    'Çoğu şirketin ayrı ayrı ödediği üç araç.',
+  'Not three products behind one login. One record model underneath, so a sticky on a board, a row in a database and an issue in a cycle can be the same thing seen from three sides.':
+    'Tek girişin arkasında üç ürün değil. Altta tek bir kayıt modeli var: board\'daki bir sticky, veritabanındaki bir satır ve döngüdeki bir iş, üç taraftan görülen aynı şey olabilir.',
+  'Infinite canvas': 'Sonsuz tuval',
+  'Stickies, frames, connectors, drawings, tables, code blocks, embeds. Templates, presenting, comments, version history.':
+    'Sticky, frame, bağlantı, çizim, tablo, kod bloğu, gömülü içerik. Şablonlar, sunum, yorumlar, sürüm geçmişi.',
+  'Pages and databases': 'Sayfalar ve veritabanları',
+  'A block editor with columns, callouts, equations and comments. Databases in six views, eighteen column types, formulas and rollups.':
+    'Sütunlu, vurgu kutulu, denklemli ve yorumlu bir blok editörü. Altı görünümde veritabanı, on sekiz sütun tipi, formül ve toplama.',
+  'Issues and projects': 'İşler ve projeler',
+  'Numbered issues, estimates, cycles with a burn line, sub-issues, blocking, labels, projects on a roadmap. Keyboard first.':
+    'Numaralı işler, tahminler, yanma çizgili döngüler, alt işler, bekletme, etiketler, yol haritasında projeler. Önce klavye.',
+  'The rest of the week': 'Haftanın geri kalanı',
+  'The small things a week is actually made of.':
+    'Bir haftayı asıl oluşturan küçük şeyler.',
+  'Forms': 'Formlar',
+  'A database with one side turned outwards. An answer becomes a row — in the table, on the board, on the calendar, the moment it arrives.':
+    'Bir yüzü dışa dönmüş veritabanı. Gelen cevap anında bir satır olur — tabloda, panoda, takvimde.',
+  'Booking': 'Randevu',
+  'Your hours on a page anybody can open. A booking becomes an event in the workspace like any other record.':
+    'Çalışma saatlerin, herkesin açabileceği bir sayfada. Alınan randevu, diğer kayıtlar gibi bir etkinliğe dönüşür.',
+  'Hours logged against issues, and a week read back from them. Nothing is typed twice.':
+    'İşlere girilen süreler ve onlardan okunan bir hafta. Hiçbir şey iki kez yazılmaz.',
+  'The standup note, the invoice, the backup check. Made on a schedule, caught up if a night is missed.':
+    'Standup notu, fatura, yedek kontrolü. Zamanlanmış olarak açılır, kaçan gece sonradan yetişir.',
+  'The plan here is to integrate rather than clone. n8n for automation, Gmail for mail, Forgejo for git — this is what they talk to.':
+    'Buradaki plan klonlamak değil entegre etmek. Otomasyon için n8n, posta için Gmail, git için Forgejo — konuştukları yer burası.',
+  'A Notion export, a Miro board, a folder of Markdown, a spreadsheet. Out again as Markdown, HTML, PDF or PNG.':
+    'Notion dışa aktarımı, bir Miro board\'u, Markdown klasörü, bir tablo. Geri çıkışı Markdown, HTML, PDF veya PNG.',
+  'What it costs': 'Ne kadar',
+  'Free to run yourself. Priced only when we run it.':
+    'Kendin çalıştırırsan ücretsiz. Fiyat yalnızca biz çalıştırdığımızda.',
+  'Nothing is held back to make a plan look thin. Every feature is on every plan, including the one you host. What the hosted price covers is the part that actually costs money: the disks, the bandwidth and the answering.':
+    'Plan zayıf görünsün diye hiçbir şey geri tutulmuyor. Her özellik her planda var — kendi kurduğunda da. Ücret, asıl para götüren kısmı karşılıyor: diskler, bant genişliği ve cevap verme.',
+  'Self-hosted': 'Kendi sunucunda',
+  'nothing, forever': 'ücretsiz, süresiz',
+  'Everything, with no limits': 'Her şey, sınırsız',
+  'Your machine, your data': 'Senin makinen, senin verin',
+  'AGPL-3.0-or-later': 'AGPL-3.0 veya sonrası',
+  '10 GB of files each': 'Kişi başı 10 GB dosya',
+  'The API and webhooks': 'API ve webhook',
+  'Reaching a limit refuses the next person or the next file. It never deletes what is already there.':
+    'Sınıra gelmek yalnızca yeni kişiyi ya da yeni dosyayı reddeder. Var olan hiçbir şey silinmez.',
+  'Every seat on this plan is taken. Free up one, or move to the paid plan.':
+    'Bu plandaki bütün koltuklar dolu. Birini boşalt ya da ücretli plana geç.',
+  'This workspace has no room for more files. Remove some, or move to the paid plan.':
+    'Bu çalışma alanında yeni dosya için yer yok. Bir kısmını sil ya da ücretli plana geç.',
+  'What this workspace is using, and what it may use.':
+    'Bu çalışma alanının kullandığı ve kullanabileceği.',
+  'Team': 'Takım',
+  'nothing': 'ücretsiz',
+  'month': 'ay',
+  'Files': 'Dosyalar',
+  'paid until {day}': '{day} tarihine kadar ödendi',
+  '{price}{currency} per {per} per {period} for the rest':
+    'Gerisi için {per} başına ayda {price}{currency}',
+  '{n} records, which are not counted against anything.':
+    '{n} kayıt — hiçbir sınıra sayılmıyor.',
+  'Close to a limit. Nothing is deleted when you reach one — new people and new files are refused until there is room.':
+    'Bir sınıra yaklaştın. Sınıra gelince hiçbir şey silinmez — yer açılana kadar yeni kişi ve yeni dosya kabul edilmez.',
+  'Up to {seats} people': 'En fazla {seats} kişi',
+  '{bytes} of files': '{bytes} dosya',
+  'Every board, page, database and issue': 'Bütün board, sayfa, veritabanı ve işler',
+  'Publishing, forms and booking links': 'Yayınlama, formlar ve randevu bağlantıları',
+  'As many people as you like': 'İstediğin kadar kişi',
+  '{bytes} of files for each of them': 'Her biri için {bytes} dosya',
+  'The API and webhooks, so n8n and the rest can reach it':
+    'API ve webhook — n8n ve diğerleri buraya ulaşabilsin diye',
+  'Everything on the free plan': 'Ücretsiz plandaki her şey',
+  'The code is AGPL. Run it on your own machine and every limit here is yours to set — this price is for somebody else keeping the disks spinning.':
+    'Kod AGPL. Kendi makinende çalıştır, buradaki bütün sınırlar senin belirlediğin olur — bu fiyat, diskleri başkasının döndürmesi için.',
   'Booking link': 'Randevu bağlantısı',
   'Your hours, on a page anybody can open. A booking becomes an event in the workspace like any other record.':
     'Çalışma saatlerin, herkesin açabileceği bir sayfada. Alınan randevu, çalışma alanında diğer kayıtlar gibi bir etkinliğe dönüşür.',
@@ -792,6 +868,7 @@ const tr: Record<string, string> = {
   'Your session expired and could not be renewed. Sign in again.':
     'Oturumun süresi doldu ve yenilenemedi. Tekrar giriş yap.',
   'Open source infinite canvas': 'Açık kaynak sonsuz tuval',
+  'Open source workspace': 'Açık kaynak çalışma alanı',
   'Open a board': 'Board aç',
   'A surface for thinking,': 'Düşünmek için bir yüzey,',
   'that an agent can read.': 'ajanın okuyabildiği.',

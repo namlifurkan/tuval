@@ -1,5 +1,6 @@
 import { claimInvites } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
+import { t } from '../i18n'
 
 export type WorkspaceRole = 'admin' | 'member' | 'guest'
 
@@ -86,7 +87,13 @@ export async function inviteToWorkspace(email: string, role: WorkspaceRole): Pro
   const { error } = await supabase.from('workspace_invites').insert({
     workspace_id: current.id, email: email.trim().toLowerCase(), role,
   })
-  return error ? error.message : null
+  if (!error) return null
+  // The seat limit comes back as a database exception, which is a sentence nobody should be
+  // shown. What it means is one thing, and this is that thing said once.
+  if (/seat limit/i.test(`${error.message} ${error.hint ?? ''}`)) {
+    return t('Every seat on this plan is taken. Free up one, or move to the paid plan.')
+  }
+  return error.message
 }
 
 export async function listWorkspaceInvites(): Promise<{ email: string; role: string }[]> {

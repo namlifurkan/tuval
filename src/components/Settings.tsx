@@ -9,6 +9,7 @@ import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
 import { BookingSetup } from './BookingSetup'
+import { PlanPanel } from './PlanPanel'
 import { Recurring } from './Recurring'
 import { TimeWeek } from './TimeWeek'
 import { Identities } from './Identities'
@@ -177,6 +178,13 @@ export function Settings() {
           note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
         >
           <Team />
+        </Row>
+
+        <Row
+          title={t('Plan')}
+          note={t('What this workspace is using, and what it may use.')}
+        >
+          <PlanPanel />
         </Row>
 
         <Row

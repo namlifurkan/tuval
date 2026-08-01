@@ -168,7 +168,11 @@ export function FilesCell({ row, field }: { row: Row; field: Field }) {
     const added: Attachment[] = []
     for (const file of [...list]) {
       if (file.size > MAX_BYTES) { setFailed(t('Up to {size} each.', { size: readableSize(MAX_BYTES) })); continue }
-      try { added.push(await uploadAttachment(file)) } catch { setFailed(t('That did not upload.')) }
+      try {
+        added.push(await uploadAttachment(file))
+      } catch (problem) {
+        setFailed(problem instanceof Error ? problem.message : t('That did not upload.'))
+      }
     }
     if (added.length) setCell(row, field.id, [...held, ...added])
     setBusy(false)

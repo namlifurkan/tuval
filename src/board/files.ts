@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { getWorkspace } from './workspace'
+import { t } from '../i18n'
 
 export const ATTACHMENTS = 'attachments'
 
@@ -29,7 +30,13 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
 
   const { error } = await supabase.storage.from(ATTACHMENTS)
     .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
-  if (error) throw error
+  if (error) {
+    // The plan limit arrives as a database exception. What it means is one thing, said once.
+    if (/storage limit/i.test(error.message)) {
+      throw new Error(t('This workspace has no room for more files. Remove some, or move to the paid plan.'))
+    }
+    throw error
+  }
   return { path, name: file.name, size: file.size }
 }
 
