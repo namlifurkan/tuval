@@ -658,6 +658,86 @@ select pg_temp.check('a stint of no time at all is refused', true, pg_temp.refus
      values ('cccccccc-0000-4000-8000-000000000003', 'dddddddd-0000-4000-8000-000000000004',
              'bbbbbbbb-0000-4000-8000-000000000002', 0)$q$));
 
+-- Work that comes back ------------------------------------------------------------------------------
+
+set local role postgres;
+delete from public.recurrences;
+insert into public.recurrences (workspace_id, title, every, next_on, created_by)
+values ('cccccccc-0000-4000-8000-000000000003', 'Standup notu', 'week',
+        current_date - 21, 'aaaaaaaa-0000-4000-8000-000000000001');
+
+select public.make_due_recurrences();
+select pg_temp.check('the ones it owed were made', true,
+  (select count(*) = 4 from public.records where title = 'Standup notu'));
+select pg_temp.check('and the rule moved past today', true,
+  (select next_on > current_date from public.recurrences limit 1));
+
+-- Running it again the same day is not a second copy of the same day's work.
+select public.make_due_recurrences();
+select pg_temp.check('asking twice makes nothing twice', true,
+  (select count(*) = 4 from public.records where title = 'Standup notu'));
+
+set local role postgres;
+delete from public.recurrences;
+insert into public.recurrences (workspace_id, title, every, next_on)
+values ('cccccccc-0000-4000-8000-000000000003', 'Gunluk', 'day', current_date - 400);
+select public.make_due_recurrences();
+select pg_temp.check('a rule left alone for a year does not make a year of rows', true,
+  (select count(*) = 60 from public.records where title = 'Gunluk'));
+
+-- Bob has been made a member further up, so he is put back outside before being asked.
+set local role postgres;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a stranger sees no rules', false, exists(select 1 from public.recurrences));
+
+-- Somebody outside picking a time --------------------------------------------------------------------
+
+set local role postgres;
+insert into public.booking_pages
+  (workspace_id, owner, slug, title, minutes, weekdays, opens_at, closes_at, zone,
+   notice_hours, horizon_days)
+values ('cccccccc-0000-4000-8000-000000000003', 'aaaaaaaa-0000-4000-8000-000000000001',
+        'ann', 'Gorusme', 30, array[1,2,3,4,5], '09:00', '17:00', 'UTC', 0, 60);
+
+-- The next Monday at 10:00 UTC, which is inside the hours and on an allowed day.
+create or replace function pg_temp.next_monday_at(hhmm time) returns timestamptz
+language sql as $$
+  select ((current_date + ((8 - extract(isodow from current_date)::int) % 7 + 7)) + hhmm)
+         at time zone 'UTC'
+$$;
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a live page can be read without an account', true,
+  exists(select 1 from public.booking_pages where slug = 'ann'));
+select pg_temp.check('nothing is taken to begin with', false,
+  exists(select * from public.taken_slots('ann')));
+
+select pg_temp.check('a time inside the hours is booked', true,
+  public.book_slot('ann', pg_temp.next_monday_at('10:00'), 'Bob', 'bob@other.test') is not null);
+select pg_temp.check('the same instant cannot be booked twice', true,
+  public.book_slot('ann', pg_temp.next_monday_at('10:00'), 'Ceren', 'c@other.test') is null);
+select pg_temp.check('and it now shows as taken', true,
+  exists(select * from public.taken_slots('ann')));
+
+select pg_temp.check('outside the hours is refused', true,
+  public.book_slot('ann', pg_temp.next_monday_at('20:00'), 'Bob', 'b@other.test') is null);
+select pg_temp.check('a time that does not land on a slot is refused', true,
+  public.book_slot('ann', pg_temp.next_monday_at('10:07'), 'Bob', 'b@other.test') is null);
+select pg_temp.check('a time in the past is refused', true,
+  public.book_slot('ann', now() - interval '1 day', 'Bob', 'b@other.test') is null);
+
+set local role postgres;
+select pg_temp.check('a booking became an event in the workspace', true,
+  exists(select 1 from public.records where kind = 'event' and title like 'Bob%'));
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('but who booked it is not readable from outside', false,
+  exists(select 1 from public.bookings));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

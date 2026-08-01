@@ -8,6 +8,8 @@ import {
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
+import { BookingSetup } from './BookingSetup'
+import { Recurring } from './Recurring'
 import { TimeWeek } from './TimeWeek'
 import { Identities } from './Identities'
 import { Team } from './Team'
@@ -175,6 +177,20 @@ export function Settings() {
           note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
         >
           <Team />
+        </Row>
+
+        <Row
+          title={t('Booking link')}
+          note={t('Your hours, on a page anybody can open. A booking becomes an event in the workspace like any other record.')}
+        >
+          <BookingSetup />
+        </Row>
+
+        <Row
+          title={t('Repeating work')}
+          note={t('An issue made on a schedule. Asked for every night, and again whenever somebody opens the workspace, so a missed night catches up rather than being lost.')}
+        >
+          <Recurring />
         </Row>
 
         <Row
