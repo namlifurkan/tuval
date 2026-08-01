@@ -50,7 +50,9 @@ export function ProfilePanel() {
   const setLink = (at: number, patch: Partial<ProfileLink>) =>
     setDraft((d) => ({ ...d, links: links.map((l, i) => (i === at ? { ...l, ...patch } : l)) }))
 
-  const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm text-[#141310] outline-none placeholder:text-[#B6B1A6] focus:border-[#C8452D]'
+  // No width in the shared class: a w-full here beat every w-[…] set beside it, which is how the
+  // label field came to take the whole row and leave the address a sliver.
+  const field = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm text-[#141310] outline-none placeholder:text-[#B6B1A6] focus:border-[#C8452D]'
   const label = 'text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]'
 
   return (
@@ -79,7 +81,7 @@ export function ProfilePanel() {
         <input
           value={draft.name}
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-          className={`mt-1 ${field}`}
+          className={`mt-1 w-full ${field}`}
         />
       </div>
 
@@ -89,7 +91,7 @@ export function ProfilePanel() {
           value={draft.bio}
           onChange={(e) => setDraft({ ...draft, bio: e.target.value.slice(0, 160) })}
           placeholder={t('Builds things with agents and writes down how')}
-          className={`mt-1 ${field}`}
+          className={`mt-1 w-full ${field}`}
         />
       </div>
 
@@ -102,7 +104,7 @@ export function ProfilePanel() {
                 value={link.label}
                 onChange={(e) => setLink(at, { label: e.target.value })}
                 placeholder={t('Label')}
-                className={`w-[110px] shrink-0 ${field}`}
+                className={`w-[92px] shrink-0 ${field}`}
               />
               <input
                 value={link.url}
