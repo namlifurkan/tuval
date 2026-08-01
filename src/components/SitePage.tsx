@@ -355,7 +355,9 @@ function PricingLayout({ page }: { page: Page }) {
           <p className="mt-2 font-bold leading-none tracking-[-0.05em]" style={{ fontSize: 'clamp(3rem,6vw,4.5rem)' }}>
             {PRICE.amount}{PRICE.currency}
           </p>
-          <p className="mt-2 text-[14px] text-[#F2EFE9]/70">per {PRICE.per}, per {PRICE.period}</p>
+          <p className="mt-2 text-[14px] text-[#F2EFE9]/70">
+            per {PRICE.per}, per {PRICE.period} · about {PRICE.about}
+          </p>
           <p
             className="mt-8 text-[16px] leading-[1.7] text-[#F2EFE9]/90"
             style={{ fontFamily: '"Instrument Sans", system-ui, sans-serif' }}

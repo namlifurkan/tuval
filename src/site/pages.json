@@ -2,20 +2,20 @@
   "pages": [
     {
       "path": "/",
-      "title": "Tuval — the board, the page and the work in one place",
+      "title": "Tuval — whiteboard, docs and tracker over one record",
       "description": "An open-source workspace where an infinite canvas, your documents and your issue tracker are three views of the same records. Run it yourself, or let us keep the disks spinning.",
-      "claim": "One record. Three ways to look at it.",
-      "lede": "A sticky on a canvas, a row in a database and an issue in a sprint are usually three tools and three subscriptions. Here they are the same thing, seen from three sides.",
+      "claim": "Whiteboard, docs and tracker. One record.",
+      "lede": "Not three apps behind one login. A sticky on a board, a row in a table and a ticket in a sprint are the same object, and editing any of them edits all of them.",
       "bands": [
         {
           "tone": "paper",
-          "heading": "This is the editor, not a picture of one",
+          "heading": "Drag it. This is the real editor",
           "body": "Drag something. Nothing here is saved until you say so.",
           "demo": "canvas"
         },
         {
           "tone": "pigment",
-          "heading": "The idea you had on Tuesday is the ticket you close on Friday",
+          "heading": "Tuesday's sticky is Friday's ticket",
           "body": "Select a sticky, turn it into an issue, and it keeps its place on the board while it turns up in the sprint. Nothing is retyped, because nothing was ever copied."
         },
         {
@@ -38,7 +38,7 @@
         },
         {
           "tone": "pigment",
-          "heading": "And it hands the whole thing to an agent",
+          "heading": "Turn any board into an agent brief",
           "body": "A board is already a brief: frames become sections, arrows become a flow, code blocks stay fenced. One button turns a canvas into the prompt you meant to write. An MCP server lets the agent go the other way and read the workspace itself."
         },
         {
@@ -87,7 +87,7 @@
             },
             {
               "title": "People on it",
-              "body": "Live cursors, follow mode, comment pins with threads, and a presentation mode that walks the frames in order."
+              "body": "Comment pins with threads, and a presentation mode that walks the frames in order. Live cursors and follow mode are built and have not yet been through a two-person session."
             }
           ]
         },
@@ -206,7 +206,7 @@
       "path": "/for/software-teams",
       "title": "For software teams — planning, retros and architecture | Tuval",
       "description": "Sprint planning, retrospectives, architecture drawings and the issue tracker in one workspace. The sticky from the retro becomes the ticket in the cycle.",
-      "claim": "The retro sticky and the sprint ticket are the same object.",
+      "claim": "The retro sticky is the sprint ticket",
       "lede": "Most teams run the workshop in one tool and the work in another, then spend an hour moving the first into the second. Skip that hour.",
       "bands": [
         {
@@ -255,13 +255,13 @@
       "path": "/for/agencies",
       "title": "For agencies — workshops, delivery and client access | Tuval",
       "description": "Run the client workshop on a shared canvas, keep the delivery in the same workspace, and give the client a read-only link without an account.",
-      "claim": "The client sees the room, not the filing cabinet.",
+      "claim": "The client sees the room, not the cabinet",
       "lede": "A workshop is worth what survives it. Here the board the client watched being drawn is the same board the work is tracked against.",
       "bands": [
         {
           "tone": "paper",
           "heading": "The room, on a screen everyone can see",
-          "body": "Live cursors, follow mode, comment pins, presentation mode through the frames.",
+          "body": "Comment pins, presentation mode through the frames, and a link that needs no account.",
           "demo": "canvas"
         },
         {
@@ -353,7 +353,7 @@
       "path": "/for/consultants",
       "title": "For consultants — analysis, findings and handover | Tuval",
       "description": "Map the situation on a canvas, keep findings as pages with properties, and hand over a workspace the client can actually keep.",
-      "claim": "A finding is worth what the client can still read next year.",
+      "claim": "Handover the client can still read",
       "lede": "The deliverable is usually a deck nobody opens twice. This is the alternative: a workspace that stays readable, searchable and exportable after you leave.",
       "bands": [
         {
@@ -402,7 +402,7 @@
       "path": "/self-hosting",
       "title": "Self-hosting — run the whole workspace yourself | Tuval",
       "description": "AGPL-3.0. Run Tuval on your own machine with your own Postgres and storage. Every limit is yours to set, and the data never leaves.",
-      "claim": "Your machine. Your database. Your problem, and that is the point.",
+      "claim": "Run it yourself. Nothing held back",
       "lede": "The hosted plan is a convenience, not a lock. The same code that runs the hosted one is the code you can run, and there is no edition with the good parts missing.",
       "bands": [
         {
@@ -451,7 +451,7 @@
       "title": "Pricing — free for small teams, paid to be hosted | Tuval",
       "description": "Free for up to three people with every feature. The paid plan is for people who would rather not run the servers. The code is AGPL and self-hosting is unlimited.",
       "claim": "The code is free. The disks are not.",
-      "lede": "What is priced here is somebody else running it: the disks, the bandwidth and the answering. So what is limited is what actually costs money to serve, and nothing else.",
+      "lede": "What is priced is somebody else running it: the disks, the bandwidth and the answering. Billed in lira, since that is the currency a Turkish company can take.",
       "bands": [
         {
           "tone": "paper",
@@ -474,7 +474,7 @@
         {
           "tone": "pigment",
           "heading": "Team",
-          "body": "As many people as you like, ten gigabytes of files for each of them, and the API and webhooks so n8n and the rest can reach it. Everything on the free plan as well."
+          "body": "As many people as you like, ten gigabytes of files each, and the API, webhooks and MCP server so n8n or a coding agent can reach the workspace. Everything on the free plan as well."
         },
         {
           "tone": "paper",

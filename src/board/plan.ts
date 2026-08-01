@@ -11,7 +11,18 @@ import { getWorkspace } from './workspace'
 export type Plan = 'free' | 'team'
 
 // One place to change the price. It is a starting point, not a market study.
-export const PRICE = { amount: 249, currency: '₺', per: 'member', period: 'month' }
+//
+// Billed in lira, which is the only currency a Turkish entity can actually take money in. On an
+// English page that number means nothing to a reader in London, so an approximation travels with
+// it: shown as "about", never as a second price, and updated when the rate moves enough to be a
+// lie. What is charged is always the lira figure.
+export const PRICE = {
+  amount: 249,
+  currency: '₺',
+  per: 'member',
+  period: 'month',
+  about: '$7',
+}
 
 export interface Usage {
   plan: Plan
