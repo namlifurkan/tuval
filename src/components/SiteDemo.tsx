@@ -66,7 +66,10 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
     const fit = () => {
       const box = boxOf(getItems())
       if (!box.w) return
-      useBoardStore.getState().setCamera(fitRect(box, el.clientWidth - 120, el.clientHeight - 96))
+      // fitRect already insets by its padding argument. Subtracting from the viewport as well
+      // padded it twice and, because it centres on whatever width it is handed, pushed the board
+      // sixty pixels left of centre. That double inset was most of the empty paper.
+      useBoardStore.getState().setCamera(fitRect(box, el.clientWidth, el.clientHeight, 44))
       requestRender()
     }
     fit()
@@ -80,7 +83,7 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
   return (
     <div
       ref={shell}
-      className={`relative w-full overflow-hidden border-y border-[#141310]/10 bg-[#F2EFE9] ${
+      className={`relative mx-auto w-[min(100%-2rem,80rem)] overflow-hidden rounded-2xl border border-[#141310]/12 bg-[#F2EFE9] shadow-[5px_5px_0_rgba(20,19,16,0.07)] ${
         tall ? 'h-[clamp(24rem,62vh,40rem)]' : 'h-[clamp(20rem,46vh,30rem)]'}`}
     >
       <Canvas />

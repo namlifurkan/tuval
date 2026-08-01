@@ -71,7 +71,7 @@ export function BoardPicture({ template, className = '', surface = '#F2EFE9' }: 
 
       render({
         ctx,
-        cam: fitRect(world, width - 28, height - 28),
+        cam: fitRect(world, width, height, 20),
         width,
         height,
         items,

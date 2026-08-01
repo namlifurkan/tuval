@@ -2,6 +2,9 @@ export const PRODUCT = {
   name: 'Tuval',
   tagline: 'Sonsuz tuval',
   mark: 'T',
+  // Where the source lives. Here rather than in the page that links to it, because the account
+  // it is published from is a decision that gets made once and changed in one line.
+  repo: 'https://github.com/namlifurkan/tuval',
 }
 
 export const GUIDE = {

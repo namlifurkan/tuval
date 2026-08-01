@@ -10,7 +10,6 @@ import { BoardPicture } from './BoardPicture'
 import { SiteDemo } from './SiteDemo'
 import { Wordmark } from './Logo'
 
-const REPO = 'https://github.com/namlifurkan/tuval'
 const DEEP = '#9E2F1B'
 const PAPER = '#F2EFE9'
 
@@ -50,7 +49,7 @@ function Header() {
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
           <a
-            href={REPO}
+            href={PRODUCT.repo}
             target="_blank"
             rel="noreferrer"
             className="hidden rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold text-[#141310] hover:bg-[#141310]/6 sm:block"
@@ -58,7 +57,7 @@ function Header() {
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="rounded-lg bg-[#141310] px-3.5 py-2 text-[13.5px] font-semibold text-[#F2EFE9] transition-transform hover:-translate-y-px"
+            className="rounded-lg bg-[#141310] px-3.5 py-2 text-[13.5px] font-semibold text-[#F2EFE9] transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_3px_0_rgba(20,19,16,0.35)] active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
           >Open {PRODUCT.name}</a>
           <Account />
         </div>
@@ -67,9 +66,9 @@ function Header() {
   )
 }
 
-function Hero({ page, wide }: { page: Page; wide?: boolean }) {
+function Hero({ page }: { page: Page }) {
   return (
-    <section className={`mx-auto max-w-[80rem] px-6 pb-12 pt-16 sm:pt-24 ${wide ? '' : 'max-w-[62rem]'}`}>
+    <section className="mx-auto max-w-[80rem] px-6 pb-14 pt-20 sm:pt-28">
       <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C8452D]">
         {page.path === '/' ? 'Open source workspace' : LINK_NAMES[page.path]}
       </span>
@@ -89,13 +88,13 @@ function Hero({ page, wide }: { page: Page; wide?: boolean }) {
         <a
           href="/dashboard"
           onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-          className="rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-white transition-transform hover:-translate-y-0.5"
+          className="rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] transition-[transform,box-shadow,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#A83621] hover:shadow-[3px_4px_0_#9E2F1B] active:translate-y-0 active:shadow-[1px_1px_0_#9E2F1B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
         >Start a board</a>
         <a
-          href={REPO}
+          href={PRODUCT.repo}
           target="_blank"
           rel="noreferrer"
-          className="rounded-xl border border-[#141310]/15 px-5 py-3 text-[15px] font-semibold hover:border-[#141310]/40"
+          className="rounded-xl border border-[#141310]/20 px-5 py-3 text-[15px] font-semibold transition-colors duration-150 hover:border-[#141310] hover:bg-[#EBE7DE] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
         >Read the source</a>
       </div>
     </section>
@@ -118,11 +117,11 @@ function Caption({ title, body }: { title: string; body?: string }) {
 // small type, tight rows, nothing decorative.
 function Index({ points }: { points: { title: string; body: string }[] }) {
   return (
-    <div className="mx-auto max-w-[80rem] px-6 py-20">
+    <div className="mx-auto max-w-[80rem] px-6 pt-24 pb-28">
       <dl className="grid gap-x-14 gap-y-10 md:grid-cols-3">
         {points.map((point) => (
           <div key={point.title}>
-            <dt className="border-b border-[#141310] pb-2 text-[15px] font-bold tracking-[-0.015em]">
+            <dt className="border-b border-[#141310] pb-2.5 text-[19px] font-bold tracking-[-0.02em]">
               {point.title}
             </dt>
             <dd
@@ -145,7 +144,7 @@ function Statement({ heading, body, picture }: {
 }) {
   return (
     <section style={{ background: DEEP, color: PAPER }}>
-      <div className={`mx-auto max-w-[80rem] px-6 py-24 sm:py-28 ${picture ? 'grid items-center gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : ''}`}>
+      <div className={`mx-auto max-w-[80rem] px-6 py-32 sm:py-40 ${picture ? 'grid items-center gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : ''}`}>
         <div>
           <h2
             className="max-w-[17ch] font-bold leading-[1.02] tracking-[-0.038em]"
@@ -178,7 +177,7 @@ function Statement({ heading, body, picture }: {
 // The trade pages are a week, not a feature list. Read across, not down.
 function Week({ points }: { points: { title: string; body: string }[] }) {
   return (
-    <div className="mx-auto max-w-[80rem] px-6 py-20">
+    <div className="mx-auto max-w-[80rem] px-6 pt-24 pb-28">
       <ol className="grid gap-y-12 md:grid-cols-3 md:gap-x-10">
         {points.map((point, at) => (
           <li key={point.title} className="relative md:pt-10">
@@ -193,7 +192,7 @@ function Week({ points }: { points: { title: string; body: string }[] }) {
             <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8452D]">
               Step {at + 1}
             </span>
-            <h3 className="mt-3 text-[22px] font-bold leading-tight tracking-[-0.025em]">{point.title}</h3>
+            <h3 className="mt-3 text-[26px] font-bold leading-[1.12] tracking-[-0.03em]">{point.title}</h3>
             <p
               className="mt-2.5 max-w-[38ch] text-[15px] leading-[1.68] text-[#4A463E]"
               style={{ fontFamily: '"Instrument Sans", system-ui, sans-serif' }}
@@ -270,7 +269,7 @@ function Footer() {
         <div className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#F2EFE9]/12 pt-6">
           <Wordmark height={16} />
           <span className="text-[12.5px] text-[#F2EFE9]/45">AGPL-3.0</span>
-          <a href={REPO} className="text-[12.5px] text-[#F2EFE9]/45 hover:text-[#F2EFE9]">Source on GitHub</a>
+          <a href={PRODUCT.repo} className="text-[12.5px] text-[#F2EFE9]/45 hover:text-[#F2EFE9]">Source on GitHub</a>
         </div>
       </div>
     </footer>
@@ -290,10 +289,10 @@ function SurfaceLayout({ page }: { page: Page }) {
     <>
       <Hero page={page} />
       {shown && (
-        <>
+        <div className="bg-[#EBE7DE] py-12">
           <SiteDemo kind={shown.demo!} template={BOARD[page.path]} tall />
           <Caption title={shown.heading} body={shown.body} />
-        </>
+        </div>
       )}
       {said[0] && <Statement heading={said[0].heading} body={said[0].body} />}
       {index?.points && <Index points={index.points} />}
@@ -311,10 +310,10 @@ function TradeLayout({ page }: { page: Page }) {
     <>
       <Hero page={page} />
       {shown && (
-        <>
+        <div className="bg-[#EBE7DE] py-12">
           <SiteDemo kind="canvas" template={BOARD[page.path]} tall />
           <Caption title={shown.heading} body={shown.body} />
-        </>
+        </div>
       )}
       {said[0] && <Statement heading={said[0].heading} body={said[0].body} />}
       {week?.points && <Week points={week.points} />}
@@ -334,7 +333,7 @@ function PricingLayout({ page }: { page: Page }) {
   return (
     <>
       <Hero page={page} />
-      <div className="mx-auto grid max-w-[62rem] gap-10 px-6 pb-16 md:grid-cols-2">
+      <div className="mx-auto grid max-w-[80rem] gap-12 px-6 pb-20 md:grid-cols-2">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8A867C]">Free</p>
           <p className="mt-2 font-bold leading-none tracking-[-0.05em]" style={{ fontSize: 'clamp(3rem,6vw,4.5rem)' }}>
@@ -364,7 +363,7 @@ function PricingLayout({ page }: { page: Page }) {
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="mt-8 inline-block rounded-xl bg-[#F2EFE9] px-5 py-3 text-[15px] font-semibold text-[#141310]"
+            className="mt-8 inline-block rounded-xl bg-[#F2EFE9] px-5 py-3 text-[15px] font-semibold text-[#141310] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2EFE9]"
           >Start free</a>
         </div>
       </div>
@@ -383,7 +382,7 @@ function SpecLayout({ page }: { page: Page }) {
   return (
     <>
       <Hero page={page} />
-      <div className="mx-auto max-w-[62rem] px-6 pb-16">
+      <div className="mx-auto max-w-[80rem] px-6 pb-20">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8A867C]">
           {needs?.heading}
         </h2>
@@ -425,14 +424,16 @@ function HomeLayout({ page }: { page: Page }) {
 
   return (
     <>
-      <Hero page={page} wide />
-      <SiteDemo kind="canvas" template={BOARD['/']} tall />
-      <Caption title="This is the editor, not a picture of one" body="Drag something. Nothing here is saved." />
+      <Hero page={page} />
+      <div className="bg-[#EBE7DE] py-12">
+        <SiteDemo kind="canvas" template={BOARD['/']} tall />
+        <Caption title="This is the editor, not a picture of one" body="Drag something. Nothing here is saved." />
+      </div>
       {said[0] && <Statement heading={said[0].heading} body={said[0].body} picture="kanban" />}
       {index?.points && <Index points={index.points} />}
       {said[1] && <Statement heading={said[1].heading} body={said[1].body} picture="flow" />}
       {last && last.tone === 'paper' && (
-        <div className="mx-auto max-w-[62rem] px-6 py-20">
+        <div className="mx-auto max-w-[80rem] px-6 pt-24 pb-28">
           <h2 className="max-w-[16ch] font-bold leading-[1.06] tracking-[-0.035em]" style={{ fontSize: 'clamp(1.7rem,3.2vw,2.6rem)' }}>
             {last.heading}
           </h2>
