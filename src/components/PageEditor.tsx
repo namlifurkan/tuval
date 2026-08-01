@@ -24,6 +24,7 @@ import { t } from '../i18n'
 import { ourSlashItems } from './pageMenu'
 import { paper, schema } from './pageSchema'
 import { PageExport } from './PageExport'
+import { PageFind } from './PageFind'
 import { PageHistory } from './PageHistory'
 
 const docs = () => getRecords('doc')
@@ -81,6 +82,10 @@ export function PageEditor({ title, locked }: { title: string; locked?: boolean 
   return (
     <>
     <div className="mb-1 ml-[54px] flex justify-end gap-1">
+      <PageFind
+        editor={editor as unknown as Parameters<typeof PageFind>[0]['editor']}
+        locked={locked}
+      />
       <PageExport editor={editor as unknown as Parameters<typeof PageExport>[0]['editor']} title={title} />
       <PageHistory editor={editor as unknown as Parameters<typeof PageHistory>[0]['editor']} />
     </div>
