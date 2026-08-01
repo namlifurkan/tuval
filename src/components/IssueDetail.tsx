@@ -7,6 +7,7 @@ import { archiveRecord, getRecords, patchRecord, PRIORITIES, STATUSES } from '..
 import type { Record as Issue, Status } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
+import { IssueLinks } from './IssueLinks'
 import { Popover } from './Popover'
 
 const cycles = getCycles
@@ -206,6 +207,8 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           </Popover>
         </div>
       </div>
+
+      <IssueLinks issue={issue} prefix={prefix} />
 
       <div className="mt-6 flex gap-2">
         <button

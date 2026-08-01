@@ -4,10 +4,11 @@ import { go, readRoute } from '../board/boards'
 import { today } from '../board/database'
 import {
   bandsOf, burnOf, currentCycle, getCycles, getLabels, issueKey, labelsOn, loadCycles, loadLabels,
-  loadWorn, STATUS_TONE, subscribeIssues,
+  isClosed, loadWorn, STATUS_TONE, subscribeIssues,
 } from '../board/issues'
 import type { GroupBy } from '../board/issues'
 import { initials } from '../board/me'
+import { loadRelations, progressOf } from '../board/relations'
 import {
   archiveRecord, createRecord, getRecords, loadRecords, patchRecord, STATUSES, subscribeRecords,
 } from '../board/records'
@@ -65,6 +66,7 @@ export function Issues() {
     void loadCycles()
     void loadLabels()
     void loadWorn()
+    void loadRelations()
     void listTeam().then(setTeam)
   }, [workspace])
 
@@ -82,13 +84,22 @@ export function Issues() {
     return held ? held.name || t('Cycle {n}', { n: held.number }) : ''
   }
 
+  // A sub-issue is shown inside its parent, not again beside it, or a list of ten becomes a list
+  // of thirty saying the same thing twice. The counts on the chips are of the same set, so the
+  // number beside a state and the number of rows under it are the same number.
+  const top = useMemo(
+    () => records.filter((r) => !r.parent_id || !records.some((p) => p.id === r.parent_id)),
+    [records],
+  )
+
   const shown = useMemo(() => {
-    let held = records
-    if (cycleOnly) held = held.filter((r) => r.cycle_id === cycleOnly)
+    let held = cycleOnly ? top.filter((r) => r.cycle_id === cycleOnly) : top
     if (filter === 'mine') held = held.filter((r) => r.assignee === mine)
     else if (filter !== 'all') held = held.filter((r) => r.status === filter)
     return held
-  }, [records, filter, cycleOnly, mine])
+  }, [top, filter, cycleOnly, mine])
+
+  const counted = cycleOnly ? top.filter((r) => r.cycle_id === cycleOnly) : top
 
   const bands = useMemo(
     () => bandsOf(shown, group, { person: nameOf, cycle: cycleName }),
@@ -155,8 +166,8 @@ export function Issues() {
             {s !== 'all' && (
               <span className="ml-1.5 text-[#B6B1A6]">
                 {s === 'mine'
-                  ? records.filter((r) => r.assignee === mine).length
-                  : records.filter((r) => r.status === s).length}
+                  ? counted.filter((r) => r.assignee === mine).length
+                  : counted.filter((r) => r.status === s).length}
               </span>
             )}
           </button>
@@ -202,6 +213,15 @@ export function Issues() {
                   />
 
                   <LabelChips known={known} worn={labelsOn(issue.id)} />
+
+                  {(() => {
+                    const kids = progressOf(issue.id, isClosed)
+                    return kids && (
+                      <span className="shrink-0 font-mono text-[10px] text-[#B6B1A6]">
+                        {kids.done}/{kids.total}
+                      </span>
+                    )
+                  })()}
 
                   {issue.estimate !== null && (
                     <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-[#EFEBE2] text-[10px] font-bold text-[#4A463E]">
