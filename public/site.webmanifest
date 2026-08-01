@@ -1,7 +1,7 @@
 {
   "name": "Tuval",
   "short_name": "Tuval",
-  "description": "Open source infinite canvas. Local-first, self-hostable.",
+  "description": "Infinite canvas workspace. Local-first, AGPL-3.0 licensed and self-hostable.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F2EFE9",

@@ -15,6 +15,7 @@ let current: Workspace | null = null
 let chosen = read()
 let loading: Promise<Workspace | null> | null = null
 let loadingFor = ''
+let problem = ''
 const listeners = new Set<() => void>()
 
 function read(): string {
@@ -22,6 +23,13 @@ function read(): string {
 }
 
 export const getWorkspace = () => current
+export const workspaceError = () => problem
+
+function setProblem(next: string) {
+  if (problem === next) return
+  problem = next
+  listeners.forEach((listener) => listener())
+}
 
 export const subscribeWorkspace = (fn: () => void) => {
   listeners.add(fn)
@@ -64,25 +72,32 @@ export async function listWorkspaces(): Promise<Workspace[]> {
 
 async function resolveWorkspace(userId: string): Promise<Workspace | null> {
   if (!supabase) return null
-  await supabase.rpc('claim_invites')
+  setProblem('')
+  const claimed = await supabase.rpc('claim_invites')
+  if (claimed.error) throw claimed.error
   if (getUser()?.id !== userId) return null
 
   // The stored choice is a hint, never a grant: row-level security decides whether it is still
   // reachable. Somebody removed from a workspace since they last chose it simply reads nothing
   // back here, and lands on the fallback instead of on an empty screen.
-  let row = chosen
-    ? (await supabase.from('workspaces').select(COLUMNS).eq('id', chosen).maybeSingle()).data
-    : null
+  const selected = chosen
+    ? await supabase.from('workspaces').select(COLUMNS).eq('id', chosen).maybeSingle()
+    : { data: null, error: null }
+  if (selected.error) throw selected.error
+  let row = selected.data
 
   if (!row) {
-    const { data: id } = await supabase.rpc('ensure_workspace')
+    const { data: id, error } = await supabase.rpc('ensure_workspace')
+    if (error) throw error
     if (getUser()?.id !== userId) return null
     if (!id) {
       current = null
       listeners.forEach((l) => l())
       return null
     }
-    row = (await supabase.from('workspaces').select(COLUMNS).eq('id', id).maybeSingle()).data
+    const fallback = await supabase.from('workspaces').select(COLUMNS).eq('id', id).maybeSingle()
+    if (fallback.error) throw fallback.error
+    row = fallback.data
     if (row) setWorkspace((row as Workspace).id)
   }
 
@@ -96,15 +111,21 @@ export function loadWorkspace(): Promise<Workspace | null> {
   const user = getUser()
   if (!supabase || !user) {
     current = null
+    setProblem('')
     listeners.forEach((l) => l())
     return Promise.resolve(null)
   }
   if (loading && loadingFor === user.id) return loading
 
   loadingFor = user.id
-  const pending = resolveWorkspace(user.id).finally(() => {
-    if (loading === pending) { loading = null; loadingFor = '' }
-  })
+  const pending = resolveWorkspace(user.id)
+    .catch((error: unknown) => {
+      setProblem(error instanceof Error ? error.message : String(error))
+      return current
+    })
+    .finally(() => {
+      if (loading === pending) { loading = null; loadingFor = '' }
+    })
   loading = pending
   return pending
 }

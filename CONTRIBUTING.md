@@ -1,5 +1,13 @@
 # Contributing
 
+## Before your first pull request
+
+Sign the [CLA](CLA.md) by adding your line to [CONTRIBUTORS.md](CONTRIBUTORS.md) in that same pull
+request. You keep the copyright in what you write; the project gets permission to ship it under
+terms other than AGPL, which is what keeps the hosted service and this repository one codebase.
+
+One signature covers everything you contribute afterwards.
+
 ## Language
 
 **Commit messages, code, comments, issues and pull requests are written in English.**

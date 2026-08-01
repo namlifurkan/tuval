@@ -49,6 +49,7 @@ export interface Page {
 }
 
 import content from './pages.json'
+import product from './product.json'
 
 // One copy, and this is it. The words were briefly in this file and also in the JSON the build
 // script reads, with nothing keeping them in step: editing the prose here changed what a visitor
@@ -74,8 +75,13 @@ export const filled = (text: string, price: {
   per: string
   period: string
   about: string
+  since: string
+  review: string
 }) => text
   .replace('{price}', `${price.currency}${price.amount}`)
   .replace('{per}', price.per)
   .replace('{period}', price.period)
   .replace('{about}', price.about)
+  .replace('{since}', price.since)
+  .replace('{review}', price.review)
+  .replace('{repo}', product.repo)

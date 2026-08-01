@@ -8,7 +8,7 @@ export const COVERS = 'covers'
 const MAX_WIDTH = 1600
 const RATIO = 1600 / 420
 
-export async function uploadCover(file: File): Promise<string> {
+export async function uploadCover(record: string, file: File): Promise<string> {
   const ws = getWorkspace()
   if (!supabase || !ws) throw new Error('Not signed in')
 
@@ -32,7 +32,7 @@ export async function uploadCover(file: File): Promise<string> {
   const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, 'image/webp', 0.82))
   if (!blob) throw new Error('Could not read that image')
 
-  const path = `${ws.id}/${crypto.randomUUID()}.webp`
+  const path = `${ws.id}/${record}/${crypto.randomUUID()}.webp`
   const { error } = await supabase.storage.from(COVERS)
     .upload(path, blob, { contentType: 'image/webp', upsert: false })
   if (error) throw error

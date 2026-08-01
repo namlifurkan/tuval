@@ -4,7 +4,7 @@ import { go, readRoute } from '../board/boards'
 import { openJournal } from '../board/journal'
 import { armed } from '../board/keys'
 import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
-import { getWorkspace, subscribeWorkspace } from '../board/workspace'
+import { getWorkspace, loadWorkspace, subscribeWorkspace, workspaceError } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
 import { Collections } from './Collections'
@@ -20,7 +20,7 @@ const NAV = [
   { path: '/inbox', label: 'Inbox', icon: Inbox },
   { path: '/issues', label: 'Issues', icon: CircleDot },
   { path: '/projects', label: 'Projects', icon: Target },
-  { path: '/docs', label: 'Docs', icon: FileText },
+  { path: '/pages', label: 'Docs', icon: FileText },
   { path: '/settings', label: 'Settings', icon: Settings2 },
 ]
 
@@ -36,6 +36,7 @@ export function Shell({ title, wide, bare, action, children }: {
   children: React.ReactNode
 }) {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
+  const workspaceProblem = useSyncExternalStore(subscribeWorkspace, workspaceError, workspaceError)
   const waiting = useSyncExternalStore(subscribeInbox, unreadCount, unreadCount)
   const here = location.pathname.replace(/\/+$/, '') || '/'
 
@@ -45,7 +46,7 @@ export function Shell({ title, wide, bare, action, children }: {
   // g then a letter, the way every keyboard-first tracker does it.
   useEffect(() => {
     const where: { [key: string]: string } = {
-      i: '/issues', p: '/projects', d: '/docs', b: '/dashboard', n: '/inbox', s: '/settings',
+      i: '/issues', p: '/projects', d: '/pages', b: '/dashboard', n: '/inbox', s: '/settings',
     }
     const key = armed('g', (second) => {
       if (second === 'j') { void openJournal(); return true }
@@ -109,6 +110,16 @@ export function Shell({ title, wide, bare, action, children }: {
         </header>
 
         <main className={`mx-auto w-full px-6 pb-24 pt-8 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
+          {workspaceProblem && (
+            <div className="mb-5 flex items-center gap-3 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-3 py-2 text-sm text-[#4A463E]">
+              <span className="min-w-0 flex-1">{t('Could not load the workspace.')}</span>
+              <button
+                type="button"
+                onClick={() => { void loadWorkspace() }}
+                className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-[#C8452D] hover:bg-[#FCFBF8]"
+              >{t('Try again')}</button>
+            </div>
+          )}
           {!bare && (
             <h1
               className="mb-7 font-bold leading-[1.02] tracking-[-0.035em] text-[#141310]"

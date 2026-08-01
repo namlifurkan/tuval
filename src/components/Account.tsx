@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  authError, authTrouble, cloudEnabled, isStaleLink, displayName, getUser, signIn, signInWith,
+  authError, authMessage, authTrouble, cloudEnabled, isStaleLink, displayName, getUser, signIn, signInWith,
   signInWithPassword, signOut, subscribeAuth,
 } from '../board/supabase'
 import { go } from '../board/boards'
@@ -69,7 +69,7 @@ export function Account() {
         setState('sent')
       }
     } catch (e) {
-      setReason(e instanceof Error ? e.message : String(e))
+      setReason(t(authMessage(e)))
       setState('error')
     }
   }
@@ -138,7 +138,7 @@ export function Account() {
                 <button
                   key={id}
                   type="button"
-                  onClick={() => { void signInWith(id).catch((e: Error) => { setReason(e.message); setState('error') }) }}
+                  onClick={() => { void signInWith(id).catch((e: Error) => { setReason(t(authMessage(e))); setState('error') }) }}
                   className="flex items-center justify-center gap-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1.5 text-[13px] font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

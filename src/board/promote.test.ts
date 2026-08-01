@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { recordHref, recordItemsFor } from './promote'
+import { recordHref, recordItemsFor, snapshotPatches } from './promote'
+import { makeRecordItem } from './items'
 import type { Record as Row } from './records'
 
 const row = (id: string, kind: string, title = id): Row =>
@@ -23,5 +24,20 @@ describe('placing existing work', () => {
     )
     expect([page, base, work].map((i) => recordHref(i as never)))
       .toEqual(['/d/a', '/d/b', '/i/c'])
+  })
+})
+
+describe('refreshing record cards', () => {
+  it('marks a card whose record disappeared, and clears the mark if it returns', () => {
+    const card = makeRecordItem(0, 0, 'gone', 'Old title', 'todo')
+    expect(snapshotPatches([card], new Map())).toEqual([[card.id, { missing: true }]])
+
+    card.missing = true
+    const returned = row('gone', 'issue', 'Restored title')
+    returned.status = 'doing'
+    expect(snapshotPatches([card], new Map([['gone', returned]]))).toEqual([[
+      card.id,
+      { missing: false, snapshot: { title: 'Restored title', status: 'doing' } },
+    ]])
   })
 })

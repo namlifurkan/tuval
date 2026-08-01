@@ -4,6 +4,7 @@ import { makeImage } from './items'
 import { requestRender, useBoardStore } from './store'
 import { getUser } from './supabase'
 import type { Vec } from './types'
+import { t } from '../i18n'
 
 const MAX_EDGE = 1600
 const KEEP_ORIGINAL_BYTES = 400_000
@@ -42,7 +43,7 @@ export async function encodeImage(file: File) {
 export async function hostImage(src: string, blob: Blob | null) {
   if (!blob || !room || !getUser()) return src
   const ext = blob.type.split('/')[1] || 'webp'
-  return (await uploadImage(room, blob, ext)) ?? src
+  return uploadImage(room, blob, ext)
 }
 
 // The single way an image enters a board. Every caller goes through here: a second path that
@@ -50,6 +51,10 @@ export async function hostImage(src: string, blob: Blob | null) {
 export async function addImage(file: File, at: Vec, centred = true) {
   const { src, width, height, blob } = await encodeImage(file)
   const hosted = await hostImage(src, blob)
+  if (!hosted) {
+    alert(t('Image could not be uploaded. Try again.'))
+    return null
+  }
   const scale = Math.min(1, PLACED_EDGE / width)
   const w = width * scale
   const h = height * scale

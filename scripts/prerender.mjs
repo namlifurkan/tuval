@@ -12,6 +12,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { marked } from 'marked'
 
 const DIST = 'dist'
 const SITE = 'https://tuval.dev'
@@ -29,11 +30,15 @@ const { pages: all } = JSON.parse(readFileSync('src/site/pages.json', 'utf8'))
 // The price is decided in src/site/price.json and read here and by the React pages, so a crawler
 // and a visitor cannot be shown two different numbers.
 const price = JSON.parse(readFileSync('src/site/price.json', 'utf8'))
+const product = JSON.parse(readFileSync('src/site/product.json', 'utf8'))
 const fill = (text) => String(text)
   .replace('{price}', `${price.currency}${price.amount}`)
   .replace('{per}', price.per)
   .replace('{period}', price.period)
   .replace('{about}', price.about)
+  .replace('{since}', price.since)
+  .replace('{review}', price.review)
+  .replace('{repo}', product.repo)
 
 const escape = (text) => fill(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -41,9 +46,33 @@ const escape = (text) => fill(text)
 
 const shell = readFileSync(join(DIST, 'index.html'), 'utf8')
 
+// The price-carrying result is the one search can give us without our ranking moving, and every
+// field it wants is already decided somewhere else in the repo. Written on the two pages that
+// carry the offer; a product marked up on eleven addresses is eleven products.
+//
+// No FAQPage: not one page here holds a question. Inventing three to earn the expansion is the
+// same trick as a badge with no stars behind it.
+const application = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: product.name,
+  url: SITE,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  license: 'https://www.gnu.org/licenses/agpl-3.0.html',
+  offers: {
+    '@type': 'Offer',
+    price: price.amount,
+    priceCurrency: 'TRY',
+    category: `per ${price.per} per ${price.period}`,
+  },
+})
 
 for (const page of all) {
   const url = `${SITE}${page.path === '/' ? '' : page.path}`
+  const structured = ['/', '/pricing'].includes(page.path)
+    ? [`<script type="application/ld+json">${application}</script>`]
+    : []
 
   const head = [
     `<title>${escape(page.title)}</title>`,
@@ -58,6 +87,7 @@ for (const page of all) {
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escape(page.title)}" />`,
     `<meta name="twitter:description" content="${escape(page.description)}" />`,
+    ...structured,
   ].join('\n    ')
 
   // Inside #root, so React replaces it on mount rather than leaving two copies on the page.
@@ -95,6 +125,9 @@ for (const page of all) {
       .map((other) => `<a href="${other.path}">${escape(other.claim)}</a>`),
     '</nav>',
     '</main>',
+    '<footer><nav>',
+    ...all.slice(1).map((other) => `<a href="${other.path}">${escape(other.claim)}</a>`),
+    '</nav></footer>',
   ].join('')
 
   const html = shell
@@ -110,10 +143,73 @@ for (const page of all) {
   writeFileSync(where, html)
 }
 
+// Documentation is the repository's files, rendered. Not a second copy in pages.json: two copies
+// of the same prose disagree within a month, and the copy a self-hoster reads is the one in the
+// checkout. These carry no bundle, so nothing hydrates over them and /docs never boots the app.
+const DOCS = [
+  ['self-hosting', 'Self-hosting', 'Run Tuval on your own Postgres and your own disks.'],
+  ['api', 'HTTP API', 'One door for a script, a bot, n8n or a spreadsheet.'],
+  ['mcp', 'MCP server', 'Mount the workspace in Claude Code or Cursor.'],
+  ['keyboard', 'Keyboard', 'Every shortcut, in the three places that have them.'],
+].filter(([name]) => existsSync(join('docs', `${name}.md`)))
+
+const STYLE = 'html{color-scheme:light}'
+  + 'body{margin:0;background:#F2EFE9;color:#141310;'
+  + 'font:16px/1.65 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}'
+  + 'main{max-width:46rem;margin:0 auto;padding:3rem 1.5rem 6rem}'
+  + 'a{color:#C8452D}h1,h2,h3{line-height:1.15;margin:2.5rem 0 .75rem}h1{margin-top:0}'
+  + 'code{background:#E7E2D6;padding:.1em .35em;border-radius:.25em;font-size:.9em}'
+  + 'pre{background:#141310;color:#F2EFE9;padding:1rem;border-radius:.5rem;overflow-x:auto}'
+  + 'pre code{background:none;color:inherit;padding:0}'
+  + 'table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}'
+  + 'th,td{border:1px solid #E2DED5;padding:.5rem .75rem;text-align:left;vertical-align:top}'
+  + 'nav{border-bottom:1px solid #E2DED5;padding-bottom:1rem;margin-bottom:2rem;font-size:14px}'
+  + 'footer{border-top:1px solid #E2DED5;margin-top:4rem;padding-top:1rem;font-size:14px}'
+
+const docShell = (path, title, description, inner) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escape(title)} | Tuval documentation</title>
+<meta name="description" content="${escape(description)}" />
+<link rel="canonical" href="${SITE}${path}" />
+<link rel="icon" href="/favicon.svg" />
+<style>${STYLE}</style></head>
+<body><main>
+<nav><a href="/">Tuval</a> · <a href="/docs">Documentation</a></nav>
+${inner}
+<footer><a href="/docs">All documentation</a> · <a href="/">Home</a> · <a href="/pricing">Pricing</a></footer>
+</main></body></html>
+`
+
+const docPath = (name) => join(DIST, 'docs', name, 'index.html')
+
+for (const [name, title, description] of DOCS) {
+  const markdown = readFileSync(join('docs', `${name}.md`), 'utf8')
+  // Links between the documents are written as neighbouring files so they work in a checkout and
+  // on GitHub; on the site the same link is a directory.
+  const inner = marked.parse(markdown).replace(/href="([a-z-]+)\.md(#[^"]*)?"/g, 'href="/docs/$1$2"')
+  mkdirSync(dirname(docPath(name)), { recursive: true })
+  writeFileSync(docPath(name), docShell(`/docs/${name}`, title, description, inner))
+}
+
+writeFileSync(join(DIST, 'docs', 'index.html'), docShell(
+  '/docs',
+  'Documentation',
+  'How to run Tuval yourself, reach it from a script or an agent, and drive it from the keyboard.',
+  '<h1>Documentation</h1><p>Written in the repository and rendered here, so the copy you read is the'
+  + ' copy in the checkout.</p><dl>'
+  + DOCS.map(([name, title, description]) =>
+    `<dt><h2><a href="/docs/${name}">${escape(title)}</a></h2></dt><dd>${escape(description)}</dd>`).join('')
+  + '</dl>',
+))
+
+const docUrls = ['/docs', ...DOCS.map(([name]) => `/docs/${name}`)]
+
 writeFileSync(join(DIST, 'sitemap.xml'), [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
   ...all.map((p) => `  <url><loc>${SITE}${p.path === '/' ? '/' : p.path}</loc></url>`),
+  ...docUrls.map((path) => `  <url><loc>${SITE}${path}</loc></url>`),
   '</urlset>',
   '',
 ].join('\n'))
@@ -124,6 +220,7 @@ writeFileSync(join(DIST, 'robots.txt'), [
   'User-agent: *',
   'Allow: /$',
   ...all.filter((p) => p.path !== '/').map((p) => `Allow: ${p.path}`),
+  'Allow: /docs',
   'Allow: /u/',
   'Allow: /p/',
   'Disallow: /b/',
@@ -139,4 +236,4 @@ writeFileSync(join(DIST, 'robots.txt'), [
   '',
 ].join('\n'))
 
-console.log(`prerender: ${all.length} pages, a sitemap and robots.txt`)
+console.log(`prerender: ${all.length} pages, ${docUrls.length} documentation pages, a sitemap and robots.txt`)

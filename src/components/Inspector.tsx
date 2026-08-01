@@ -454,7 +454,12 @@ export function Inspector() {
 
       {card && (
         <Section title={t(CARD_TITLES[card.kind] ?? 'Issue')}>
-          {(card.kind === 'issue' || card.kind === 'project') && (
+          {card.missing && (
+            <p className="mb-2 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-relaxed text-[#C8452D]">
+              {t('The record behind this card was deleted or is no longer reachable.')}
+            </p>
+          )}
+          {!card.missing && (card.kind === 'issue' || card.kind === 'project') && (
             <div className="grid grid-cols-3 gap-1">
               {STATUSES.map((st) => (
                 <button
@@ -473,8 +478,9 @@ export function Inspector() {
           )}
           <button
             type="button"
+            disabled={card.missing}
             onClick={() => go(recordHref(card))}
-            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2] disabled:cursor-not-allowed disabled:opacity-40"
           >{t('Open it')}</button>
         </Section>
       )}

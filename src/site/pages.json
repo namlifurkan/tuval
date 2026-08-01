@@ -3,7 +3,7 @@
     {
       "path": "/",
       "title": "Tuval — the sticky note is the ticket",
-      "description": "An open-source workspace where an infinite canvas, your pages and your issue tracker are three views of one record. Promote a sticky note on this page and watch it turn up in the table and the sprint. AGPL-3.0, self-hostable, free for three people.",
+      "description": "A self-hostable workspace where an infinite canvas, your pages and your issue tracker are three views of one record. Promote a sticky note on this page and watch it turn up in the table and the sprint. AGPL-3.0 licensed, free for three people.",
       "claim": "The sticky note is the ticket.",
       "lede": "Not a copy of it. Not a link to it. One record, drawn on a canvas, listed in a table, worked in a sprint. The three panels below are live and they are all reading the same document.",
       "bands": [
@@ -27,7 +27,7 @@
           "lines": [
             "Frames, connectors, sticky notes, pen, shapes, tables and mind maps",
             "Images, PDFs placed page by page, live embeds and code blocks",
-            "Presentation mode, comments, live cursors and version history",
+            "Presentation mode, comments and version history",
             "Templates, and importers for an existing Miro board or a Notion export"
           ]
         },
@@ -128,7 +128,7 @@
       ],
       "next": [
         "/canvas",
-        "/docs",
+        "/databases",
         "/issues",
         "/self-hosting",
         "/pricing"
@@ -136,7 +136,7 @@
     },
     {
       "path": "/canvas",
-      "title": "Infinite canvas — open source whiteboard | Tuval",
+      "title": "Infinite canvas and workspace | Tuval",
       "description": "An infinite canvas with frames, connectors, sticky notes, tables and mind maps. Drawn on one canvas element, works offline, and every idea on it can become a tracked issue.",
       "claim": "A surface with no edges and no lag.",
       "lede": "One canvas element, a dirty-flag render loop, and a document that lives in your browser before it lives anywhere else. Pan, zoom, and keep going.",
@@ -177,15 +177,15 @@
         }
       ],
       "next": [
-        "/docs",
+        "/databases",
         "/issues",
         "/for/software-teams",
         "/self-hosting"
       ]
     },
     {
-      "path": "/docs",
-      "title": "Pages and databases — open source Notion alternative | Tuval",
+      "path": "/databases",
+      "title": "Pages and databases | Tuval",
       "description": "Pages with real blocks and databases with twenty column types, formulas, rollups and relations. Table, board, calendar, gallery, timeline and list views over the same rows.",
       "claim": "Write it down. Then ask it questions.",
       "lede": "A page is a page until you give it columns. Then it is a database, and the same rows can be a table, a board, a calendar, a gallery or a timeline without being copied.",
@@ -276,7 +276,7 @@
       ],
       "next": [
         "/canvas",
-        "/docs",
+        "/databases",
         "/for/software-teams",
         "/pricing"
       ]
@@ -374,7 +374,7 @@
       ],
       "next": [
         "/canvas",
-        "/docs",
+        "/databases",
         "/pricing",
         "/self-hosting"
       ]
@@ -387,35 +387,36 @@
       "lede": "The hosted plan is a convenience, not a lock. The same code that runs the hosted one is the code you can run, and there is no edition with the good parts missing.",
       "bands": [
         {
+          "id": "commands",
+          "tone": "paper",
+          "heading": "Five commands",
+          "body": "The source repository publishes shortly. Once it does, point Tuval at your Supabase project, apply the migrations, lift the hosted-service limits, and build the folder of static files.",
+          "lines": [
+            "git clone {repo} && cd tuval",
+            "cp .env.example .env.local   # add your Supabase URL and anon key",
+            "npx supabase db push   # apply the schema",
+            "psql -c \"update public.tuval_settings set self_hosted = true where id = 1\"   # lift seat, storage and API limits",
+            "npm install && npm run build   # serve dist/ from anything"
+          ]
+        },
+        {
           "tone": "paper",
           "heading": "What it needs",
           "points": [
             {
-              "title": "A Postgres database",
-              "body": "Supabase, or a plain Postgres with the same extensions. The schema is a folder of migrations you can read before you run them."
+              "title": "A Supabase project",
+              "body": "Hosted Supabase or the self-hosted stack. The schema is a folder of migrations you can read before you run them."
             },
             {
-              "title": "An S3 bucket",
-              "body": "Any S3-compatible bucket. Images and attachments are signed URLs, never public ones."
+              "title": "Object storage",
+              "body": "The private Supabase Storage bucket created by the migrations holds images and attachments behind signed URLs."
             },
             {
               "title": "Any static file host",
-              "body": "The app builds to a folder of files. Anything that can serve them will do."
+              "body": "The app builds to a folder of files. Anything that can serve them with the documented SPA fallback will do."
             }
           ],
           "id": "needs"
-        },
-        {
-          "id": "commands",
-          "tone": "paper",
-          "heading": "Four commands",
-          "body": "Point it at a Postgres and a bucket, apply the migrations, build the folder of files. There is no installer to trust and nothing that phones home.",
-          "lines": [
-            "git clone https://github.com/namlifurkan/tuval && cd tuval",
-            "cp .env.example .env   # your Supabase URL and anon key",
-            "npx supabase db push   # the schema, as migrations you can read first",
-            "npm install && npm run build   # serve dist/ from anything"
-          ]
         },
         {
           "tone": "pigment",
@@ -439,7 +440,7 @@
       "next": [
         "/pricing",
         "/canvas",
-        "/docs",
+        "/databases",
         "/for/software-teams"
       ]
     },
@@ -464,7 +465,7 @@
             },
             {
               "title": "Every board, page and issue",
-              "body": "Databases, publishing, forms and booking links included. The API and webhooks are the one thing held for the paid plan, and they are open on an install you run yourself."
+              "body": "Databases, publishing and forms included. The API and webhooks are the one thing held for the paid plan, and they are open on an install you run yourself."
             }
           ]
         },
@@ -479,6 +480,12 @@
           "body": "It means the tax of moving between four tools is paid by exactly one person. Three people and a gigabyte is a whole workspace, not a trial, and no feature is held back to make the paid plan look thin."
         },
         {
+          "id": "pay",
+          "tone": "paper",
+          "heading": "How you pay",
+          "body": "There is no card form yet. The first thirty customers are invoiced and pay by bank transfer: write to product@tuval.dev with your company details, an invoice comes back the same week, and the workspace is on the Team plan the day it is paid. A card checkout arrives when it is worth the fee; being invoiced is not a worse deal, and for a Turkish company it is usually the one accounting prefers."
+        },
+        {
           "tone": "paper",
           "heading": "Or none of the above",
           "body": "Run it on your own machine and every limit here is yours to set. That is not a downgrade path; it is the same code."
@@ -487,14 +494,14 @@
       "next": [
         "/self-hosting",
         "/canvas",
-        "/docs"
+        "/databases"
       ]
     },
     {
       "path": "/alternatives/miro",
-      "title": "An open-source alternative to Miro | Tuval",
+      "title": "A self-hostable alternative to Miro | Tuval",
       "description": "An infinite canvas you can self-host under AGPL-3.0, with pages and an issue tracker beside it. An honest comparison with Miro, including where we lose.",
-      "claim": "An open-source alternative to Miro",
+      "claim": "A self-hostable alternative to Miro",
       "lede": "A canvas with frames, connectors and thirty-two shape kinds, plus the tracker and the pages the board feeds into. Run it on your own Postgres.",
       "compare": {
         "against": "Miro",
@@ -502,7 +509,7 @@
         "rows": [
           {
             "feature": "Licence",
-            "tuval": "AGPL-3.0. Source on GitHub, no separate edition and no feature flags.",
+            "tuval": "AGPL-3.0 licensed. The source repository publishes shortly; there is no separate edition and no feature flags.",
             "them": "Proprietary, delivered as a hosted service."
           },
           {
@@ -587,7 +594,7 @@
       "next": [
         "/",
         "/canvas",
-        "/docs",
+        "/databases",
         "/issues",
         "/pricing",
         "/self-hosting"
@@ -595,9 +602,9 @@
     },
     {
       "path": "/alternatives/notion",
-      "title": "An open-source alternative to Notion | Tuval",
+      "title": "A self-hostable alternative to Notion | Tuval",
       "description": "Pages and databases with twenty column types, six views, formulas, rollups and relations, self-hostable under AGPL-3.0. An honest comparison with Notion.",
-      "claim": "An open-source alternative to Notion",
+      "claim": "A self-hostable alternative to Notion",
       "lede": "Pages on a block editor, databases with twenty column types and six views over the same rows, and an infinite canvas those records can sit on.",
       "compare": {
         "against": "Notion",
@@ -655,7 +662,7 @@
           },
           {
             "feature": "Beyond pages",
-            "tuval": "The same records open as an issue with a key, cycle and estimate, or as a card on an infinite canvas. Forms drop answers into a database; booking pages and published pages are included.",
+            "tuval": "The same records open as an issue with a key, cycle and estimate, or as a card on an infinite canvas. Forms drop answers into a database, and pages can be published.",
             "them": "Pages, databases and forms, with no infinite canvas of its own."
           },
           {
@@ -690,7 +697,7 @@
       "next": [
         "/",
         "/canvas",
-        "/docs",
+        "/databases",
         "/issues",
         "/pricing",
         "/self-hosting"
@@ -698,9 +705,9 @@
     },
     {
       "path": "/alternatives/linear",
-      "title": "An open-source alternative to Linear | Tuval",
+      "title": "A self-hostable alternative to Linear | Tuval",
       "description": "Issues with keys, cycles and estimates, in the same workspace as your boards and pages. AGPL-3.0 and self-hostable. An honest comparison with Linear.",
-      "claim": "An open-source alternative to Linear",
+      "claim": "A self-hostable alternative to Linear",
       "lede": "Issues with workspace keys, two-week cycles, projects, estimates, labels, sub-issues and blocking links, on the same records as the board the idea came from.",
       "compare": {
         "against": "Linear",
@@ -793,7 +800,7 @@
       "next": [
         "/",
         "/canvas",
-        "/docs",
+        "/databases",
         "/issues",
         "/pricing",
         "/self-hosting"
@@ -803,7 +810,7 @@
   "names": {
     "/": "What it is",
     "/canvas": "Canvas",
-    "/docs": "Pages and databases",
+    "/databases": "Pages and databases",
     "/issues": "Issues",
     "/for/software-teams": "For software teams",
     "/for/client-work": "For client work",

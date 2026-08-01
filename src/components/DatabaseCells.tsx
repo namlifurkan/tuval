@@ -169,7 +169,7 @@ export function FilesCell({ row, field }: { row: Row; field: Field }) {
     for (const file of [...list]) {
       if (file.size > MAX_BYTES) { setFailed(t('Up to {size} each.', { size: readableSize(MAX_BYTES) })); continue }
       try {
-        added.push(await uploadAttachment(file))
+        added.push(await uploadAttachment(row.id, file))
       } catch (problem) {
         setFailed(problem instanceof Error ? problem.message : t('That did not upload.'))
       }

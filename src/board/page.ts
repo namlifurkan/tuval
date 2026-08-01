@@ -31,10 +31,16 @@ export const hex = (bytes: Uint8Array) =>
 // and nothing under it.
 async function pull(id: string): Promise<Uint8Array | null> {
   if (!supabase) return null
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('record_docs').select('doc').eq('record_id', id).maybeSingle()
+  if (error) throw new Error('That page could not be loaded.')
   const raw = data?.doc as string | undefined
-  if (!raw?.startsWith('\\x')) return null
+  if (!raw) return null
+  return decodePageDoc(raw)
+}
+
+export function decodePageDoc(raw: string): Uint8Array {
+  if (!/^\\x(?:[0-9a-f]{2})*$/i.test(raw)) throw new Error('The stored page is damaged.')
   const body = raw.slice(2)
   const out = new Uint8Array(body.length / 2)
   for (let i = 0; i < out.length; i++) out[i] = parseInt(body.slice(i * 2, i * 2 + 2), 16)
@@ -108,8 +114,8 @@ async function load(id: string) {
   })
 }
 
-export function openPage(id: string): Promise<void> {
-  if (current === id) return opening
+export function openPage(id: string, retry = false): Promise<void> {
+  if (current === id && !retry) return opening
   if (current) {
     void push()
     void persistence?.destroy()

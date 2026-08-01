@@ -1,0 +1,71 @@
+name: Bug report
+description: Report something that is broken or behaves unexpectedly.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      description: Where did the problem happen?
+      options:
+        - Canvas
+        - Pages and databases
+        - Issues and projects
+        - API or MCP
+        - Authentication and workspace settings
+        - Marketing site
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: Installation
+      description: Is this on tuval.dev or an installation you run yourself?
+      options:
+        - tuval.dev
+        - Self-hosted
+        - Local development
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Include the browser name and version, for example Chrome 128.
+      placeholder: Chrome 128 on macOS 15
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Tell us what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest sequence that reliably shows the problem.
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, logs, or sample data
+      description: Remove tokens, email addresses, and workspace data before posting.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed secrets and private workspace data from this report.
+          required: true
+

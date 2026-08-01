@@ -1,14 +1,12 @@
+import product from '../site/product.json'
+
 export const PRODUCT = {
-  name: 'Tuval',
-  tagline: 'Sonsuz tuval',
-  mark: 'T',
-  // Where the source lives. Here rather than in the page that links to it, because the account
-  // it is published from is a decision that gets made once and changed in one line.
-  repo: 'https://github.com/namlifurkan/tuval',
+  ...product,
+  // The site and its prerender both read product.json, so the repository move and publication
+  // state change in one place.
   // The repository is still private. Until it is not, the site does not say "open source" and
   // does not offer a link that answers 404: it says AGPL-3.0, which is true today, and points at
   // the page that explains running it yourself. One line to flip on the day it publishes.
-  published: false,
 }
 
 export const GUIDE = {

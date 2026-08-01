@@ -10,13 +10,13 @@ import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
 import { BackupPanel } from './BackupPanel'
 import { ProfilePanel } from './ProfilePanel'
-import { BookingSetup } from './BookingSetup'
 import { PlanPanel } from './PlanPanel'
 import { Recurring } from './Recurring'
 import { TimeWeek } from './TimeWeek'
 import { Identities } from './Identities'
 import { Team } from './Team'
 import { Shell } from './Shell'
+import { getWorkspace } from '../board/workspace'
 
 const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
 const button = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40'
@@ -37,6 +37,7 @@ function Row({ title, note, children }: {
 
 export function Settings() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
+  const workspace = getWorkspace()
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
   const file = useRef<HTMLInputElement>(null)
 
@@ -190,13 +191,6 @@ export function Settings() {
         </Row>
 
         <Row
-          title={t('Booking link')}
-          note={t('Your hours, on a page anybody can open. A booking becomes an event in the workspace like any other record.')}
-        >
-          <BookingSetup />
-        </Row>
-
-        <Row
           title={t('Repeating work')}
           note={t('An issue made on a schedule. Asked for every night, and again whenever somebody opens the workspace, so a missed night catches up rather than being lost.')}
         >
@@ -210,12 +204,14 @@ export function Settings() {
           <TimeWeek />
         </Row>
 
-        <Row
-          title={t('API and webhooks')}
-          note={t('The plan for this product is to integrate rather than clone — n8n for automation, Gmail for mail. This is what they talk to.')}
-        >
-          <ApiAccess />
-        </Row>
+        {workspace?.owner === user.id && (
+          <Row
+            title={t('API and webhooks')}
+            note={t('The plan for this product is to integrate rather than clone — n8n for automation, Gmail for mail. This is what they talk to.')}
+          >
+            <ApiAccess />
+          </Row>
+        )}
 
         <Row
           title={t('Backup')}

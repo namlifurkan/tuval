@@ -171,16 +171,17 @@ const STATUS_TONE: Record<string, string> = {
 function drawRecord(s: Scene, item: Item & { type: 'record' }) {
   const { ctx } = s
   const { title, status } = item.snapshot
+  const missing = !!item.missing
 
   ctx.save()
-  ctx.fillStyle = item.fill
+  ctx.fillStyle = missing ? '#F2EFE9' : item.fill
   ctx.fillRect(item.x, item.y, item.w, item.h)
-  ctx.strokeStyle = 'rgba(20, 19, 16, 0.12)'
+  ctx.strokeStyle = missing ? '#C8664A' : 'rgba(20, 19, 16, 0.12)'
   ctx.lineWidth = 1
-  ctx.setLineDash([])
+  ctx.setLineDash(missing ? [5, 4] : [])
   ctx.strokeRect(item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
 
-  const tone = status ? STATUS_TONE[status] ?? '#8A867C' : '#D6D1C6'
+  const tone = missing ? '#C8664A' : status ? STATUS_TONE[status] ?? '#8A867C' : '#D6D1C6'
   ctx.fillStyle = tone
   ctx.fillRect(item.x, item.y, 4, item.h)
 
@@ -190,19 +191,19 @@ function drawRecord(s: Scene, item: Item & { type: 'record' }) {
   ctx.rect(item.x + pad, item.y + pad, 9, 9)
   ctx.fill()
 
-  if (status) {
+  if (missing || status) {
     ctx.font = fontString({ ...item, bold: true }, 11)
     ctx.fillStyle = '#8A867C'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText(status.toUpperCase(), item.x + pad + 16, item.y + pad + 5)
+    ctx.fillText(missing ? 'MISSING' : status!.toUpperCase(), item.x + pad + 16, item.y + pad + 5)
   }
   ctx.restore()
 
   if (s.editing === item.id) return
   drawText(
     s,
-    { ...item, text: title },
+    { ...item, text: title, strike: missing },
     { x: item.x + pad, y: item.y + pad + 20, w: item.w - pad * 2, h: item.h - pad * 2 - 20 },
   )
 }

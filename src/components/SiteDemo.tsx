@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { fitRect } from '../board/camera'
-import { createItems, getItems } from '../board/doc'
+import { createItems, getItems, getMeta, removeItems, setMeta, transact } from '../board/doc'
 import { bandsOf, STATUS_TONE } from '../board/issues'
 import { makeConnector, makeFrame, makeSticky, makeText } from '../board/items'
 import type { Field } from '../board/database'
@@ -30,7 +30,12 @@ const TOOLS = [
 // The board each page opens on is that page's own. A consultant lands on a five whys, a
 // software team on a kanban, and the two pages stop being the same page with different words.
 function seed(template?: string) {
-  if (getItems().length) return
+  const key = `site:${template || 'blank'}`
+  if (getMeta().siteSeed === key && getItems().length) return
+  transact(() => {
+    removeItems(getItems().map((item) => item.id))
+    setMeta('siteSeed', key)
+  })
   const found = template && TEMPLATES.find((one) => one.id === template)
   if (found) {
     createItems(inEnglish(() => found.build({ x: 0, y: 0 })))
@@ -86,7 +91,7 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
       className={`relative mx-auto w-[min(100%-2rem,80rem)] overflow-hidden rounded-2xl border border-[#141310]/12 bg-[#F2EFE9] shadow-[5px_5px_0_rgba(20,19,16,0.07)] ${
         tall ? 'h-[clamp(24rem,62vh,40rem)]' : 'h-[clamp(20rem,46vh,30rem)]'}`}
     >
-      <Canvas />
+      <Canvas embedded />
       <TextEditor />
       <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
         <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-1 shadow-[2px_2px_0_rgba(20,19,16,0.07)]">

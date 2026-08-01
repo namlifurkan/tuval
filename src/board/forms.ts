@@ -65,15 +65,12 @@ export async function removeForm(id: string) {
 // Read without an account, because that is the whole point of it.
 export async function readForm(slug: string): Promise<{ form: Form; fields: Field[] } | null> {
   if (!supabase) return null
-  const { data } = await supabase.from('forms').select(COLUMNS).eq('slug', slug).maybeSingle()
-  const form = (data as Form) ?? null
-  if (!form) return null
-
-  // The questions are the database's own columns, so the form never holds a second copy of them
-  // that could drift from the first. Asked for through a function, because somebody filling in a
-  // form cannot read the row those columns live on — that row is where every answer already is.
-  const { data: asked } = await supabase.rpc('form_questions', { form_slug: slug })
-  return { form, fields: (asked ?? []) as Field[] }
+  // Public visitors get one addressed form and its questions, never a table they can enumerate.
+  const { data, error } = await supabase.rpc('public_form', { form_slug: slug })
+  if (error || !data || typeof data !== 'object' || Array.isArray(data)) return null
+  const result = data as { form?: Form; fields?: Field[] }
+  if (!result.form || !Array.isArray(result.fields)) return null
+  return { form: result.form, fields: result.fields }
 }
 
 export async function sendForm(

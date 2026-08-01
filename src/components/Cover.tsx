@@ -22,7 +22,7 @@ export function Cover({ id, path }: { id: string; path: string }) {
     setBusy(true)
     setTrouble('')
     try {
-      const made = await uploadCover(picked)
+      const made = await uploadCover(id, picked)
       // The old one is dropped only once the new one is safely up, so a failed upload leaves
       // the page with the cover it had rather than with none.
       if (path) void removeCover(path)

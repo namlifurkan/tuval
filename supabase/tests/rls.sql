@@ -72,6 +72,10 @@ select pg_temp.check('owner reads own board',   true, public.can_read_board('rls
 select pg_temp.check('owner writes own board',  true, public.can_write_board('rls-team-board'));
 select pg_temp.check('owner sees the row',      true, exists(select 1 from public.boards where id = 'rls-team-board'));
 select pg_temp.check('owner sees the snapshot', true, exists(select 1 from public.board_snapshots where board_id = 'rls-team-board'));
+select public.save_board_snapshot('rls-team-board', 'AQID', 4, 2, null);
+select pg_temp.check('owner saves compact base64 board bytes', true,
+  (select doc = decode('AQID', 'base64') and items = 4 and frames = 2
+   from public.board_snapshots where board_id = 'rls-team-board'));
 
 -- A stranger -------------------------------------------------------------------------------------
 
@@ -83,6 +87,26 @@ select pg_temp.check('stranger sees no snapshot',       false, exists(select 1 f
 select pg_temp.check('stranger sees no workspace',      false, exists(select 1 from public.workspaces where id = 'cccccccc-0000-4000-8000-000000000003'));
 select pg_temp.check('stranger is not in the workspace', false, public.in_workspace('cccccccc-0000-4000-8000-000000000003'));
 
+-- Realtime broadcast has its own table and must enforce the same board gate.
+set local role postgres;
+insert into realtime.messages (topic, extension, event, private, payload)
+values ('board:rls-team-board', 'broadcast', 'y', true, '{}'::jsonb);
+
+select set_config('realtime.topic', 'board:rls-team-board', true);
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('board owner reads its private realtime channel', true,
+  exists(select 1 from realtime.messages where topic = 'board:rls-team-board'));
+select pg_temp.check('board owner writes its private realtime channel', false, pg_temp.refused(
+  $q$insert into realtime.messages (topic, extension, event, private, payload)
+     values ('board:rls-team-board', 'broadcast', 'y', true, '{}'::jsonb)$q$));
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('stranger cannot read a private realtime channel', false,
+  exists(select 1 from realtime.messages where topic = 'board:rls-team-board'));
+select pg_temp.check('stranger cannot write a private realtime channel', true, pg_temp.refused(
+  $q$insert into realtime.messages (topic, extension, event, private, payload)
+     values ('board:rls-team-board', 'broadcast', 'y', true, '{}'::jsonb)$q$));
+
 -- A member of the workspace ----------------------------------------------------------------------
 
 set local role postgres;
@@ -93,6 +117,20 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('workspace member reads',      true, public.can_read_board('rls-team-board'));
 select pg_temp.check('workspace member writes',     true, public.can_write_board('rls-team-board'));
 select pg_temp.check('workspace member sees row',   true, exists(select 1 from public.boards where id = 'rls-team-board'));
+
+set local role postgres;
+update public.workspace_members set role = 'guest'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('workspace guest reads', true, public.can_read_board('rls-team-board'));
+select pg_temp.check('workspace guest cannot write', false, public.can_write_board('rls-team-board'));
+
+set local role postgres;
+update public.workspace_members set role = 'member'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
 
 -- A board grant overrides the workspace ------------------------------------------------------------
 
@@ -145,6 +183,16 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('a new account gets a workspace', true, public.ensure_workspace() is not null);
 select pg_temp.check('asking twice does not make a second',
   true, public.ensure_workspace() = public.ensure_workspace());
+select pg_temp.check('a new workspace starts with one board', true,
+  (select count(*) = 1 from public.boards
+   where workspace_id = public.ensure_workspace() and name = 'Start here'));
+select pg_temp.check('its first project ties together an issue and a page', true,
+  exists (
+    select 1 from public.records p
+    where p.workspace_id = public.ensure_workspace() and p.kind = 'project'
+      and exists(select 1 from public.records i where i.project_id = p.id and i.kind = 'issue')
+      and exists(select 1 from public.records d where d.project_id = p.id and d.kind = 'doc')
+  ));
 
 set local role postgres;
 delete from public.workspaces where owner = 'bbbbbbbb-0000-4000-8000-000000000002';
@@ -425,9 +473,34 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('blocked beats being named', false,
   public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
 
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner)
+values
+  ('attachments', 'cccccccc-0000-4000-8000-000000000003/eeeeeeee-0000-4000-8000-000000000005/secret.txt',
+   'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('attachments', 'cccccccc-0000-4000-8000-000000000003/dddddddd-0000-4000-8000-000000000004/open.txt',
+   'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('attachments', 'cccccccc-0000-4000-8000-000000000003/legacy.txt',
+   'aaaaaaaa-0000-4000-8000-000000000001');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a blocked member cannot read a restricted attachment', false,
+  exists(select 1 from storage.objects where name like '%/secret.txt'));
+select pg_temp.check('the same member can read an unrestricted attachment', true,
+  exists(select 1 from storage.objects where name like '%/open.txt'));
+select pg_temp.check('a blocked member cannot upload to a restricted record', true, pg_temp.refused(
+  $q$insert into storage.objects (bucket_id, name, owner)
+     values ('attachments',
+       'cccccccc-0000-4000-8000-000000000003/eeeeeeee-0000-4000-8000-000000000005/nope.txt',
+       'bbbbbbbb-0000-4000-8000-000000000002')$q$));
+select pg_temp.check('legacy unscoped files fail closed for members', false,
+  exists(select 1 from storage.objects where name like '%/legacy.txt'));
+
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
 select pg_temp.check('the owner of the workspace is never shut out', true,
   public.can_read_record('eeeeeeee-0000-4000-8000-000000000005'));
+select pg_temp.check('the owner can recover a legacy unscoped file', true,
+  exists(select 1 from storage.objects where name like '%/legacy.txt'));
 
 -- Publishing is a hole in the wall, and only where it was made --------------------------------------
 
@@ -559,7 +632,7 @@ select pg_temp.check('a guest cannot make one', true, pg_temp.refused(
 set local role postgres;
 delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
 insert into public.api_keys (workspace_id, name, hint, token_sha)
-values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab', 
+values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab',
         encode(extensions.digest('tuv_secret_token', 'sha256'), 'hex'));
 insert into public.webhooks (id, workspace_id, url)
 values ('33333333-0000-4000-8000-000000000033', 'cccccccc-0000-4000-8000-000000000003',
@@ -582,8 +655,23 @@ update public.workspace_members set role = 'member'
 where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
 
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
-select pg_temp.check('somebody who may write the workspace sees them', true,
+select pg_temp.check('a member cannot inspect workspace keys', false,
   exists(select 1 from public.api_keys));
+select pg_temp.check('a member cannot inspect workspace hooks', false,
+  exists(select 1 from public.webhooks));
+select pg_temp.check('a member cannot mint a workspace key', true, pg_temp.refused(
+  $q$insert into public.api_keys (workspace_id, name, hint, token_sha, created_by)
+     values ('cccccccc-0000-4000-8000-000000000003', 'stolen', 'tuv_no', 'not-a-key',
+             'bbbbbbbb-0000-4000-8000-000000000002')$q$));
+select pg_temp.check('a member cannot attach a workspace webhook', true, pg_temp.refused(
+  $q$insert into public.webhooks (workspace_id, url)
+     values ('cccccccc-0000-4000-8000-000000000003', 'https://member.test/hook')$q$));
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('the owner can inspect workspace keys', true,
+  exists(select 1 from public.api_keys));
+select pg_temp.check('the owner can inspect workspace hooks', true,
+  exists(select 1 from public.webhooks));
 
 -- The token itself never opens anything by being guessed at ------------------------------------------
 
@@ -605,6 +693,19 @@ select pg_temp.check('a revoked key names nothing', true,
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('and nobody signed in may ask that question at all', true, pg_temp.refused(
   $q$select public.workspace_for_key('tuv_secret_token')$q$));
+
+set local role postgres;
+select pg_temp.check('security definer functions have no blanket execute grant', false,
+  exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace,
+         lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+    where n.nspname = 'public'
+      and p.prosecdef
+      and a.grantee = 0
+      and a.privilege_type = 'EXECUTE'
+  ));
 
 -- A webhook nobody can reach does not stop work being saved -----------------------------------------
 
@@ -633,15 +734,30 @@ insert into public.forms (workspace_id, database_id, slug, asks)
 values ('cccccccc-0000-4000-8000-000000000003', '44444444-0000-4000-8000-000000000044',
         'basvuru', array['__title__', 'f1', 'f2']);
 
+insert into public.workspaces (id, slug, name, owner)
+values ('eeeeeeee-0000-4000-8000-000000000005', 'bob-form-test', 'Bob form test',
+        'bbbbbbbb-0000-4000-8000-000000000002');
+insert into public.records (id, workspace_id, kind, title)
+values ('55555555-0000-4000-8000-000000000055',
+        'eeeeeeee-0000-4000-8000-000000000005', 'database', 'Foreign database');
+select pg_temp.check('a form cannot point into another workspace', true, pg_temp.refused(
+  $q$insert into public.forms (workspace_id, database_id, slug)
+     values ('cccccccc-0000-4000-8000-000000000003',
+             '55555555-0000-4000-8000-000000000055', 'crossed-form')$q$));
+
 select set_config('request.jwt.claims', null, true);
 set local role anon;
-select pg_temp.check('a live form can be read without an account', true,
+select pg_temp.check('forms cannot be enumerated without an account', false,
   exists(select 1 from public.forms where slug = 'basvuru'));
 select pg_temp.check('but not the rows of what it writes into', false,
   exists(select 1 from public.records where id = '44444444-0000-4000-8000-000000000044'));
 
-select pg_temp.check('the questions can be read without the answers', true,
-  jsonb_array_length(public.form_questions('basvuru')) = 3);
+select pg_temp.check('one addressed form can be read without an account', true,
+  public.public_form('basvuru') -> 'form' ->> 'slug' = 'basvuru');
+select pg_temp.check('the addressed form includes questions without answers', true,
+  jsonb_array_length(public.public_form('basvuru') -> 'fields') = 3);
+select pg_temp.check('the old columns-only endpoint is unavailable', true, pg_temp.refused(
+  $q$select public.form_questions('basvuru')$q$));
 
 select public.submit_form('basvuru',
   '{"__title__":"Ayse","f1":"12,5","f2":"merhaba","f3":"gizlice"}'::jsonb);
@@ -674,8 +790,8 @@ select pg_temp.check('a closed form cannot be read', false,
   exists(select 1 from public.forms where slug = 'basvuru'));
 select pg_temp.check('nor answered', true,
   public.submit_form('basvuru', '{"__title__":"Gec kalan"}'::jsonb) is null);
-select pg_temp.check('and a closed form has no questions either', true,
-  public.form_questions('basvuru') is null);
+select pg_temp.check('and its addressed endpoint returns nothing', true,
+  public.public_form('basvuru') is null);
 
 -- Hours are everybody's to read and only yours to write ---------------------------------------------
 
@@ -742,7 +858,7 @@ delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-80
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('a stranger sees no rules', false, exists(select 1 from public.recurrences));
 
--- Somebody outside picking a time --------------------------------------------------------------------
+-- Booking links are dormant --------------------------------------------------------------------------
 
 set local role postgres;
 insert into public.booking_pages
@@ -751,42 +867,14 @@ insert into public.booking_pages
 values ('cccccccc-0000-4000-8000-000000000003', 'aaaaaaaa-0000-4000-8000-000000000001',
         'ann', 'Gorusme', 30, array[1,2,3,4,5], '09:00', '17:00', 'UTC', 0, 60);
 
--- The next Monday at 10:00 UTC, which is inside the hours and on an allowed day.
-create or replace function pg_temp.next_monday_at(hhmm time) returns timestamptz
-language sql as $$
-  select ((current_date + ((8 - extract(isodow from current_date)::int) % 7 + 7)) + hhmm)
-         at time zone 'UTC'
-$$;
-
 select set_config('request.jwt.claims', null, true);
 set local role anon;
-select pg_temp.check('a live page can be read without an account', true,
+select pg_temp.check('booking pages cannot be enumerated without an account', false,
   exists(select 1 from public.booking_pages where slug = 'ann'));
-select pg_temp.check('nothing is taken to begin with', false,
-  exists(select * from public.taken_slots('ann')));
-
-select pg_temp.check('a time inside the hours is booked', true,
-  public.book_slot('ann', pg_temp.next_monday_at('10:00'), 'Bob', 'bob@other.test') is not null);
-select pg_temp.check('the same instant cannot be booked twice', true,
-  public.book_slot('ann', pg_temp.next_monday_at('10:00'), 'Ceren', 'c@other.test') is null);
-select pg_temp.check('and it now shows as taken', true,
-  exists(select * from public.taken_slots('ann')));
-
-select pg_temp.check('outside the hours is refused', true,
-  public.book_slot('ann', pg_temp.next_monday_at('20:00'), 'Bob', 'b@other.test') is null);
-select pg_temp.check('a time that does not land on a slot is refused', true,
-  public.book_slot('ann', pg_temp.next_monday_at('10:07'), 'Bob', 'b@other.test') is null);
-select pg_temp.check('a time in the past is refused', true,
-  public.book_slot('ann', now() - interval '1 day', 'Bob', 'b@other.test') is null);
-
-set local role postgres;
-select pg_temp.check('a booking became an event in the workspace', true,
-  exists(select 1 from public.records where kind = 'event' and title like 'Bob%'));
-
-select set_config('request.jwt.claims', null, true);
-set local role anon;
-select pg_temp.check('but who booked it is not readable from outside', false,
-  exists(select 1 from public.bookings));
+select pg_temp.check('taken slots are not exposed', true, pg_temp.refused(
+  $q$select * from public.taken_slots('ann')$q$));
+select pg_temp.check('a stranger cannot create a booking', true, pg_temp.refused(
+  $q$select public.book_slot('ann', now() + interval '1 day', 'Bob', 'bob@other.test')$q$));
 
 -- What the hosted one costs -------------------------------------------------------------------------
 
@@ -844,8 +932,15 @@ where id = 'cccccccc-0000-4000-8000-000000000003';
 select pg_temp.check('and works again once it is paid for', true,
   public.workspace_for_key('tuv_plan_token') = 'cccccccc-0000-4000-8000-000000000003');
 
--- What the screen is told is what the triggers use.
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+update public.workspaces set plan = 'free', plan_until = null, customer_ref = 'mine'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+select pg_temp.check('an owner cannot grant their own paid plan', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'team'
+  and (select customer_ref is null from public.workspaces
+       where id = 'cccccccc-0000-4000-8000-000000000003'));
+
+-- What the screen is told is what the triggers use.
 select pg_temp.check('the usage answer says which plan and how many seats', true,
   (public.workspace_usage('cccccccc-0000-4000-8000-000000000003') ->> 'plan') = 'team');
 
@@ -955,6 +1050,13 @@ select pg_temp.check('and a project is not inside itself', true,
 update public.boards set project_id = null where id = 'rls-team-board';
 select pg_temp.check('and belonging nowhere is still allowed', true,
   exists(select 1 from public.boards where id = 'rls-team-board' and project_id is null));
+
+set local role postgres;
+select pg_temp.check('records has one update trigger', true,
+  (select count(*) = 1 and bool_and(tgname = 'records_touched') from pg_trigger
+   where tgrelid = 'public.records'::regclass
+     and not tgisinternal
+     and tgname in ('records_touch', 'records_touched')));
 
 -- An install nobody is billing for -----------------------------------------------------------------
 

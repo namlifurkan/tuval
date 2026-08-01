@@ -65,7 +65,7 @@ export const WHAT_YOU_GET: { [K in Plan]: string[] } = {
     'Up to {seats} people',
     '{bytes} of files',
     'Every board, page, database and issue',
-    'Publishing, forms and booking links',
+    'Publishing and forms',
   ],
   team: [
     'Up to {seats} people',

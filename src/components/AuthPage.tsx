@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { go, goHome, readRoute } from '../board/boards'
 import type { AuthPage as Page } from '../board/boards'
 import {
-  authError, getUser, isStaleLink, passwordProblem, sendReset, setPassword, signIn, signInWith,
+  authError, authMessage, getUser, isStaleLink, passwordProblem, sendReset, setPassword, signIn, signInWith,
   signInWithPassword, subscribeAuth,
 } from '../board/supabase'
 import type { Provider } from '../board/supabase'
@@ -73,7 +73,7 @@ export function AuthPage() {
       await work()
       setState(after)
     } catch (e) {
-      setReason(e instanceof Error ? e.message : String(e))
+      setReason(t(authMessage(e)))
       setState('error')
     }
   }
@@ -173,7 +173,7 @@ export function AuthPage() {
                 <button
                   key={id}
                   type="button"
-                  onClick={() => { void signInWith(id).catch((e: Error) => { setReason(e.message); setState('error') }) }}
+                  onClick={() => { void signInWith(id).catch((e: Error) => { setReason(t(authMessage(e))); setState('error') }) }}
                   className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-2.5 text-[13px] font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

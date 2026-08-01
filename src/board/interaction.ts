@@ -920,7 +920,7 @@ export function doubleClick(screen: Vec) {
   // A record card holds no text of its own, so opening it means opening the row it stands for.
   if (hit?.type === 'record') {
     s.setSelection([hit.id])
-    go(recordHref(hit))
+    if (!hit.missing) go(recordHref(hit))
     return
   }
   if (hit && hit.type !== 'draw' && hit.type !== 'image') {

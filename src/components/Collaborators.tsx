@@ -6,6 +6,7 @@ import { GUIDE } from '../board/brand'
 import { awareness } from '../board/doc'
 import { initials, me } from '../board/me'
 import { requestRender, useBoardStore } from '../board/store'
+import { realtimeOn, subscribeRealtime } from '../board/realtime'
 import { Popover, usePopover } from './ui'
 
 interface Peer { id: number; name: string; color: string; avatar?: string }
@@ -15,6 +16,7 @@ export function Collaborators() {
   const following = useBoardStore((s) => s.following)
   const update = useBoardStore((s) => s.update)
   const ada = useSyncExternalStore(subscribeAda, getAda, getAda)
+  const live = useSyncExternalStore(subscribeRealtime, realtimeOn, realtimeOn)
   const pop = usePopover()
 
   useEffect(() => {
@@ -56,9 +58,10 @@ export function Collaborators() {
     <div className="relative flex items-center pl-1">
       <button
         type="button"
-        title={`${all.length} ${t('people on this board')}`}
+        title={live ? `${all.length} ${t('people on this board')}` : t('Live connection unavailable')}
         onClick={pop.toggle}
-        className="flex items-center rounded-lg p-0.5 transition-[background-color] hover:bg-[#EAE6DD]"
+        className={`flex items-center rounded-lg p-0.5 transition-[background-color,opacity] hover:bg-[#EAE6DD] ${
+          live ? '' : 'opacity-45'}`}
       >
         {shown.map((p, i) => (
           <span

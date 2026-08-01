@@ -1,7 +1,7 @@
 {
   "name": "tuval",
   "version": "0.1.0",
-  "description": "A\u00e7\u0131k kaynak sonsuz tuval \u2014 Canvas 2D + Yjs CRDT",
+  "description": "Açık kaynak sonsuz tuval — Canvas 2D + Yjs CRDT",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -56,6 +56,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^30.0.1",
+    "marked": "^18.0.7",
     "oxlint": "^1.75.0",
     "pdfjs-dist": "^6.2.108",
     "tailwindcss": "^4.3.3",

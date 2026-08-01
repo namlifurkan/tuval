@@ -28,6 +28,7 @@ export function BoardsPanel() {
   const [cloud, setCloud] = useState<BoardEntry[]>([])
   const [remote, setRemote] = useState<Set<string>>(() => new Set())
   const [query, setQuery] = useState('')
+  const [cloudProblem, setCloudProblem] = useState(false)
   const remoteRoomKey = local.map((board) => board.room).sort().join('\n')
 
   useEffect(() => { if (open) void discoverBoards() }, [open])
@@ -35,11 +36,14 @@ export function BoardsPanel() {
     if (!open || !user) { setCloud([]); setRemote(new Set()); return }
     const rooms = remoteRoomKey ? remoteRoomKey.split('\n') : []
     setRemote(new Set(rooms))
+    setCloudProblem(false)
     let live = true
     void Promise.all([listCloudBoards(), listCloudBoardIds(rooms)]).then(([boards, ids]) => {
       if (!live) return
       setCloud(boards)
       setRemote(ids)
+    }).catch(() => {
+      if (live) setCloudProblem(true)
     })
     return () => { live = false }
   }, [open, user, remoteRoomKey])
@@ -94,8 +98,13 @@ export function BoardsPanel() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-1">
+        {cloudProblem && (
+          <p className="px-3 py-3 text-center text-sm text-[#C8452D]">
+            {t('Could not reach the cloud. Your boards are still there.')}
+          </p>
+        )}
         {shown.length === 0 && (
-          <p className="px-3 py-4 text-center text-sm text-[#8A867C]">{t('No boards yet')}</p>
+          !cloudProblem && <p className="px-3 py-4 text-center text-sm text-[#8A867C]">{t('No boards yet')}</p>
         )}
         {shown.map((b) => (
           <div

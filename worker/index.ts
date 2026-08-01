@@ -12,6 +12,8 @@ interface Env {
   ASSETS: { fetch: (request: Request) => Promise<Response> }
 }
 
+import site from '../src/site/pages.json'
+
 const SITE = 'Tuval'
 const PICTURE = '/brand/tuval-wordmark.png'
 
@@ -84,32 +86,34 @@ async function cardFor(url: URL): Promise<Card | null> {
 // og:image — a crawler wants an address it can fetch. This is that address.
 const PICTURES = ['image/webp', 'image/png', 'image/jpeg'] as const
 
+export function decodePreview(held: string): { bytes: Uint8Array; type: typeof PICTURES[number] } | null {
+  const at = held.indexOf(',')
+  if (at < 0) return null
+  const type = PICTURES.find((allowed) => held.startsWith(`data:${allowed};base64,`))
+  if (!type) return null
+
+  try {
+    const raw = atob(held.slice(at + 1))
+    const bytes = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i)
+    return { bytes, type }
+  } catch {
+    return null
+  }
+}
+
 async function preview(name: string): Promise<Response | null> {
   const board = await ask('boards', `id=eq.${encodeURIComponent(name)}&public_at=not.is.null&deleted_at=is.null&select=id`)
   if (!board) return null
   const shot = await ask('board_snapshots', `board_id=eq.${encodeURIComponent(name)}&select=thumb&order=updated_at.desc&limit=1`)
   const held = shot?.thumb as string | undefined
-  const at = held?.indexOf(',') ?? -1
-  if (!held || at < 0) return null
+  if (!held) return null
+  const decoded = decodePreview(held)
+  if (!decoded) return null
 
-  // The type comes off a list we wrote, never off the column. `thumb` is free text written by
-  // whoever can edit the board, so echoing its own mime back served attacker HTML from our own
-  // origin, with the session in localStorage next to it.
-  const type = PICTURES.find((allowed) => held.startsWith(`data:${allowed};base64,`))
-  if (!type) return null
-
-  let bytes: Uint8Array
-  try {
-    const raw = atob(held.slice(at + 1))
-    bytes = new Uint8Array(raw.length)
-    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i)
-  } catch {
-    return null
-  }
-
-  return new Response(bytes, {
+  return new Response(decoded.bytes, {
     headers: {
-      'content-type': type,
+      'content-type': decoded.type,
       'content-security-policy': "default-src 'none'; sandbox",
       'x-content-type-options': 'nosniff',
       'cache-control': 'public, max-age=300',
@@ -130,6 +134,41 @@ const tags = (card: Card, url: string) => [
   `<meta name="twitter:image" content="${escape(new URL(card.picture, url).href)}" />`,
 ].join('')
 
+const APP_PATHS = new Set([
+  '/dashboard', '/settings', '/issues', '/projects', '/pages', '/inbox',
+  '/login', '/register', '/forgot', '/reset',
+])
+const APP_PREFIXES = ['/b/', '/d/', '/i/', '/w/', '/c/', '/p/', '/u/', '/f/']
+// The documentation tree is plain files with no bundle behind them, so it never reaches the
+// router; /docs is the address every crawler and every reader already tries first.
+const STATIC_PREFIXES = ['/assets/', '/brand/', '/docs']
+const STATIC_FILES = new Set([
+  '/favicon.svg', '/site.webmanifest', '/robots.txt', '/sitemap.xml', '/version.json',
+])
+const SITE_PATHS = new Set(site.pages.map((page) => page.path.replace(/\/+$/, '') || '/'))
+
+export function isKnownPath(pathname: string) {
+  const path = pathname.replace(/\/+$/, '') || '/'
+  return SITE_PATHS.has(path)
+    || APP_PATHS.has(path)
+    || APP_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    || STATIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    || STATIC_FILES.has(path)
+}
+
+export function rewriteCardShell(shell: string, card: Card, requestUrl: string) {
+  const request = new URL(requestUrl)
+  const canonical = `${request.origin}${request.pathname}`
+  const clean = shell
+    .replace(/<title>[\s\S]*?<\/title>/i, '')
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '')
+    .replace(/<meta\s+(?:property=["']og:[^"']+["']|name=["']twitter:[^"']+["'])[^>]*>/gi, '')
+  const head = `<title>${escape(card.title)}</title>`
+    + `<link rel="canonical" href="${escape(canonical)}" />`
+    + tags(card, canonical)
+  return clean.replace('</head>', `${head}</head>`)
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
@@ -141,6 +180,14 @@ export default {
       return Response.redirect(new URL(PICTURE, url).href, 302)
     }
 
+    if (request.method === 'GET' && !isKnownPath(url.pathname)) {
+      const shell = await env.ASSETS.fetch(new Request(new URL('/', url), request))
+      return new Response(await shell.text(), {
+        status: 404,
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      })
+    }
+
     if (!['u', 'p', 'b'].includes(kind) || request.method !== 'GET') {
       return env.ASSETS.fetch(request)
     }
@@ -149,8 +196,7 @@ export default {
     const card = await cardFor(url).catch(() => null)
     if (!card) return env.ASSETS.fetch(request)
 
-    const html = (await shell.text())
-      .replace('<title>Tuval</title>', `<title>${escape(card.title)}</title>${tags(card, url.href)}`)
+    const html = rewriteCardShell(await shell.text(), card, url.href)
 
     return new Response(html, {
       headers: {

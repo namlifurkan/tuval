@@ -636,6 +636,13 @@ const tr: Record<string, string> = {
   '{bytes} of files': '{bytes} dosya',
   'Every board, page, database and issue': 'Bütün board, sayfa, veritabanı ve işler',
   'Publishing, forms and booking links': 'Yayınlama, formlar ve randevu bağlantıları',
+  'Publishing and forms': 'Yayınlama ve formlar',
+  'That page could not be loaded.': 'Bu sayfa yüklenemedi.',
+  'The stored page is damaged.': 'Kayıtlı sayfa hasarlı.',
+  'Nothing was overwritten. You can try loading the stored page again.':
+    'Hiçbir şeyin üzerine yazılmadı. Kayıtlı sayfayı yeniden yüklemeyi deneyebilirsin.',
+  'The record behind this card was deleted or is no longer reachable.':
+    'Bu kartın arkasındaki kayıt silindi veya artık erişilemiyor.',
   'As many people as you like': 'İstediğin kadar kişi',
   '{bytes} of files for each of them': 'Her biri için {bytes} dosya',
   'The API and webhooks, so n8n and the rest can reach it':
@@ -1044,6 +1051,18 @@ const tr: Record<string, string> = {
   'Password saved. Next time you can sign in with it.':
     'Parola kaydedildi. Bundan sonra onunla girebilirsin.',
   'Cloud': 'Bulut',
+  'Could not reach the cloud. Your boards are still there.': 'Buluta ulaşılamadı. Board’larınız hâlâ orada.',
+  'Could not load the workspace.': 'Çalışma alanı yüklenemedi.',
+  'Not saved to the cloud': 'Buluta kaydedilmedi',
+  'Image could not be uploaded. Try again.': 'Görsel yüklenemedi. Yeniden deneyin.',
+  'Live connection unavailable': 'Canlı bağlantı kullanılamıyor',
+  'Email or password is incorrect.': 'E-posta veya parola yanlış.',
+  'Too many emails were requested. Wait a minute and try again.': 'Çok fazla e-posta istendi. Bir dakika bekleyip yeniden deneyin.',
+  'Confirm your email before signing in.': 'Giriş yapmadan önce e-posta adresinizi doğrulayın.',
+  'An account already uses this email. Sign in instead.': 'Bu e-posta zaten bir hesapta kullanılıyor. Bunun yerine giriş yapın.',
+  'New accounts are not available right now.': 'Şu anda yeni hesap oluşturulamıyor.',
+  'Use at least 8 characters for the password.': 'Parola için en az 8 karakter kullanın.',
+  'Try again': 'Yeniden dene',
   'This browser': 'Bu tarayıcı',
   'Delete "{name}" for everyone? This cannot be undone.':
     '"{name}" herkes için silinsin mi? Geri alınamaz.',

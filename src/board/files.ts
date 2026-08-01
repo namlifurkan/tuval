@@ -18,7 +18,7 @@ export function attachmentsOf(value: unknown): Attachment[] {
     !!v && typeof v === 'object' && typeof (v as Attachment).path === 'string')
 }
 
-export async function uploadAttachment(file: File): Promise<Attachment> {
+export async function uploadAttachment(record: string, file: File): Promise<Attachment> {
   const ws = getWorkspace()
   if (!supabase || !ws) throw new Error('Not signed in')
   if (file.size > MAX_BYTES) throw new Error('too big')
@@ -26,7 +26,7 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
   // The extension is kept so that a browser opening the link knows what it has.
   const dot = file.name.lastIndexOf('.')
   const suffix = dot > 0 ? file.name.slice(dot).toLowerCase() : ''
-  const path = `${ws.id}/${crypto.randomUUID()}${suffix}`
+  const path = `${ws.id}/${record}/${crypto.randomUUID()}${suffix}`
 
   const { error } = await supabase.storage.from(ATTACHMENTS)
     .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })

@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, Copy, RotateCcw } from 'lucide-react'
 import { boardToGraph, graphToMarkdown } from '../board/agent'
 import { fitRect } from '../board/camera'
-import { connectorsFor, createItems, getItems, patchItems, removeItems, transact } from '../board/doc'
+import {
+  connectorsFor, createItems, getItems, getMeta, patchItems, removeItems, setMeta, transact,
+} from '../board/doc'
 import {
   makeConnector, makeFrame, makeRecordItem, makeSticky, RECORD_H, RECORD_W, STICKY_SIZE,
 } from '../board/items'
@@ -56,7 +58,12 @@ const spot = (at: number) => [LEFT + (at % COLS) * STEP, TOP + Math.floor(at / C
 // One row is already promoted, so the table and the sprint have something in them before anybody
 // presses anything. An empty panel above the fold reads as a broken page, not as an invitation.
 function seed() {
-  if (getItems().length) return
+  const key = 'site:three-views'
+  if (getMeta().siteSeed === key && getItems().length) return
+  transact(() => {
+    removeItems(getItems().map((item) => item.id))
+    setMeta('siteSeed', key)
+  })
   const frame = makeFrame(LEFT - PAD, TOP - PAD, WIDE + PAD * 2, TALL + PAD * 2, FRAME_TITLE)
   const notes = NOTES.map(([fill, text], at) => {
     const [x, y] = spot(at)
@@ -306,7 +313,7 @@ export function ThreeViews() {
           </footer>
         </div>
 
-        <Pane name="Database" note={`Sprint 24 · ${cards.length} rows`}>
+        <Pane name="Database" note="Type here — the board changes as you type">
           <div className="grid shrink-0 grid-cols-[1fr_auto] gap-3 border-b border-[#141310]/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
             <span>Title</span>
             <span>Status</span>

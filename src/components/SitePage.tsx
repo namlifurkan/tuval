@@ -32,7 +32,7 @@ const BOARD: { [path: string]: string } = {
   '/for/client-work': 'fivewhys',
 }
 
-const NAV = ['/canvas', '/docs', '/issues', '/pricing']
+const NAV = ['/', '/pricing']
 
 function Header() {
   const path = routePath().replace(/\/+$/, '') || '/'
@@ -87,12 +87,10 @@ function Header() {
 function Hero({ page }: { page: Page }) {
   const home = page.path === '/'
   return (
-    <section className="mx-auto max-w-[80rem] px-6 pt-14 pb-9">
+    <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-9">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
         {home
-          ? (PRODUCT.published
-            ? 'Open source workspace · AGPL-3.0 · runs on your own machine'
-            : 'AGPL-3.0 licenced · runs on your own machine · the source publishes shortly')
+          ? 'AGPL-3.0 licensed · runs on your own machine · the source publishes shortly'
           : LINK_NAMES[page.path]}
       </p>
       <div className="mt-6 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
@@ -353,7 +351,11 @@ function Footer() {
         <div className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#F2EFE9]/12 pt-6">
           <Wordmark height={16} />
           <span className="text-[12.5px] text-[#F2EFE9]/45">AGPL-3.0</span>
-          <a href={PRODUCT.repo} className="text-[12.5px] text-[#F2EFE9]/45 hover:text-[#F2EFE9]">Source on GitHub</a>
+          {PRODUCT.published && (
+            <a href={PRODUCT.repo} className="text-[12.5px] text-[#F2EFE9]/45 hover:text-[#F2EFE9]">
+              Source on GitHub
+            </a>
+          )}
         </div>
       </div>
     </footer>
@@ -411,6 +413,7 @@ function TradeLayout({ page }: { page: Page }) {
 function PricingLayout({ page }: { page: Page }) {
   const free = page.bands.find((b) => b.heading === 'Free')
   const team = page.bands.find((b) => b.heading === 'Team')
+  const pay = page.bands.find((b) => b.id === 'pay')
   const last = page.bands[page.bands.length - 1]
 
   const price = (label: string, amount: string, unit: string) => (
@@ -455,8 +458,20 @@ function PricingLayout({ page }: { page: Page }) {
               onClick={(e) => { e.preventDefault(); go('/dashboard') }}
               className="mt-8 inline-block rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
             >Start free</a>
+            <p className="mt-6 max-w-[46ch] border-t border-[#141310]/12 pt-3 text-[12px] leading-[1.6] text-[#8A867C]">
+              {`${PRICE.currency}${PRICE.amount} since ${PRICE.since}. ${PRICE.review}`}
+            </p>
           </div>
         </div>
+
+        {pay && (
+          <div className="mt-16 border-t border-[#141310]/20 pt-6">
+            <h2 className="text-[26px] leading-[1.1]" style={DISPLAY}>{pay.heading}</h2>
+            <p className="mt-3 max-w-[62ch] text-[15px] leading-[1.65] text-[#4A463E]" style={READING}>
+              {say(pay.body ?? '')}
+            </p>
+          </div>
+        )}
       </div>
       {last && <Statement heading={last.heading} body={last.body} />}
     </>
@@ -573,13 +588,11 @@ function HomeHero({ page }: { page: Page }) {
   return (
     <section className="mx-auto max-w-[80rem] px-6 pt-14 pb-9">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
-        {PRODUCT.published
-          ? 'Open source workspace · AGPL-3.0 · runs on your own machine'
-          : 'AGPL-3.0 licenced · runs on your own machine · the source publishes shortly'}
+        AGPL-3.0 licensed · runs on your own machine · the source publishes shortly
       </p>
       <div className="mt-6 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
         <h1
-          className="text-[clamp(2.9rem,6.4vw,5.4rem)] leading-[0.92] tracking-[-0.015em]"
+          className="text-[clamp(2.9rem,6.4vw,4rem)] leading-[0.92] tracking-[-0.015em]"
           style={DISPLAY}
         >{page.claim}</h1>
         <p className="text-[16.5px] leading-[1.5] text-[#4A463E]" style={READING}>{page.lede}</p>
@@ -660,12 +673,20 @@ function HomeLayout({ page }: { page: Page }) {
   return (
     <>
       <HomeHero page={page} />
-      <ThreeViews />
-      <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-16">
+      <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-6 lg:hidden">
         <h2 className="text-[19px] font-bold tracking-[-0.02em]">{demo?.heading}</h2>
         <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-[#4A463E]" style={READING}>
           {demo?.body}
         </p>
+      </section>
+      <ThreeViews />
+      <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-16">
+        <div className="hidden lg:block">
+          <h2 className="text-[19px] font-bold tracking-[-0.02em]">{demo?.heading}</h2>
+          <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-[#4A463E]" style={READING}>
+            {demo?.body}
+          </p>
+        </div>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <a
             href="/dashboard"

@@ -126,6 +126,8 @@ export function Dashboard() {
   const [remote, setRemote] = useState<Set<string>>(() => new Set())
   const [roles, setRoles] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(cloudEnabled)
+  const [cloudProblem, setCloudProblem] = useState('')
+  const [retry, setRetry] = useState(0)
   const [copying, setCopying] = useState('')
   const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
   const remoteRoomKey = [...local, ...localTrash].map((board) => board.room).sort().join('\n')
@@ -136,6 +138,7 @@ export function Dashboard() {
     const rooms = remoteRoomKey ? remoteRoomKey.split('\n') : []
     setRemote(new Set(rooms))
     setLoading(true)
+    setCloudProblem('')
     let live = true
     void Promise.all([listCloudBoards(), listCloudBoardIds(rooms)]).then(([list, ids]) => {
       if (!live) return
@@ -143,10 +146,14 @@ export function Dashboard() {
       setRemote(ids)
       setLoading(false)
       void emptyExpiredTrash(list)
+    }).catch((error: unknown) => {
+      if (!live) return
+      setCloudProblem(error instanceof Error ? error.message : String(error))
+      setLoading(false)
     })
     void myRoles().then(setRoles)
     return () => { live = false }
-  }, [user, remoteRoomKey])
+  }, [user, remoteRoomKey, retry])
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
   // A board in this browser belongs to no project, so scoping hides it along with everything
@@ -228,6 +235,17 @@ export function Dashboard() {
           <p className="mb-4 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm text-[#4A463E]">
             {t('Copying the board and its images…')}
           </p>
+        )}
+
+        {cloudProblem && (
+          <div className="mb-4 flex items-center gap-3 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-3 py-2 text-sm text-[#4A463E]">
+            <span className="min-w-0 flex-1">{t('Could not reach the cloud. Your boards are still there.')}</span>
+            <button
+              type="button"
+              onClick={() => setRetry((value) => value + 1)}
+              className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-[#C8452D] hover:bg-[#FCFBF8]"
+            >{t('Try again')}</button>
+          </div>
         )}
 
         <div className="flex flex-wrap items-end gap-x-6 gap-y-3">

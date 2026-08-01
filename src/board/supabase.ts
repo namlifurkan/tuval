@@ -23,6 +23,21 @@ export const authError = returned('error_description')
 export const authErrorCode = returned('error_code') || returned('error')
 export const isStaleLink = /otp_expired|access_denied/.test(authErrorCode)
 
+export function authMessage(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error)
+  const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : ''
+  const known = `${code} ${raw}`.toLowerCase()
+  if (/invalid_credentials|invalid login credentials/.test(known)) return 'Email or password is incorrect.'
+  if (/over_email_send_rate_limit|email rate limit/.test(known)) {
+    return 'Too many emails were requested. Wait a minute and try again.'
+  }
+  if (/email_not_confirmed|email not confirmed/.test(known)) return 'Confirm your email before signing in.'
+  if (/user_already_exists|already registered/.test(known)) return 'An account already uses this email. Sign in instead.'
+  if (/signup_disabled|signups not allowed/.test(known)) return 'New accounts are not available right now.'
+  if (/weak_password|password should be/.test(known)) return 'Use at least 8 characters for the password.'
+  return raw
+}
+
 let session: Session | null = null
 const listeners = new Set<() => void>()
 

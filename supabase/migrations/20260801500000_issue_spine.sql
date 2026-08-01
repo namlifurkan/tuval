@@ -10,9 +10,12 @@
 
 alter table public.workspaces add column if not exists prefix text;
 
+-- coalesce falls through on null, not on the empty string, and a Cyrillic or CJK name leaves
+-- nothing behind either. Both used to reach the constraint below as '' and abort the whole file
+-- on somebody else's install. Same guard the trigger already had.
 update public.workspaces
-set prefix = upper(substring(
-  regexp_replace(coalesce(nullif(slug, ''), name, 'iss'), '[^a-zA-Z]', '', 'g') from 1 for 3))
+set prefix = coalesce(nullif(upper(substring(
+  regexp_replace(coalesce(nullif(slug, ''), name, ''), '[^a-zA-Z]', '', 'g') from 1 for 3)), ''), 'ISS')
 where prefix is null or prefix = '';
 
 -- And every workspace made from here on, not just the ones that already existed.

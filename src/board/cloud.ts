@@ -17,6 +17,15 @@ const table = () => supabase?.from('boards')
 
 export interface Snapshot { items: number; frames: number; thumb: string | null }
 
+export function mergeBoardLists(local: BoardEntry[], cloud: CloudBoard[]): BoardEntry[] {
+  const all = new Map<string, BoardEntry>()
+  for (const board of local) all.set(board.room, board)
+  // Cloud carries shared boards this browser has never opened. It also has the authoritative
+  // name for a board renamed by somebody else.
+  for (const board of cloud) if (!board.deleted) all.set(board.room, board)
+  return [...all.values()]
+}
+
 // board_snapshots.board_id is both the foreign key and the primary key, so PostgREST reads the
 // relationship as one-to-one and embeds an object where a plain foreign key would give an
 // array. Reading only the array shape left every cloud board looking empty.
@@ -37,8 +46,8 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
     .select('id, name, owner, project_id, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
     .eq('workspace_id', workspace.id)
     .order('updated_at', { ascending: false })
-  if (error || !data) return []
-  return data.map((row) => {
+  if (error) throw error
+  return (data ?? []).map((row) => {
     const snap = pickSnapshot(row.board_snapshots)
     return {
       room: row.id as string,
@@ -169,15 +178,31 @@ export async function pushSnapshot(
   room: string, doc: Uint8Array, items: number, frames: number, thumb?: string,
 ): Promise<string | null> {
   if (!supabase || !getUser()) return null
-  const { error } = await supabase.from('board_snapshots').upsert({
-    board_id: room,
-    doc: `\\x${[...doc].map((b) => b.toString(16).padStart(2, '0')).join('')}`,
-    items,
-    frames,
-    ...(thumb ? { thumb } : {}),
-    updated_at: new Date().toISOString(),
+  const snapshot = await snapshotBase64(doc)
+  const { error } = await supabase.rpc('save_board_snapshot', {
+    room,
+    snapshot,
+    item_count: items,
+    frame_count: frames,
+    thumbnail: thumb || null,
   })
   return error ? error.message : null
+}
+
+const BASE64_CHUNK = 48 * 1024 // divisible by three, so only the final chunk is padded
+
+export async function snapshotBase64(doc: Uint8Array): Promise<string> {
+  const chunks: string[] = []
+  for (let at = 0; at < doc.length; at += BASE64_CHUNK) {
+    const bytes = doc.subarray(at, at + BASE64_CHUNK)
+    chunks.push(btoa(String.fromCharCode(...bytes)))
+    // A large board yields between bounded chunks so typing and pointer input are not starved by
+    // serialization. Each allocation is at most 48 KiB rather than one array and string per byte.
+    if (at + BASE64_CHUNK < doc.length) {
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 0))
+    }
+  }
+  return chunks.join('')
 }
 
 const HEX = /^\\x/
@@ -189,7 +214,8 @@ export async function pullSnapshot(room: string): Promise<Uint8Array | null> {
     .select('doc')
     .eq('board_id', room)
     .maybeSingle()
-  if (error || !data?.doc) return null
+  if (error) throw error
+  if (!data?.doc) return null
   const raw = data.doc as string
   if (!HEX.test(raw)) return null
   const body = raw.slice(2)

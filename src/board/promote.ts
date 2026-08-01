@@ -79,6 +79,25 @@ export const recordItemsFor = (rows: Row[], x: number, y: number): Item[] =>
 export const recordHref = (item: Item & { type: 'record' }) =>
   (item.kind === 'doc' || item.kind === 'database' ? `/d/${item.recordId}` : `/i/${item.recordId}`)
 
+export function snapshotPatches(
+  cards: Array<Item & { type: 'record' }>, rows: Map<string, Row>,
+): [Id, Record<string, unknown>][] {
+  const stale: [Id, Record<string, unknown>][] = []
+  for (const card of cards) {
+    const row = rows.get(card.recordId)
+    if (!row) {
+      if (!card.missing) stale.push([card.id, { missing: true }])
+      continue
+    }
+    if (!card.missing && row.title === card.snapshot.title && row.status === card.snapshot.status) continue
+    stale.push([card.id, {
+      missing: false,
+      snapshot: { title: row.title, status: row.status },
+    }])
+  }
+  return stale
+}
+
 // The row is the truth and the snapshot is a copy, so on arriving at a board the copies are
 // brought up to date. Only what actually differs is written: an unconditional write would put
 // a change into every board on every load.
@@ -90,13 +109,7 @@ export async function refreshSnapshots() {
   await Promise.all(kinds.map((k) => loadRecords(k)))
   const rows = new Map(kinds.flatMap((k) => getRecords(k)).map((r) => [r.id, r]))
 
-  const stale: [Id, Record<string, unknown>][] = []
-  for (const card of cards) {
-    const row = rows.get(card.recordId)
-    if (!row) continue
-    if (row.title === card.snapshot.title && row.status === card.snapshot.status) continue
-    stale.push([card.id, { snapshot: { title: row.title, status: row.status } }])
-  }
+  const stale = snapshotPatches(cards, rows)
 
   if (stale.length) {
     patchItems(stale)

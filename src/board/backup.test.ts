@@ -23,8 +23,13 @@ describe('readBackup', () => {
   })
 
   it('refuses a version it does not know how to put back', () => {
-    const older = JSON.stringify({ ...JSON.parse(good), version: BACKUP_VERSION + 1 })
-    expect(() => readBackup(older)).toThrow(/different version/)
+    const newer = JSON.stringify({ ...JSON.parse(good), version: BACKUP_VERSION + 1 })
+    expect(() => readBackup(newer)).toThrow(/different version/)
+  })
+
+  it('accepts the first backup format, whose missing board fields are optional', () => {
+    const older = JSON.stringify({ ...JSON.parse(good), version: 1 })
+    expect(readBackup(older).records).toHaveLength(1)
   })
 
   it('lets bad JSON say so itself rather than pretending it read something', () => {

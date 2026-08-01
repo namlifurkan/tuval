@@ -30,7 +30,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), stamp],
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'worker/**/*.test.ts'],
     setupFiles: ['./src/test-setup.ts'],
     env: { VITE_COLLAB_URL: '' },
   },

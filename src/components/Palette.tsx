@@ -5,6 +5,8 @@ import {
 } from '../board/records'
 import type { Hit } from '../board/records'
 import { openJournal } from '../board/journal'
+import { listCloudBoards, mergeBoardLists } from '../board/cloud'
+import type { CloudBoard } from '../board/cloud'
 import { t } from '../i18n'
 
 // What the question is about. Narrowing is the difference between a palette and a search: with
@@ -39,6 +41,7 @@ export function Palette() {
   const [inside, setInside] = useState<Hit[]>([])
   const [only, setOnly] = useState<Scope>('all')
   const rooms = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
+  const [cloudRooms, setCloudRooms] = useState<CloudBoard[]>([])
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -56,6 +59,14 @@ export function Palette() {
 
   useEffect(() => { if (open) field.current?.focus() }, [open])
   useEffect(() => { if (open && !work.length) void loadRecords('issue') }, [open, work.length])
+  useEffect(() => {
+    if (!open) return
+    let live = true
+    void listCloudBoards()
+      .then((boards) => { if (live) setCloudRooms(boards) })
+      .catch(() => { if (live) setCloudRooms([]) })
+    return () => { live = false }
+  }, [open])
 
   // Asked a beat after the typing stops, and thrown away if the answer arrives for a question
   // that is no longer on screen.
@@ -73,7 +84,7 @@ export function Palette() {
   const commands = useMemo<Action[]>(() => [
     { id: 'boards', label: t('Go to boards'), hint: '/dashboard', run: () => go('/dashboard') },
     { id: 'issues', label: t('Go to issues'), hint: '/issues', run: () => go('/issues') },
-    { id: 'docs', label: t('Go to docs'), hint: '/docs', run: () => go('/docs') },
+    { id: 'docs', label: t('Go to docs'), hint: '/pages', run: () => go('/pages') },
     { id: 'settings', label: t('Go to settings'), hint: '/settings', run: () => go('/settings') },
     { id: 'journal', label: t("Today's journal"), hint: 'g j', run: () => void openJournal() },
     {
@@ -118,7 +129,8 @@ export function Palette() {
         hint: t('Issue'),
         run: () => go(`/i/${i.id}`),
       })),
-      ...(want('board') ? rooms.filter((b) => hit(b.name || t('Untitled board'))) : [])
+      ...(want('board') ? mergeBoardLists(rooms, cloudRooms)
+        .filter((b) => hit(b.name || t('Untitled board'))) : [])
         .slice(0, 6).map((b) => ({
           id: `r:${b.room}`,
           label: b.name || t('Untitled board'),
@@ -148,7 +160,7 @@ export function Palette() {
       })
     }
     return found
-  }, [commands, docs, work, rooms, query, inside, only])
+  }, [commands, docs, work, rooms, cloudRooms, query, inside, only])
 
   if (!open) return null
 

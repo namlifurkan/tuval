@@ -4,5 +4,7 @@
   "per": "member",
   "period": "month",
   "about": "$7",
-  "taxIncluded": true
+  "taxIncluded": true,
+  "since": "1 August 2026",
+  "review": "Reviewed once a year, in January. A change is announced thirty days before it applies, never lands inside a period already paid for, and is dated here on the day it takes effect."
 }

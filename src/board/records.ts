@@ -1,10 +1,11 @@
 import { getUser, supabase } from './supabase'
 import { TRASH_DAYS } from './cloud'
-import { getWorkspace } from './workspace'
+import { getWorkspace, subscribeWorkspace } from './workspace'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 export type Kind =
   | 'issue' | 'doc' | 'database' | 'collection'
-  | 'person' | 'company' | 'project' | 'event' | 'file'
+  | 'project'
 export type Status = 'backlog' | 'todo' | 'doing' | 'review' | 'blocked' | 'done' | 'cancelled'
 
 export const STATUSES: Status[] =
@@ -93,13 +94,64 @@ function replace(id: string, make: (rows: Record[]) => Record[]) {
 export async function loadRecords(kind: Kind = 'issue') {
   const ws = getWorkspace()
   if (!supabase || !ws) return
-  const { data } = await supabase
-    .from('records').select(COLUMNS)
-    .eq('workspace_id', ws.id).eq('kind', kind)
-    .is('archived_at', null)
-    .order('position', { ascending: true })
-    .limit(500)
-  publish(kind, (data ?? []) as unknown as Record[])
+  const pageSize = 500
+  const rows: Record[] = []
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('records').select(COLUMNS)
+      .eq('workspace_id', ws.id).eq('kind', kind)
+      .is('archived_at', null)
+      .order('position', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (error) return
+    const page = (data ?? []) as unknown as Record[]
+    rows.push(...page)
+    if (page.length < pageSize) break
+  }
+  // Do not publish a response that finished after the user moved to another workspace.
+  if (getWorkspace()?.id === ws.id) publish(kind, rows)
+}
+
+let recordsChannel: RealtimeChannel | null = null
+let recordsWorkspace = ''
+let refreshTimer = 0
+const changedKinds = new Set<Kind>()
+
+function refreshChanged() {
+  refreshTimer = 0
+  const kinds = [...changedKinds]
+  changedKinds.clear()
+  for (const kind of kinds) void loadRecords(kind)
+}
+
+function watchRecords() {
+  const ws = getWorkspace()
+  if (!supabase || ws?.id === recordsWorkspace) return
+  if (recordsChannel) void supabase.removeChannel(recordsChannel)
+  recordsChannel = null
+  recordsWorkspace = ws?.id ?? ''
+  if (!ws) return
+
+  const channel = supabase.channel(`records:${ws.id}`)
+    .on('postgres_changes', {
+      event: '*', schema: 'public', table: 'records', filter: `workspace_id=eq.${ws.id}`,
+    }, (change) => {
+      const row = (change.new && Object.keys(change.new).length ? change.new : change.old) as {
+        kind?: Kind
+      }
+      if (row.kind) changedKinds.add(row.kind)
+      else for (const kind of cache.keys()) changedKinds.add(kind)
+      if (!refreshTimer) refreshTimer = window.setTimeout(refreshChanged, 150)
+    })
+    .subscribe()
+  recordsChannel = channel
+}
+
+export function startRecordSync() {
+  if (!supabase) return
+  watchRecords()
+  subscribeWorkspace(watchRecords)
 }
 
 export async function createRecord(

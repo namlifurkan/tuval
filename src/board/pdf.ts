@@ -46,6 +46,7 @@ export async function addPdf(file: File, at: Vec): Promise<PdfImport> {
     const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, 'image/webp', 0.82))
     if (!blob) continue
     const src = await hostImage(canvas.toDataURL('image/webp', 0.82), blob)
+    if (!src) continue
 
     const ratio = viewport.height / viewport.width
     const w = PAGE_W

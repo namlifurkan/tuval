@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { orphansIn, pickSnapshot } from './cloud'
+import { mergeBoardLists, orphansIn, pickSnapshot, snapshotBase64 } from './cloud'
 
 describe('embedded snapshot', () => {
   const snap = { items: 90, frames: 7, thumb: 'data:image/webp;base64,xx' }
@@ -46,5 +46,35 @@ describe('collecting images nothing refers to', () => {
   it('keeps an image two items share', () => {
     const objects = [{ name: 'a.webp', created_at: old }]
     expect(orphansIn('demo', objects, new Set(['demo/a.webp']), now)).toEqual([])
+  })
+})
+
+describe('boards offered to search', () => {
+  it('includes a shared cloud board this browser has never opened', () => {
+    const local = [{ room: 'mine', name: 'Mine', opened: 1, items: 0, frames: 0 }]
+    const cloud = [{
+      room: 'panel', name: 'Panel planning', opened: 2, items: 4, frames: 0,
+      owned: false,
+    }]
+    expect(mergeBoardLists(local, cloud).map((board) => board.room)).toEqual(['mine', 'panel'])
+  })
+
+  it('uses the cloud name and omits cloud trash', () => {
+    const local = [{ room: 'same', name: 'Old name', opened: 1, items: 0, frames: 0 }]
+    const cloud = [
+      { room: 'same', name: 'Renamed', opened: 2, items: 0, frames: 0, owned: true },
+      { room: 'gone', name: 'Gone', opened: 2, items: 0, frames: 0, owned: true, deleted: 1 },
+    ]
+    expect(mergeBoardLists(local, cloud)).toEqual([expect.objectContaining({ name: 'Renamed' })])
+  })
+})
+
+describe('snapshot transport', () => {
+  it('base64-encodes across chunk boundaries without changing a byte', async () => {
+    const bytes = Uint8Array.from({ length: 100_003 }, (_, i) => i % 251)
+    const encoded = await snapshotBase64(bytes)
+    const decoded = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0))
+    expect(decoded).toEqual(bytes)
+    expect(encoded.length).toBeLessThan(bytes.length * 1.34 + 4)
   })
 })

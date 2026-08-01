@@ -8,6 +8,9 @@ import { getUser, subscribeAuth, supabase } from './supabase'
 const ORIGIN = 'realtime'
 const FLUSH = 130
 const CHUNK = 150_000
+const RETRY_MAX = 15_000
+const PART_WAIT = 2_000
+const RESYNC_AFTER = 15_000
 
 type Kind = 'u' | 'a' | 'sv' | 'd'
 interface Wire { k: Kind; d: string; id: string; i: number; n: number; r?: number }
@@ -27,9 +30,49 @@ let pending: Uint8Array[] = []
 let awarePending = false
 let timer = 0
 let seq = 0
+let connected = false
+let retryTimer = 0
+let retryCount = 0
+let resyncTimer = 0
+const connectionListeners = new Set<() => void>()
 
-const parts = new Map<string, { got: string[]; left: number; k: Kind; r?: number }>()
+const parts = new Map<string, {
+  got: string[]; left: number; k: Kind; r?: number; timer: number
+}>()
 const clientOf = new Map<string, number>()
+
+function setConnected(next: boolean) {
+  if (connected === next) return
+  connected = next
+  connectionListeners.forEach((listener) => listener())
+}
+
+function retry() {
+  if (retryTimer || !getUser()) return
+  const delay = Math.min(RETRY_MAX, 1000 * 2 ** retryCount++)
+  retryTimer = window.setTimeout(() => {
+    retryTimer = 0
+    connect()
+  }, delay)
+}
+
+function clearParts() {
+  for (const slot of parts.values()) window.clearTimeout(slot.timer)
+  parts.clear()
+}
+
+function resyncLater() {
+  if (resyncTimer || !channel || !connected) return
+  resyncTimer = window.setTimeout(() => {
+    resyncTimer = 0
+    if (!channel || !connected) return
+    // shortcut: Realtime broadcast has no delivery acknowledgements. A periodic state-vector
+    // exchange repairs a completely dropped message; upgrade to an acknowledged transport if
+    // boards ever need sub-second delivery guarantees across unreliable networks.
+    send('sv', Y.encodeStateVector(ydoc), 1)
+    resyncLater()
+  }, RESYNC_AFTER)
+}
 
 function send(k: Kind, bytes: Uint8Array, r?: number) {
   if (!channel) return
@@ -79,13 +122,21 @@ function receive(w: Wire) {
   if (w.n === 1) { handle(w.k, decode(w.d), w.r); return }
   let slot = parts.get(w.id)
   if (!slot) {
-    slot = { got: new Array<string>(w.n).fill(''), left: w.n, k: w.k, r: w.r }
+    const timer = window.setTimeout(() => {
+      const incomplete = parts.get(w.id)
+      if (!incomplete) return
+      parts.delete(w.id)
+      // Asking for the current diff repairs the edit whose broadcast lost one of its chunks.
+      send('sv', Y.encodeStateVector(ydoc), 1)
+    }, PART_WAIT)
+    slot = { got: new Array<string>(w.n).fill(''), left: w.n, k: w.k, r: w.r, timer }
     parts.set(w.id, slot)
   }
   if (slot.got[w.i]) return
   slot.got[w.i] = w.d
   if (--slot.left) return
   parts.delete(w.id)
+  window.clearTimeout(slot.timer)
   handle(slot.k, decode(slot.got.join('')), slot.r)
 }
 
@@ -97,23 +148,24 @@ function connect() {
 
   void supabase.realtime.setAuth()
 
-  channel = supabase.channel(`board:${room}`, {
+  const next = supabase.channel(`board:${room}`, {
     config: {
       private: true,
       broadcast: { self: false },
       presence: { key: String(awareness.clientID) },
     },
   })
+  channel = next
 
-  channel.on('broadcast', { event: 'y' }, ({ payload }) => receive(payload as Wire))
+  next.on('broadcast', { event: 'y' }, ({ payload }) => receive(payload as Wire))
 
-  channel.on('presence', { event: 'sync' }, () => {
-    const state = channel!.presenceState()
+  next.on('presence', { event: 'sync' }, () => {
+    const state = next.presenceState()
     clientOf.clear()
     for (const key of Object.keys(state)) clientOf.set(key, Number(key))
   })
 
-  channel.on('presence', { event: 'leave' }, ({ key }: { key: string }) => {
+  next.on('presence', { event: 'leave' }, ({ key }: { key: string }) => {
     const id = clientOf.get(key) ?? Number(key)
     if (Number.isFinite(id) && id !== awareness.clientID) {
       removeAwarenessStates(awareness, [id], ORIGIN)
@@ -121,22 +173,43 @@ function connect() {
     }
   })
 
-  void channel.subscribe((status) => {
-    if (status !== 'SUBSCRIBED') return
-    void channel!.track({ c: awareness.clientID })
-    send('sv', Y.encodeStateVector(ydoc))
-    awarePending = true
-    schedule()
+  void next.subscribe((status) => {
+    if (channel !== next) return
+    if (status === 'SUBSCRIBED') {
+      retryCount = 0
+      setConnected(true)
+      void next.track({ c: awareness.clientID })
+      send('sv', Y.encodeStateVector(ydoc))
+      awarePending = true
+      schedule()
+      resyncLater()
+      return
+    }
+    if (!['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(status)) return
+    setConnected(false)
+    if (resyncTimer) window.clearTimeout(resyncTimer)
+    resyncTimer = 0
+    clearParts()
+    channel = null
+    void next.unsubscribe()
+    retry()
   })
 }
 
 function disconnect() {
+  if (retryTimer) window.clearTimeout(retryTimer)
+  retryTimer = 0
+  retryCount = 0
+  if (resyncTimer) window.clearTimeout(resyncTimer)
+  resyncTimer = 0
+  setConnected(false)
   if (!channel) return
-  removeAwarenessStates(awareness, [awareness.clientID], ORIGIN)
-  void channel.unsubscribe()
+  const old = channel
   channel = null
+  removeAwarenessStates(awareness, [awareness.clientID], ORIGIN)
+  void old.unsubscribe()
   pending = []
-  parts.clear()
+  clearParts()
   clientOf.clear()
 }
 
@@ -160,4 +233,8 @@ export function startRealtime() {
   subscribeAuth(() => { if (getUser()) connect(); else disconnect() })
 }
 
-export const realtimeOn = () => !!channel
+export const realtimeOn = () => connected
+export const subscribeRealtime = (listener: () => void) => {
+  connectionListeners.add(listener)
+  return () => { connectionListeners.delete(listener) }
+}

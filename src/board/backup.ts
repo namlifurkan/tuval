@@ -37,7 +37,7 @@ async function belonging(table: string, workspace: string): Promise<Row[]> {
   const out: Row[] = []
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase!.from(table).select('*')
-      .eq('workspace_id', workspace).range(from, from + PAGE - 1)
+      .eq('workspace_id', workspace).order('id', { ascending: true }).range(from, from + PAGE - 1)
     if (error) throw error
     out.push(...((data ?? []) as Row[]))
     if ((data ?? []).length < PAGE) return out
@@ -108,7 +108,7 @@ export function readBackup(text: string): Backup {
   if (!held || typeof held !== 'object' || !Array.isArray(held.records)) {
     throw new Error('This is not a Tuval backup.')
   }
-  if (held.version !== BACKUP_VERSION) {
+  if (typeof held.version !== 'number' || held.version < 1 || held.version > BACKUP_VERSION) {
     throw new Error(`This backup was written by a different version (${held.version ?? '?'}).`)
   }
   return held as Backup
@@ -149,7 +149,13 @@ export async function importWorkspace(backup: Backup): Promise<{ records: number
   }
 
   const flat: Row[] = backup.records.map((r) => {
-    const row: Row = { ...r, workspace_id: ws.id }
+    const row: Row = {
+      ...r,
+      workspace_id: ws.id,
+      assignee: null,
+      created_by: null,
+      updated_by: null,
+    }
     for (const key of LATER) row[key] = null
     return row
   })

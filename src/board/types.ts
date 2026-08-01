@@ -59,6 +59,7 @@ export interface RecordItem extends BaseItem, TextStyle {
   recordId: string
   kind: string
   fill: string
+  missing?: boolean
   snapshot: { title: string; status: string | null }
 }
 

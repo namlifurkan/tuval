@@ -22,6 +22,7 @@ import { HandoffMenu } from './HandoffMenu'
 import { ProjectPicker } from './ProjectPicker'
 import { ViewOnly } from './ViewOnly'
 import { IconButton, Popover, usePopover } from './ui'
+import { cloudError, subscribeCloud } from '../board/sync'
 
 function Caption({ children }: { children: ReactNode }) {
   const boardName = useSyncExternalStore(subscribeMeta, readName, readName)
@@ -66,6 +67,7 @@ export function TopBar() {
   const dark = isDarkSurface(paint)
   const texture = useSyncExternalStore(subscribeMeta, readTexture, readTexture)
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
+  const saveProblem = useSyncExternalStore(subscribeCloud, cloudError, cloudError)
   const boardsPanel = useBoardStore((s) => s.boardsPanel)
   const update = useBoardStore((s) => s.update)
   const setSelection = useBoardStore((s) => s.setSelection)
@@ -219,6 +221,13 @@ export function TopBar() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-1.5">
+          {saveProblem && (
+            <span
+              role="status"
+              title={saveProblem}
+              className="rounded-lg border border-[#C8452D]/30 bg-[#F7E9E4] px-2 py-1 text-[11px] font-semibold text-[#A83621]"
+            >{t('Not saved to the cloud')}</span>
+          )}
           <IconButton title={t('Search — ⌘F')} onClick={() => update({ searchOpen: true })}>
             <Search size={18} strokeWidth={1.8} />
           </IconButton>

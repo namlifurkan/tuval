@@ -1,17 +1,32 @@
 <img src="public/brand/tuval-wordmark.png" alt="Tuval" width="280" />
 
-Open source infinite canvas. Canvas 2D renderer + Yjs CRDT, local-first, self-hostable.
+A workspace you can run yourself: pages, databases, issues and an infinite canvas over one set of
+records. Canvas 2D renderer + Yjs CRDT, local-first, self-hostable.
 
-An open alternative to Miro, FigJam and the like. All code, design and branding are our own;
-no visual identity or asset is copied from any commercial product.
+An alternative to paying three subscriptions for one team's work. All code, design and branding
+are our own; no visual identity or asset is copied from any commercial product.
 
-[Contributing](CONTRIBUTING.md)
+[Self-hosting](docs/self-hosting.md) · [HTTP API](docs/api.md) · [MCP server](docs/mcp.md) ·
+[Keyboard](docs/keyboard.md) · [Contributing](CONTRIBUTING.md)
+
+## What is in here
+
+| | |
+|---|---|
+| **Canvas** | Infinite board, 32 shapes, connectors, frames, comments, templates, Miro and PDF import |
+| **Pages** | Block editor, sub-pages, backlinks, `@` mentions, version history, trash, export to md/html/pdf |
+| **Databases** | Six views — table, list, board, gallery, calendar, timeline — and 18 column types |
+| **Issues** | `TUV-12` numbers, estimates, labels, sub-issues, blocking relations, seven statuses |
+| **Projects and cycles** | Two-week cycles with a burn line, projects with a roadmap read from their issues |
+| **Forms and bookings** | Answers land straight in a database |
+| **Workspace** | `⌘K` search across bodies, inbox, activity, page permissions, publish to `/p/<slug>`, backup |
+| **Outside** | [HTTP API](docs/api.md), webhooks, [MCP server](docs/mcp.md), Notion and CSV import |
 
 ## Why
 
-Whiteboard, task board and document are three views of one workspace, not three products.
-Tuval is the canvas view. It is meant to be used daily by a real team, self-hosted, without
-a per-seat bill.
+Whiteboard, task board and document are three views of one workspace, not three products. The
+canvas is one of those views, not the product. It is meant to be used daily by a real team,
+self-hosted, without a per-seat bill.
 
 One thing here does not exist elsewhere: **Hand off to AI**. A board is reduced to a semantic
 graph — frames become sections, connectors become directed edges, comments attach to the nearest
@@ -55,6 +70,16 @@ snapshot kept server side.
 VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
 ```
+
+4. Tell the install it is yours:
+
+   ```sql
+   update public.tuval_settings set self_hosted = true where id = 1;
+   ```
+
+   Skip this and a fresh workspace caps at 3 seats and 1 GB with the HTTP API switched off —
+   the limits that exist because somebody pays for the hosted service. There is no somebody else
+   on your install. [The whole story](docs/self-hosting.md).
 
 Sign-in is a magic link, so there are no passwords to store. Without the keys every control
 disappears and nothing changes: the board list stays local and images stay inline.
@@ -160,23 +185,9 @@ then every byte of it replicates to every peer.
 
 ## Shortcuts
 
-| Key | Action |
-|---|---|
-| `V` `H` `N` `T` `S` `L` `P` `F` `C` | Select, Hand, Sticky, Text, Shape, Connector, Pen, Frame, Comment |
-| `Space` + drag / middle click | Pan |
-| `⌘` + wheel / trackpad pinch | Zoom to cursor |
-| `⌘Z` / `⌘⇧Z` | Undo / Redo |
-| `⌘D` `⌘C` `⌘X` `⌘V` `⌘A` | Duplicate, copy, cut, paste, select all |
-| `⌘G` / `⌘⇧G` | Group / Ungroup |
-| `⌘]` `⌘[` (with `⇧` for front/back) | Z-order |
-| `⇧1` `⇧2` `⇧3` | Fit, zoom to selection, 100% |
-| Arrow keys (`⇧` = 10px) | Nudge |
-| `Tab` / `⇧Tab` | New item to the right / left of the selection |
-| `⌘F` | Search the board (`↑↓` navigate, `↵` go) |
-| `⌘⌥C` / `⌘⌥V` | Copy / paste style |
-| `Alt` + drag | Duplicate while moving |
-| `⇧` + resize | Keep ratio · `Alt` + resize: from centre |
-| `⌘` + move | Disable snapping |
+`⌘K` anywhere, `g` then `i p d b n s j` to move around, `j k c x ↵ 1–7` in the issue list, and the
+canvas tools on their own letters. The full reference is [docs/keyboard.md](docs/keyboard.md) —
+one copy, because two drift.
 
 ## Translating
 

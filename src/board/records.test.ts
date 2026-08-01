@@ -1,32 +1,109 @@
-import { describe, expect, it } from 'vitest'
-import { between } from './records'
-import type { Record as Issue } from './records'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const at = (position: number) => ({ position } as Issue)
+const mocked = vi.hoisted(() => ({
+  rows: new Map<string, unknown[]>(),
+  ranges: [] as Array<[number, number]>,
+  workspace: { id: 'workspace-1' } as { id: string } | null,
+  workspaceListener: null as (() => void) | null,
+  change: null as ((payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void) | null,
+  from: vi.fn(),
+  removeChannel: vi.fn(),
+}))
 
-describe('where a dropped card goes', () => {
-  it('takes the midpoint between its neighbours, so one row is written', () => {
-    expect(between(at(1), at(2))).toBe(1.5)
-    expect(between(at(0), at(1))).toBe(0.5)
+function query() {
+  let kind = ''
+  const builder = {
+    select: () => builder,
+    eq: (column: string, value: string) => {
+      if (column === 'kind') kind = value
+      return builder
+    },
+    is: () => builder,
+    order: () => builder,
+    range: async (from: number, to: number) => {
+      mocked.ranges.push([from, to])
+      return { data: (mocked.rows.get(kind) ?? []).slice(from, to + 1), error: null }
+    },
+  }
+  return builder
+}
+
+vi.mock('./supabase', () => ({
+  getUser: () => ({ id: 'user-1' }),
+  supabase: {
+    from: mocked.from,
+    rpc: vi.fn(),
+    removeChannel: mocked.removeChannel,
+    channel: vi.fn(() => {
+      const channel = {
+        on: (_type: string, _filter: unknown, callback: typeof mocked.change) => {
+          mocked.change = callback
+          return channel
+        },
+        subscribe: () => channel,
+      }
+      return channel
+    }),
+  },
+}))
+vi.mock('./workspace', () => ({
+  getWorkspace: () => mocked.workspace,
+  subscribeWorkspace: (listener: () => void) => {
+    mocked.workspaceListener = listener
+    return () => { mocked.workspaceListener = null }
+  },
+}))
+vi.mock('./cloud', () => ({ TRASH_DAYS: 30 }))
+
+const row = (id: number, kind: string) => ({ id: `${kind}-${id}`, kind, position: id })
+
+beforeEach(() => {
+  vi.useFakeTimers()
+  vi.resetModules()
+  mocked.rows.clear()
+  mocked.ranges.length = 0
+  mocked.workspace = { id: 'workspace-1' }
+  mocked.workspaceListener = null
+  mocked.change = null
+  mocked.from.mockReset().mockImplementation(() => query())
+  mocked.removeChannel.mockReset()
+})
+
+afterEach(() => vi.useRealTimers())
+
+describe('record loading', () => {
+  it('paginates past the server row cap with deterministic ranges', async () => {
+    mocked.rows.set('issue', Array.from({ length: 1_201 }, (_, i) => row(i, 'issue')))
+    const records = await import('./records')
+
+    await records.loadRecords('issue')
+
+    expect(records.getRecords('issue')).toHaveLength(1_201)
+    expect(mocked.ranges).toEqual([[0, 499], [500, 999], [1000, 1499]])
   })
 
-  it('goes before the first, or after the last', () => {
-    expect(between(null, at(3))).toBe(2)
-    expect(between(at(3), null)).toBe(4)
+  it('keeps pages and databases in separate caches before merging the tree', async () => {
+    mocked.rows.set('doc', [row(1, 'doc'), row(2, 'doc')])
+    mocked.rows.set('database', [row(3, 'database')])
+    const records = await import('./records')
+
+    await records.loadPages()
+
+    expect(records.getRecords('doc')).toHaveLength(2)
+    expect(records.getRecords('database')).toHaveLength(1)
+    expect(records.getPages()).toHaveLength(3)
   })
 
-  it('has somewhere to go in an empty column', () => {
-    expect(between(null, null)).toBe(0)
-  })
+  it('refreshes the affected cache after a remote record change', async () => {
+    mocked.rows.set('issue', [row(1, 'issue')])
+    const records = await import('./records')
+    await records.loadRecords('issue')
+    records.startRecordSync()
 
-  it('keeps its place after repeated drops between the same pair', () => {
-    let low = at(0)
-    const high = at(1)
-    for (let i = 0; i < 20; i++) {
-      const next = between(low, high)
-      expect(next).toBeGreaterThan(low.position)
-      expect(next).toBeLessThan(high.position)
-      low = at(next)
-    }
+    mocked.rows.set('issue', [row(1, 'issue'), row(2, 'issue')])
+    mocked.change?.({ new: { kind: 'issue' }, old: {} })
+    await vi.advanceTimersByTimeAsync(150)
+
+    expect(records.getRecords('issue')).toHaveLength(2)
   })
 })

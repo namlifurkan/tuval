@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a capability or an improvement to an existing workflow.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Canvas
+        - Pages and databases
+        - Issues and projects
+        - API or MCP
+        - Authentication and workspace settings
+        - Marketing site
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the blocked workflow before describing a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should Tuval do, and what would a successful result look like?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: How do you handle this today?
+

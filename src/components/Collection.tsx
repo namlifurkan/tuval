@@ -91,7 +91,7 @@ export function Collection() {
         />
         <button
           type="button"
-          onClick={() => { void archiveRecord(id); go('/docs') }}
+          onClick={() => { void archiveRecord(id); go('/pages') }}
           title={t('Delete')}
           className="mt-1.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[#8A867C] hover:bg-[#EFEBE2] hover:text-[#C8452D]"
         ><Trash2 size={15} /></button>

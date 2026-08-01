@@ -37,6 +37,7 @@ export function Page() {
   const rows = useSyncExternalStore(subscribeRecords, pages, pages)
   const [title, setTitle] = useState('')
   const [ready, setReady] = useState(false)
+  const [openProblem, setOpenProblem] = useState('')
   const name = useRef<HTMLInputElement>(null)
   const [links, setLinks] = useState<Backlink[]>([])
   const [copying, setCopying] = useState(false)
@@ -45,9 +46,25 @@ export function Page() {
   useEffect(() => {
     if (!id) return
     let live = true
-    void openPage(id).then(() => { if (live) setReady(true) })
+    setReady(false)
+    setOpenProblem('')
+    void openPage(id)
+      .then(() => { if (live) setReady(true) })
+      .catch((error: unknown) => {
+        if (live) setOpenProblem(error instanceof Error ? error.message : String(error))
+      })
     return () => { live = false }
   }, [id])
+
+  const retryOpen = () => {
+    setReady(false)
+    setOpenProblem('')
+    void openPage(id, true)
+      .then(() => setReady(true))
+      .catch((error: unknown) => {
+        setOpenProblem(error instanceof Error ? error.message : String(error))
+      })
+  }
 
   useEffect(() => { if (workspace) void loadFavourites() }, [workspace])
 
@@ -170,7 +187,7 @@ export function Page() {
               onClick={() => {
                 const shown = title || t('Untitled page')
                 if (!confirm(t('Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.', { name: shown, days: TRASH_DAYS }))) return
-                void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/docs'))
+                void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/pages'))
               }}
               className="grid h-7 w-7 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
             >
@@ -195,7 +212,21 @@ export function Page() {
         ? <Database db={here} />
         : (
           <div className="mt-5 -ml-[54px]">
-            {ready && (
+            {openProblem ? (
+              <div role="alert" className="ml-[54px] rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-4">
+                <p className="text-sm font-semibold text-[#141310]">{t(openProblem)}</p>
+                <p className="mt-1 text-[12px] text-[#8A867C]">
+                  {t('Nothing was overwritten. You can try loading the stored page again.')}
+                </p>
+                <button
+                  type="button"
+                  onClick={retryOpen}
+                  className="mt-3 rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                >
+                  {t('Retry')}
+                </button>
+              </div>
+            ) : ready && (
               <Suspense fallback={null}>
                 <PageEditor title={title} locked={isLocked(here)} />
               </Suspense>
