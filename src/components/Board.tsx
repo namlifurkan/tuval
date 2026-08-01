@@ -24,6 +24,7 @@ import { Inspector } from './Inspector'
 import { Minimap } from './Minimap'
 import { startRealtime } from '../board/realtime'
 import { refreshSnapshots } from '../board/promote'
+import { subscribeRecords } from '../board/records'
 import { startCloudSync, sweepOrphanImages } from '../board/sync'
 import { takeTemplate } from '../board/boards'
 import { insertItems } from '../board/interaction'
@@ -71,13 +72,26 @@ export default function Board() {
   useEffect(() => {
     startCloudSync()
     startRealtime()
-    // Once, after the document has had time to arrive: sweeping an empty document would look
-    // like every image on the board is unreferenced.
     // Once the document has arrived: the rows are the truth and the cards on the board carry a
     // copy, so the copies are brought up to date on the way in.
     const fresh = setTimeout(() => void refreshSnapshots(), 2500)
+    // And from then on, whenever a row changes. Renaming an issue in a list used to leave the
+    // card on an open board wearing the old name until the next time somebody loaded it, which
+    // made "the same record, seen from three places" true only on arrival.
+    //
+    // Debounced, and that is not politeness: a title typed letter by letter would otherwise
+    // write a Y.Map update per keystroke into every open board, and a Y.Map keeps the history of
+    // every key it is ever given. refreshSnapshots writes only what actually differs, so a board
+    // with nothing stale on it writes nothing at all.
+    let settle = 0
+    const follow = subscribeRecords(() => {
+      clearTimeout(settle)
+      settle = window.setTimeout(() => void refreshSnapshots(), 500)
+    })
     const swept = setTimeout(() => void sweepOrphanImages(), 8000)
-    return () => { clearTimeout(fresh); clearTimeout(swept) }
+    return () => {
+      clearTimeout(fresh); clearTimeout(swept); clearTimeout(settle); follow()
+    }
   }, [])
 
   return (

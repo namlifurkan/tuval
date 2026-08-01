@@ -671,7 +671,7 @@ export default function TryC() {
                   ['Live editing is unproven', 'The synchronisation is written and the channel is private, checked by the same policies as the board. It has never once been run with two people in the room. Try it and tell me where it breaks.'],
                   ['No phone layout, deliberately', 'An infinite canvas on a six-inch screen is a worse product, not a smaller one. The effort goes into the desk instead.'],
                   ['Embeds sit on top', 'A live embed is a real iframe over the canvas, so an item stacked above one still draws behind it. A still preview will fix it.'],
-                  ['The repository opens shortly', 'The licence is already AGPL-3.0 and the code goes public in days, not months. Self-hosting instructions land with it.'],
+                  ['No importer for your tracker', 'A Notion export and a Miro board come in whole. A Linear or Jira backlog does not: there is no importer, and you would be retyping it. This is the hardest thing about switching and it is not solved.'],
                 ].map(([head, body]) => (
                   <li key={head} className="border-t border-[#141310]/15 pt-3">
                     <h3 className="text-[14px] font-bold tracking-[-0.01em]">{head}</h3>
