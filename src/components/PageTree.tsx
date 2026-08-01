@@ -6,6 +6,7 @@ import {
 } from '../board/records'
 import type { Record } from '../board/records'
 import { pageTemplates, fromTemplate } from '../board/pageTemplates'
+import { getScope, inScope, subscribeScope } from '../board/scope'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { Popover } from './Popover'
 import { t } from '../i18n'
@@ -129,8 +130,12 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
 // Notion's spine. Every screen shows it, so a page written yesterday is one click away from
 // wherever you are rather than behind a list you have to go and open.
 export function PageTree() {
-  const rows = useSyncExternalStore(subscribeRecords, pages, pages)
+  const all = useSyncExternalStore(subscribeRecords, pages, pages)
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
+  const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
+  // Scoped by walking up rather than by the row's own project: a page inside a page belongs
+  // where its parent belongs, and copying the project onto every child would lose one.
+  const rows = scope ? all.filter((r) => inScope(r, all)) : all
   const route = readRoute()
   const here = route.kind === 'page' ? route.id : ''
   const [open, setOpen] = useState(readOpen)

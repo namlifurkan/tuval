@@ -15,6 +15,7 @@ import {
   archiveRecord, createRecord, getRecords, loadRecords, patchRecord, STATUSES, subscribeRecords,
 } from '../board/records'
 import type { Status } from '../board/records'
+import { getScope, subscribeScope } from '../board/scope'
 import { getUser } from '../board/supabase'
 import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
@@ -46,6 +47,7 @@ const pill = 'shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0
 export function Issues() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const records = useSyncExternalStore(subscribeRecords, issues, issues)
+  const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
   useSyncExternalStore(subscribeIssues, cycles, cycles)
   const known = useSyncExternalStore(subscribeIssues, labels, labels)
   const [team, setTeam] = useState<Teammate[]>([])
@@ -93,9 +95,13 @@ export function Issues() {
   // A sub-issue is shown inside its parent, not again beside it, or a list of ten becomes a list
   // of thirty saying the same thing twice. The counts on the chips are of the same set, so the
   // number beside a state and the number of rows under it are the same number.
+  // Narrowed to the project on the left before anything else, so the chips count what the list
+  // shows and both are about the piece of work somebody is actually in.
   const top = useMemo(
-    () => records.filter((r) => !r.parent_id || !records.some((p) => p.id === r.parent_id)),
-    [records],
+    () => records
+      .filter((r) => !scope || r.project_id === scope)
+      .filter((r) => !r.parent_id || !records.some((p) => p.id === r.parent_id)),
+    [records, scope],
   )
 
   const shown = useMemo(() => {
@@ -121,6 +127,7 @@ export function Issues() {
     // Typed while looking at a cycle means it belongs to that cycle. Anything else is a step
     // somebody has to remember, and forgets.
     if (id && cycleOnly) patchRecord(id, { cycle_id: cycleOnly })
+    if (id && scope) patchRecord(id, { project_id: scope })
   }
 
   // The rows as the eye reads them: bands in order, and every row inside them, so j and k walk

@@ -397,6 +397,8 @@ const tr: Record<string, string> = {
   'Find': 'Bul',
   'Tags': 'Etiketler',
   'Untitled project': 'Adsız proje',
+  'Open this project': 'Bu projeyi aç',
+  'All projects': 'Tüm projeler',
   'Empty the trash ({n})': 'Çöpü boşalt ({n})',
   'Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.':
     '"{name}" çöpe taşınsın mı? İçindekiler de gider, {days} gün boyunca geri getirilebilir.',

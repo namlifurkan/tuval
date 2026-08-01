@@ -6,10 +6,12 @@ import {
 } from '../board/boards'
 import type { BoardEntry } from '../board/boards'
 import {
-  deleteCloudBoard, emptyExpiredTrash, listCloudBoards, myRoles, restoreBoard, TRASH_DAYS,
-  trashBoard,
+  claimBoard, deleteCloudBoard, emptyExpiredTrash, listCloudBoards, myRoles, restoreBoard,
+  TRASH_DAYS, trashBoard,
 } from '../board/cloud'
 import type { CloudBoard } from '../board/cloud'
+import { setBoardProject } from '../board/projects'
+import { getScope, subscribeScope } from '../board/scope'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { duplicateBoard } from '../board/duplicate'
 import { TEMPLATES } from '../board/templates'
@@ -26,9 +28,15 @@ function when(at: number) {
   return t('{n} d ago', { n: Math.floor(mins / 1440) })
 }
 
-const start = (template?: string) => {
+const start = (template?: string, project?: string) => {
   const room = newRoom()
   touchBoard(room, { name: '', opened: Date.now() })
+  // Made while looking at one project, so it lands in that project rather than nowhere. The row
+  // has to exist before it can be pointed at, which is what claiming the board does.
+  if (project) {
+    void claimBoard(room, '').then(() => setBoardProject(room, project)).then(() => openBoard(room, template))
+    return
+  }
   openBoard(room, template)
 }
 
@@ -118,6 +126,7 @@ export function Dashboard() {
   const [roles, setRoles] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(cloudEnabled)
   const [copying, setCopying] = useState('')
+  const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
 
   useEffect(() => { void discoverBoards() }, [])
   useEffect(() => {
@@ -132,11 +141,13 @@ export function Dashboard() {
   }, [user])
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
-  const alive = cloud.filter((b) => !b.deleted)
+  // A board in this browser belongs to no project, so scoping hides it along with everything
+  // else that is not this piece of work.
+  const alive = cloud.filter((b) => !b.deleted).filter((b) => !scope || b.project === scope)
   // Local boards belong to the browser, not to the account: signing in as somebody else does
   // not change them, and mixing them into your own boards makes that look like a bug.
   const mine = user ? alive.filter((b) => b.owned) : []
-  const here = local.filter((b) => !cloudRooms.has(b.room))
+  const here = scope ? [] : local.filter((b) => !cloudRooms.has(b.room))
   const shared = alive.filter((b) => !b.owned)
   const trash = [
     ...cloud.filter((b) => b.deleted && b.owned),
@@ -217,7 +228,7 @@ export function Dashboard() {
           </h1>
           <button
             type="button"
-            onClick={() => start()}
+            onClick={() => start(undefined, scope || undefined)}
             className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
           >
             <Plus size={15} strokeWidth={2.4} /> {t('New board')}
@@ -240,7 +251,7 @@ export function Dashboard() {
               key={tpl.id}
               type="button"
               title={t(tpl.description)}
-              onClick={() => start(tpl.id)}
+              onClick={() => start(tpl.id, scope || undefined)}
               className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-xs font-semibold text-[#4A463E] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
             >
               {t(tpl.name)}

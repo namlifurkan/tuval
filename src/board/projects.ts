@@ -2,6 +2,7 @@ import { addDays, today } from './database'
 import { isClosed } from './issues'
 import { createRecord, getPages, getRecords, patchCells } from './records'
 import type { Record as Row, Status } from './records'
+import { inScope } from './scope'
 import { supabase } from './supabase'
 
 // A project is a record, so it is searchable, mentionable and can be dropped on a canvas like
@@ -29,8 +30,15 @@ export async function addProject(title: string): Promise<string | null> {
 
 // What else belongs to it. Optional on purpose: the quick note and the scratch board are the
 // reason a tool that insists everything lives inside something is a tool people work around.
-export const pagesIn = (project: string) =>
-  getPages().filter((r) => r.project_id === project)
+//
+// A page inside a page belongs where its parent belongs, worked out by walking up rather than by
+// copying the project onto every child. Two reasons that is the better answer: a subtree moved
+// into a project cannot half-arrive, and a child somebody deliberately put in another project
+// keeps its own place instead of being overwritten by its parent.
+export const pagesIn = (project: string) => {
+  const all = getPages()
+  return all.filter((r) => inScope(r, all, project))
+}
 
 export const projectsIn = (project: string) =>
   getRecords('project').filter((r) => r.project_id === project)

@@ -5,6 +5,7 @@ import type { BoardEntry } from './boards'
 export interface CloudBoard extends BoardEntry {
   owned: boolean
   deleted?: number
+  project?: string | null
 }
 
 // Long enough that nobody is coming back for it, short enough that it is not storage nobody
@@ -30,7 +31,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
   if (!supabase || !user) return []
   const { data, error } = await supabase
     .from('boards')
-    .select('id, name, owner, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
+    .select('id, name, owner, project_id, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
     .order('updated_at', { ascending: false })
   if (error || !data) return []
   return data.map((row) => {
@@ -43,6 +44,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
       frames: snap?.frames ?? 0,
       thumb: snap?.thumb ?? '',
       owned: row.owner === user.id,
+      project: (row.project_id as string | null) ?? null,
       deleted: row.deleted_at ? Date.parse(row.deleted_at as string) : undefined,
     }
   })

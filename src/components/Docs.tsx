@@ -3,11 +3,12 @@ import { Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
   ancestors, archiveRecord, createRecord, deleteRecord, emptyOldTrash, emptyPages, emptyTrash,
-  getPages, getTrash, loadPages, loadTrash, restoreRecord, subscribeRecords,
+  getPages, getTrash, loadPages, loadTrash, patchRecord, restoreRecord, subscribeRecords,
 } from '../board/records'
 import type { Record as Row } from '../board/records'
 import { removeCover } from '../board/cover'
 import { TRASH_DAYS } from '../board/cloud'
+import { getScope, inScope, subscribeScope } from '../board/scope'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { ImportButton } from './ImportButton'
@@ -31,6 +32,7 @@ export function Docs() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const records = useSyncExternalStore(subscribeRecords, pages, pages)
   const binned = useSyncExternalStore(subscribeRecords, trash, trash)
+  const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
 
   useEffect(() => {
     if (!workspace) return
@@ -42,11 +44,14 @@ export function Docs() {
   const add = async () => {
     setBusy(true)
     const id = await createRecord('', 'doc')
+    // Made while looking at one project, so it lands in that project rather than nowhere.
+    if (id && scope) patchRecord(id, { project_id: scope })
     if (id) go(`/d/${id}`)
     else setBusy(false)
   }
 
   const recent = [...records]
+    .filter((r) => inScope(r, records))
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
     .slice(0, 40)
 
