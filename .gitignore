@@ -33,3 +33,4 @@ PRODUCT.md
 supabase/.temp
 WORKSPACE.md
 .rls-run-*.sql
+worker/env.generated.ts

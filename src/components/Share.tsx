@@ -6,6 +6,7 @@ import {
   revokeInvite, setDomainAccess, setMemberRole,
 } from '../board/cloud'
 import type { DomainAccess, Invite, Member } from '../board/cloud'
+import { boardIsOpen, openBoardToWorld } from '../board/publicProfile'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
 import { Popover, usePopover } from './ui'
@@ -27,6 +28,7 @@ export function Share() {
   const [note, setNote] = useState('')
   const [domain, setDomain] = useState<DomainAccess>({ domain: null, role: 'editor' })
   const [copied, setCopied] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const refresh = useCallback(() => {
     if (!user) return
@@ -34,6 +36,7 @@ export function Share() {
     void listInvites(room).then(setInvites)
     void myRole(room).then(setRole)
     void getDomainAccess(room).then(setDomain)
+    void boardIsOpen(room).then(setOpen)
   }, [user])
 
   useEffect(() => { if (pop.open) refresh() }, [pop.open, refresh])
@@ -201,6 +204,38 @@ export function Share() {
               {domain.domain
                 ? t('Anyone signing in with that domain can open this board, no invite needed.')
                 : t('Off: only the people listed below can open this board.')}
+            </p>
+
+            {/* Its own switch, not a role on the list above. Sharing answers who else may work
+                on this; this answers whether a stranger may read it, and running the two through
+                one setting is how somebody publishes a board they meant to send to a colleague. */}
+            <div className="my-1 h-px bg-[#EAE6DD]" />
+            <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
+              <span className="min-w-0 flex-1 text-xs font-semibold text-[#8A867C]">
+                {t('Anybody with the link')}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={open}
+                onClick={() => {
+                  const next = !open
+                  setOpen(next)
+                  void openBoardToWorld(room, next)
+                }}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
+                  ${open ? 'bg-[#C8452D]' : 'bg-[#D8D5CD]'}`}
+              >
+                <span
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
+                    ${open ? 'left-[18px]' : 'left-0.5'}`}
+                />
+              </button>
+            </div>
+            <p className="px-2.5 pb-1 text-[11px] leading-snug text-[#8A867C]">
+              {open
+                ? t('Open to the world, read only, no account needed. It shows on your page and the brief can be copied off it.')
+                : t('Off: opening this needs an account and a place on the list.')}
             </p>
           </>
         )}

@@ -812,6 +812,75 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'nobody@elsewhere
 select pg_temp.check('and says nothing to somebody outside', true,
   public.workspace_usage('cccccccc-0000-4000-8000-000000000003') is null);
 
+-- A page of somebody's own, and a board anybody may read -------------------------------------------
+
+set local role postgres;
+insert into public.profiles (user_id, handle, name, bio)
+values ('aaaaaaaa-0000-4000-8000-000000000001', 'ann', 'Ann', 'Builds with agents');
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a profile is readable by anybody', true,
+  exists(select 1 from public.profiles where handle = 'ann'));
+
+-- Somebody else's page is not somebody else's to write.
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('but not writable by anybody', true,
+  pg_temp.refused($$update public.profiles set bio = 'mine now' where handle = 'ann'$$)
+  or (select bio from public.profiles where handle = 'ann') = 'Builds with agents');
+select pg_temp.check('and a name the product answers to cannot be taken', true,
+  pg_temp.refused($$insert into public.profiles (user_id, handle)
+                    values ('bbbbbbbb-0000-4000-8000-000000000002', 'settings')$$));
+
+-- The allow-list is the database's, not the browser's.
+select pg_temp.check('a link to a place we do not link to is refused', true,
+  pg_temp.refused($$insert into public.profiles (user_id, handle, links)
+                    values ('bbbbbbbb-0000-4000-8000-000000000002', 'bob',
+                            '[{"url":"https://pay-me-now.example/steal"}]'::jsonb)$$));
+select pg_temp.check('and http is not https', true,
+  pg_temp.refused($$insert into public.profiles (user_id, handle, links)
+                    values ('bbbbbbbb-0000-4000-8000-000000000002', 'bob',
+                            '[{"url":"http://patreon.com/ann"}]'::jsonb)$$));
+select pg_temp.check('a real one goes in', true, public.allowed_link('https://buymeacoffee.com/ann'));
+select pg_temp.check('and so does a subdomain of one', true, public.allowed_link('https://ann.github.io'));
+select pg_temp.check('but not a host that merely ends the same way', false,
+  public.allowed_link('https://evilgithub.io/ann'));
+
+-- A private board stays private to somebody with no account, and opening it changes only that.
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a board nobody opened is unreadable without an account', false,
+  exists(select 1 from public.boards where id = 'rls-team-board'));
+
+set local role postgres;
+update public.boards set public_at = now() where id = 'rls-team-board';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('an opened board is readable without an account', true,
+  exists(select 1 from public.boards where id = 'rls-team-board'));
+select pg_temp.check('and so is what is drawn on it', true,
+  exists(select 1 from public.board_snapshots where board_id = 'rls-team-board'));
+-- Reading it is not writing it. A write with no policy behind it is not an error, it is a
+-- statement that touches nothing, so what is checked is that nothing moved.
+select pg_temp.refused($$update public.boards set name = 'mine' where id = 'rls-team-board'$$);
+select pg_temp.check('but it is still not writable', false,
+  exists(select 1 from public.boards where id = 'rls-team-board' and name = 'mine'));
+
+-- A stranger with an account gains nothing they did not already have: the board being public is
+-- about reading it, and can_read_board still answers about membership.
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'nobody@elsewhere.test');
+select pg_temp.check('a public board is not a board a stranger may write to', false,
+  public.can_write_board('rls-team-board'));
+
+set local role postgres;
+update public.boards set public_at = null where id = 'rls-team-board';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('closing it shuts the door again', false,
+  exists(select 1 from public.boards where id = 'rls-team-board'));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

@@ -9,6 +9,7 @@ import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
 import { Activity } from './Activity'
 import { ApiAccess } from './ApiAccess'
 import { BackupPanel } from './BackupPanel'
+import { ProfilePanel } from './ProfilePanel'
 import { BookingSetup } from './BookingSetup'
 import { PlanPanel } from './PlanPanel'
 import { Recurring } from './Recurring'
@@ -228,6 +229,13 @@ export function Settings() {
           note={t('The last change to everything in this workspace. Not every change to it: what a page said before is in that page\'s own history.')}
         >
           <Activity />
+        </Row>
+
+        <Row
+          title={t('Your page')}
+          note={t('An address of your own, with whatever you have opened to the world on it. Off until you choose a name. There is no feed here and no way to be found from inside: this is what you link to from wherever your readers already are.')}
+        >
+          <ProfilePanel />
         </Row>
 
         <Row title={t('Sign-in methods')} note={t('Connect a provider here rather than signing in with it: an account is chosen, not guessed.')}>

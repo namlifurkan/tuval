@@ -15,6 +15,7 @@ import { FramesPanel } from './FramesPanel'
 import { HistoryPanel } from './HistoryPanel'
 import { FrameTitleEditor } from './FrameTitleEditor'
 import { Presentation } from './Presentation'
+import { PublicBanner } from './PublicBanner'
 import { SearchPanel } from './SearchPanel'
 import { TextEditor } from './TextEditor'
 import { TopBar } from './TopBar'
@@ -102,6 +103,7 @@ export default function Board() {
           <FramesPanel />
           <HistoryPanel />
           <FrameTitleEditor />
+          <PublicBanner />
           <Ada />
         </Boundary>
       )}

@@ -396,6 +396,32 @@ const tr: Record<string, string> = {
   'Diagram': 'Diyagram',
   'Find': 'Bul',
   'Tags': 'Etiketler',
+  'Your page': 'Kendi sayfan',
+  'An address of your own, with whatever you have opened to the world on it. Off until you choose a name. There is no feed here and no way to be found from inside: this is what you link to from wherever your readers already are.':
+    'Dünyaya açtığın ne varsa üzerinde duran, sana ait bir adres. Bir ad seçene kadar kapalı. Burada akış yok, içeriden keşfedilmek de yok: okuyucularının zaten olduğu yerden buraya link verirsin.',
+  'Address': 'Adres',
+  'One line about you': 'Kendin hakkında tek satır',
+  'Builds things with agents and writes down how': 'Ajanlarla bir şeyler kurar, nasıl olduğunu yazar',
+  'Links': 'Bağlantılar',
+  'Add a link': 'Bağlantı ekle',
+  'Over https, and only to: {hosts}. An allow-list rather than a warning — a page that takes any address is a place to host the link in somebody else\'s scam.':
+    'https üzerinden ve yalnızca şunlara: {hosts}. Uyarı değil izin listesi — her adresi kabul eden bir sayfa, başkasının dolandırıcılık linkini barındıracak yerdir.',
+  'Lower case letters, numbers, dashes and underscores, two to thirty of them.':
+    'Küçük harf, rakam, tire ve alt çizgi; iki ile otuz arası.',
+  'That name is taken.': 'Bu ad alınmış.',
+  'Saved.': 'Kaydedildi.',
+  'See it': 'Görüntüle',
+  'Nobody here': 'Burada kimse yok',
+  'There is no page at this address.': 'Bu adreste bir sayfa yok.',
+  'Out in the open': 'Açıkta olanlar',
+  'Nothing opened yet.': 'Henüz açılmış bir şey yok.',
+  'Board': 'Board',
+  'Anybody with the link': 'Linki olan herkes',
+  'Open to the world, read only, no account needed. It shows on your page and the brief can be copied off it.':
+    'Dünyaya açık, salt okunur, hesap gerekmiyor. Kendi sayfanda görünür ve brief buradan kopyalanabilir.',
+  'Off: opening this needs an account and a place on the list.':
+    'Kapalı: açmak için hesap ve listede yer gerekiyor.',
+  'Copy the brief': 'Brief\'i kopyala',
   'Select leftovers': 'Artıkları seç',
   'Empty text and stickies, pen specks, connectors joined to nothing, unnamed empty frames. Selected rather than deleted, so you see what is going.':
     'Boş metin ve sticky\'ler, kalem lekeleri, hiçbir yere bağlanmayan konektörler, adsız boş frame\'ler. Silinmez, seçilir — neyin gideceğini görürsün.',

@@ -1,11 +1,18 @@
 {
-  // Tuval builds to a folder of static files; there is no server code. The one thing the host
-  // has to know is that /b/<room> and /dashboard are routes inside the app, not missing files,
-  // so an unknown path must be answered with index.html instead of a 404.
+  // Tuval builds to a folder of static files. The one thing the host has to know is that
+  // /b/<room> and /dashboard are routes inside the app, not missing files, so an unknown path is
+  // answered with index.html instead of a 404.
+  //
+  // The worker exists for one reason: a link posted anywhere turns into a card, and the crawler
+  // that builds that card does not run JavaScript. Three addresses get their tags filled in on
+  // the way out; everything else is the static file, untouched.
   "name": "tuval",
   "compatibility_date": "2026-07-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./worker/index.ts",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   }
 }

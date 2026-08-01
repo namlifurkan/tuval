@@ -3,6 +3,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { readOnly, setRole, subscribeAccess } from '../board/access'
 import { myRole, touchMembership } from '../board/cloud'
 import { room } from '../board/doc'
+import { boardIsOpen } from '../board/publicProfile'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
 
@@ -10,12 +11,17 @@ export function ViewOnly() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
   const ro = useSyncExternalStore(subscribeAccess, readOnly, readOnly)
 
+  // A board opened to the world is read by people with no place on it and often no account at
+  // all. Asked second, so somebody who is on the board still gets the role they were given.
   useEffect(() => {
-    if (!cloudEnabled || !user) { setRole(null); return }
+    if (!cloudEnabled) { setRole(null); return }
     let live = true
-    void touchMembership(room)
-      .then(() => myRole(room))
-      .then((r) => { if (live) setRole(r) })
+    const settle = async () => {
+      const mine = user ? await touchMembership(room).then(() => myRole(room)) : null
+      if (mine) return mine
+      return (await boardIsOpen(room)) ? ('viewer' as const) : null
+    }
+    void settle().then((r) => { if (live) setRole(r) })
     return () => { live = false }
   }, [user])
 
