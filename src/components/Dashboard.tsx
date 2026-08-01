@@ -6,8 +6,8 @@ import {
 } from '../board/boards'
 import type { BoardEntry } from '../board/boards'
 import {
-  claimBoard, deleteCloudBoard, emptyExpiredTrash, listCloudBoards, myRoles, restoreBoard,
-  TRASH_DAYS, trashBoard,
+  claimBoard, deleteCloudBoard, emptyExpiredTrash, listCloudBoardIds, listCloudBoards, myRoles,
+  restoreBoard, TRASH_DAYS, trashBoard,
 } from '../board/cloud'
 import type { CloudBoard } from '../board/cloud'
 import { setBoardProject } from '../board/projects'
@@ -123,22 +123,30 @@ export function Dashboard() {
   const local = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
   const localTrash = useSyncExternalStore(subscribeBoards, getTrash, getTrash)
   const [cloud, setCloud] = useState<CloudBoard[]>([])
+  const [remote, setRemote] = useState<Set<string>>(() => new Set())
   const [roles, setRoles] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(cloudEnabled)
   const [copying, setCopying] = useState('')
   const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
+  const remoteRoomKey = [...local, ...localTrash].map((board) => board.room).sort().join('\n')
 
   useEffect(() => { void discoverBoards() }, [])
   useEffect(() => {
-    if (!user) { setCloud([]); setLoading(false); return }
+    if (!user) { setCloud([]); setRemote(new Set()); setLoading(false); return }
+    const rooms = remoteRoomKey ? remoteRoomKey.split('\n') : []
+    setRemote(new Set(rooms))
     setLoading(true)
-    void listCloudBoards().then((list) => {
+    let live = true
+    void Promise.all([listCloudBoards(), listCloudBoardIds(rooms)]).then(([list, ids]) => {
+      if (!live) return
       setCloud(list)
+      setRemote(ids)
       setLoading(false)
       void emptyExpiredTrash(list)
     })
     void myRoles().then(setRoles)
-  }, [user])
+    return () => { live = false }
+  }, [user, remoteRoomKey])
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
   // A board in this browser belongs to no project, so scoping hides it along with everything
@@ -147,11 +155,11 @@ export function Dashboard() {
   // Local boards belong to the browser, not to the account: signing in as somebody else does
   // not change them, and mixing them into your own boards makes that look like a bug.
   const mine = user ? alive.filter((b) => b.owned) : []
-  const here = scope ? [] : local.filter((b) => !cloudRooms.has(b.room))
+  const here = scope ? [] : local.filter((b) => !remote.has(b.room))
   const shared = alive.filter((b) => !b.owned)
   const trash = [
     ...cloud.filter((b) => b.deleted && b.owned),
-    ...localTrash.filter((b) => !cloudRooms.has(b.room)),
+    ...localTrash.filter((b) => !remote.has(b.room)),
   ]
 
   const drop = (board: BoardEntry, inCloud: boolean) => () => {

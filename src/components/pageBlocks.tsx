@@ -59,7 +59,7 @@ export const Callout = createReactBlockSpec(
 export const Equation = createReactBlockSpec(
   { type: 'equation', propSchema: { tex: { default: '' } }, content: 'none' },
   {
-    render: ({ block, editor }) => {
+    render: function EquationBlock({ block, editor }) {
       const [open, setOpen] = useState(!block.props.tex)
       const tex = block.props.tex
 
@@ -102,7 +102,7 @@ export const Equation = createReactBlockSpec(
 export const Diagram = createReactBlockSpec(
   { type: 'diagram', propSchema: { code: { default: '' } }, content: 'none' },
   {
-    render: ({ block, editor }) => {
+    render: function DiagramBlock({ block, editor }) {
       const code = block.props.code
       const [open, setOpen] = useState(!code)
       const [drawn, setDrawn] = useState<{ svg: string; fault: string }>({ svg: '', fault: '' })

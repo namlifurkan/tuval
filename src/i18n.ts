@@ -366,6 +366,7 @@ const tr: Record<string, string> = {
   // home
   'Home': 'Anasayfa',
   'Workspace': 'Çalışma alanı',
+  'Switch workspace: {name}': 'Çalışma alanını değiştir: {name}',
   'Issues': 'İşler',
   'Docs': 'Dokümanlar',
   'New page': 'Yeni sayfa',

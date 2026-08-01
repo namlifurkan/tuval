@@ -4,9 +4,10 @@ import { readOnly } from './access'
 import { storagePath } from './storage'
 import { surfaceColor } from './brand'
 import { makeThumb } from './thumb'
-import { claimBoard, claimInvites, pullSnapshot, pushSnapshot, sweepImages } from './cloud'
+import { claimBoard, pullSnapshot, pushSnapshot, sweepImages } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
+import { loadWorkspace } from './workspace'
 
 const SAVE_AFTER = 2500
 
@@ -71,7 +72,7 @@ function schedule() {
 async function restore() {
   if (restored || !getUser()) return
   restored = true
-  await claimInvites()
+  await loadWorkspace()
   const update = await pullSnapshot(room)
   if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
   dirty = true

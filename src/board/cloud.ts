@@ -1,4 +1,5 @@
 import { getUser, supabase } from './supabase'
+import { getWorkspace, loadWorkspace } from './workspace'
 import { BUCKET } from './storage'
 import type { BoardEntry } from './boards'
 
@@ -29,9 +30,12 @@ export function pickSnapshot(embedded: unknown): Snapshot | null {
 export async function listCloudBoards(): Promise<CloudBoard[]> {
   const user = getUser()
   if (!supabase || !user) return []
+  const workspace = getWorkspace() ?? await loadWorkspace()
+  if (!workspace) return []
   const { data, error } = await supabase
     .from('boards')
     .select('id, name, owner, project_id, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
+    .eq('workspace_id', workspace.id)
     .order('updated_at', { ascending: false })
   if (error || !data) return []
   return data.map((row) => {
@@ -50,11 +54,29 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
   })
 }
 
+export async function listCloudBoardIds(rooms: string[]): Promise<Set<string>> {
+  const wanted = [...new Set(rooms)]
+  if (!wanted.length) return new Set()
+  const user = getUser()
+  if (!supabase || !user) return new Set()
+  if (!getWorkspace() && !await loadWorkspace()) return new Set(wanted)
+
+  const found = new Set<string>()
+  for (let at = 0; at < wanted.length; at += 200) {
+    const { data, error } = await supabase.from('boards').select('id').in('id', wanted.slice(at, at + 200))
+    if (error) return new Set(wanted)
+    for (const row of data ?? []) found.add(row.id as string)
+  }
+  return found
+}
+
 // Never re-send owner on an existing row: a board shared with you belongs to someone else,
 // and an upsert would try to take it over and be refused by the update policy.
 export async function claimBoard(room: string, name: string): Promise<string | null> {
   const user = getUser()
   if (!supabase || !user) return null
+  const workspace = getWorkspace() ?? await loadWorkspace()
+  if (!workspace) return 'No workspace'
 
   const touch = await supabase
     .from('boards')
@@ -66,7 +88,7 @@ export async function claimBoard(room: string, name: string): Promise<string | n
 
   const created = await supabase
     .from('boards')
-    .insert({ id: room, owner: user.id, name })
+    .insert({ id: room, owner: user.id, name, workspace_id: workspace.id })
   return created.error ? created.error.message : null
 }
 
@@ -224,11 +246,6 @@ export async function setDomainAccess(room: string, next: DomainAccess) {
 export interface Invite {
   email: string
   role: 'editor' | 'viewer'
-}
-
-export async function claimInvites() {
-  if (!supabase || !getUser()) return
-  await supabase.rpc('claim_invites')
 }
 
 export async function listMembers(room: string): Promise<Member[]> {

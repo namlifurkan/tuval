@@ -44,7 +44,7 @@ export function Popover({ trigger, children, width = 200 }: {
       {trigger({ open, toggle: () => setOpen((was) => !was) })}
       {open && createPortal(
         <>
-          <div className="fixed inset-0 z-[80]" onPointerDown={() => setOpen(false)} />
+          <div className="fixed inset-0 z-[80]" onClick={() => setOpen(false)} />
           <div
             style={{ left: box.left, top: box.top, width }}
             className="fixed z-[81] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] p-1 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"

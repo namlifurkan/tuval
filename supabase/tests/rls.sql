@@ -155,6 +155,51 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('an invited account joins rather than starting its own',
   true, public.ensure_workspace() = 'cccccccc-0000-4000-8000-000000000003');
 
+-- Reaching a second workspace ----------------------------------------------------------------------
+-- The switcher asks once for owned workspaces and once for non-blocked memberships. These prove
+-- the policies admit both halves without any new access, then pin the fallback down: two owned
+-- workspaces used to mean an arbitrary one, and arbitrary is free to change between sessions.
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a member reads the workspace row itself', true,
+  exists(select 1 from public.workspaces where id = 'cccccccc-0000-4000-8000-000000000003'));
+select pg_temp.check('and it is the only one he is offered', true,
+  (select count(*) from public.workspaces) = 1);
+
+set local role postgres;
+insert into public.workspaces (id, slug, name, owner, created_at) values
+  ('dddddddd-0000-4000-8000-000000000004', 'bob-older', 'Bob older',
+   'bbbbbbbb-0000-4000-8000-000000000002', now() - interval '2 days'),
+  ('eeeeeeee-0000-4000-8000-000000000005', 'bob-newer', 'Bob newer',
+   'bbbbbbbb-0000-4000-8000-000000000002', now() - interval '1 day');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('both of his own and the one he was invited into', true,
+  (select count(*) from public.workspaces) = 3);
+select pg_temp.check('a stranger workspace is still not on the list', false,
+  exists(select 1 from public.workspaces
+         where owner = 'aaaaaaaa-0000-4000-8000-000000000001'
+           and id <> 'cccccccc-0000-4000-8000-000000000003'));
+select pg_temp.check('the fallback takes the oldest owned one', true,
+  public.ensure_workspace() = 'dddddddd-0000-4000-8000-000000000004');
+select pg_temp.check('and the board default agrees with it', true,
+  public.my_workspace() = 'dddddddd-0000-4000-8000-000000000004');
+select pg_temp.check('owning two does not move it between calls', true,
+  public.ensure_workspace() = public.ensure_workspace());
+
+set local role postgres;
+update public.workspace_members set role = 'blocked'
+where user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('blocked at the workspace takes it off the list', true,
+  (select count(*) from public.workspaces) = 2);
+
+set local role postgres;
+delete from public.workspaces where owner = 'bbbbbbbb-0000-4000-8000-000000000002';
+update public.workspace_members set role = 'member'
+where user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
 -- A board created without a workspace lands in one --------------------------------------------------
 
 set local role postgres;

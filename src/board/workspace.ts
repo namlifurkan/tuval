@@ -1,4 +1,3 @@
-import { claimInvites } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { t } from '../i18n'
 
@@ -9,41 +8,112 @@ export interface Teammate { userId: string; email: string; role: WorkspaceRole; 
 
 export const ROLES: WorkspaceRole[] = ['admin', 'member', 'guest']
 
+const KEY = 'tuval:workspace'
+const COLUMNS = 'id, name, slug, owner, prefix'
+
 let current: Workspace | null = null
+let chosen = read()
+let loading: Promise<Workspace | null> | null = null
+let loadingFor = ''
 const listeners = new Set<() => void>()
 
+function read(): string {
+  try { return localStorage.getItem(KEY) ?? '' } catch { return '' }
+}
+
 export const getWorkspace = () => current
+
 export const subscribeWorkspace = (fn: () => void) => {
   listeners.add(fn)
   return () => { listeners.delete(fn) }
 }
 
-// Called on sign in. The function it calls creates a workspace only if there is none and
-// nobody has invited you into theirs, so it is safe to call every time.
-export async function loadWorkspace(): Promise<Workspace | null> {
-  if (!supabase || !getUser()) {
-    current = null
-    listeners.forEach((l) => l())
-    return null
-  }
-  const { data: id } = await supabase.rpc('ensure_workspace')
-  if (!id) return null
+export function setWorkspace(id: string) {
+  if (id === chosen) return
+  chosen = id
+  try { localStorage.setItem(KEY, id) } catch { /* private mode */ }
+  listeners.forEach((fn) => fn())
+}
 
-  const { data } = await supabase
-    .from('workspaces').select('id, name, slug, owner, prefix').eq('id', id).maybeSingle()
-  current = (data as Workspace) ?? null
+export async function listWorkspaces(): Promise<Workspace[]> {
+  const user = getUser()
+  if (!supabase || !user) return []
+
+  const [owned, joined] = await Promise.all([
+    supabase.from('workspaces').select(COLUMNS).eq('owner', user.id),
+    supabase.from('workspace_members')
+      .select(`workspace:workspaces(${COLUMNS})`)
+      .eq('user_id', user.id)
+      .neq('role', 'blocked'),
+  ])
+
+  const rows = new Map<string, Workspace>()
+  for (const row of (owned.data ?? []) as Workspace[]) rows.set(row.id, row)
+  for (const membership of (joined.data ?? []) as unknown as {
+    workspace: Workspace | Workspace[] | null
+  }[]) {
+    const workspaces = Array.isArray(membership.workspace)
+      ? membership.workspace
+      : membership.workspace ? [membership.workspace] : []
+    for (const workspace of workspaces) rows.set(workspace.id, workspace)
+  }
+
+  return [...rows.values()].sort((a, b) =>
+    a.name.localeCompare(b.name) || a.id.localeCompare(b.id))
+}
+
+async function resolveWorkspace(userId: string): Promise<Workspace | null> {
+  if (!supabase) return null
+  await supabase.rpc('claim_invites')
+  if (getUser()?.id !== userId) return null
+
+  // The stored choice is a hint, never a grant: row-level security decides whether it is still
+  // reachable. Somebody removed from a workspace since they last chose it simply reads nothing
+  // back here, and lands on the fallback instead of on an empty screen.
+  let row = chosen
+    ? (await supabase.from('workspaces').select(COLUMNS).eq('id', chosen).maybeSingle()).data
+    : null
+
+  if (!row) {
+    const { data: id } = await supabase.rpc('ensure_workspace')
+    if (getUser()?.id !== userId) return null
+    if (!id) {
+      current = null
+      listeners.forEach((l) => l())
+      return null
+    }
+    row = (await supabase.from('workspaces').select(COLUMNS).eq('id', id).maybeSingle()).data
+    if (row) setWorkspace((row as Workspace).id)
+  }
+
+  if (getUser()?.id !== userId) return null
+  current = (row as Workspace) ?? null
   listeners.forEach((l) => l())
   return current
+}
+
+export function loadWorkspace(): Promise<Workspace | null> {
+  const user = getUser()
+  if (!supabase || !user) {
+    current = null
+    listeners.forEach((l) => l())
+    return Promise.resolve(null)
+  }
+  if (loading && loadingFor === user.id) return loading
+
+  loadingFor = user.id
+  const pending = resolveWorkspace(user.id).finally(() => {
+    if (loading === pending) { loading = null; loadingFor = '' }
+  })
+  loading = pending
+  return pending
 }
 
 // Runs wherever the app starts, not only on a board: somebody invited to a team may well land
 // on the board list, and an unclaimed invitation would leave them looking at nothing.
 export function startWorkspace() {
   if (!supabase) return
-  const settle = () => {
-    if (!getUser()) { current = null; listeners.forEach((l) => l()); return }
-    void claimInvites().then(() => loadWorkspace())
-  }
+  const settle = () => { void loadWorkspace() }
   settle()
   subscribeAuth(settle)
 }

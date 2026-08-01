@@ -9,6 +9,7 @@ import { t } from '../i18n'
 import { Account } from './Account'
 import { Collections } from './Collections'
 import { ProjectSwitcher } from './ProjectSwitcher'
+import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { Favourites } from './Favourites'
 import { PageTree } from './PageTree'
 import { Palette } from './Palette'
@@ -63,10 +64,7 @@ export function Shell({ title, wide, bare, action, children }: {
         className="hidden w-[228px] shrink-0 flex-col overflow-y-auto border-r border-[#E2DED5] px-3 py-4 sm:flex"
       >
         <a href="/" className="mb-1 px-2"><Wordmark height={18} /></a>
-        <span className="mb-2 truncate px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
-          {workspace?.name || t('Workspace')}
-        </span>
-
+        <WorkspaceSwitcher />
         <ProjectSwitcher />
 
         {NAV.map(({ path, label, icon: Icon }) => (

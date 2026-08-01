@@ -4,7 +4,7 @@ import {
   currentRoom, discoverBoards, forgetBoard, getBoards, newRoom, openBoard, subscribeBoards,
   touchBoard,
 } from '../board/boards'
-import { deleteCloudBoard, listCloudBoards } from '../board/cloud'
+import { deleteCloudBoard, listCloudBoardIds, listCloudBoards } from '../board/cloud'
 import { getUser, subscribeAuth } from '../board/supabase'
 import { requestRender, useBoardStore } from '../board/store'
 import { t } from '../i18n'
@@ -26,17 +26,27 @@ export function BoardsPanel() {
   const local = useSyncExternalStore(subscribeBoards, getBoards, getBoards)
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
   const [cloud, setCloud] = useState<BoardEntry[]>([])
+  const [remote, setRemote] = useState<Set<string>>(() => new Set())
   const [query, setQuery] = useState('')
+  const remoteRoomKey = local.map((board) => board.room).sort().join('\n')
 
   useEffect(() => { if (open) void discoverBoards() }, [open])
   useEffect(() => {
-    if (!open || !user) { setCloud([]); return }
-    void listCloudBoards().then(setCloud)
-  }, [open, user])
+    if (!open || !user) { setCloud([]); setRemote(new Set()); return }
+    const rooms = remoteRoomKey ? remoteRoomKey.split('\n') : []
+    setRemote(new Set(rooms))
+    let live = true
+    void Promise.all([listCloudBoards(), listCloudBoardIds(rooms)]).then(([boards, ids]) => {
+      if (!live) return
+      setCloud(boards)
+      setRemote(ids)
+    })
+    return () => { live = false }
+  }, [open, user, remoteRoomKey])
   if (!open) return null
 
   const cloudRooms = new Set(cloud.map((b) => b.room))
-  const boards = [...cloud, ...local.filter((b) => !cloudRooms.has(b.room))]
+  const boards = [...cloud, ...local.filter((b) => !remote.has(b.room))]
 
   const here = currentRoom()
   const q = query.trim().toLowerCase()

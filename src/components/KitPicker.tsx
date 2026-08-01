@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Boxes } from 'lucide-react'
 import { go } from '../board/boards'
-import { KITS, useKit } from '../board/kits'
+import { KITS, useKit as applyKit } from '../board/kits'
 import { t } from '../i18n'
 import { Popover } from './Popover'
 
@@ -33,7 +33,7 @@ export function KitPicker() {
               onClick={() => {
                 close()
                 setBusy(true)
-                void useKit(kit, null)
+                void applyKit(kit, null)
                   .then((id) => { if (id) go(`/d/${id}`); else setBusy(false) })
                   .catch(() => setBusy(false))
               }}
