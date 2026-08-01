@@ -22,6 +22,9 @@ const row = (id: string, title: string, data: { [k: string]: unknown } = {}, pos
   updated_at: '2026-08-01T00:00:00Z',
   published_at: null,
   public_slug: null,
+  created_at: '2026-08-01T00:00:00Z',
+  created_by: null,
+  updated_by: null,
   data,
 })
 
@@ -254,5 +257,29 @@ describe('spanOf', () => {
   it('refuses to run backwards', () => {
     const held = spanOf(row('1', 'One', { s: '2026-08-05', e: '2026-07-01' }), timeline)
     expect(held).toEqual({ start: '2026-08-05', end: '2026-08-05' })
+  })
+})
+
+describe('the stamps', () => {
+  const stamped = (over: Partial<Row>): Row => ({ ...row('1', 'One'), ...over })
+
+  const field = (type: Field['type']): Field => ({ id: 'f', name: 'F', type })
+
+  it('reads what the database wrote, not what a cell holds', () => {
+    const held = stamped({
+      created_at: '2026-07-01T09:00:00Z',
+      updated_at: '2026-08-01T10:00:00Z',
+      created_by: 'ann',
+      updated_by: 'bob',
+      data: { f: 'a cell nobody should see here' },
+    })
+    expect(valueOf(held, field('created'), [])).toBe('2026-07-01T09:00:00Z')
+    expect(valueOf(held, field('edited'), [])).toBe('2026-08-01T10:00:00Z')
+    expect(valueOf(held, field('createdBy'), [])).toBe('ann')
+    expect(valueOf(held, field('editedBy'), [])).toBe('bob')
+  })
+
+  it('is empty rather than null when nobody is recorded', () => {
+    expect(valueOf(stamped({ created_by: null }), field('createdBy'), [])).toBe('')
   })
 })

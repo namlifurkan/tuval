@@ -1,94 +1,24 @@
 import { useState } from 'react'
-import { ArrowUpRight, Bookmark, ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { ArrowUpRight, Bookmark, ChevronDown, ChevronRight, EyeOff, Plus, Trash2 } from 'lucide-react'
 import { go } from '../board/boards'
 import {
-  addChoice, cellsOf, cellText, COMPUTED, editField, FIELD_TYPES, groupsOf, linksOf, removeField,
-  ROLLS, rowsOf, schemaOf, setCell, TITLE, toggleLink,
+  aggregate, cellsOf, cellText, COMPUTED, editField, FIELD_TYPES, FORMATS, groupsOf, linksOf,
+  removeField, ROLLS, rowsOf, schemaOf, setCell, TITLE, toggleLink, valueOf,
 } from '../board/database'
-import type { Choice, Field, FieldType, Roll } from '../board/database'
+import type { Choice, Field, FieldType, Format, Roll } from '../board/database'
+import { AddressCell, ChoiceCell, FilesCell, NumberCell, StampCell, Tag } from './DatabaseCells'
 import { ERROR } from '../board/formula'
 import { isTemplate, rowTemplates, setTemplate, fromTemplate } from '../board/pageTemplates'
 import { archiveRecord, createRecord, getRecords, patchRecord } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
+import { displayName } from '../board/supabase'
 import { t } from '../i18n'
 import { Popover } from './Popover'
 
 const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-[#141310] outline-none focus:bg-[#F7E9E4]'
 
 const UNGROUPED = '__none__'
-
-function Tag({ choice }: { choice: Choice }) {
-  return (
-    <span
-      className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-[#141310]"
-      style={{ background: choice.tone }}
-    >
-      {choice.name}
-    </span>
-  )
-}
-
-function SelectCell({ db, row, field }: { db: Row; row: Row; field: Field }) {
-  const [typed, setTyped] = useState('')
-  const choices = field.choices ?? []
-  const held = choices.find((c) => c.id === cellsOf(row)[field.id])
-
-  return (
-    <Popover
-      trigger={({ toggle }) => (
-        <button
-          type="button"
-          onClick={toggle}
-          className="flex w-full items-center px-2.5 py-1.5 text-left text-sm hover:bg-[#F2EFE9]"
-        >
-          {held ? <Tag choice={held} /> : <span className="text-[#C6C2B6]">—</span>}
-        </button>
-      )}
-    >
-      {(close) => {
-        const pick = (choice: Choice | null) => {
-          setCell(row, field.id, choice?.id ?? '')
-          setTyped('')
-          close()
-        }
-        return (
-          <>
-            <input
-              autoFocus
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== 'Enter' || !typed.trim()) return
-                const match = choices.find((c) => c.name.toLowerCase() === typed.trim().toLowerCase())
-                pick(match ?? addChoice(db, field.id, typed.trim()))
-              }}
-              placeholder={t('Find or create')}
-              className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
-            />
-            {held && (
-              <button
-                type="button"
-                onClick={() => pick(null)}
-                className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD]"
-              >{t('Clear')}</button>
-            )}
-            {choices
-              .filter((c) => c.name.toLowerCase().includes(typed.trim().toLowerCase()))
-              .map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => pick(c)}
-                  className="flex w-full rounded-md px-2 py-1 text-left hover:bg-[#EAE6DD]"
-                ><Tag choice={c} /></button>
-              ))}
-          </>
-        )
-      }}
-    </Popover>
-  )
-}
 
 function Chip({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
@@ -167,6 +97,28 @@ function Cell({ db, row, field, fields, team }: {
 }) {
   const held = cellsOf(row)[field.id]
 
+  switch (field.type) {
+    case 'select': case 'status':
+      return <ChoiceCell db={db} row={row} field={field} many={false} />
+    case 'multiselect':
+      return <ChoiceCell db={db} row={row} field={field} many />
+    case 'relation':
+      return <RelationCell row={row} field={field} />
+    case 'files':
+      return <FilesCell row={row} field={field} />
+    case 'number':
+      return <NumberCell row={row} field={field} />
+    case 'url': case 'email': case 'phone':
+      return <AddressCell row={row} field={field} />
+    case 'created': case 'edited':
+      return <StampCell value={valueOf(row, field, fields)} kind="time" team={team} />
+    case 'createdBy': case 'editedBy':
+      return <StampCell value={valueOf(row, field, fields)} kind="person" team={team} />
+    case 'id':
+      return <StampCell value={valueOf(row, field, fields)} kind="number" team={team} />
+    default: break
+  }
+
   // Worked out, not typed in, so there is nothing here to click into.
   if (COMPUTED.includes(field.type)) {
     const shown = cellText(row, field, fields)
@@ -176,9 +128,6 @@ function Cell({ db, row, field, fields, team }: {
       </span>
     )
   }
-
-  if (field.type === 'select') return <SelectCell db={db} row={row} field={field} />
-  if (field.type === 'relation') return <RelationCell row={row} field={field} />
 
   if (field.type === 'checkbox') {
     return (
@@ -202,22 +151,17 @@ function Cell({ db, row, field, fields, team }: {
       >
         <option value="">{t('Nobody')}</option>
         {team.map((m) => (
-          <option key={m.userId} value={m.userId}>{m.email.split('@')[0] || t('Member')}</option>
+          <option key={m.userId} value={m.userId}>{displayName(m.email) || t('Member')}</option>
         ))}
       </select>
     )
   }
 
-  const kind = field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'
   return (
     <input
-      type={kind}
+      type={field.type === 'date' ? 'date' : 'text'}
       value={held === undefined || held === null ? '' : String(held)}
-      onChange={(e) => setCell(
-        row,
-        field.id,
-        field.type === 'number' && e.target.value !== '' ? Number(e.target.value) : e.target.value,
-      )}
+      onChange={(e) => setCell(row, field.id, e.target.value)}
       className={cell}
     />
   )
@@ -268,7 +212,11 @@ function Rollup({ db, field, fields }: { db: Row; field: Field; fields: Field[] 
 
 function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] }) {
   return (
-    <th scope="col" className="min-w-[120px] border-b border-[#E2DED5] p-0 text-left font-normal">
+    <th
+      scope="col"
+      style={field.width ? { width: field.width } : undefined}
+      className="min-w-[120px] border-b border-[#E2DED5] p-0 text-left font-normal"
+    >
       <Popover
         width={190}
         trigger={({ toggle }) => (
@@ -311,6 +259,15 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
                 ))}
               </select>
             )}
+            {field.type === 'number' && (
+              <select
+                value={field.format ?? 'plain'}
+                onChange={(e) => editField(db, field.id, { format: e.target.value as Format })}
+                className={pick}
+              >
+                {FORMATS.map((f) => <option key={f} value={f}>{t(f)}</option>)}
+              </select>
+            )}
             {field.type === 'formula' && (
               <>
                 <input
@@ -326,6 +283,23 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
               </>
             )}
             {field.type === 'rollup' && <Rollup db={db} field={field} fields={fields} />}
+            <label className="mb-1 flex items-center gap-2 px-0.5 text-[12px] text-[#4A463E]">
+              <span className="flex-1">{t('Width')}</span>
+              <input
+                type="range"
+                min={90}
+                max={480}
+                step={10}
+                value={field.width ?? 160}
+                onChange={(e) => editField(db, field.id, { width: Number(e.target.value) })}
+                className="w-[110px] accent-[#C8452D]"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => { editField(db, field.id, { hidden: true }); close() }}
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            >{t('Hide column')}</button>
             <button
               type="button"
               onClick={() => { removeField(db, field.id); close() }}
@@ -338,7 +312,9 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
   )
 }
 
-function Line({ db, row, fields, team }: { db: Row; row: Row; fields: Field[]; team: Teammate[] }) {
+function Line({ db, row, fields, shown, team }: {
+  db: Row; row: Row; fields: Field[]; shown: Field[]; team: Teammate[]
+}) {
   return (
     <tr className="group border-b border-[#EAE6DD]">
       <th scope="row" className="p-0 text-left font-normal">
@@ -381,7 +357,7 @@ function Line({ db, row, fields, team }: { db: Row; row: Row; fields: Field[]; t
           </button>
         </div>
       </th>
-      {fields.map((field) => (
+      {shown.map((field) => (
         <td key={field.id} className="p-0 align-middle">
           <Cell db={db} row={row} field={field} fields={fields} team={team} />
         </td>
@@ -404,7 +380,11 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
 }) {
   const [shut, setShut] = useState<string[]>([])
   const groups = groupsOf(rows, group)
-  const span = fields.length + 2
+  // Hidden is a property of the column, not of the row, so the full list still reaches a formula
+  // that names a column somebody stopped looking at.
+  const shown = fields.filter((f) => !f.hidden)
+  const away = fields.filter((f) => f.hidden)
+  const span = shown.length + 2
 
   const newRow = async (choice: Choice | null) => {
     const id = await createRecord('', 'doc', db.id)
@@ -414,26 +394,101 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+      <table className="group/foot w-full border-collapse">
         <caption className="sr-only">{db.title || t('Untitled database')}</caption>
         <thead>
           <tr>
             <th scope="col" className="w-[36%] min-w-[220px] border-b border-[#E2DED5] px-2.5 py-2 text-left text-[12px] font-bold uppercase tracking-[0.1em] text-[#8A867C]">
               {t('Name')}
             </th>
-            {fields.map((field) => <Head key={field.id} db={db} field={field} fields={fields} />)}
-            <th scope="col" className="w-9 border-b border-[#E2DED5] p-0">
-              <button
-                type="button"
-                aria-label={t('Add a column')}
-                onClick={onAddField}
-                className="grid h-full w-9 place-items-center text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
-              >
-                <Plus size={14} />
-              </button>
+            {shown.map((field) => <Head key={field.id} db={db} field={field} fields={fields} />)}
+            <th scope="col" className="w-16 border-b border-[#E2DED5] p-0">
+              <span className="flex items-center">
+                <button
+                  type="button"
+                  aria-label={t('Add a column')}
+                  onClick={onAddField}
+                  className="grid h-full w-9 place-items-center text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                >
+                  <Plus size={14} />
+                </button>
+                {!!away.length && (
+                  <Popover
+                    width={180}
+                    trigger={({ toggle }) => (
+                      <button
+                        type="button"
+                        onClick={toggle}
+                        title={t('Hidden columns')}
+                        className="grid h-full w-7 place-items-center text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                      >
+                        <EyeOff size={13} />
+                      </button>
+                    )}
+                  >
+                    {() => (
+                      <>
+                        {away.map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => editField(db, f.id, { hidden: false })}
+                            className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                          >{f.name}</button>
+                        ))}
+                      </>
+                    )}
+                  </Popover>
+                )}
+              </span>
             </th>
           </tr>
         </thead>
+
+        <tfoot>
+          <tr className="border-t border-[#E2DED5]">
+            <th scope="row" className="px-2.5 py-1.5 text-left text-[11px] font-normal text-[#B6B1A6]">
+              {rows.length} {t(rows.length === 1 ? 'row' : 'rows')}
+            </th>
+            {shown.map((field) => (
+              <td key={field.id} className="p-0 text-right">
+                <Popover
+                  width={150}
+                  trigger={({ toggle }) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      className="w-full px-2.5 py-1.5 text-right text-[12px] text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                    >
+                      {field.summary
+                        ? `${t(field.summary)} ${String(aggregate(rows.map((r) => valueOf(r, field, fields)), field.summary))}`
+                        : <span className="opacity-0 group-hover/foot:opacity-100">{t('Summarise')}</span>}
+                    </button>
+                  )}
+                >
+                  {(close) => (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => { editField(db, field.id, { summary: undefined }); close() }}
+                        className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD]"
+                      >{t('Nothing')}</button>
+                      {ROLLS.map((roll) => (
+                        <button
+                          key={roll}
+                          type="button"
+                          onClick={() => { editField(db, field.id, { summary: roll }); close() }}
+                          className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                        >{t(roll)}</button>
+                      ))}
+                    </>
+                  )}
+                </Popover>
+              </td>
+            ))}
+            <td />
+          </tr>
+        </tfoot>
 
         {groups.map(({ choice, rows: held }) => {
           const key = choice?.id ?? UNGROUPED
@@ -442,7 +497,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
           if (!group) {
             return (
               <tbody key={key}>
-                {held.map((row) => <Line key={row.id} db={db} row={row} fields={fields} team={team} />)}
+                {held.map((row) => <Line key={row.id} db={db} row={row} fields={fields} shown={shown} team={team} />)}
               </tbody>
             )
           }
@@ -480,7 +535,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                 </th>
               </tr>
               {open && held.map((row) => (
-                <Line key={row.id} db={db} row={row} fields={fields} team={team} />
+                <Line key={row.id} db={db} row={row} fields={fields} shown={shown} team={team} />
               ))}
             </tbody>
           )

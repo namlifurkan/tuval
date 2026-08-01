@@ -177,7 +177,7 @@ export function Database({ db }: { db: Row }) {
             className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
           >
             <option value="">{view.kind === 'board' ? t('Group by…') : t('No grouping')}</option>
-            {schema.fields.filter((f) => f.type === 'select').map((f) => (
+            {schema.fields.filter((f) => f.type === 'select' || f.type === 'status').map((f) => (
               <option key={f.id} value={f.id}>{f.name}</option>
             ))}
           </select>
@@ -227,7 +227,8 @@ export function Database({ db }: { db: Row }) {
           db={db}
           rows={mine}
           fields={schema.fields}
-          group={schema.fields.find((f) => f.id === view?.groupBy && f.type === 'select')}
+          group={schema.fields.find((f) =>
+            f.id === view?.groupBy && (f.type === 'select' || f.type === 'status'))}
           team={team}
           onAddField={() => addField(db, 'text', t('Field'))}
         />

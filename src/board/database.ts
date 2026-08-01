@@ -4,23 +4,45 @@ import { getRecords, patchRecord } from './records'
 import type { Record as Row } from './records'
 
 export type FieldType =
-  | 'text' | 'number' | 'select' | 'date' | 'checkbox' | 'person' | 'url' | 'relation'
+  | 'text' | 'number' | 'select' | 'multiselect' | 'status' | 'date' | 'checkbox' | 'person'
+  | 'url' | 'email' | 'phone' | 'files' | 'relation'
   | 'formula' | 'rollup'
+  | 'created' | 'createdBy' | 'edited' | 'editedBy' | 'id'
 
 export const FIELD_TYPES: FieldType[] = [
-  'text', 'number', 'select', 'date', 'checkbox', 'person', 'url', 'relation',
+  'text', 'number', 'select', 'multiselect', 'status', 'date', 'checkbox', 'person',
+  'url', 'email', 'phone', 'files', 'relation',
   'formula', 'rollup',
+  'created', 'createdBy', 'edited', 'editedBy', 'id',
 ]
 
-// A formula and a rollup are read, never written: the value is worked out from the row every
-// time it is drawn, so there is nothing of theirs to store and nothing to keep in step.
-export const COMPUTED: FieldType[] = ['formula', 'rollup']
+// Read, never written: the value is worked out from the row every time it is drawn, so there is
+// nothing of theirs to store and nothing to keep in step. The stamps are the database's own
+// columns; a formula and a rollup are arithmetic over what is beside them.
+export const COMPUTED: FieldType[] =
+  ['formula', 'rollup', 'created', 'createdBy', 'edited', 'editedBy', 'id']
+
+// How a number is meant to be read. Stored plain either way — this is a way of showing it.
+export type Format = 'plain' | 'currency' | 'percent'
+
+export const FORMATS: Format[] = ['plain', 'currency', 'percent']
+
+// A status is a select whose choices are sorted into three columns everybody already thinks in.
+export type Stage = 'todo' | 'doing' | 'done'
+
+export const STAGES: Stage[] = ['todo', 'doing', 'done']
+
+export const STAGE_TONE: { [K in Stage]: string } = {
+  todo: '#D6D1C6',
+  doing: '#E8C55A',
+  done: '#8FA96B',
+}
 
 export type Roll = 'count' | 'sum' | 'average' | 'min' | 'max' | 'range' | 'show'
 
 export const ROLLS: Roll[] = ['count', 'sum', 'average', 'min', 'max', 'range', 'show']
 
-export interface Choice { id: string; name: string; tone: string }
+export interface Choice { id: string; name: string; tone: string; stage?: Stage }
 // `db` is the database a relation points at. A relation with none yet is a column waiting to
 // be told what it relates to, not a broken one. `via` and `then` are the two halves of a rollup:
 // which relation to walk, and which column to read once it is walked.
@@ -34,6 +56,12 @@ export interface Field {
   via?: string
   then?: string
   roll?: Roll
+  format?: Format
+  // Set by hand from the header, or left off to let the column find its own width.
+  width?: number
+  hidden?: boolean
+  // What the foot of the column says about the rows above it, if anything.
+  summary?: Roll
 }
 
 export type Op =
@@ -72,8 +100,18 @@ const OPS: { [K in FieldType | 'title']: Op[] } = {
   checkbox: ['checked', 'unchecked'],
   person: ['is', 'empty', 'notEmpty'],
   relation: ['is', 'empty', 'notEmpty'],
+  multiselect: ['is', 'empty', 'notEmpty'],
+  status: ['is', 'isNot', 'empty', 'notEmpty'],
+  email: ['contains', 'is', 'empty', 'notEmpty'],
+  phone: ['contains', 'is', 'empty', 'notEmpty'],
+  files: ['empty', 'notEmpty'],
   formula: ['is', 'contains', 'gt', 'lt', 'empty', 'notEmpty'],
   rollup: ['is', 'gt', 'lt', 'empty', 'notEmpty'],
+  created: ['before', 'after', 'is'],
+  edited: ['before', 'after', 'is'],
+  createdBy: ['is', 'empty', 'notEmpty'],
+  editedBy: ['is', 'empty', 'notEmpty'],
+  id: ['is', 'gt', 'lt'],
 }
 
 export const opsFor = (field: Field | null) => OPS[field?.type ?? 'title']
@@ -129,7 +167,13 @@ const writeSchema = (id: string, next: Schema) =>
 export function addField(db: Row, type: FieldType = 'text', name = 'Field') {
   const held = schemaOf(db)
   const field: Field = { id: nanoid(8), name, type }
-  if (type === 'select') field.choices = []
+  if (type === 'select' || type === 'multiselect') field.choices = []
+  // A status column arrives with the three everybody was going to type anyway.
+  if (type === 'status') {
+    field.choices = STAGES.map((stage) => ({
+      id: nanoid(8), name: stage, tone: STAGE_TONE[stage], stage,
+    }))
+  }
   if (type === 'rollup') field.roll = 'count'
   writeSchema(db.id, { ...held, fields: [...held.fields, field] })
 }
@@ -170,7 +214,9 @@ export function addChoice(db: Row, fieldId: string, name: string): Choice {
 // note telling you to configure it.
 export function addView(db: Row, kind: ViewKind, name: string) {
   const held = schemaOf(db)
-  const groupBy = kind === 'board' ? held.fields.find((f) => f.type === 'select')?.id : undefined
+  const groupBy = kind === 'board'
+    ? held.fields.find((f) => f.type === 'status' || f.type === 'select')?.id
+    : undefined
   const dated = kind === 'calendar' || kind === 'timeline'
   const dateBy = dated ? held.fields.find((f) => f.type === 'date')?.id : undefined
   writeSchema(db.id, {
@@ -261,7 +307,27 @@ function rollupOf(row: Row, field: Field, fields: Field[]): unknown {
 // columns that name each other from taking the tab down with them.
 const DEPTH = 5
 
+// A number nobody types: the position of a row among its siblings by age. Worked out rather
+// than stored, so it cannot be wrong, and it costs a sort of one database's rows.
+// shortcut: deleting a row renumbers the ones after it. Stable numbering needs a counter on the
+// database and a write per row, which is the upgrade path if the number is ever quoted outside.
+function serialOf(row: Row): number {
+  if (!row.parent_id) return 1
+  const siblings = rowsOf(row.parent_id)
+    .slice()
+    .sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id))
+  return siblings.findIndex((r) => r.id === row.id) + 1
+}
+
 export function valueOf(row: Row, field: Field, fields: Field[], depth = 0): unknown {
+  switch (field.type) {
+    case 'created': return row.created_at
+    case 'edited': return row.updated_at
+    case 'createdBy': return row.created_by ?? ''
+    case 'editedBy': return row.updated_by ?? ''
+    case 'id': return serialOf(row)
+    default: break
+  }
   if (field.type === 'rollup') return depth < DEPTH ? rollupOf(row, field, fields) : ''
   if (field.type !== 'formula') return cellsOf(row)[field.id]
   if (depth >= DEPTH) return ''

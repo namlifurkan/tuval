@@ -25,6 +25,10 @@ export interface Record {
   // Set when a page is opened to the world; the slug is its address and outlives unpublishing.
   published_at: string | null
   public_slug: string | null
+  // Stamped by the database, never by a caller, so a column showing them cannot be wrong.
+  created_at: string
+  created_by: string | null
+  updated_by: string | null
   // Whatever a kind needs and a column would not earn: a database keeps its fields and views
   // here, a row of one keeps its values.
   data: { [key: string]: unknown }
@@ -32,7 +36,7 @@ export interface Record {
 
 const COLUMNS =
   'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, '
-  + 'position, updated_at, published_at, public_slug, data'
+  + 'position, created_at, created_by, updated_at, updated_by, published_at, public_slug, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so
 // the two are loaded at the same time and a single list would have them overwriting each other.
