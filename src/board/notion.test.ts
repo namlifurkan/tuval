@@ -82,3 +82,30 @@ describe('expand', () => {
     expect(held).toEqual([{ path: 'Plan.csv', text: 'Name\nOne' }])
   })
 })
+
+describe('what a real export throws at it', () => {
+  const bytes = (files: { [path: string]: string }) =>
+    zipSync(Object.fromEntries(
+      Object.entries(files).map(([path, text]) => [path, strToU8(text)]),
+    ))
+
+  it('goes into a zip of zips, which is how a large export arrives', async () => {
+    const inner = bytes({ 'Export/Notes 1a2b.md': '# Notes' })
+    const outer = zipSync({ 'Part-1.zip': inner })
+    const held = await expand([new File([outer as unknown as BlobPart], 'Export.zip')])
+    expect(held.map((e) => e.path)).toEqual(['Export/Notes 1a2b.md'])
+  })
+
+  it('drops the byte order mark rather than naming a column after it', async () => {
+    const held = await expand([new File(['﻿Name,Owner\nOne,Ayse'], 'Plan.csv')])
+    expect(held[0].text.startsWith('Name,')).toBe(true)
+  })
+
+  it('leaves alone what is neither a page nor a database', async () => {
+    const held = await expand([new File([bytes({
+      'Export/cover.png': 'not a png',
+      'Export/Notes 1a2b.md': '# Notes',
+    }) as unknown as BlobPart], 'Export.zip')])
+    expect(held).toHaveLength(1)
+  })
+})

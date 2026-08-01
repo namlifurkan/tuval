@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { evaluate, today } from './formula'
-import { getRecords, patchRecord } from './records'
+import { getRecords, patchCells, patchRecord } from './records'
 import type { Record as Row } from './records'
 
 export type FieldType =
@@ -415,16 +415,11 @@ export function removeView(db: Row, viewId: string) {
 // shortcut: the whole data object is rewritten for one cell, so two people editing different
 // cells of the same row at the same second lose one of the two. Per-cell writes need a table of
 // values, which is the upgrade path if rows ever get edited by more than one person at once.
-// Cells that change together are written together. Two calls in a row would both read the copy
-// of the row this render was given, and the second would put back what the first had changed.
-export function setCells(row: Row, values: { [fieldId: string]: unknown }) {
-  const next = { ...cellsOf(row) }
-  for (const [fieldId, value] of Object.entries(values)) {
-    if (value === '' || value === null || value === undefined) delete next[fieldId]
-    else next[fieldId] = value
-  }
-  patchRecord(row.id, { data: next } as unknown as Partial<Row>)
-}
+// Merged into the row rather than replacing it, so that two people editing two cells of the same
+// row at the same second keep both. Cells that change together still go in one call, because two
+// calls would each be merging into a row the other has not reached yet.
+export const setCells = (row: Row, values: { [fieldId: string]: unknown }) =>
+  patchCells(row.id, values)
 
 export const setCell = (row: Row, fieldId: string, value: unknown) =>
   setCells(row, { [fieldId]: value })

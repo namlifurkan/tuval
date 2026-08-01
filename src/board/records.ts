@@ -136,18 +136,58 @@ export function patchRecord(id: string, changes: Partial<Record>) {
   timers.set(id, window.setTimeout(() => void flushRecord(id), SETTLE))
 }
 
+// Cells go their own way. A column patch replaces what it names; a cell patch is merged into
+// whatever the row holds by then, so two people editing two cells of the same row keep both.
+// Same debounce, because a cell is typed into as much as a title is.
+const cells = new Map<string, { set: { [k: string]: unknown }; drop: Set<string> }>()
+
+export function patchCells(id: string, values: { [key: string]: unknown }) {
+  const held = cells.get(id) ?? { set: {}, drop: new Set<string>() }
+  for (const [key, value] of Object.entries(values)) {
+    const empty = value === '' || value === null || value === undefined
+    if (empty) { delete held.set[key]; held.drop.add(key) } else { held.set[key] = value; held.drop.delete(key) }
+  }
+  cells.set(id, held)
+
+  replace(id, (rows) => rows.map((r) => {
+    if (r.id !== id) return r
+    const next = { ...(r.data ?? {}) }
+    for (const [key, value] of Object.entries(values)) {
+      if (value === '' || value === null || value === undefined) delete next[key]
+      else next[key] = value
+    }
+    return { ...r, data: next, updated_at: new Date().toISOString() }
+  }))
+
+  clearTimeout(timers.get(id))
+  timers.set(id, window.setTimeout(() => void flushRecord(id), SETTLE))
+}
+
 export async function flushRecord(id: string) {
   clearTimeout(timers.get(id))
   timers.delete(id)
   const changes = queued.get(id)
-  if (!changes || !supabase) return
+  const patch = cells.get(id)
+  if (!supabase || (!changes && !patch)) return
   const kind = kindOf(id) ?? 'issue'
   queued.delete(id)
-  const { error } = await supabase.from('records').update(changes).eq('id', id)
-  if (error) await loadRecords(kind)
+  cells.delete(id)
+
+  const failed = await Promise.all([
+    changes ? supabase.from('records').update(changes).eq('id', id) : null,
+    patch
+      ? supabase.rpc('merge_cells', {
+        record: id,
+        patch: patch.set,
+        drop_keys: [...patch.drop],
+      })
+      : null,
+  ])
+  if (failed.some((r) => r?.error)) await loadRecords(kind)
 }
 
-export const flushRecords = () => Promise.all([...queued.keys()].map(flushRecord))
+export const flushRecords = () =>
+  Promise.all([...new Set([...queued.keys(), ...cells.keys()])].map(flushRecord))
 
 addEventListener('pagehide', () => { void flushRecords() })
 

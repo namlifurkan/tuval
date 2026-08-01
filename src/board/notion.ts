@@ -17,6 +17,9 @@ import { getWorkspace } from './workspace'
 // hand-made folder of .md and .csv imports exactly as well.
 const CAP = 300
 
+// How many rows go in one request.
+const BATCH = 250
+
 export interface Haul { pages: number; databases: number; rows: number; skipped: number }
 
 export interface Entry { path: string; text: string }
@@ -32,17 +35,28 @@ const nameOf = (path: string) => {
 // A file with no folder in front of it is at the top, not in a folder named after itself.
 const folderOf = (path: string) => (path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '')
 
+// A byte order mark is invisible until it is the first character of the first column name, and
+// then the column is called "\uFEFFName" and nothing matches it.
+const clean = (text: string) => text.replace(/^\uFEFF/, '')
+
+// A large Notion export arrives as a zip of zips — Part-1.zip, Part-2.zip — so unpacking has to
+// be willing to go round again. Twice is enough: Notion does not nest further, and a zip that
+// contains itself should stop rather than spin.
+function unpack(bytes: Uint8Array, depth = 0): Entry[] {
+  const out: Entry[] = []
+  for (const [path, held] of Object.entries(unzipSync(bytes))) {
+    if (!held.length) continue
+    if (/\.zip$/i.test(path) && depth < 2) out.push(...unpack(held, depth + 1))
+    else if (/\.(md|csv)$/i.test(path)) out.push({ path, text: clean(strFromU8(held)) })
+  }
+  return out
+}
+
 export async function expand(files: File[]): Promise<Entry[]> {
   const out: Entry[] = []
   for (const file of files) {
-    if (/\.zip$/i.test(file.name)) {
-      const held = unzipSync(new Uint8Array(await file.arrayBuffer()))
-      for (const [path, bytes] of Object.entries(held)) {
-        if (bytes.length) out.push({ path, text: strFromU8(bytes) })
-      }
-    } else {
-      out.push({ path: file.name, text: await file.text() })
-    }
+    if (/\.zip$/i.test(file.name)) out.push(...unpack(new Uint8Array(await file.arrayBuffer())))
+    else out.push({ path: file.name, text: clean(await file.text()) })
   }
   // The `_all` copy is the same database written twice, once per view.
   return out
@@ -77,10 +91,15 @@ const isOn = (value: string) => /^(yes|true|evet)$/i.test(value.trim())
 // The first column of a Notion CSV is the page title, so it becomes the row's name rather than
 // a column of its own — the same place it lives in a database made here.
 function schemaFrom(header: string[], lines: string[][]): Schema {
+  // Two columns of the same name is a table nobody can read, and Notion allows it.
+  const seenNames = new Map<string, number>()
   const fields: Field[] = header.slice(1).map((name, i) => {
     const values = lines.map((line) => line[i + 1] ?? '')
     const type = guessType(values)
-    const field: Field = { id: nanoid(8), name: name.trim() || 'Field', type }
+    const wanted = name.trim() || 'Field'
+    const taken = seenNames.get(wanted) ?? 0
+    seenNames.set(wanted, taken + 1)
+    const field: Field = { id: nanoid(8), name: taken ? `${wanted} ${taken + 1}` : wanted, type }
     if (type === 'select') {
       const seen = [...new Set(values.map((v) => v.trim()).filter(Boolean))]
       field.choices = seen.map((label, at): Choice => ({
@@ -185,9 +204,11 @@ export async function importNotion(files: File[], parent: string | null): Promis
         created_by: getUser()?.id ?? null,
         data: cellsFrom(schema.fields, line),
       }))
-      if (rows.length) {
-        const { error: failed } = await supabase.from('records').insert(rows)
-        if (!failed) haul.rows += rows.length
+      // Sent in handfuls: a database of a few thousand rows is one request the server refuses
+      // and a person who is told nothing went in.
+      for (let at = 0; at < rows.length; at += BATCH) {
+        const { error: failed } = await supabase.from('records').insert(rows.slice(at, at + BATCH))
+        if (!failed) haul.rows += Math.min(BATCH, rows.length - at)
       }
       haul.databases += 1
       continue

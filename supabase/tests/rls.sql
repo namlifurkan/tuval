@@ -411,6 +411,44 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('and nobody else sees them', false,
   exists(select 1 from public.record_favourites));
 
+-- One cell at a time, and only for somebody who may write the row -----------------------------------
+
+set local role postgres;
+delete from public.record_members;
+update public.records set data = '{"a": 1, "b": 2}'::jsonb
+where id = 'dddddddd-0000-4000-8000-000000000004';
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'member', 'bob@other.test');
+
+-- Two people, two cells, neither having seen the other's write.
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select public.merge_cells('dddddddd-0000-4000-8000-000000000004', '{"a": 99}'::jsonb);
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select public.merge_cells('dddddddd-0000-4000-8000-000000000004', '{"b": 88}'::jsonb);
+
+set local role postgres;
+select pg_temp.check('two people writing two cells keep both', true,
+  (select data = '{"a": 99, "b": 88}'::jsonb from public.records
+   where id = 'dddddddd-0000-4000-8000-000000000004'));
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select public.merge_cells('dddddddd-0000-4000-8000-000000000004', '{}'::jsonb, array['a']);
+set local role postgres;
+select pg_temp.check('clearing a cell leaves the others', true,
+  (select data = '{"b": 88}'::jsonb from public.records
+   where id = 'dddddddd-0000-4000-8000-000000000004'));
+
+set local role postgres;
+update public.workspace_members set role = 'guest'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select public.merge_cells('dddddddd-0000-4000-8000-000000000004', '{"c": 7}'::jsonb);
+set local role postgres;
+select pg_temp.check('a guest cannot write a cell either', false,
+  (select data ? 'c' from public.records where id = 'dddddddd-0000-4000-8000-000000000004'));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
