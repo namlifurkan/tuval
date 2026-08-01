@@ -11,6 +11,7 @@ import { TRASH_DAYS } from '../board/cloud'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { ImportButton } from './ImportButton'
+import { KitPicker } from './KitPicker'
 import { Shell } from './Shell'
 
 const pages = getPages
@@ -61,6 +62,7 @@ export function Docs() {
           <Plus size={15} strokeWidth={2.4} /> {t('New page')}
         </button>
         <ImportButton />
+        <KitPicker />
       </div>
 
       <h2 className="mt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">

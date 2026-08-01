@@ -469,6 +469,17 @@ const tr: Record<string, string> = {
   'Clear': 'Temizle',
   'No value': 'Değersiz',
   'No grouping': 'Gruplama yok',
+  'Start from a kit': 'Hazır setten başla',
+  'Making…': 'Oluşturuluyor…',
+  'Sales': 'Satış',
+  'People, companies, deals and the conversations between them.':
+    'Kişiler, şirketler, fırsatlar ve aralarındaki görüşmeler.',
+  'Client work': 'Müşteri işleri',
+  'Clients, the jobs you owe them and what each one is worth.':
+    'Müşteriler, onlara borçlu olduğun işler ve her birinin karşılığı.',
+  'Hiring': 'İşe alım',
+  'Roles you are filling and the people going through them.':
+    'Doldurduğun pozisyonlar ve içinden geçen kişiler.',
   'Time': 'Süre',
   '45, 1h30, 2h': '45, 1s30, 2s',
   'What on?': 'Ne üzerine?',
