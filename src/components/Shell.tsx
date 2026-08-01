@@ -7,6 +7,7 @@ import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
+import { Collections } from './Collections'
 import { Favourites } from './Favourites'
 import { PageTree } from './PageTree'
 import { Palette } from './Palette'
@@ -84,6 +85,8 @@ export function Shell({ title, wide, action, children }: {
         <Favourites />
 
         <div className="mt-5"><PageTree /></div>
+
+        <Collections />
 
         <span className="mt-auto px-2 pt-4 text-[11px] leading-snug text-[#B6B1A6]">
           {t('Press ⌘K for anything')}

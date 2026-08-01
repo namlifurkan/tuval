@@ -20,6 +20,7 @@ import { t } from '../i18n'
 import { Database } from './Database'
 import { Cover } from './Cover'
 import { IconPicker } from './IconPicker'
+import { PageProps } from './PageProps'
 import { PageShare } from './PageShare'
 import { Shell } from './Shell'
 
@@ -172,6 +173,8 @@ export function Page() {
         placeholder={t(database ? 'Untitled database' : 'Untitled page')}
         className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
       />
+
+      {here && !database && <PageProps row={here} locked={isLocked(here)} />}
 
       {database
         ? <Database db={here} />

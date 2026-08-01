@@ -159,6 +159,7 @@ export type Route =
   | { kind: 'form'; slug: string }
   | { kind: 'booking'; slug: string }
   | { kind: 'page'; id: string }
+  | { kind: 'collection'; id: string }
   | { kind: 'auth'; page: AuthPage }
   | { kind: 'board'; room: string }
 
@@ -182,6 +183,8 @@ export function readRoute(): Route {
   if (booking) return { kind: 'booking', slug: decodeURIComponent(booking[1]) }
   const page = /^\/d\/(.+)$/.exec(path)
   if (page) return { kind: 'page', id: decodeURIComponent(page[1]) }
+  const set = /^\/c\/(.+)$/.exec(path)
+  if (set) return { kind: 'collection', id: decodeURIComponent(set[1]) }
   const issue = /^\/i\/(.+)$/.exec(path)
   if (issue) return { kind: 'issue', id: decodeURIComponent(issue[1]) }
   const auth = AUTH_PAGES.find((p) => path === `/${p}`)

@@ -1,6 +1,7 @@
 import { readRoute, routePath, subscribeRoute } from '../board/boards'
 import { lazy, Suspense, useSyncExternalStore } from 'react'
 import { AuthPage } from './AuthPage'
+import { Collection } from './Collection'
 import { Dashboard } from './Dashboard'
 import { Docs } from './Docs'
 import { Inbox } from './Inbox'
@@ -28,6 +29,7 @@ export function Home() {
   if (route.kind === 'form') return <Suspense fallback={null}><PublicForm /></Suspense>
   if (route.kind === 'booking') return <Suspense fallback={null}><PublicBooking /></Suspense>
   if (route.kind === 'page') return <Page key={route.id} />
+  if (route.kind === 'collection') return <Collection key={route.id} />
   if (route.kind === 'dashboard') return <Dashboard />
   return <Suspense fallback={null}><Landing /></Suspense>
 }

@@ -2,7 +2,9 @@ import { getUser, supabase } from './supabase'
 import { TRASH_DAYS } from './cloud'
 import { getWorkspace } from './workspace'
 
-export type Kind = 'issue' | 'doc' | 'database' | 'person' | 'company' | 'project' | 'event' | 'file'
+export type Kind =
+  | 'issue' | 'doc' | 'database' | 'collection'
+  | 'person' | 'company' | 'project' | 'event' | 'file'
 export type Status = 'backlog' | 'todo' | 'doing' | 'review' | 'blocked' | 'done' | 'cancelled'
 
 export const STATUSES: Status[] =
