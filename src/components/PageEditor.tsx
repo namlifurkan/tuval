@@ -21,6 +21,7 @@ import type { Teammate } from '../board/workspace'
 import { ancestors, createRecord, getRecords, subscribeRecords } from '../board/records'
 import { displayName, getUser } from '../board/supabase'
 import { t } from '../i18n'
+import { ourSlashItems } from './pageMenu'
 import { paper, schema } from './pageSchema'
 import { PageExport } from './PageExport'
 import { PageHistory } from './PageHistory'
@@ -91,7 +92,11 @@ export function PageEditor({ title }: { title: string }) {
       <SuggestionMenuController
         triggerCharacter="/"
         getItems={async (query) => filterSuggestionItems(
-          [...getDefaultReactSlashMenuItems(editor), ...getMultiColumnSlashMenuItems(editor)],
+          [
+            ...getDefaultReactSlashMenuItems(editor),
+            ...getMultiColumnSlashMenuItems(editor),
+            ...ourSlashItems(editor as unknown as Parameters<typeof ourSlashItems>[0]),
+          ],
           query,
         )}
       />

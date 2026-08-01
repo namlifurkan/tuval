@@ -6,6 +6,7 @@ import '@blocknote/mantine/style.css'
 import { go } from '../board/boards'
 import { COLOR, PIGMENTS } from '../board/brand'
 import { MENTION } from '../board/mention'
+import { Bookmark, Callout, Contents, Equation, Frame } from './pageBlocks'
 
 // BlockNote ships its own look and its own font. Neither is ours, so the whole surface is
 // restated in the tokens the rest of the product uses: paper, ink, one hairline, one pigment.
@@ -76,6 +77,17 @@ const Mention = createReactInlineContentSpec(
 // Side-by-side blocks come from BlockNote's own multi-column package rather than from us.
 // It is GPL-3.0, which an AGPL-3.0 project may include.
 export const schema = withMultiColumn(
-  BlockNoteSchema.create().extend({ inlineContentSpecs: { [MENTION]: Mention } }),
+  BlockNoteSchema.create().extend({
+    inlineContentSpecs: { [MENTION]: Mention },
+    // The blocks Notion has and BlockNote does not ship. Written here rather than found, because
+    // each is a few lines and a dependency for each would be five dependencies.
+    blockSpecs: {
+      callout: Callout(),
+      equation: Equation(),
+      toc: Contents(),
+      bookmark: Bookmark(),
+      embed: Frame(),
+    },
+  }),
 )
 
