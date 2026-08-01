@@ -561,7 +561,7 @@ export default function TryC() {
                     'Issues with keys, cycles, projects, estimates and labels',
                     'Sub-issues, blocking relations, a board view and a burn-down',
                     'Promote a note or a paragraph into an issue where it stands',
-                    'A card on a canvas stays the row it came from, both ways',
+                    'A card on a canvas points at the row it came from and refreshes from it',
                   ],
                 },
               ].map((col) => (
@@ -610,7 +610,7 @@ export default function TryC() {
                     name: 'Small',
                     price: 'Free',
                     unit: 'up to three people',
-                    list: ['Every feature, no ceiling', 'Hosted, backed up, updated', 'Keep it as long as you like'],
+                    list: ['Every board, page, database and issue', 'Hosted, backed up, updated', 'The API and webhooks are the paid part'],
                   },
                   {
                     name: 'Team',
@@ -623,7 +623,7 @@ export default function TryC() {
                     name: 'Your server',
                     price: 'Free',
                     unit: 'AGPL-3.0, for good',
-                    list: ['Docker and a Postgres', 'Your disks, your backups', 'No seat count, no phone-home'],
+                    list: ['A Postgres and a bucket', 'Your disks, your backups', 'No seat count, no phone-home'],
                   },
                 ].map((tier) => (
                   <div
@@ -668,7 +668,7 @@ export default function TryC() {
               </div>
               <ul className="grid gap-x-10 gap-y-7 sm:grid-cols-2">
                 {[
-                  ['Live editing is young', 'Several people on one board works, over a private channel with the same permissions as the rest. It has not yet been beaten up by ten at once. Break it and tell me where.'],
+                  ['Live editing is unproven', 'The synchronisation is written and the channel is private, checked by the same policies as the board. It has never once been run with two people in the room. Try it and tell me where it breaks.'],
                   ['No phone layout, deliberately', 'An infinite canvas on a six-inch screen is a worse product, not a smaller one. The effort goes into the desk instead.'],
                   ['Embeds sit on top', 'A live embed is a real iframe over the canvas, so an item stacked above one still draws behind it. A still preview will fix it.'],
                   ['The repository opens shortly', 'The licence is already AGPL-3.0 and the code goes public in days, not months. Self-hosting instructions land with it.'],
