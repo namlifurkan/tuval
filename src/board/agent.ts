@@ -6,6 +6,9 @@ export interface AgentNode {
   id: Id
   kind: string
   text: string
+  // Only a record card has one. An agent reading a board wants to know which of these is already
+  // being worked on.
+  status?: string
   color?: string
   label?: string
   lang?: string
@@ -42,9 +45,13 @@ function toNode(item: Item): AgentNode {
   const node: AgentNode = {
     id: item.id,
     kind: item.type,
-    text: 'text' in item ? item.text : '',
+    // A record card carries no text of its own; what it says is the copy of the row it stands
+    // for. Reading only item.text handed an agent "(empty record)" for every piece of tracked
+    // work on the board, which is the one thing on it the agent most needed to read.
+    text: item.type === 'record' ? item.snapshot.title : ('text' in item ? item.text : ''),
     at: [Math.round(item.x), Math.round(item.y)],
   }
+  if (item.type === 'record' && item.snapshot.status) node.status = item.snapshot.status
   if ('fill' in item && typeof item.fill === 'string' && item.fill !== 'transparent') node.color = item.fill
   if (item.type === 'sticky' && item.label) node.label = item.label
   if (item.type === 'code') node.lang = item.lang
@@ -176,7 +183,8 @@ export function graphToMarkdown(g: AgentGraph): string {
       const text = node.text.trim()
       if (!text) continue
       const lines = text.split('\n')
-      out.push(`- ${node.label ? `[${node.label}] ` : ''}${lines[0]}`)
+      const wearing = node.label ? `[${node.label}] ` : node.status ? `[${node.status}] ` : ''
+      out.push(`- ${wearing}${lines[0]}`)
       for (const rest of lines.slice(1)) out.push(`  ${rest}`)
     }
     out.push('')

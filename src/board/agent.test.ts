@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { makeRecordItem } from './items'
 import { boardToGraph, graphToMarkdown } from './agent'
 import { briefToItems } from './importer'
 import type { Item } from './types'
@@ -126,5 +127,21 @@ describe('boardToGraph', () => {
     const graph = boardToGraph(build(brief).items, 'Sprint')
     expect(graph.counts.frame).toBe(2)
     expect(graph.counts.edge).toBe(1)
+  })
+})
+
+// A record card carries no text of its own: what it says is the copy of the row it stands for.
+// Reading only item.text handed an agent "(empty record)" for every piece of tracked work.
+describe('a board with tracked work on it', () => {
+  it('reads the card, not the empty text field it does not have', () => {
+    const card = makeRecordItem(0, 0, 'r1', 'Ship the picker', 'doing')
+    const graph = boardToGraph([card], 'board')
+    expect(graph.sections[0].nodes[0].text).toBe('Ship the picker')
+    expect(graph.sections[0].nodes[0].status).toBe('doing')
+  })
+
+  it('and says which of them is already being worked on', () => {
+    const card = makeRecordItem(0, 0, 'r1', 'Ship the picker', 'doing')
+    expect(graphToMarkdown(boardToGraph([card], 'board'))).toContain('- [doing] Ship the picker')
   })
 })

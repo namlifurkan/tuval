@@ -67,15 +67,15 @@
           "heading": "What is on it",
           "points": [
             {
-              "title": "Things",
+              "title": "What you can put on it",
               "body": "Sticky notes, text, twenty shapes, connectors with labels, freehand pen and highlighter, images, PDFs page by page, tables with merged cells, code blocks, embeds and mind maps that lay themselves out."
             },
             {
-              "title": "Ways to hold them",
+              "title": "Frames, layers and snapping",
               "body": "Frames that carry their contents, layers, locking, alignment and distribution, snapping with spacing guides, and a minimap for the far corners."
             },
             {
-              "title": "People on it",
+              "title": "Comments and presenting",
               "body": "Comment pins with threads, and a presentation mode that walks the frames in order. Live cursors and follow mode are built and have not yet been through a two-person session."
             }
           ]
@@ -116,15 +116,15 @@
           "heading": "What a page can hold",
           "points": [
             {
-              "title": "Blocks",
+              "title": "Every block Notion has",
               "body": "Headings, lists, toggles, callouts, quotes, code with highlighting, tables, columns, equations in LaTeX, mermaid diagrams, bookmarks, embeds and a table of contents that reads itself from the headings."
             },
             {
-              "title": "Links between things",
+              "title": "Mentions and backlinks",
               "body": "Mention a page and it links; the page you mentioned shows who pointed at it. Mention a person and they hear about it."
             },
             {
-              "title": "Ways out",
+              "title": "Markdown, HTML, PDF, backup",
               "body": "Markdown, HTML, a real text PDF, and a backup of the whole workspace in one file that can be put back."
             }
           ]
@@ -138,7 +138,7 @@
       "next": [
         "/canvas",
         "/issues",
-        "/for/consultants",
+        "/for/client-work",
         "/pricing"
       ]
     },
@@ -173,7 +173,7 @@
               "body": "This blocks that, so that is blocked by this. Stored once, so the two can never disagree about which way round it is."
             },
             {
-              "title": "Time, without typing it twice",
+              "title": "Time logging",
               "body": "Log a stint against an issue and the week adds itself up. Repeating work is asked for every night, so a missed night catches up."
             }
           ]
@@ -222,7 +222,7 @@
               "body": "Architecture on the canvas, mermaid in the doc, and one button that hands the whole flow to an agent as a brief."
             },
             {
-              "title": "Afterwards",
+              "title": "Retros and decisions",
               "body": "A retro board, decisions written down as pages, and an incident record that links to the decision it changed."
             }
           ]
@@ -241,11 +241,11 @@
       ]
     },
     {
-      "path": "/for/agencies",
-      "title": "For agencies — workshops, delivery and client access | Tuval",
-      "description": "Run the client workshop on a shared canvas, keep the delivery in the same workspace, and give the client a read-only link without an account.",
+      "path": "/for/client-work",
+      "title": "For client work — workshops, findings and handover | Tuval",
+      "description": "Run the workshop on a shared canvas, keep the findings as records, and hand over a workspace the client can still read next year. Read-only links need no account.",
       "claim": "The client sees the room, not the cabinet",
-      "lede": "A workshop is worth what survives it. Here the board the client watched being drawn is the same board the work is tracked against.",
+      "lede": "A workshop is worth what survives it, and a deck is not what survives it. The board they watched being drawn is the workspace the work is tracked in.",
       "bands": [
         {
           "tone": "paper",
@@ -260,117 +260,19 @@
         },
         {
           "tone": "paper",
-          "heading": "After the workshop",
-          "points": [
-            {
-              "title": "The record",
-              "body": "People, companies and deals in a database you did not have to buy a CRM for. A form on a public link drops answers straight into it."
-            },
-            {
-              "title": "The delivery",
-              "body": "A project holds its boards, its pages and its issues, and the switch at the top of the sidebar makes everything else disappear until you switch back."
-            },
-            {
-              "title": "The proof",
-              "body": "Log time against issues and the week adds itself up, per person, per day."
-            }
-          ]
-        },
-        {
-          "tone": "pigment",
-          "heading": "A booking page, so the meeting books itself",
-          "body": "Your hours on an address anybody can open. A booking becomes a record like any other."
-        }
-      ],
-      "next": [
-        "/canvas",
-        "/docs",
-        "/pricing",
-        "/for/consultants"
-      ]
-    },
-    {
-      "path": "/for/freelancers",
-      "title": "For freelancers — one workspace instead of four | Tuval",
-      "description": "Notes, client work, invoicing records and the canvas you think on, in one place, for nothing. Run it yourself or use the free plan.",
-      "claim": "Four subscriptions is three too many.",
-      "lede": "Working alone does not mean needing less. It means the tax of moving between tools is paid by exactly one person: you.",
-      "bands": [
-        {
-          "tone": "paper",
-          "heading": "Think here first",
-          "body": "The canvas is where the shape of the job turns up before the job does.",
-          "demo": "canvas"
-        },
-        {
-          "tone": "pigment",
-          "heading": "Free is not a trial",
-          "body": "Three people, a gigabyte of files, and every board, page, database and issue there is. No feature is held back to make the paid plan look thin."
-        },
-        {
-          "tone": "paper",
-          "heading": "The parts of the job nobody bills for",
-          "points": [
-            {
-              "title": "Keeping track",
-              "body": "A daily journal one keystroke away, a clock against each piece of work, and a week that adds itself up."
-            },
-            {
-              "title": "Showing the work",
-              "body": "Publish a page to a public address, or open a board to the world and let a reader copy the brief off it."
-            },
-            {
-              "title": "Getting paid attention",
-              "body": "A page of your own with everything you have opened on it, and links to wherever people support your work."
-            }
-          ]
-        },
-        {
-          "tone": "pigment",
-          "heading": "And it is yours",
-          "body": "AGPL. Download the whole workspace as one file whenever you like, and put it back."
-        }
-      ],
-      "next": [
-        "/pricing",
-        "/self-hosting",
-        "/docs",
-        "/canvas"
-      ]
-    },
-    {
-      "path": "/for/consultants",
-      "title": "For consultants — analysis, findings and handover | Tuval",
-      "description": "Map the situation on a canvas, keep findings as pages with properties, and hand over a workspace the client can actually keep.",
-      "claim": "Handover the client can still read",
-      "lede": "The deliverable is usually a deck nobody opens twice. This is the alternative: a workspace that stays readable, searchable and exportable after you leave.",
-      "bands": [
-        {
-          "tone": "paper",
-          "heading": "Map it before you write it",
-          "body": "Five whys, customer journey, architecture. The templates are there.",
-          "demo": "canvas"
-        },
-        {
-          "tone": "pigment",
-          "heading": "A finding is a record, not a slide",
-          "body": "Give it a status, an owner, a date and a tag. Then a collection answers \"everything still open\" for the rest of the engagement without anybody maintaining a list."
-        },
-        {
-          "tone": "paper",
-          "heading": "Handover that survives you",
+          "heading": "From the room to the handover",
           "points": [
             {
               "title": "Decisions with their reasons",
               "body": "What was chosen, what it was chosen instead of, and why. Linked to the incident that prompted it."
             },
             {
-              "title": "Everything, in one file",
-              "body": "A backup of every page, issue, database, tag and link, which can be restored into their own workspace, self-hosted, with no licence to buy."
+              "title": "Projects that hold their work",
+              "body": "A project holds its boards, its pages and its issues, and the switch at the top of the sidebar makes everything else disappear until you switch back."
             },
             {
-              "title": "Or a real PDF",
-              "body": "Text you can select and search, not a screenshot of a document."
+              "title": "Everything, in one file",
+              "body": "A backup of every page, issue, database, tag and link, which can be restored into their own workspace, self-hosted, with no licence to buy."
             }
           ]
         },
@@ -381,10 +283,10 @@
         }
       ],
       "next": [
+        "/canvas",
         "/docs",
-        "/self-hosting",
-        "/for/agencies",
-        "/pricing"
+        "/pricing",
+        "/self-hosting"
       ]
     },
     {
@@ -399,15 +301,15 @@
           "heading": "What it needs",
           "points": [
             {
-              "title": "A Postgres",
+              "title": "A Postgres database",
               "body": "Supabase, or a plain Postgres with the same extensions. The schema is a folder of migrations you can read before you run them."
             },
             {
-              "title": "Somewhere for files",
+              "title": "An S3 bucket",
               "body": "Any S3-compatible bucket. Images and attachments are signed URLs, never public ones."
             },
             {
-              "title": "A static host",
+              "title": "Any static file host",
               "body": "The app builds to a folder of files. Anything that can serve them will do."
             }
           ]
@@ -467,13 +369,17 @@
         },
         {
           "tone": "paper",
+          "heading": "Working alone does not mean needing less",
+          "body": "It means the tax of moving between four tools is paid by exactly one person. Three people and a gigabyte is a whole workspace, not a trial, and no feature is held back to make the paid plan look thin."
+        },
+        {
+          "tone": "paper",
           "heading": "Or none of the above",
           "body": "Run it on your own machine and every limit here is yours to set. That is not a downgrade path; it is the same code."
         }
       ],
       "next": [
         "/self-hosting",
-        "/for/freelancers",
         "/canvas",
         "/docs"
       ]
@@ -485,9 +391,7 @@
     "/docs": "Pages and databases",
     "/issues": "Issues",
     "/for/software-teams": "For software teams",
-    "/for/agencies": "For agencies",
-    "/for/freelancers": "For freelancers",
-    "/for/consultants": "For consultants",
+    "/for/client-work": "For client work",
     "/self-hosting": "Self-hosting",
     "/pricing": "Pricing"
   }

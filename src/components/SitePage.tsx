@@ -21,9 +21,7 @@ const BOARD: { [path: string]: string } = {
   '/': 'journey',
   '/canvas': 'architecture',
   '/for/software-teams': 'kanban',
-  '/for/agencies': 'brainwriting',
-  '/for/freelancers': 'mindmap',
-  '/for/consultants': 'fivewhys',
+  '/for/client-work': 'fivewhys',
 }
 
 const NAV = ['/canvas', '/docs', '/issues', '/pricing']
@@ -120,8 +118,8 @@ function Index({ points }: { points: { title: string; body: string }[] }) {
   return (
     <div className="mx-auto max-w-[80rem] px-6 pt-24 pb-28">
       <dl className="grid gap-x-14 gap-y-10 md:grid-cols-3">
-        {points.map((point) => (
-          <div key={point.title}>
+        {points.map((point, at) => (
+          <div key={point.title} data-reveal style={{ '--step': at } as React.CSSProperties}>
             <dt className="border-b border-[#141310] pb-2.5 text-[19px] font-bold tracking-[-0.02em]">
               {point.title}
             </dt>
@@ -144,22 +142,25 @@ function Statement({ heading, body, picture }: {
   picture?: string
 }) {
   return (
-    <section style={{ background: DEEP, color: PAPER }}>
+    <section data-arrive style={{ '--band': DEEP, color: PAPER } as React.CSSProperties}>
       <div className={`mx-auto max-w-[80rem] px-6 py-32 sm:py-40 ${picture ? 'grid items-center gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : ''}`}>
         <div>
           <h2
+            data-reveal
             className="max-w-[17ch] font-bold leading-[1.02] tracking-[-0.038em]"
             style={{ fontSize: picture ? 'clamp(1.9rem, 3.6vw, 2.9rem)' : 'clamp(2.2rem, 5.4vw, 4.2rem)' }}
           >{heading}</h2>
           {body && (
             <p
+              data-reveal
               className="mt-6 max-w-[52ch]"
               style={{
+                '--step': 1,
                 fontFamily: '"Instrument Sans", system-ui, sans-serif',
                 fontSize: '18px',
                 lineHeight: 1.66,
                 color: 'rgba(242,239,233,0.86)',
-              }}
+              } as React.CSSProperties}
             >{body}</p>
           )}
         </div>
@@ -252,7 +253,7 @@ function Footer() {
             </p>
           </div>
           <nav className="flex flex-wrap gap-x-14 gap-y-8">
-            {[PAGES.slice(1, 4), PAGES.slice(4, 8), PAGES.slice(8)].map((group, at) => (
+            {[PAGES.slice(1, 4), PAGES.slice(4, 6), PAGES.slice(6)].map((group, at) => (
               <ul key={at} className="space-y-2.5">
                 {group.map((one) => (
                   <li key={one.path}>
@@ -447,9 +448,32 @@ function HomeLayout({ page }: { page: Page }) {
   )
 }
 
+function useArrival(on: unknown) {
+  useEffect(() => {
+    const marks = [...document.querySelectorAll<HTMLElement>('[data-reveal],[data-arrive]')]
+    if (!marks.length) return
+    // A page that never scrolls, or a browser with no observer, must still be readable.
+    if (typeof IntersectionObserver !== 'function') {
+      marks.forEach((el) => el.classList.add('seen'))
+      return
+    }
+    const watch = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        entry.target.classList.add('seen')
+        watch.unobserve(entry.target)
+      }
+    }, { rootMargin: '0px 0px -12% 0px' })
+    marks.forEach((el) => watch.observe(el))
+    return () => watch.disconnect()
+  }, [on])
+}
+
 export function SitePage() {
   const route = readRoute()
   const page = findPage(routePath()) ?? findPage('/')!
+
+  useArrival(page.path)
 
   useEffect(() => {
     document.title = page.title

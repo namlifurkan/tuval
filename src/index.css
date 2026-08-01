@@ -42,6 +42,41 @@ svg.lucide {
   }
 }
 
+/* The site's motion, and all of it -----------------------------------------------------------
+   A wipe rather than a float: content is uncovered, the way a printed sheet is drawn out of a
+   folder, and nothing that drives layout is animated. Long and calm reads expensive; short and
+   snappy reads like a template. */
+@property --reveal {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 14%;
+}
+
+[data-reveal] {
+  opacity: 0;
+  clip-path: inset(0 0 12% 0);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--step, 0) * 70ms);
+}
+
+[data-reveal].seen {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+}
+
+/* The pigment bands are the only contrast event on the site, and they used to simply be there.
+   Arriving is what makes an event of one. Colour is safe to animate; layout is not. */
+[data-arrive] {
+  background-color: #F2EFE9;
+  transition: background-color 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-arrive].seen {
+  background-color: var(--band, #9E2F1B);
+}
+
 @keyframes ada-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: none; }
@@ -53,4 +88,20 @@ svg.lucide {
 
 @media (prefers-reduced-motion: reduce) {
   .ada-label { animation: none; }
+
+  /* Nothing arrives, everything is simply there. Note the end state is the visible one: a
+     reveal that forgets this leaves the whole page invisible to the people who asked for less
+     motion, which is the worst possible way to respect them. */
+  [data-reveal],
+  [data-reveal].seen {
+    opacity: 1;
+    clip-path: none;
+    transition: none;
+  }
+
+  [data-arrive],
+  [data-arrive].seen {
+    background-color: var(--band, #9E2F1B);
+    transition: none;
+  }
 }

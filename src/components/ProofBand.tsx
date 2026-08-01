@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { boardToGraph, graphToMarkdown } from '../board/agent'
+import { inEnglish } from '../i18n'
 import { fitRect } from '../board/camera'
 import { connectorsFor, createItems, getItems, patchItems, removeItems, transact } from '../board/doc'
-import { makeConnector, makeFrame, makeRecordItem, makeSticky, RECORD_H, RECORD_W } from '../board/items'
+import {
+  makeConnector, makeFrame, makeRecordItem, makeSticky, RECORD_H, RECORD_W, STICKY_SIZE,
+} from '../board/items'
 import { boxOf } from '../board/render'
 import { requestRender, useBoardStore } from '../board/store'
 import type { Item } from '../board/types'
@@ -21,18 +24,38 @@ import { TextEditor } from './TextEditor'
 
 type Shown = 'none' | 'issues' | 'agent' | 'mcp'
 
-const SEED: [number, number, string, string][] = [
-  [-460, -120, '#F0E3B0', 'Onboarding is too long'],
-  [-160, -120, '#7FA5BE', 'Cut the second step'],
-  [140, -120, '#CBD79A', 'Ship a one-field sign-up'],
-  [-460, 60, '#E7B7B4', 'Nobody reads the tooltip'],
-  [-160, 60, '#CBD79A', 'Move it into the empty state'],
+// Laid out from the sticky's own size rather than from numbers typed by eye. Written by hand
+// they overlapped each other by forty-eight pixels and hung a hundred out of the bottom of the
+// frame, which is what a retro drawn by somebody who has never used the product looks like.
+const GAP = 40
+const PAD = 56
+const COLS = 3
+
+const SEED: [string, string][] = [
+  ['#F0E3B0', 'Onboarding is too long'],
+  ['#7FA5BE', 'Cut the second step'],
+  ['#CBD79A', 'Ship a one-field sign-up'],
+  ['#E7B7B4', 'Nobody reads the tooltip'],
+  ['#CBD79A', 'Move it into the empty state'],
 ]
+
+const STEP = STICKY_SIZE + GAP
+const ROWS = Math.ceil(SEED.length / COLS)
+const WIDE = COLS * STICKY_SIZE + (COLS - 1) * GAP
+const TALL = ROWS * STICKY_SIZE + (ROWS - 1) * GAP
+const LEFT = -WIDE / 2
+const TOP = -TALL / 2
 
 function seed() {
   if (getItems().length) return
-  const frame = makeFrame(-520, -200, 940, 380, 'Retro, this morning')
-  const notes = SEED.map(([x, y, fill, text]) => makeSticky(x, y, fill, text))
+  const frame = makeFrame(
+    LEFT - PAD, TOP - PAD, WIDE + PAD * 2, TALL + PAD * 2, 'Retro, this morning',
+  )
+  const notes = SEED.map(([fill, text], at) => makeSticky(
+    LEFT + (at % COLS) * STEP,
+    TOP + Math.floor(at / COLS) * STEP,
+    fill, text,
+  ))
   const wire = (from: string, to: string) => makeConnector(
     { itemId: from, anchor: 'right', x: 0, y: 0 },
     { itemId: to, anchor: 'left', x: 0, y: 0 },
@@ -169,8 +192,9 @@ export function ProofBand() {
     setShown('issues')
   }
 
+  // The brief goes through t(), and this site is English whatever language the app is set to.
   const handOff = () => {
-    setBrief(graphToMarkdown(boardToGraph(getItems(), 'retro-this-morning')))
+    setBrief(inEnglish(() => graphToMarkdown(boardToGraph(getItems(), 'retro-this-morning'))))
     setShown('agent')
   }
 
