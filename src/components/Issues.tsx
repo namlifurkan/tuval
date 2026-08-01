@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { PanelRight, Trash2 } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { today } from '../board/database'
@@ -7,6 +7,7 @@ import {
   isClosed, loadWorn, STATUS_TONE, subscribeIssues,
 } from '../board/issues'
 import type { GroupBy } from '../board/issues'
+import { plain } from '../board/keys'
 import { initials } from '../board/me'
 import { loadRelations, progressOf } from '../board/relations'
 import {
@@ -52,6 +53,8 @@ export function Issues() {
   const [view, setView] = useState<'list' | 'board'>('list')
   const [group, setGroup] = useState<GroupBy>('status')
   const [cycleOnly, setCycleOnly] = useState('')
+  const [at, setAt] = useState(-1)
+  const box = useRef<HTMLInputElement>(null)
 
   // The open issue is the address, not a piece of state beside it. That is what makes it
   // something you can send to somebody, and what makes the back button close the panel.
@@ -117,6 +120,32 @@ export function Issues() {
     if (id && cycleOnly) patchRecord(id, { cycle_id: cycleOnly })
   }
 
+  // The rows as the eye reads them: bands in order, and every row inside them, so j and k walk
+  // the list rather than a band at a time.
+  const walk = useMemo(() => bands.flatMap((b) => b.rows), [bands])
+
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && openId) { setOpenId(null); return }
+      if (!plain(e)) return
+      const step = (by: number) =>
+        setAt((was) => Math.max(0, Math.min(walk.length - 1, (was < 0 ? -1 : was) + by)))
+
+      if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); step(1) }
+      else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); step(-1) }
+      else if (e.key === 'c') { e.preventDefault(); box.current?.focus() }
+      else if (e.key === 'Enter' && walk[at]) { e.preventDefault(); setOpenId(walk[at].id) }
+      else if (e.key === 'x' && walk[at]) { e.preventDefault(); void archiveRecord(walk[at].id) }
+      else if (/^[1-7]$/.test(e.key) && walk[at]) {
+        e.preventDefault()
+        patchRecord(walk[at].id, { status: STATUSES[Number(e.key) - 1] })
+      }
+    }
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walk, at, openId])
+
   const now = currentCycle(today())
 
   return (
@@ -178,7 +207,8 @@ export function Issues() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') void add() }}
-        placeholder={t('Write an issue and press enter')}
+        ref={box}
+        placeholder={t('Write an issue and press enter — or press c')}
         className="mt-5 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]"
       />
 
@@ -199,7 +229,12 @@ export function Issues() {
 
             <div className="divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
               {band.rows.map((issue) => (
-                <div key={issue.id} className="group flex items-center gap-2.5 py-2.5">
+                <div
+                  key={issue.id}
+                  onMouseEnter={() => setAt(walk.indexOf(issue))}
+                  className={`group flex items-center gap-2.5 py-2.5
+                    ${walk[at]?.id === issue.id ? 'bg-[#F7E9E4]' : ''}`}
+                >
                   <Dot status={issue.status} />
 
                   <span className="w-[68px] shrink-0 font-mono text-[11px] text-[#B6B1A6]">
@@ -278,6 +313,12 @@ export function Issues() {
           prefix={prefix}
           onClose={() => setOpenId(null)}
         />
+      )}
+
+      {view === 'list' && !!shown.length && (
+        <p className="mt-4 text-[11px] text-[#B6B1A6]">
+          {t('j k move · enter opens · c writes · x archives · 1–7 set the state · g then i p d b n s')}
+        </p>
       )}
 
       {view === 'list' && !shown.length && (

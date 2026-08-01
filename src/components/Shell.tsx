@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
+import { armed } from '../board/keys'
 import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
@@ -33,6 +34,20 @@ export function Shell({ title, wide, action, children }: {
 
   // Asked for once wherever you land, so the badge is right on a page that is not the inbox.
   useEffect(() => { if (workspace) void loadInbox() }, [workspace])
+
+  // g then a letter, the way every keyboard-first tracker does it.
+  useEffect(() => {
+    const where: { [key: string]: string } = {
+      i: '/issues', p: '/projects', d: '/docs', b: '/dashboard', n: '/inbox', s: '/settings',
+    }
+    const key = armed('g', (second) => {
+      const to = where[second]
+      if (to) go(to)
+      return !!to
+    })
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [])
 
   return (
     <div className="flex h-dvh bg-[#F2EFE9]">
