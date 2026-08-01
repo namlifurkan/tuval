@@ -143,6 +143,58 @@ export const KITS: Kit[] = [
       },
     ],
   },
+  {
+    // What people build by hand in Obsidian, as four tables instead of four folders. The
+    // difference that matters is not the shape: it is that an agent can search this and read a
+    // page out of it, which a folder of files on somebody's laptop cannot do from anywhere else.
+    id: 'brain',
+    name: 'Second brain',
+    blurb: 'Decisions, incidents, what a term means, and where you read it.',
+    tables: [
+      {
+        name: 'Decisions',
+        icon: '⚖️',
+        asks: [
+          { name: 'Decided', type: 'date' },
+          { name: 'Decided by', type: 'person' },
+          { name: 'Standing', type: 'select', choices: ['Holds', 'Superseded', 'Reversed'] },
+          { name: 'Instead of', type: 'text' },
+          { name: 'Because', type: 'text' },
+          { name: 'Sources', type: 'relation', to: 'Sources' },
+        ],
+      },
+      {
+        name: 'Incidents',
+        icon: '🔥',
+        asks: [
+          { name: 'Happened', type: 'date' },
+          { name: 'Severity', type: 'select', choices: ['Noticed', 'Degraded', 'Down'] },
+          { name: 'Symptom', type: 'text' },
+          { name: 'Root cause', type: 'text' },
+          { name: 'Decisions', type: 'relation', to: 'Decisions' },
+        ],
+      },
+      {
+        name: 'Terms',
+        icon: '📖',
+        asks: [
+          { name: 'Means', type: 'text' },
+          { name: 'Not to be confused with', type: 'text' },
+          { name: 'Sources', type: 'relation', to: 'Sources' },
+        ],
+      },
+      {
+        name: 'Sources',
+        icon: '🔗',
+        asks: [
+          { name: 'Where', type: 'url' },
+          { name: 'Kind', type: 'select', choices: ['Paper', 'Post', 'Talk', 'Book', 'Thread', 'Person'] },
+          { name: 'Read', type: 'date' },
+          { name: 'Worth it', type: 'checkbox' },
+        ],
+      },
+    ],
+  },
 ]
 
 const STAGES: { id: string; name: string; tone: string; stage: 'todo' | 'doing' | 'done' }[] = [

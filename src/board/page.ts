@@ -53,6 +53,15 @@ export function textOf(from: Y.Doc): string {
   return parts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 20000)
 }
 
+// The editor on screen is the only thing that can turn this document into markdown, and it is
+// also the only thing that can have changed it. So it lends the ability while it is mounted and
+// takes it back when it goes.
+let toMarkdown: (() => string | Promise<string>) | null = null
+
+export function lendMarkdown(make: (() => string | Promise<string>) | null) {
+  toMarkdown = make
+}
+
 async function push() {
   saving = 0
   if (!dirty || !current || !supabase || !getUser()) return
@@ -63,7 +72,13 @@ async function push() {
     supabase.from('record_docs').upsert({ record_id: id, doc: hex(Y.encodeStateAsUpdate(saved)), updated_at: at }),
     // Writing the body is editing the page. Without this the record keeps the timestamp of the
     // last time somebody changed its title, and a page written all afternoon looks untouched.
-    supabase.from('records').update({ updated_at: at, body: textOf(saved) }).eq('id', id),
+    supabase.from('records').update({
+      updated_at: at,
+      body: textOf(saved),
+      // Left alone rather than blanked when no editor is mounted: a stale rendition of the page
+      // is worth more to whoever asks than nothing at all.
+      ...(toMarkdown ? { markdown: (await Promise.resolve(toMarkdown()).catch(() => '')).slice(0, 200_000) } : {}),
+    }).eq('id', id),
     linkMentions(id, saved),
     notifyMentions(id, peopleIn(saved)),
   ])

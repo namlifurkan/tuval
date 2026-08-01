@@ -64,6 +64,9 @@ Deno.serve(async (request) => {
     return send({
       workspace,
       records: '/records',
+      one: '/records/<id>',
+      markdown: '/records/<id>/markdown',
+      search: '/search?q=<words>',
       cycles: '/cycles',
       labels: '/labels',
     })
@@ -82,9 +85,52 @@ Deno.serve(async (request) => {
     return send(data ?? [])
   }
 
+  // What an agent asks first. Titles and bodies together, ranked by the database rather than by
+  // us, with a line of context so an answer can be judged without opening it.
+  if (parts[0] === 'search' && request.method === 'GET') {
+    const asked = (query.get('q') ?? '').trim()
+    if (asked.length < 2) return send({ error: 'Ask for at least two characters.' }, 400)
+
+    const { data, error } = await db.from('records')
+      .select('id, kind, title, icon, updated_at, body')
+      .eq('workspace_id', workspace).is('archived_at', null)
+      .textSearch('search', asked, { type: 'websearch', config: 'simple' })
+      .limit(Math.min(Number(query.get('limit') ?? 20) || 20, 100))
+    if (error) return send({ error: error.message }, 400)
+
+    const first = asked.split(/\s+/)[0].toLowerCase()
+    return send((data ?? []).map((row) => {
+      const body = (row.body as string) ?? ''
+      const at = body.toLowerCase().indexOf(first)
+      const from = at < 0 ? 0 : Math.max(0, at - 40)
+      return {
+        id: row.id,
+        kind: row.kind,
+        title: row.title,
+        icon: row.icon,
+        updated_at: row.updated_at,
+        excerpt: `${from ? '…' : ''}${body.slice(from, from + 160)}${body.length > from + 160 ? '…' : ''}`,
+        markdown: `/records/${row.id as string}/markdown`,
+      }
+    }))
+  }
+
   if (parts[0] !== 'records') return send({ error: 'No such collection.' }, 404)
 
   const id = parts[1]
+
+  // The page as prose rather than as a row. Markdown is what an agent reads; the flattened body
+  // is the fallback for a page written before this existed or never opened in the editor since.
+  if (request.method === 'GET' && id && parts[2] === 'markdown') {
+    const { data } = await db.from('records').select('title, markdown, body')
+      .eq('workspace_id', workspace).eq('id', id).maybeSingle()
+    if (!data) return send({ error: 'No such record.' }, 404)
+    const title = (data.title as string) || 'Untitled'
+    const held = (data.markdown as string) || (data.body as string) || ''
+    return new Response(`# ${title}\n\n${held}\n`, {
+      headers: { 'Content-Type': 'text/markdown; charset=utf-8', ...CORS },
+    })
+  }
 
   if (request.method === 'GET' && id) {
     const { data } = await db.from('records').select(COLUMNS)

@@ -14,7 +14,7 @@ import { BlockNoteView } from '@blocknote/mantine'
 import { readRoute } from '../board/boards'
 import { me } from '../board/me'
 import { MENTION } from '../board/mention'
-import { pageAwareness, pageFragment } from '../board/page'
+import { lendMarkdown, pageAwareness, pageFragment } from '../board/page'
 import { PageThreadStore } from '../board/threads'
 import { listTeam } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
@@ -75,6 +75,14 @@ export function PageEditor({ title, locked }: { title: string; locked?: boolean 
       user: { name: displayName(getUser()?.email) || 'Anonymous', color: me.color },
     },
   }))
+
+  // The save writes markdown beside the flattened text so an agent asking for this page gets
+  // something with headings and lists in it. Only this editor can produce it, and only while it
+  // is mounted — which is also the only time the document can change.
+  useEffect(() => {
+    lendMarkdown(() => editor.blocksToMarkdownLossy())
+    return () => lendMarkdown(null)
+  }, [editor])
 
   const here = readRoute()
   const mine = here.kind === 'page' ? here.id : ''
