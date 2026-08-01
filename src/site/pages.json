@@ -2,38 +2,128 @@
   "pages": [
     {
       "path": "/",
-      "title": "Tuval — whiteboard, docs and tracker over one record",
-      "description": "An open-source workspace where an infinite canvas, your documents and your issue tracker are three views of the same records. Run it yourself, or let us keep the disks spinning.",
-      "claim": "Whiteboard, docs and tracker. One record.",
-      "lede": "Not three apps behind one login. A sticky on a board, a row in a table and a ticket in a sprint are the same object, and editing any of them edits all of them.",
+      "title": "Tuval — the sticky note is the ticket",
+      "description": "An open-source workspace where an infinite canvas, your pages and your issue tracker are three views of one record. Promote a sticky note on this page and watch it turn up in the table and the sprint. AGPL-3.0, self-hostable, free for three people.",
+      "claim": "The sticky note is the ticket.",
+      "lede": "Not a copy of it. Not a link to it. One record, drawn on a canvas, listed in a table, worked in a sprint. The three panels below are live and they are all reading the same document.",
       "bands": [
         {
-          "tone": "pigment",
-          "heading": "Tuesday's sticky is Friday's ticket",
-          "body": "Select a sticky, turn it into an issue, and it keeps its place on the board while it turns up in the sprint. Nothing is retyped, because nothing was ever copied."
+          "id": "demo",
+          "tone": "paper",
+          "heading": "One board, read three ways",
+          "body": "The left panel is the product's own renderer drawing a real document. The two beside it read that same document, and nothing is copied between them because there was only ever one of it. Switch the right panel to brief.md and the board comes out as markdown a coding agent can act on: every other whiteboard exports a picture, and a picture is the one thing a model cannot act on."
         },
         {
+          "id": "promote",
+          "tone": "pigment",
+          "heading": "Tuesday's sticky is Friday's ticket",
+          "body": "Select a note, press one button, and it is an issue with a key on it. The card stands where the note stood and the arrow you drew stays attached, because where you put it was part of the thought. Rename it in the table and the canvas changes under your hand. Nothing is retyped, because nothing was ever copied."
+        },
+        {
+          "id": "canvas",
           "tone": "paper",
-          "heading": "What it replaces",
+          "heading": "Canvas",
+          "body": "A surface with no edges and no lag.",
+          "lines": [
+            "Frames, connectors, sticky notes, pen, shapes, tables and mind maps",
+            "Images, PDFs placed page by page, live embeds and code blocks",
+            "Presentation mode, comments, live cursors and version history",
+            "Templates, and importers for an existing Miro board or a Notion export"
+          ]
+        },
+        {
+          "id": "pages",
+          "tone": "paper",
+          "heading": "Pages and databases",
+          "body": "Where the same records get written down.",
+          "lines": [
+            "A block editor with nested pages, mentions, backlinks and an inbox",
+            "Databases with twenty column types, formulas, rollups and relations",
+            "Table, board, list, gallery, calendar and timeline views over them",
+            "Publish a page to the web, or keep it behind the login"
+          ]
+        },
+        {
+          "id": "issues",
+          "tone": "paper",
+          "heading": "Issues",
+          "body": "The work, with keys on it.",
+          "lines": [
+            "Issues with keys, cycles, projects, estimates and labels",
+            "Sub-issues, blocking relations, a board view and a burn-down",
+            "Promote a note or a paragraph into an issue where it stands",
+            "A card on a canvas points at the row it came from and refreshes from it"
+          ]
+        },
+        {
+          "id": "migrate",
+          "tone": "paper",
+          "heading": "Getting your work in",
+          "body": "Switching is the expensive part, so here is exactly how far the importers go and where they stop.",
           "points": [
             {
-              "title": "The whiteboard",
-              "body": "Infinite canvas, frames, connectors, sticky notes, pen, tables, mind maps, templates, presentation mode, comments and live cursors."
+              "title": "A Miro board",
+              "body": "A script pulls the board through Miro's own API and the mapper lays it out here: frames, sticky notes, shapes, text, connectors and images. Your token stays in your shell and never reaches this site."
             },
             {
-              "title": "The wiki",
-              "body": "Pages with real blocks, databases with twenty column types, six views over them, formulas, rollups, relations, publishing and version history."
+              "title": "A Notion export",
+              "body": "Take the markdown export Notion gives you and the pages come in as pages, with their headings, lists, code blocks, tables and nesting intact. Databases arrive as databases, not as screenshots of them."
             },
             {
-              "title": "The tracker",
-              "body": "Issues with keys, cycles, projects, estimates, labels, sub-issues, blocking relations, a board view and a burn-down."
+              "title": "A tracker backlog",
+              "body": "This one is not solved. There is no importer for Linear or Jira, so a backlog would be retyped. It is the hardest thing about switching and pretending otherwise would waste your afternoon."
             }
           ]
         },
         {
+          "id": "price",
           "tone": "paper",
-          "heading": "Yours either way",
-          "body": "The code is AGPL. Run it on your own machine and every limit is yours to set. Pay only if you would rather somebody else kept the disks spinning."
+          "heading": "One tool. One line on the invoice.",
+          "body": "Priced for a team that was paying three separate bills for the same afternoon's work. The code is AGPL either way; what is charged for is somebody else keeping the disks spinning.",
+          "points": [
+            {
+              "title": "Free",
+              "body": "Up to three people, one gigabyte of files, and every board, page, database and issue there is. No card, no trial clock."
+            },
+            {
+              "title": "Team",
+              "body": "{price} per {per} per {period}, VAT included, about {about}. Ten gigabytes each, up to two hundred people, and the API and webhooks so n8n and the rest can reach it."
+            },
+            {
+              "title": "Your own server",
+              "body": "Nothing, for good. A Postgres and a bucket, your disks and your backups. No seat count, no phone-home, no feature held back to make the paid one look better."
+            }
+          ]
+        },
+        {
+          "id": "ceiling",
+          "tone": "paper",
+          "heading": "Where it stops",
+          "body": "Written by one person, in Turkey. So here is the list a sales page leaves out, which is better read now than after you have moved a team across.",
+          "points": [
+            {
+              "title": "Live editing is unproven",
+              "body": "The synchronisation is written and the channel is private, checked by the same policies as the board itself. It has never once been run with two people in the room."
+            },
+            {
+              "title": "No phone layout, deliberately",
+              "body": "An infinite canvas on a six-inch screen is a worse product, not a smaller one. The effort goes into the desk instead."
+            },
+            {
+              "title": "No enterprise identity",
+              "body": "Email, GitHub, Google and Apple sign-in, with roles enforced in the database. No SAML, no SCIM, no signed support agreement. If procurement needs those, this does not get approved."
+            },
+            {
+              "title": "Embeds sit on top",
+              "body": "A live embed is a real iframe over the canvas, so an item stacked above one still draws behind it. A still preview will fix it."
+            }
+          ]
+        },
+        {
+          "id": "close",
+          "tone": "pigment",
+          "heading": "Draw it once. Ship it from the same place.",
+          "body": "Start a board in the browser, or clone the repository and run the whole thing on a machine you own. Both are the same software."
         }
       ],
       "next": [

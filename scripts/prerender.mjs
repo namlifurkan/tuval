@@ -24,9 +24,18 @@ if (!existsSync(join(DIST, 'index.html'))) {
 // The words live in JSON so that both readers are readers: the React pages import it and this
 // writes it out. Parsing the TypeScript with a regular expression was the first attempt and it
 // silently found three pages out of ten, which is exactly the failure a build step must not have.
-const { pages: all, names } = JSON.parse(readFileSync('src/site/pages.json', 'utf8'))
+const { pages: all } = JSON.parse(readFileSync('src/site/pages.json', 'utf8'))
 
-const escape = (text) => String(text)
+// The price is decided in src/site/price.json and read here and by the React pages, so a crawler
+// and a visitor cannot be shown two different numbers.
+const price = JSON.parse(readFileSync('src/site/price.json', 'utf8'))
+const fill = (text) => String(text)
+  .replace('{price}', `${price.currency}${price.amount}`)
+  .replace('{per}', price.per)
+  .replace('{period}', price.period)
+  .replace('{about}', price.about)
+
+const escape = (text) => fill(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;')
 
@@ -70,6 +79,9 @@ for (const page of all) {
         `<h3>${escape(point.title)}</h3>`,
         `<p>${escape(point.body)}</p>`,
       ]),
+      ...(band.lines?.length
+        ? [`<ul>${band.lines.map((line) => `<li>${escape(line)}</li>`).join('')}</ul>`]
+        : []),
     ]).filter(Boolean),
     '<nav>',
     // The module curates which page points at which, and this used to throw that away and dump

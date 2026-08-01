@@ -162,7 +162,6 @@ export type Route =
   | { kind: 'collection'; id: string }
   | { kind: 'profile'; handle: string }
   | { kind: 'project'; id: string }
-  | { kind: 'try' }
   | { kind: 'auth'; page: AuthPage }
   | { kind: 'board'; room: string }
 
@@ -190,7 +189,6 @@ export function readRoute(): Route {
   if (set) return { kind: 'collection', id: decodeURIComponent(set[1]) }
   const who = /^\/u\/(.+)$/.exec(path)
   if (who) return { kind: 'profile', handle: decodeURIComponent(who[1]) }
-  if (path === '/try' || path.startsWith('/try/')) return { kind: 'try' }
   const work = /^\/w\/(.+)$/.exec(path)
   if (work) return { kind: 'project', id: decodeURIComponent(work[1]) }
   const issue = /^\/i\/(.+)$/.exec(path)

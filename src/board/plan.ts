@@ -16,17 +16,13 @@ export type Plan = 'free' | 'team'
 // English page that number means nothing to a reader in London, so an approximation travels with
 // it: shown as "about", never as a second price, and updated when the rate moves enough to be a
 // lie. What is charged is always the lira figure.
-export const PRICE = {
-  amount: 249,
-  currency: '₺',
-  per: 'member',
-  period: 'month',
-  about: '$7',
-  // Turkish consumer law requires the price a buyer is shown to be the price they pay, tax
-  // included. Saying so is not decoration: a figure with the tax left off is the shape of a
-  // complaint.
-  taxIncluded: true,
-}
+// Turkish consumer law requires the price a buyer is shown to be the price they pay, tax
+// included. Saying so is not decoration: a figure with the tax left off is the shape of a
+// complaint.
+//
+// In JSON because three readers need it and none of them can import the others: this module, the
+// marketing copy, and the build script that writes the marketing copy out as HTML.
+export { default as PRICE } from '../site/price.json'
 
 export interface Usage {
   plan: Plan

@@ -10,6 +10,9 @@
 export type Demo = 'canvas' | 'database' | 'issues' | 'none'
 
 export interface Band {
+  // Which slot on the page this band is. The home layout has eight of them and they are not
+  // interchangeable, so it asks for them by name rather than guessing from their shape.
+  id?: string
   // A full-bleed pigment band or a paper one. The alternation is the voice: the app is the
   // quiet gallery, this is the poster outside it.
   tone: 'pigment' | 'paper'
@@ -17,6 +20,8 @@ export interface Band {
   body?: string
   // Numbered lines rather than a card grid. Three at most; four reads as a list nobody finishes.
   points?: { title: string; body: string }[]
+  // A plain list, for the places where a sentence per item would be padding.
+  lines?: string[]
   demo?: Demo
 }
 
@@ -57,3 +62,20 @@ export const HOME = PAGES[0]
 
 export const findPage = (path: string) =>
   PAGES.find((p) => p.path === (path.replace(/\/+$/, '') || '/'))
+
+export const bandOf = (page: Page, id: string) => page.bands.find((b) => b.id === id)
+
+// The price is decided in one place and enforced in another, and neither of them is this file.
+// A sentence that quotes a stale number is a complaint waiting to happen, so it carries tokens
+// and the number arrives from src/board/plan.ts. Prerender does the same substitution.
+export const filled = (text: string, price: {
+  amount: number
+  currency: string
+  per: string
+  period: string
+  about: string
+}) => text
+  .replace('{price}', `${price.currency}${price.amount}`)
+  .replace('{per}', price.per)
+  .replace('{period}', price.period)
+  .replace('{about}', price.about)
