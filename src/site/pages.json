@@ -402,22 +402,38 @@
               "title": "Any static file host",
               "body": "The app builds to a folder of files. Anything that can serve them will do."
             }
+          ],
+          "id": "needs"
+        },
+        {
+          "id": "commands",
+          "tone": "paper",
+          "heading": "Four commands",
+          "body": "Point it at a Postgres and a bucket, apply the migrations, build the folder of files. There is no installer to trust and nothing that phones home.",
+          "lines": [
+            "git clone https://github.com/namlifurkan/tuval && cd tuval",
+            "cp .env.example .env   # your Supabase URL and anon key",
+            "npx supabase db push   # the schema, as migrations you can read first",
+            "npm install && npm run build   # serve dist/ from anything"
           ]
         },
         {
           "tone": "pigment",
           "heading": "Nothing is held back",
-          "body": "No separate edition and no feature flags. Seats, storage and the API are limited on the hosted plan because those are what cost money to serve; on an install you run yourself they are not limited at all."
+          "body": "No separate edition and no feature flags. Seats, storage and the API are limited on the hosted plan because those are what cost money to serve; on an install you run yourself they are not limited at all.",
+          "id": null
         },
         {
           "tone": "paper",
           "heading": "Access is decided by the database",
-          "body": "Every rule about who may read or write what is a row-level security policy, proven by a suite of access checks that runs against the real schema before any change ships. An interface that hides a button is not security; this is."
+          "body": "Every rule about who may read or write what is a row-level security policy, proven by a suite of access checks that runs against the real schema before any change ships. An interface that hides a button is not security; this is.",
+          "id": null
         },
         {
           "tone": "pigment",
           "heading": "And you can leave",
-          "body": "One file holds every page, board, issue, database, tag and link, and restores into any workspace."
+          "body": "One file holds every page, board, issue, database, tag and link, and restores into any workspace.",
+          "id": null
         }
       ],
       "next": [
@@ -496,7 +512,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {
@@ -594,7 +610,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {
@@ -697,7 +713,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan ₺249 per member per month, VAT included, about $7.",
+            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {

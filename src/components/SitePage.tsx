@@ -240,7 +240,7 @@ function Compare({ compare }: { compare: NonNullable<Page['compare']> }) {
                 <th scope="row" className="px-5 py-3.5 align-top text-[14px] font-semibold">
                   {row.feature}
                 </th>
-                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{row.tuval}</td>
+                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{say(row.tuval)}</td>
                 <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{row.them}</td>
               </tr>
             ))}
@@ -491,10 +491,32 @@ function CompareLayout({ page }: { page: Page }) {
 
 // A specification sheet. Nothing to demonstrate here, so the page is what it is about: the
 // requirements, plainly, in the order somebody would meet them.
+// The instructions, as instructions. Prose about how easy something is to install is not how
+// anybody decides whether to install it; the four lines they will actually type are.
+function Commands({ band }: { band: Band }) {
+  return (
+    <div className="mt-4 mb-12 border-t border-[#141310]/12 pt-8">
+      <h3 className="text-[26px] leading-[1.12]" style={DISPLAY}>{band.heading}</h3>
+      <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-[#4A463E]" style={READING}>
+        {band.body}
+      </p>
+      <ol className="mt-6 overflow-x-auto rounded-xl border border-[#141310]/12 bg-[#141310] py-4 text-[#EBE7DE]">
+        {band.lines?.map((line) => (
+          <li key={line} className="flex gap-3 whitespace-pre px-5 py-1.5 font-mono text-[12.5px] leading-[1.6]">
+            <span aria-hidden className="select-none text-[#C8452D]">$</span>
+            {line}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 function SpecLayout({ page }: { page: Page }) {
   const needs = page.bands.find((b) => b.points)
+  const commands = bandOf(page, 'commands')
   const said = page.bands.filter((b) => b.tone === 'pigment')
-  const note = page.bands.filter((b) => b.tone === 'paper' && !b.points)
+  const note = page.bands.filter((b) => b.tone === 'paper' && !b.points && !b.lines)
 
   return (
     <>
@@ -516,6 +538,7 @@ function SpecLayout({ page }: { page: Page }) {
             </div>
           ))}
         </dl>
+        {commands && <Commands band={commands} />}
         {note.map((one) => (
           <div key={one.heading} className="border-t border-[#141310]/12 py-8">
             <h3 className="text-[26px] leading-[1.12]" style={DISPLAY}>{one.heading}</h3>
