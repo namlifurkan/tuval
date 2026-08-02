@@ -1,8 +1,10 @@
 // The door for everything outside: n8n, a script, a bot, somebody's spreadsheet.
 //
-// It holds the service key, so it can read anything in the database. The one thing that makes
-// that safe is that every query it runs is filtered by the workspace the caller's key belongs
-// to, and the caller never chooses that workspace — the key does.
+// It holds the service key, so it can read anything in the database. Three things make that
+// safe. Every query it runs is filtered by the workspace the caller's key belongs to, and the
+// caller never chooses that workspace — the key does. A key that was made to read is refused
+// every method that is not a read. And a page with people named on it is asked about on behalf
+// of the person who made the key, so restricting a page shuts this door as well as the app.
 //
 // Deliberately small. This is not a mirror of the app: it is the handful of things an
 // integration asks for, which is records in and records out.
@@ -51,8 +53,28 @@ Deno.serve(async (request) => {
   const token = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim()
   if (!token) return send({ error: 'Send an API key as a bearer token.' }, 401)
 
-  const { data: workspace } = await db.rpc('workspace_for_key', { token })
-  if (!workspace) return send({ error: 'That key is not valid.' }, 401)
+  const { data: keyed } = await db.rpc('workspace_for_key', { token })
+  const key = (Array.isArray(keyed) ? keyed[0] : keyed) as
+    { workspace_id: string; acting: string; scope: string } | undefined
+  if (!key?.workspace_id) return send({ error: 'That key is not valid.' }, 401)
+
+  const workspace = key.workspace_id
+  const acting = key.acting
+  if (request.method !== 'GET' && key.scope !== 'write') {
+    return send({ error: 'That key may only read.' }, 403)
+  }
+
+  // The page gate, asked once for a whole page of rows rather than once per row.
+  const readable = async (ids: string[]) => {
+    if (!ids.length) return new Set<string>()
+    const { data } = await db.rpc('can_read_records_as', { who: acting, ids })
+    return new Set<string>((data as string[] | null) ?? [])
+  }
+
+  const writable = async (rec: string | null) => {
+    const { data } = await db.rpc('can_write_record_as', { who: acting, rec })
+    return data === true
+  }
 
   // Everything after /api is the path, so /api/records/<id> and /functions/v1/api/records/<id>
   // are the same request seen from two sides of a proxy.
@@ -63,6 +85,7 @@ Deno.serve(async (request) => {
   if (!parts.length) {
     return send({
       workspace,
+      scope: key.scope,
       records: '/records',
       one: '/records/<id>',
       markdown: '/records/<id>/markdown',
@@ -98,8 +121,9 @@ Deno.serve(async (request) => {
       .limit(Math.min(Number(query.get('limit') ?? 20) || 20, 100))
     if (error) return send({ error: error.message }, 400)
 
+    const open = await readable((data ?? []).map((row) => row.id as string))
     const first = asked.split(/\s+/)[0].toLowerCase()
-    return send((data ?? []).map((row) => {
+    return send((data ?? []).filter((row) => open.has(row.id as string)).map((row) => {
       const body = (row.body as string) ?? ''
       const at = body.toLowerCase().indexOf(first)
       const from = at < 0 ? 0 : Math.max(0, at - 40)
@@ -124,7 +148,7 @@ Deno.serve(async (request) => {
   if (request.method === 'GET' && id && parts[2] === 'markdown') {
     const { data } = await db.from('records').select('title, markdown, body')
       .eq('workspace_id', workspace).eq('id', id).maybeSingle()
-    if (!data) return send({ error: 'No such record.' }, 404)
+    if (!data || !(await readable([id])).has(id)) return send({ error: 'No such record.' }, 404)
     const title = (data.title as string) || 'Untitled'
     const held = (data.markdown as string) || (data.body as string) || ''
     return new Response(`# ${title}\n\n${held}\n`, {
@@ -135,7 +159,8 @@ Deno.serve(async (request) => {
   if (request.method === 'GET' && id) {
     const { data } = await db.from('records').select(COLUMNS)
       .eq('workspace_id', workspace).eq('id', id).maybeSingle()
-    return data ? send(data) : send({ error: 'No such record.' }, 404)
+    if (!data || !(await readable([id])).has(id)) return send({ error: 'No such record.' }, 404)
+    return send(data)
   }
 
   if (request.method === 'GET') {
@@ -154,7 +179,12 @@ Deno.serve(async (request) => {
     const { data, error } = await asking
       .order('updated_at', { ascending: false })
       .range(Number(query.get('offset') ?? 0) || 0, (Number(query.get('offset') ?? 0) || 0) + limit - 1)
-    return error ? send({ error: error.message }, 400) : send(data ?? [])
+    if (error) return send({ error: error.message }, 400)
+
+    // Filtered after the page rather than inside the query, so a restricted page costs a shorter
+    // page rather than a recursive join on every listing.
+    const open = await readable((data ?? []).map((row) => row.id as string))
+    return send((data ?? []).filter((row) => open.has(row.id as string)))
   }
 
   if (request.method === 'POST') {
@@ -163,6 +193,10 @@ Deno.serve(async (request) => {
     const row = only(body as Record<string, unknown>, WRITABLE)
     if (!row.kind) row.kind = 'issue'
     if (!KINDS.includes(String(row.kind))) return send({ error: 'No such kind.' }, 400)
+    // A new page under a restricted one is part of that page, so it is judged by its parent.
+    if (!(await writable((row.parent_id as string | null) ?? null))) {
+      return send({ error: 'No such record.' }, 404)
+    }
 
     const { data, error } = await db.from('records')
       .insert({ ...row, workspace_id: workspace }).select(COLUMNS).single()
@@ -172,6 +206,7 @@ Deno.serve(async (request) => {
   if (request.method === 'PATCH' && id) {
     const body = await request.json().catch(() => null)
     if (!body || typeof body !== 'object') return send({ error: 'Send a JSON object.' }, 400)
+    if (!(await writable(id))) return send({ error: 'No such record.' }, 404)
 
     const { data, error } = await db.from('records')
       .update(only(body as Record<string, unknown>, WRITABLE))
@@ -183,6 +218,7 @@ Deno.serve(async (request) => {
   // Archived rather than deleted, the same as everywhere else: an integration having a bad day
   // should not be able to take work away for good.
   if (request.method === 'DELETE' && id) {
+    if (!(await writable(id))) return send({ error: 'No such record.' }, 404)
     const { data, error } = await db.from('records')
       .update({ archived_at: new Date().toISOString() })
       .eq('workspace_id', workspace).eq('id', id).select('id').maybeSingle()

@@ -7,10 +7,14 @@ import { getWorkspace } from './workspace'
 export const apiBase = () =>
   `${(import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? ''}/functions/v1/api`
 
+export type Scope = 'read' | 'write'
+
 export interface Key {
   id: string
   name: string
   hint: string
+  scope: Scope
+  expires_at: string | null
   created_at: string
   last_used_at: string | null
   revoked_at: string | null
@@ -26,7 +30,7 @@ export interface Hook {
   last_status: number | null
 }
 
-const KEY_COLUMNS = 'id, name, hint, created_at, last_used_at, revoked_at'
+const KEY_COLUMNS = 'id, name, hint, scope, expires_at, created_at, last_used_at, revoked_at'
 const HOOK_COLUMNS = 'id, url, secret, kinds, active, last_fired_at, last_status'
 
 export async function listKeys(): Promise<Key[]> {
@@ -40,7 +44,10 @@ const hex = (bytes: Uint8Array) => [...bytes].map((b) => b.toString(16).padStart
 
 // The token is made here and hashed here. What reaches the database is the hash, so the row is
 // not a working key — which means this is also the only moment the token can ever be shown.
-export async function makeKey(name: string): Promise<string | null> {
+//
+// A key speaks for whoever made it: it opens the pages that person can open and no others, so
+// scope and expiry are the two things asked before it exists rather than regretted after.
+export async function makeKey(name: string, scope: Scope, days: number): Promise<string | null> {
   const ws = getWorkspace()
   if (!supabase || !ws) return null
 
@@ -52,10 +59,14 @@ export async function makeKey(name: string): Promise<string | null> {
     name: name.trim(),
     hint: `${token.slice(0, 10)}…`,
     token_sha: hex(new Uint8Array(digest)),
+    scope,
+    expires_at: days > 0 ? new Date(Date.now() + days * 86400_000).toISOString() : null,
     created_by: getUser()?.id ?? null,
   })
   return error ? null : token
 }
+
+export const expired = (key: Key) => !!key.expires_at && Date.parse(key.expires_at) <= Date.now()
 
 // Revoked rather than deleted, so a key that turns up in somebody's logs later can still be
 // recognised as one of ours and as one we had already stopped trusting.

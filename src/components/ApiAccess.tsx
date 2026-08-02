@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Copy, Trash2 } from 'lucide-react'
 import {
-  addHook, apiBase, forgetKey, listHooks, listKeys, makeKey, removeHook, revokeKey, setHook,
+  addHook, apiBase, expired, forgetKey, listHooks, listKeys, makeKey, removeHook, revokeKey, setHook,
 } from '../board/api'
-import type { Hook, Key } from '../board/api'
+import type { Hook, Key, Scope } from '../board/api'
 import { t } from '../i18n'
 
 const field = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm outline-none focus:border-[#C8452D]'
+
+// A key that never runs out is the one still working in somebody's old script two years from now,
+// so the offer starts short and having no end at all is the last choice rather than the first.
+const LIVES = [30, 90, 365, 0]
 
 function Copyable({ text, label }: { text: string; label: string }) {
   const [done, setDone] = useState(false)
@@ -28,6 +32,8 @@ export function ApiAccess() {
   const [keys, setKeys] = useState<Key[]>([])
   const [hooks, setHooks] = useState<Hook[]>([])
   const [name, setName] = useState('')
+  const [scope, setScope] = useState<Scope>('read')
+  const [days, setDays] = useState(90)
   const [url, setUrl] = useState('')
   const [fresh, setFresh] = useState('')
   const [failed, setFailed] = useState('')
@@ -40,7 +46,7 @@ export function ApiAccess() {
   useEffect(reload, [])
 
   const create = async () => {
-    const token = await makeKey(name || t('Untitled'))
+    const token = await makeKey(name || t('Untitled'), scope, days)
     setName('')
     // Shown once and never again: what is stored is a hash, so there is nothing to show later.
     if (token) setFresh(token)
@@ -60,15 +66,39 @@ export function ApiAccess() {
         <p className="mb-2 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
           {t('A key lets something outside read and write this workspace. Send it as a bearer token to {url}', { url: apiBase() })}
         </p>
+        <p className="mb-2 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+          {t('It opens the pages you can open and no others, so a page with people named on it stays shut.')}
+        </p>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') void create() }}
             placeholder={t('What is it for?')}
-            className={`flex-1 ${field}`}
+            className={`min-w-[10rem] flex-1 ${field}`}
           />
+          <select
+            value={scope}
+            onChange={(e) => setScope(e.target.value as Scope)}
+            aria-label={t('What it may do')}
+            className={field}
+          >
+            <option value="read">{t('Read only')}</option>
+            <option value="write">{t('Read and write')}</option>
+          </select>
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            aria-label={t('How long it lasts')}
+            className={field}
+          >
+            {LIVES.map((life) => (
+              <option key={life} value={life}>
+                {life ? t('{n} days', { n: life }) : t('Never expires')}
+              </option>
+            ))}
+          </select>
           <button
             type="button"
             onClick={() => void create()}
@@ -89,13 +119,18 @@ export function ApiAccess() {
           {keys.map((key) => (
             <div key={key.id} className="flex items-center gap-2 px-3 py-2">
               <span className={`min-w-0 flex-1 truncate text-[13px]
-                ${key.revoked_at ? 'text-[#B6B1A6] line-through' : 'text-[#141310]'}`}
+                ${key.revoked_at || expired(key) ? 'text-[#B6B1A6] line-through' : 'text-[#141310]'}`}
               >
                 {key.name || t('Untitled')}
                 <span className="ml-2 font-mono text-[11px] text-[#B6B1A6]">{key.hint}</span>
               </span>
+              <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[11px] text-[#4A463E]">
+                {key.scope === 'write' ? t('read and write') : t('read only')}
+              </span>
               <span className="shrink-0 text-[11px] text-[#B6B1A6]">
-                {key.last_used_at ? t('used') : t('never used')}
+                {expired(key) ? t('expired')
+                  : key.expires_at ? t('until {date}', { date: new Date(key.expires_at).toLocaleDateString() })
+                  : key.last_used_at ? t('used') : t('never used')}
               </span>
               {!key.revoked_at && (
                 <button

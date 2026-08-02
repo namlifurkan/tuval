@@ -16,6 +16,14 @@ curl -H "authorization: Bearer tuv_..." \
 The key decides which workspace the call reads and writes. The caller never chooses it, and there
 is no parameter that can move a call into another workspace.
 
+A key is made with a **scope** and an **expiry**. A `read` key is refused every method that is not
+a `GET`, with `403`. An expired key is refused everything, with `401`.
+
+A key is also never more than the person who made it. It opens the pages that person can open, so
+a page with people named on it stays shut unless they are one of them — `GET /records` simply
+leaves those rows out, and asking for one by id answers `404`. Taking that person out of the
+workspace closes their key with them.
+
 Available on the `team` plan, and on any install where
 [`self_hosted`](self-hosting.md#the-fourth-command-is-not-optional) is true. On a `free` hosted
 workspace every call answers `401`.
@@ -91,8 +99,9 @@ does not have keeps working.
 
 ## Errors
 
-`401` no key, or a key that is not valid, or the API is off for this plan · `400` malformed body
-or a rejected write · `404` no such record in this workspace · `405` a method this door does not do.
+`401` no key, or a key that is not valid, expired or revoked, or the API is off for this plan ·
+`403` a `read` key asked to write · `400` malformed body or a rejected write · `404` no such
+record in this workspace, or one the key's holder is not on · `405` a method this door does not do.
 
 ## Related
 

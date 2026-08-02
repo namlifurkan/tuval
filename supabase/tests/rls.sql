@@ -631,9 +631,10 @@ select pg_temp.check('a guest cannot make one', true, pg_temp.refused(
 
 set local role postgres;
 delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
-insert into public.api_keys (workspace_id, name, hint, token_sha)
+insert into public.api_keys (workspace_id, name, hint, token_sha, created_by)
 values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab',
-        encode(extensions.digest('tuv_secret_token', 'sha256'), 'hex'));
+        encode(extensions.digest('tuv_secret_token', 'sha256'), 'hex'),
+        'aaaaaaaa-0000-4000-8000-000000000001');
 insert into public.webhooks (id, workspace_id, url)
 values ('33333333-0000-4000-8000-000000000033', 'cccccccc-0000-4000-8000-000000000003',
         'https://example.test/hook');
@@ -682,13 +683,14 @@ update public.workspaces set plan = 'team', plan_until = now() + interval '30 da
 where id = 'cccccccc-0000-4000-8000-000000000003';
 
 select pg_temp.check('a key names its workspace', true,
-  public.workspace_for_key('tuv_secret_token') = 'cccccccc-0000-4000-8000-000000000003');
-select pg_temp.check('a wrong token names nothing', true,
-  public.workspace_for_key('tuv_not_the_token') is null);
+  (select k.workspace_id from public.workspace_for_key('tuv_secret_token') k)
+    = 'cccccccc-0000-4000-8000-000000000003');
+select pg_temp.check('a wrong token names nothing', false,
+  exists(select 1 from public.workspace_for_key('tuv_not_the_token')));
 
 update public.api_keys set revoked_at = now();
-select pg_temp.check('a revoked key names nothing', true,
-  public.workspace_for_key('tuv_secret_token') is null);
+select pg_temp.check('a revoked key names nothing', false,
+  exists(select 1 from public.workspace_for_key('tuv_secret_token')));
 
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('and nobody signed in may ask that question at all', true, pg_temp.refused(
@@ -920,17 +922,19 @@ select pg_temp.check('and what was written is all still there', true,
 
 -- The door for robots opens on the paid plan and not before.
 delete from public.api_keys;
-insert into public.api_keys (workspace_id, name, hint, token_sha)
+insert into public.api_keys (workspace_id, name, hint, token_sha, created_by)
 values ('cccccccc-0000-4000-8000-000000000003', 'n8n', 'tuv_ab',
-        encode(extensions.digest('tuv_plan_token', 'sha256'), 'hex'));
+        encode(extensions.digest('tuv_plan_token', 'sha256'), 'hex'),
+        'aaaaaaaa-0000-4000-8000-000000000001');
 
-select pg_temp.check('a key on the free plan opens nothing', true,
-  public.workspace_for_key('tuv_plan_token') is null);
+select pg_temp.check('a key on the free plan opens nothing', false,
+  exists(select 1 from public.workspace_for_key('tuv_plan_token')));
 
 update public.workspaces set plan = 'team', plan_until = now() + interval '30 days'
 where id = 'cccccccc-0000-4000-8000-000000000003';
 select pg_temp.check('and works again once it is paid for', true,
-  public.workspace_for_key('tuv_plan_token') = 'cccccccc-0000-4000-8000-000000000003');
+  (select k.workspace_id from public.workspace_for_key('tuv_plan_token') k)
+    = 'cccccccc-0000-4000-8000-000000000003');
 
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
 update public.workspaces set plan = 'free', plan_until = null, customer_ref = 'mine'
@@ -1061,20 +1065,22 @@ select pg_temp.check('records has one update trigger', true,
 -- An install nobody is billing for -----------------------------------------------------------------
 
 set local role postgres;
-insert into public.api_keys (workspace_id, name, token_sha)
+insert into public.api_keys (workspace_id, name, token_sha, created_by)
 values ('cccccccc-0000-4000-8000-000000000003', 'self host',
-        encode(extensions.digest('tuv_selfhost_token', 'sha256'), 'hex'))
+        encode(extensions.digest('tuv_selfhost_token', 'sha256'), 'hex'),
+        'aaaaaaaa-0000-4000-8000-000000000001')
 on conflict do nothing;
 update public.workspaces set plan = 'free', plan_until = null
 where id = 'cccccccc-0000-4000-8000-000000000003';
 
-select pg_temp.check('a free workspace on the hosted install has no API', true,
-  public.workspace_for_key('tuv_selfhost_token') is null);
+select pg_temp.check('a free workspace on the hosted install has no API', false,
+  exists(select 1 from public.workspace_for_key('tuv_selfhost_token')));
 
 update public.tuval_settings set self_hosted = true where id = 1;
 
 select pg_temp.check('the same workspace self-hosted has one', true,
-  public.workspace_for_key('tuv_selfhost_token') = 'cccccccc-0000-4000-8000-000000000003');
+  (select k.workspace_id from public.workspace_for_key('tuv_selfhost_token') k)
+    = 'cccccccc-0000-4000-8000-000000000003');
 select pg_temp.check('and the plan reads as team without anybody paying', true,
   public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'team');
 select pg_temp.check('seats stop being capped', true,
@@ -1086,6 +1092,119 @@ set local role postgres;
 update public.tuval_settings set self_hosted = false where id = 1;
 select pg_temp.check('turning it off puts the limits back', true,
   (select seats from public.plan_limits('free', 1)) = 3);
+
+-- What one key opens ------------------------------------------------------------------------------
+-- A key is not the workspace. It may only read, it may run out, and it sees exactly the pages the
+-- person who made it sees — a page with people named on it stays shut whichever door you use.
+
+set local role postgres;
+update public.tuval_settings set self_hosted = false where id = 1;
+update public.workspaces set plan = 'team', plan_until = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+delete from public.record_members;
+delete from public.api_keys;
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002',
+        'admin', 'bob@other.test');
+
+insert into public.records (id, workspace_id, kind, title, created_by)
+values ('a0a0a0a0-0000-4000-8000-00000000000a', 'cccccccc-0000-4000-8000-000000000003',
+        'doc', 'Named page', 'aaaaaaaa-0000-4000-8000-000000000001'),
+       ('b0b0b0b0-0000-4000-8000-00000000000b', 'cccccccc-0000-4000-8000-000000000003',
+        'doc', 'Open page', 'aaaaaaaa-0000-4000-8000-000000000001')
+on conflict (id) do nothing;
+insert into public.record_members (record_id, user_id, role, email)
+values ('a0a0a0a0-0000-4000-8000-00000000000a', 'aaaaaaaa-0000-4000-8000-000000000001',
+        'editor', 'ann@rls.test')
+on conflict do nothing;
+
+insert into public.api_keys (workspace_id, name, token_sha, created_by, scope)
+values
+  ('cccccccc-0000-4000-8000-000000000003', 'reads only',
+   encode(extensions.digest('tuv_read_only', 'sha256'), 'hex'),
+   'bbbbbbbb-0000-4000-8000-000000000002', 'read'),
+  ('cccccccc-0000-4000-8000-000000000003', 'reads and writes',
+   encode(extensions.digest('tuv_read_write', 'sha256'), 'hex'),
+   'bbbbbbbb-0000-4000-8000-000000000002', 'write'),
+  ('cccccccc-0000-4000-8000-000000000003', 'long gone',
+   encode(extensions.digest('tuv_expired', 'sha256'), 'hex'),
+   'aaaaaaaa-0000-4000-8000-000000000001', 'write'),
+  ('cccccccc-0000-4000-8000-000000000003', 'taken back',
+   encode(extensions.digest('tuv_revoked', 'sha256'), 'hex'),
+   'aaaaaaaa-0000-4000-8000-000000000001', 'write'),
+  ('cccccccc-0000-4000-8000-000000000003', 'nobody behind it',
+   encode(extensions.digest('tuv_orphan', 'sha256'), 'hex'), null, 'write')
+on conflict do nothing;
+
+update public.api_keys set expires_at = now() - interval '1 day'
+where token_sha = encode(extensions.digest('tuv_expired', 'sha256'), 'hex');
+update public.api_keys set revoked_at = now()
+where token_sha = encode(extensions.digest('tuv_revoked', 'sha256'), 'hex');
+
+select pg_temp.check('a key says which workspace it opens', true,
+  (select k.workspace_id from public.workspace_for_key('tuv_read_write') k)
+    = 'cccccccc-0000-4000-8000-000000000003');
+select pg_temp.check('and whose eyes it reads with', true,
+  (select k.acting from public.workspace_for_key('tuv_read_write') k)
+    = 'bbbbbbbb-0000-4000-8000-000000000002');
+select pg_temp.check('a read key never says it may write', true,
+  (select k.scope from public.workspace_for_key('tuv_read_only') k) = 'read');
+select pg_temp.check('a write key says it may', true,
+  (select k.scope from public.workspace_for_key('tuv_read_write') k) = 'write');
+select pg_temp.check('an expired key opens nothing at all', false,
+  exists(select 1 from public.workspace_for_key('tuv_expired')));
+select pg_temp.check('nor does a revoked one', false,
+  exists(select 1 from public.workspace_for_key('tuv_revoked')));
+select pg_temp.check('nor one with nobody behind it', false,
+  exists(select 1 from public.workspace_for_key('tuv_orphan')));
+
+select pg_temp.check('a key reads a page nobody was named on', true,
+  'b0b0b0b0-0000-4000-8000-00000000000b' = any (public.can_read_records_as(
+    'bbbbbbbb-0000-4000-8000-000000000002',
+    array['a0a0a0a0-0000-4000-8000-00000000000a',
+          'b0b0b0b0-0000-4000-8000-00000000000b']::uuid[])));
+select pg_temp.check('but not a page it was left off', false,
+  'a0a0a0a0-0000-4000-8000-00000000000a' = any (public.can_read_records_as(
+    'bbbbbbbb-0000-4000-8000-000000000002',
+    array['a0a0a0a0-0000-4000-8000-00000000000a',
+          'b0b0b0b0-0000-4000-8000-00000000000b']::uuid[])));
+select pg_temp.check('the person named on it still reads it', true,
+  'a0a0a0a0-0000-4000-8000-00000000000a' = any (public.can_read_records_as(
+    'aaaaaaaa-0000-4000-8000-000000000001',
+    array['a0a0a0a0-0000-4000-8000-00000000000a']::uuid[])));
+select pg_temp.check('a key held by nobody in the workspace reads nothing', true,
+  public.can_read_records_as('99999999-0000-4000-8000-000000000009',
+    array['b0b0b0b0-0000-4000-8000-00000000000b']::uuid[]) = '{}'::uuid[]);
+
+select pg_temp.check('a key cannot write a page it was left off either', false,
+  public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'a0a0a0a0-0000-4000-8000-00000000000a'));
+select pg_temp.check('and can write an unrestricted one', true,
+  public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'b0b0b0b0-0000-4000-8000-00000000000b'));
+select pg_temp.check('somebody outside the workspace writes neither', false,
+  public.can_write_record_as('99999999-0000-4000-8000-000000000009',
+    'b0b0b0b0-0000-4000-8000-00000000000b'));
+
+set local role postgres;
+update public.workspace_members set role = 'blocked'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.check('taking the person off the workspace closes their key with them', true,
+  public.can_read_records_as('bbbbbbbb-0000-4000-8000-000000000002',
+    array['b0b0b0b0-0000-4000-8000-00000000000b']::uuid[]) = '{}'::uuid[]);
+select pg_temp.check('and the door stops answering for it at all', false,
+  exists(select 1 from public.workspace_for_key('tuv_read_write')));
+
+set local role postgres;
+update public.workspace_members set role = 'guest'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+
+select pg_temp.check('a guest cannot hold a key that writes', true,
+  (select k.scope from public.workspace_for_key('tuv_read_write') k) = 'read');
 
 -- What went wrong, if anything --------------------------------------------------------------------
 
