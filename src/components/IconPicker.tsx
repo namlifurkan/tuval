@@ -11,7 +11,7 @@ const SKIN = {
   '--rgb-color': '20, 19, 16',
   '--rgb-accent': '200, 69, 45',
   '--color-border': '#E2DED5',
-  '--font-family': '"Space Grotesk", system-ui, sans-serif',
+  '--font-family': '"Instrument Sans", system-ui, sans-serif',
   '--shadow': 'none',
 }
 

@@ -14,9 +14,6 @@ import { Wordmark } from './Logo'
 const DEEP = '#9E2F1B'
 const PAPER = '#F2EFE9'
 
-// The display face. Space Grotesk is the interface, and it is also the face every second product
-// of the last five years reached for to prove it was not using Inter. On the poster outside the
-// gallery the headline is set in a serif instead; the reading text stays where it was.
 const DISPLAY = { fontFamily: '"Instrument Serif", "Iowan Old Style", Georgia, serif' }
 const READING = { fontFamily: '"Instrument Sans", system-ui, sans-serif' }
 
