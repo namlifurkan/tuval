@@ -27,6 +27,13 @@ const COLUMNS =
 
 // What a caller is allowed to set. Anything else it sends is dropped rather than refused, so a
 // client that grew a field we do not have keeps working.
+//
+// `body` and `markdown` are deliberately not on it, and that is not squeamishness. A page lives
+// in a CRDT the server cannot read, in `record_docs`; these two columns are the flattened copy
+// the browser writes beside it on every save, so that Postgres has something to index and an
+// agent has something to read. Accepting a write to either would look like it worked — it would
+// show up in search and in `GET /records/<id>/markdown` — and then vanish the first time somebody
+// opened the page and typed. Prose goes in `description`, which the app folds into the page.
 const WRITABLE = [
   'kind', 'title', 'description', 'status', 'assignee', 'priority', 'due_at',
   'estimate', 'parent_id', 'project_id', 'cycle_id', 'position', 'data',
@@ -160,12 +167,18 @@ Deno.serve(async (request) => {
 
   // The page as prose rather than as a row. Markdown is what an agent reads; the flattened body
   // is the fallback for a page written before this existed or never opened in the editor since.
+  //
+  // The description comes after it because that is where it will end up: text written through
+  // this door waits in that column until somebody opens the page, and then becomes the last
+  // paragraphs of it. Reading it back here means a key reads what it just wrote rather than
+  // being told the page is empty.
   if (request.method === 'GET' && id && parts[2] === 'markdown') {
-    const { data } = await db.from('records').select('title, markdown, body')
+    const { data } = await db.from('records').select('title, markdown, body, description')
       .eq('workspace_id', workspace).eq('id', id).maybeSingle()
     if (!data || !(await readable([id])).has(id)) return send({ error: 'No such record.' }, 404)
     const title = (data.title as string) || 'Untitled'
-    const held = (data.markdown as string) || (data.body as string) || ''
+    const held = [(data.markdown as string) || (data.body as string), data.description as string]
+      .filter((part) => (part ?? '').trim()).join('\n\n')
     return new Response(`# ${title}\n\n${held}\n`, {
       headers: { 'Content-Type': 'text/markdown; charset=utf-8', ...CORS },
     })

@@ -324,7 +324,7 @@
         {
           "tone": "pigment",
           "heading": "The API is a door, not a demo",
-          "body": "API keys and webhooks, so n8n or a script can read and write the workspace, and a read-only MCP server so a coding agent can look at it. We integrate rather than clone."
+          "body": "API keys and webhooks, so n8n or a script can read and write the workspace, and an MCP server so a coding agent can search it, read a page and file what it found. We integrate rather than clone."
         }
       ],
       "next": [
@@ -452,14 +452,14 @@
     {
       "path": "/mcp",
       "title": "MCP server — the workspace in Claude Code | Tuval",
-      "description": "A read-only MCP server for Claude Code and Cursor: search the workspace, read a page as Markdown, list what is in flight. One line to mount it, and the key decides what it sees.",
+      "description": "An MCP server for Claude Code and Cursor: search the workspace, read a page as Markdown, list what is in flight, and file issues and pages back. One line to mount it, and the key decides what it sees and whether it may write.",
       "claim": "Mount the workspace in Claude Code.",
-      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Four tools, all of them reads: search pages, databases, issues and projects in one call, open any of them as Markdown, list what is in flight. The key decides which workspace, and the agent is shown exactly what the person who made that key can see.",
+      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Seven tools: search pages, databases, issues and projects in one call, open any of them as Markdown, list what is in flight — and, with a key made to write, file a new record, change one, or add to a page. The key decides which workspace, whether it may write at all, and the agent is shown exactly what the person who made that key can see.",
       "bands": [
         {
           "id": "tools",
           "tone": "paper",
-          "heading": "The four tools",
+          "heading": "The seven tools",
           "points": [
             {
               "title": "search",
@@ -475,7 +475,19 @@
             },
             {
               "title": "workspace",
-              "body": "What this key can reach, and the addresses inside it. The first call an agent makes when it is working out what it has been handed."
+              "body": "What this key can reach, and the addresses inside it. It also says whether the key may write and how many writes are left today, so an agent finds out before it plans rather than after it fails."
+            },
+            {
+              "title": "create_record",
+              "body": "File an issue, a page, a project, a person, a company or an event, with its status, assignee, priority, parent and opening text. Wants a key made to write; a read key is told so in words."
+            },
+            {
+              "title": "update_record",
+              "body": "Change a title, a status, an assignee, a due date, or which project or cycle something belongs to. Only the fields you send move, and the change is signed with the key's name."
+            },
+            {
+              "title": "append_to_page",
+              "body": "Add Markdown to the end of a page or issue. It becomes real paragraphs — headings, lists, code — the next time somebody opens that page, because a page is a shared document only a browser can edit. The band below says exactly what that delay costs."
             }
           ]
         },
@@ -496,8 +508,13 @@
         },
         {
           "tone": "paper",
-          "heading": "Read-only, and not by accident",
-          "body": "All four tools are GET requests, and the single helper that makes them sends no method, no body and no content type. There is no path through this server that could write, so an agent that decides to reorganise your workspace finds nothing to do it with. Writing is a separate decision taken at the HTTP API, with a key issued to write and revocable on its own."
+          "heading": "Writing is a key you choose to make",
+          "body": "Scope is set when the key is made and cannot be raised by the agent holding it. A read key answers 403 to every write, in a sentence rather than a number, and a key past its daily allowance answers 429 — two different problems, told apart on purpose, because one means come back with a better key and the other means come back tomorrow. Every write is signed with the key's name and the person behind it, and leaves a version somebody can put back."
+        },
+        {
+          "tone": "paper",
+          "heading": "Where a written paragraph actually lands",
+          "body": "A page is a shared document held in the browsers editing it, not a column in a table, so no server here can open one. Text an agent adds waits on the record and is folded onto the end of the page the next time somebody opens it, with its structure intact. Until then the agent can read it back where it will sit, but search will not find it and nobody scrolling past will see it. That is a delay rather than a second place for text to live, and it is written down here rather than discovered in week two."
         },
         {
           "tone": "paper",
@@ -512,7 +529,7 @@
         {
           "tone": "pigment",
           "heading": "The half that does not exist yet",
-          "body": "A board goes out to an agent as a brief. A workspace comes back to an agent as records. Neither direction ends with an agent drawing on a canvas, and this server reads without writing, so whatever the model concludes still comes back through a person or through the HTTP API. That is a limit rather than an oversight, and it belongs on the page where you are deciding rather than in week two."
+          "body": "A board goes out to an agent as a brief. A workspace comes back as records and goes back again as records. Neither direction ends with an agent drawing on a canvas: there is no endpoint that makes a board, adds a sticky note or draws a connector, so whatever a model concludes about a canvas still reaches it through a person. Nor can anything here rewrite a paragraph already in a page, delete one or reorder blocks. That is a limit rather than an oversight, and it belongs on the page where you are deciding rather than in week two."
         },
         {
           "tone": "pigment",
@@ -1056,7 +1073,7 @@
           },
           {
             "feature": "Integrations",
-            "tuval": "REST API with keys hashed at rest, webhooks, and a read-only MCP server so a coding agent can read the workspace. No GitHub, GitLab, Slack or Figma integration; branch and pull-request linking does not exist.",
+            "tuval": "REST API with keys hashed at rest, webhooks, and an MCP server so a coding agent can read the workspace and file issues and pages back into it. No GitHub, GitLab, Slack or Figma integration; branch and pull-request linking does not exist.",
             "them": "Git provider, chat and design-tool integrations, including the pull-request linking most teams build their habits on."
           },
           {

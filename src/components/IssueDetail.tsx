@@ -7,7 +7,7 @@ import { archiveRecord, getRecords, patchRecord, PRIORITIES, STATUSES } from '..
 import type { Record as Issue, Status } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
-import { openIssueBody } from '../board/issueBody'
+import { openRecordBody } from '../board/pageBody'
 import { IssueLinks } from './IssueLinks'
 import { RecordHistory } from './RecordHistory'
 import { TimeLog } from './TimeLog'
@@ -44,7 +44,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
   useEffect(() => {
     let live = true
     setReady(false)
-    void openIssueBody(issue).then(() => { if (live) setReady(true) })
+    void openRecordBody(issue.id).then(() => { if (live) setReady(true) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issue.id])

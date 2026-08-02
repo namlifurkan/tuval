@@ -10,7 +10,8 @@ import { isLocked, isWide, setLocked, setWide } from '../board/pageOptions'
 import { getFavourites, loadFavourites, subscribeFavourites, toggleFavourite } from '../board/favourites'
 import { backlinks } from '../board/mention'
 import type { Backlink } from '../board/mention'
-import { openPage } from '../board/page'
+import { overwriteDamagedPage, pageDamage } from '../board/page'
+import { openRecordBody } from '../board/pageBody'
 import { TRASH_DAYS } from '../board/cloud'
 import {
   ancestors, archiveRecord, createRecord, getPages, loadPages, patchRecord, subscribeRecords,
@@ -38,6 +39,7 @@ export function Page() {
   const [title, setTitle] = useState('')
   const [ready, setReady] = useState(false)
   const [openProblem, setOpenProblem] = useState('')
+  const [damaged, setDamaged] = useState('')
   const name = useRef<HTMLInputElement>(null)
   const [links, setLinks] = useState<Backlink[]>([])
   const [copying, setCopying] = useState(false)
@@ -48,8 +50,9 @@ export function Page() {
     let live = true
     setReady(false)
     setOpenProblem('')
-    void openPage(id)
-      .then(() => { if (live) setReady(true) })
+    setDamaged('')
+    void openRecordBody(id)
+      .then(() => { if (live) { setReady(true); setDamaged(pageDamage()) } })
       .catch((error: unknown) => {
         if (live) setOpenProblem(error instanceof Error ? error.message : String(error))
       })
@@ -59,11 +62,29 @@ export function Page() {
   const retryOpen = () => {
     setReady(false)
     setOpenProblem('')
-    void openPage(id, true)
-      .then(() => setReady(true))
+    setDamaged('')
+    void openRecordBody(id, true)
+      .then(() => { setReady(true); setDamaged(pageDamage()) })
       .catch((error: unknown) => {
         setOpenProblem(error instanceof Error ? error.message : String(error))
       })
+  }
+
+  // The damaged bytes themselves. They are still the only copy of whatever did not come back, so
+  // they are handed over before anything is allowed to replace them.
+  const keepDamaged = () => {
+    const blob = new Blob([damaged], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${id}.damaged.txt`
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  }
+
+  const replaceDamaged = () => {
+    overwriteDamagedPage()
+    setDamaged('')
   }
 
   useEffect(() => { if (workspace) void loadFavourites() }, [workspace])
@@ -227,9 +248,37 @@ export function Page() {
                 </button>
               </div>
             ) : ready && (
-              <Suspense fallback={null}>
-                <PageEditor title={title} locked={isLocked(here)} />
-              </Suspense>
+              <>
+                {!!damaged && (
+                  <div role="alert" className="mb-4 ml-[54px] rounded-xl border border-[#C8452D] bg-[#FCF4F2] p-4">
+                    <p className="text-sm font-semibold text-[#141310]">
+                      {t('Part of this page could not be read.')}
+                    </p>
+                    <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-[#4A463E]">
+                      {t('What did come back is below. The stored copy is damaged and is being left exactly as it is, so saving is off — otherwise the first thing typed here would replace it. Keep a copy of the damaged file before replacing it.')}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={keepDamaged}
+                        className="rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                      >
+                        {t('Download the damaged copy')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={replaceDamaged}
+                        className="rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                      >
+                        {t('Save over it from here on')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <Suspense fallback={null}>
+                  <PageEditor title={title} locked={isLocked(here)} />
+                </Suspense>
+              </>
             )}
           </div>
         )}

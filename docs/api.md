@@ -69,6 +69,9 @@ One record.
 The same record with its body rendered as Markdown — headings, lists and code intact. This is the
 endpoint to read a page with, not the JSON one.
 
+Text written through `description` and not yet folded into the page comes back at the end, in the
+place it will take once somebody opens the page. See [Writable fields](#writable-fields).
+
 ### `POST /records`
 
 ```bash
@@ -103,6 +106,16 @@ Anything else you send is dropped rather than refused, so a client that grew a f
 does not have keeps working.
 
 `data` is a free JSON object for fields that are yours, not ours.
+
+`body` and `markdown` are missing on purpose. A page is a CRDT in `record_docs` that this door
+cannot read or edit; those two columns are the flattened copies the browser writes beside it so
+Postgres has something to index, and writing to either would look like it worked until the first
+person opened the page and typed.
+
+Prose goes in `description`, which does reach the page: the app folds it onto the end of the body
+the next time somebody opens that page, as real paragraphs, and clears the column. Until then it
+is readable through `GET /records/<id>/markdown` but not findable through `GET /search` — search
+indexes the document, and the text is not in the document yet.
 
 ## Everything else
 
