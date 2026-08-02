@@ -1299,6 +1299,49 @@ where token_sha = encode(extensions.digest('tuv_read_write', 'sha256'), 'hex');
 select pg_temp.check('and yesterday''s count is not today''s', true,
   (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = 1);
 
+-- The issue prefix, on real data ------------------------------------------------------------------
+-- The migration that introduced it asks the table to promise the shape of every prefix, and a row
+-- that breaks the promise takes the whole file down with it. What follows is the repair standing
+-- in front of that promise: every shape the check refuses, put right first.
+
+set local role postgres;
+select set_config('request.jwt.claims', '', true);
+
+insert into public.workspaces (id, slug, name, owner)
+values ('eeee0000-0000-4000-8000-0000000000e1', '—', 'Проект',
+        'aaaaaaaa-0000-4000-8000-000000000001');
+select pg_temp.check('a workspace with no ASCII letters in its slug or name still gets a key', true,
+  (select prefix from public.workspaces where id = 'eeee0000-0000-4000-8000-0000000000e1') = 'ISS');
+
+-- Clearing it is a write with an obvious right answer, and used to be refused outright because the
+-- trigger only ran on the way in.
+update public.workspaces set prefix = ''
+where id = 'cccccccc-0000-4000-8000-000000000003';
+select pg_temp.check('a prefix cleared by an update is filled in rather than refused', true,
+  (select prefix ~ '^[A-Z]{1,5}$' from public.workspaces
+   where id = 'cccccccc-0000-4000-8000-000000000003'));
+
+-- The shapes the original UPDATE walks straight past. It only looks at null and the empty string,
+-- so these reach the constraint untouched and abort the upgrade on somebody's install.
+alter table public.workspaces drop constraint workspaces_prefix_check;
+insert into public.workspaces (id, slug, name, owner, prefix) values
+  ('eeee0000-0000-4000-8000-0000000000e2', 'lower-case', 'Lower', 'aaaaaaaa-0000-4000-8000-000000000001', 'low'),
+  ('eeee0000-0000-4000-8000-0000000000e3', 'too-long', 'Toolong', 'aaaaaaaa-0000-4000-8000-000000000001', 'TOOLONG'),
+  ('eeee0000-0000-4000-8000-0000000000e4', 'digits', 'Digits', 'aaaaaaaa-0000-4000-8000-000000000001', 'A1');
+select pg_temp.check('a prefix the check refuses does exist before the repair', true,
+  (select count(*) = 3 from public.workspaces where prefix !~ '^[A-Z]{1,5}$'));
+
+update public.workspaces
+set prefix = coalesce(nullif(upper(substring(
+  regexp_replace(coalesce(nullif(slug, ''), name, ''), '[^a-zA-Z]', '', 'g') from 1 for 3)), ''), 'ISS')
+where prefix is null or prefix !~ '^[A-Z]{1,5}$';
+
+select pg_temp.check('the repair leaves nothing the check would refuse', true,
+  (select count(*) = 0 from public.workspaces where prefix is null or prefix !~ '^[A-Z]{1,5}$'));
+select pg_temp.check('and the promise can then be asked for without aborting', false,
+  pg_temp.refused($$alter table public.workspaces add constraint workspaces_prefix_check
+    check (prefix is null or prefix ~ '^[A-Z]{1,5}$')$$));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

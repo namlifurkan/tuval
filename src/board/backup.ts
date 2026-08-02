@@ -103,6 +103,8 @@ export function downloadBackup(backup: Backup, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
 
+const LISTS = ['docs', 'labels', 'record_labels', 'record_links', 'cycles', 'boards', 'board_docs'] as const
+
 export function readBackup(text: string): Backup {
   const held = JSON.parse(text) as Partial<Backup>
   if (!held || typeof held !== 'object' || !Array.isArray(held.records)) {
@@ -110,6 +112,11 @@ export function readBackup(text: string): Backup {
   }
   if (typeof held.version !== 'number' || held.version < 1 || held.version > BACKUP_VERSION) {
     throw new Error(`This backup was written by a different version (${held.version ?? '?'}).`)
+  }
+  // An older file is missing the lists that were added after it was written, and a newer one may
+  // arrive with a list truncated. Filled in here, once, so nothing downstream has to wonder.
+  for (const list of LISTS) {
+    if (!Array.isArray(held[list])) (held as Record<string, unknown>)[list] = []
   }
   return held as Backup
 }
@@ -119,65 +126,118 @@ export function readBackup(text: string): Backup {
 // parent is further down the file is not refused.
 const LATER = ['parent_id', 'project_id', 'cycle_id'] as const
 
-// The number an issue wears is assigned by a trigger on insert, which would renumber a restored
-// workspace and break every TUV-12 anybody had written down. It is put back afterwards.
-export async function importWorkspace(backup: Backup): Promise<{ records: number; boards: number }> {
+// The three columns that name a person. Every one of them is a foreign key into the account
+// table, which does not travel with the file: nobody in it exists on a fresh install.
+const WHO = ['assignee', 'created_by', 'updated_by'] as const
+
+export interface Restored {
+  records: number
+  boards: number
+  // Fields dropped because the person they named has no account here. Said out loud rather than
+  // swallowed: an issue that comes back unassigned is a small loss, but it is a loss, and the
+  // one thing worse than losing it is not being told.
+  strangers: number
+  // Rows that would not go back at all. Counted rather than thrown, because a restore that
+  // stops on the first refusal leaves a workspace half full and no way to tell which half.
+  refused: number
+}
+
+// Two hundred rows in one request is what makes a restore finish. Retrying a refused batch one
+// row at a time is what stops a single bad row from taking the other hundred and ninety-nine
+// with it — and it is the only way the count at the end can be true.
+async function putBack(table: string, rows: Row[], onConflict?: string): Promise<number> {
+  const send = (batch: Row[]) => onConflict
+    ? supabase!.from(table).upsert(batch, { onConflict })
+    : supabase!.from(table).upsert(batch)
+
+  let written = 0
+  for (let at = 0; at < rows.length; at += 200) {
+    const batch = rows.slice(at, at + 200)
+    const { error } = await send(batch)
+    if (!error) {
+      written += batch.length
+      continue
+    }
+    for (const row of batch) {
+      const { error: alone } = await send([row])
+      if (!alone) written += 1
+      else console.warn(`[tuval] ${table} row refused during restore:`, alone.message)
+    }
+  }
+  return written
+}
+
+// Who exists here. A restore onto the same installation is the common case — somebody undoing a
+// bad afternoon — and blanking every assignee in it would be a second bad afternoon. Only the
+// names that really are absent are dropped.
+async function peopleHere(workspace: string, owner: string): Promise<Set<string>> {
+  const { data } = await supabase!.from('workspace_members').select('user_id').eq('workspace_id', workspace)
+  const known = new Set((data ?? []).map((m) => (m as Row).user_id as string))
+  known.add(owner)
+  const me = (await supabase!.auth.getUser()).data.user?.id
+  if (me) known.add(me)
+  return known
+}
+
+export async function importWorkspace(backup: Backup): Promise<Restored> {
   const ws = getWorkspace()
   if (!supabase || !ws) throw new Error('Not signed in')
 
-  if (backup.labels.length) {
-    await supabase.from('labels')
-      .upsert(backup.labels.map((l) => ({ ...l, workspace_id: ws.id })), { onConflict: 'id' })
-      .throwOnError()
-  }
-  if (backup.cycles.length) {
-    await supabase.from('cycles')
-      .upsert(backup.cycles.map((c) => ({ ...c, workspace_id: ws.id })), { onConflict: 'id' })
-      .throwOnError()
+  const known = await peopleHere(ws.id, ws.owner)
+  const me = (await supabase.auth.getUser()).data.user?.id ?? ws.owner
+
+  let strangers = 0
+  const person = (who: unknown): string | null => {
+    if (typeof who !== 'string' || !who) return null
+    if (known.has(who)) return who
+    strangers += 1
+    return null
   }
 
-  // A board belongs to whoever restores it: its old owner may not be a person on this install.
-  const user = (await supabase.auth.getUser()).data.user
-  for (const board of backup.boards ?? []) {
-    await supabase.from('boards')
-      .upsert({ ...board, workspace_id: ws.id, owner: user?.id ?? board.owner }, { onConflict: 'id' })
-      .throwOnError()
-  }
-  for (let at = 0; at < (backup.board_docs ?? []).length; at += 50) {
-    await supabase.from('board_snapshots')
-      .upsert(backup.board_docs.slice(at, at + 50)).throwOnError()
+  let asked = 0
+  let written = 0
+  const restore = async (table: string, rows: Row[], onConflict?: string) => {
+    asked += rows.length
+    const put = await putBack(table, rows, onConflict)
+    written += put
+    return put
   }
 
+  await restore('labels', backup.labels.map((l) => ({ ...l, workspace_id: ws.id })), 'id')
+  await restore('cycles', backup.cycles.map((c) => ({ ...c, workspace_id: ws.id })), 'id')
+
+  // A board keeps its owner if that person is here, and otherwise belongs to whoever restored
+  // it. The column cannot be null, so there is no third answer.
+  const boards = await restore('boards', backup.boards.map((b) => ({
+    ...b, workspace_id: ws.id, owner: person(b.owner) ?? me,
+  })), 'id')
+  await restore('board_snapshots', backup.board_docs)
+
+  // seq travels with the row. The trigger that hands out issue numbers only fires when the
+  // column arrives empty, so a restored workspace keeps the numbers people wrote down.
   const flat: Row[] = backup.records.map((r) => {
-    const row: Row = {
-      ...r,
-      workspace_id: ws.id,
-      assignee: null,
-      created_by: null,
-      updated_by: null,
-    }
+    const row: Row = { ...r, workspace_id: ws.id }
+    for (const key of WHO) row[key] = person(r[key])
     for (const key of LATER) row[key] = null
     return row
   })
-  for (let at = 0; at < flat.length; at += 200) {
-    await supabase.from('records').upsert(flat.slice(at, at + 200), { onConflict: 'id' }).throwOnError()
-  }
+  const records = await restore('records', flat, 'id')
 
-  for (const row of backup.records) {
-    const changes: Row = {}
-    for (const key of LATER) if (row[key]) changes[key] = row[key]
-    if (row.seq) changes.seq = row.seq
-    if (!Object.keys(changes).length) continue
-    await supabase.from('records').update(changes).eq('id', row.id as string).throwOnError()
-  }
+  // The second pass, batched like the first. It used to be one request per record, which on a
+  // real workspace is thousands of round trips and thousands of chances to stop halfway.
+  const pointing = flat
+    .map((row, at) => ({ row, from: backup.records[at] }))
+    .filter(({ from }) => LATER.some((key) => from[key]))
+    .map(({ row, from }) => {
+      const full: Row = { ...row }
+      for (const key of LATER) full[key] = from[key] ?? null
+      return full
+    })
+  await restore('records', pointing, 'id')
 
-  for (const table of ['record_docs', 'record_labels', 'record_links'] as const) {
-    const rows: Row[] = table === 'record_docs' ? backup.docs
-      : table === 'record_labels' ? backup.record_labels : backup.record_links
-    for (let at = 0; at < rows.length; at += 200) {
-      await supabase.from(table).upsert(rows.slice(at, at + 200)).throwOnError()
-    }
-  }
+  await restore('record_docs', backup.docs)
+  await restore('record_labels', backup.record_labels)
+  await restore('record_links', backup.record_links)
 
-  return { records: backup.records.length, boards: (backup.boards ?? []).length }
+  return { records, boards, strangers, refused: asked - written }
 }

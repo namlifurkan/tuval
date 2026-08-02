@@ -34,8 +34,18 @@ export function BackupPanel() {
     setSaid('')
     void chosen.text()
       .then((text) => importWorkspace(readBackup(text)))
-      .then(({ records, boards }) => {
-        setSaid(t('{n} records and {b} boards put back.', { n: records, b: boards }))
+      .then(({ records, boards, strangers, refused }) => {
+        // Everything that did not survive the trip, on the screen, in the same breath as the
+        // good news. A restore that quietly drops a third of itself is worse than one that fails.
+        setSaid([
+          t('{n} records and {b} boards put back.', { n: records, b: boards }),
+          strangers
+            ? t('{n} fields naming people with no account here were left empty.', { n: strangers })
+            : '',
+          refused
+            ? t('{n} rows would not go back and were skipped. The file still has them.', { n: refused })
+            : '',
+        ].filter(Boolean).join(' '))
         return Promise.all([loadPages(), loadRecords('issue'), loadRecords('project')])
       })
       .catch((e: Error) => setSaid(e.message))

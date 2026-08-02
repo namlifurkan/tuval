@@ -18,6 +18,19 @@ let current = ''
 let opening: Promise<void> = Promise.resolve()
 let saving = 0
 let dirty = false
+let damaged = ''
+
+// The stored bytes of a page that would not decode, kept so they can be handed to whoever wants
+// to look at them. Empty means the page came back whole.
+export const pageDamage = () => damaged
+
+// Saving is off while a page is damaged, and turning it back on is somebody's decision, not
+// ours. What is on screen replaces the stored copy from here on.
+export function overwriteDamagedPage() {
+  if (!damaged) return
+  damaged = ''
+  schedule()
+}
 
 export const pageDoc = () => doc
 export const pageFragment = () => doc.getXmlFragment(FRAGMENT)
@@ -29,14 +42,15 @@ export const hex = (bytes: Uint8Array) =>
 // No account needed to ask. A published page is readable by anybody, and the policy is what
 // decides that — requiring a signed-in user here would have meant a published page with a title
 // and nothing under it.
-async function pull(id: string): Promise<Uint8Array | null> {
+//
+// The bytes come back undecoded: a page the network refused and a page whose stored bytes are
+// damaged are two different accidents, and only the first is worth retrying.
+async function pull(id: string): Promise<string | null> {
   if (!supabase) return null
   const { data, error } = await supabase
     .from('record_docs').select('doc').eq('record_id', id).maybeSingle()
   if (error) throw new Error('That page could not be loaded.')
-  const raw = data?.doc as string | undefined
-  if (!raw) return null
-  return decodePageDoc(raw)
+  return (data?.doc as string | undefined) ?? null
 }
 
 export function decodePageDoc(raw: string): Uint8Array {
@@ -45,6 +59,23 @@ export function decodePageDoc(raw: string): Uint8Array {
   const out = new Uint8Array(body.length / 2)
   for (let i = 0; i < out.length; i++) out[i] = parseInt(body.slice(i * 2, i * 2 + 2), 16)
   return out
+}
+
+// One bad byte used to be a page that never opened and never said why. It opens now, holding
+// however much of itself Yjs could read before the damage — which for a document appended to all
+// afternoon is nearly all of it, because the damage is usually at the end.
+//
+// Returns whether the stored copy went in whole. It matters more than it looks: the caller must
+// not save over bytes it could not read. An empty editor mounted on a page that failed to load
+// is indistinguishable from an empty page, and two seconds later it would have written that
+// emptiness back and turned a recoverable file into a lost one.
+export function applyStoredPage(into: Y.Doc, raw: string): boolean {
+  try {
+    Y.applyUpdate(into, decodePageDoc(raw), 'cloud')
+    return true
+  } catch {
+    return false
+  }
 }
 
 // The words in a page, flattened so the server can index what it cannot read. Walked from the
@@ -70,7 +101,7 @@ export function lendMarkdown(make: (() => string | Promise<string>) | null) {
 
 async function push() {
   saving = 0
-  if (!dirty || !current || !supabase || !getUser()) return
+  if (!dirty || !current || !supabase || !getUser() || damaged) return
   const [id, saved] = [current, doc]
   const at = new Date().toISOString()
   dirty = false
@@ -92,7 +123,7 @@ async function push() {
 
 function schedule() {
   dirty = true
-  if (saving || !getUser()) return
+  if (saving || !getUser() || damaged) return
   saving = window.setTimeout(() => void push(), SAVE_AFTER)
 }
 
@@ -106,9 +137,10 @@ async function load(id: string) {
   const mine = doc
   const store = new IndexeddbPersistence(`tuval:doc:${id}`, mine)
   persistence = store
+  damaged = ''
   await Promise.all([store.whenSynced, authReady])
   const stored = await pull(id)
-  if (stored?.length && doc === mine) Y.applyUpdate(mine, stored, 'cloud')
+  if (stored && doc === mine && !applyStoredPage(mine, stored)) damaged = stored
   mine.on('update', (_u: Uint8Array, origin: unknown) => {
     if (origin !== 'cloud') schedule()
   })

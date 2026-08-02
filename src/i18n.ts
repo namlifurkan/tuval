@@ -460,6 +460,10 @@ const tr: Record<string, string> = {
   'Working…': 'Çalışıyor…',
   '{n} records and {b} boards written to the file.': '{n} kayıt ve {b} board dosyaya yazıldı.',
   '{n} records and {b} boards put back.': '{n} kayıt ve {b} board geri yüklendi.',
+  '{n} fields naming people with no account here were left empty.':
+    'Burada hesabı olmayan kişileri gösteren {n} alan boş bırakıldı.',
+  '{n} rows would not go back and were skipped. The file still has them.':
+    '{n} satır geri yüklenemedi ve atlandı. Dosyada duruyorlar.',
   'Restoring writes over anything with the same id, which is what makes it a restore rather than a second copy. Uploaded files are not in the file — they live in storage and can run to gigabytes.':
     'Geri yükleme aynı id\'ye sahip olanın üzerine yazar; ikinci bir kopya değil, geri yükleme olmasının sebebi bu. Yüklenen dosyalar bu dosyada değil — depoda duruyorlar ve gigabaytlara çıkabilir.',
   'Collections': 'Koleksiyonlar',
@@ -643,6 +647,11 @@ const tr: Record<string, string> = {
   'The stored page is damaged.': 'Kayıtlı sayfa hasarlı.',
   'Nothing was overwritten. You can try loading the stored page again.':
     'Hiçbir şeyin üzerine yazılmadı. Kayıtlı sayfayı yeniden yüklemeyi deneyebilirsin.',
+  'Part of this page could not be read.': 'Bu sayfanın bir kısmı okunamadı.',
+  'What did come back is below. The stored copy is damaged and is being left exactly as it is, so saving is off — otherwise the first thing typed here would replace it. Keep a copy of the damaged file before replacing it.':
+    'Geri gelebilen kısım aşağıda. Kayıtlı kopya hasarlı ve olduğu gibi bırakılıyor, bu yüzden kaydetme kapalı — yoksa buraya yazılan ilk şey onun üzerine geçerdi. Üzerine yazmadan önce hasarlı dosyanın bir kopyasını al.',
+  'Download the damaged copy': 'Hasarlı kopyayı indir',
+  'Save over it from here on': 'Bundan sonra üzerine yaz',
   'The record behind this card was deleted or is no longer reachable.':
     'Bu kartın arkasındaki kayıt silindi veya artık erişilemiyor.',
   'As many people as you like': 'İstediğin kadar kişi',
