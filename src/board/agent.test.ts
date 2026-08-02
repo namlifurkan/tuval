@@ -130,8 +130,6 @@ describe('boardToGraph', () => {
   })
 })
 
-// A record card carries no text of its own: what it says is the copy of the row it stands for.
-// Reading only item.text handed an agent "(empty record)" for every piece of tracked work.
 describe('a board with tracked work on it', () => {
   it('reads the card, not the empty text field it does not have', () => {
     const card = makeRecordItem(0, 0, 'r1', 'Ship the picker', 'doing')
