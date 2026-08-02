@@ -93,7 +93,7 @@ Deno.serve(async (request) => {
   }
 
   const writable = async (rec: string | null) => {
-    const { data } = await db.rpc('can_write_record_as', { who: acting, rec })
+    const { data } = await db.rpc('can_write_record_as', { who: acting, ws: workspace, rec })
     return data === true
   }
 

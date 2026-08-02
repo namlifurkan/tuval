@@ -1179,12 +1179,27 @@ select pg_temp.check('a key held by nobody in the workspace reads nothing', true
 
 select pg_temp.check('a key cannot write a page it was left off either', false,
   public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'cccccccc-0000-4000-8000-000000000003',
     'a0a0a0a0-0000-4000-8000-00000000000a'));
 select pg_temp.check('and can write an unrestricted one', true,
   public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'cccccccc-0000-4000-8000-000000000003',
     'b0b0b0b0-0000-4000-8000-00000000000b'));
 select pg_temp.check('somebody outside the workspace writes neither', false,
   public.can_write_record_as('99999999-0000-4000-8000-000000000009',
+    'cccccccc-0000-4000-8000-000000000003',
+    'b0b0b0b0-0000-4000-8000-00000000000b'));
+
+-- Naming no record asks about the top of the workspace, which is a question about the seat.
+select pg_temp.check('naming no record asks whether this person may write here at all', true,
+  public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'cccccccc-0000-4000-8000-000000000003', null));
+select pg_temp.check('and a stranger naming no record is still refused', false,
+  public.can_write_record_as('99999999-0000-4000-8000-000000000009',
+    'cccccccc-0000-4000-8000-000000000003', null));
+select pg_temp.check('a record belonging to another workspace is refused, not judged', false,
+  public.can_write_record_as('bbbbbbbb-0000-4000-8000-000000000002',
+    'dddddddd-0000-4000-8000-000000000004',
     'b0b0b0b0-0000-4000-8000-00000000000b'));
 
 set local role postgres;
