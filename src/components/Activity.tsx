@@ -6,13 +6,9 @@ import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { getLang, t } from '../i18n'
 
-// What changed in the workspace, read off the records themselves rather than kept in a log of
-// its own. Every record already carries when it was last touched and by whom, so a second table
-// would be the same facts written twice and a chance for the two to disagree.
-//
-// shortcut: this is the last change to each record, not every change to it. A real audit trail —
-// who read what, who was given access when — is a row per event, which is the upgrade path if
-// this is ever needed for an answer somebody has to defend.
+// What changed in the workspace, read off the records themselves: the last change to each one,
+// which is the question this screen is asking. Every change to a record is kept beside it —
+// record_revisions, shown on the record — so this stays the short answer rather than the long one.
 const KEEP = 40
 
 interface Change {
@@ -21,6 +17,8 @@ interface Change {
   title: string
   updated_at: string
   updated_by: string | null
+  // The name of the key that wrote it, when something outside did. A person leaves this empty.
+  updated_via: string | null
   created_at: string
 }
 
@@ -42,7 +40,7 @@ export function Activity() {
     let live = true
     void supabase
       .from('records')
-      .select('id, kind, title, updated_at, updated_by, created_at')
+      .select('id, kind, title, updated_at, updated_by, updated_via, created_at')
       .eq('workspace_id', ws.id)
       .is('archived_at', null)
       .order('updated_at', { ascending: false })
@@ -80,7 +78,10 @@ export function Activity() {
               {change.title || t('Untitled page')}
             </span>
             <span className="shrink-0 text-[11px] text-[#8A867C]">
-              {fresh ? t('made by') : t('changed by')} {displayName(who?.email) || t('Somebody')}
+              {fresh ? t('made by') : t('changed by')}{' '}
+              {change.updated_via
+                ? <span className="text-[#C8452D]">{change.updated_via} · {t('agent')}</span>
+                : displayName(who?.email) || t('Somebody')}
             </span>
             <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(change.updated_at)}</span>
           </button>

@@ -69,6 +69,7 @@ Four things are checked before any of the above happens, and each one answers on
 | The key is not revoked and not past its `expires_at` | `401` |
 | Somebody is still behind the key — a key whose maker has no row, or was taken out of the workspace, or was blocked | `401` |
 | The key's scope is `write`, for anything that is not a `GET` | `403` |
+| The key has writes left for the day — 1000 by default | `429` |
 
 Two of those are worth stating plainly. On a `free` hosted workspace every call answers `401`,
 including `tools/list` working and `tools/call` failing — the MCP server reports the reason as
@@ -117,7 +118,11 @@ Plainly, because the shape of the door is easy to mistake for the shape of the p
   browsers. An agent holding a key is not a participant in a session; it reads rows and writes
   rows, and the app sees the result the next time it reads.
 - **Nothing on the free plan.** Not a reduced rate limit — off. Pay for `team`, or set
-  `self_hosted = true` on your own install, where it is on and unlimited.
+  `self_hosted = true` on your own install, where it is on. The daily write allowance applies
+  either way; raise `api_keys.daily_writes` if a thousand changes a day is not enough.
+- **Nothing quietly.** Every write is signed with the key's name and leaves a version of what it
+  changed, which a person can put back from the record. See
+  [what a write leaves behind](api.md#what-a-write-leaves-behind).
 
 ## Related
 

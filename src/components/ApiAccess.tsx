@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Copy, Trash2 } from 'lucide-react'
 import {
-  addHook, apiBase, expired, forgetKey, listHooks, listKeys, makeKey, removeHook, revokeKey, setHook,
+  addHook, apiBase, expired, forgetKey, listHooks, listKeys, makeKey, removeHook, revokeKey,
+  setHook, writesToday,
 } from '../board/api'
 import type { Hook, Key, Scope } from '../board/api'
 import { t } from '../i18n'
@@ -69,6 +70,9 @@ export function ApiAccess() {
         <p className="mb-2 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
           {t('It opens the pages you can open and no others, so a page with people named on it stays shut.')}
         </p>
+        <p className="mb-2 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+          {t('Every change it makes is signed with its name, kept as a version you can go back to, and counted against what it may write in a day.')}
+        </p>
 
         <div className="flex flex-wrap gap-2">
           <input
@@ -127,6 +131,11 @@ export function ApiAccess() {
               <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[11px] text-[#4A463E]">
                 {key.scope === 'write' ? t('read and write') : t('read only')}
               </span>
+              {key.scope === 'write' && (
+                <span className={`shrink-0 text-[11px] ${writesToday(key) >= key.daily_writes ? 'text-[#DC2626]' : 'text-[#B6B1A6]'}`}>
+                  {t('{used} of {cap} writes today', { used: writesToday(key), cap: key.daily_writes })}
+                </span>
+              )}
               <span className="shrink-0 text-[11px] text-[#B6B1A6]">
                 {expired(key) ? t('expired')
                   : key.expires_at ? t('until {date}', { date: new Date(key.expires_at).toLocaleDateString() })

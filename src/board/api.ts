@@ -18,6 +18,9 @@ export interface Key {
   created_at: string
   last_used_at: string | null
   revoked_at: string | null
+  daily_writes: number
+  writes_today: number
+  writes_on: string | null
 }
 
 export interface Hook {
@@ -30,7 +33,7 @@ export interface Hook {
   last_status: number | null
 }
 
-const KEY_COLUMNS = 'id, name, hint, scope, expires_at, created_at, last_used_at, revoked_at'
+const KEY_COLUMNS = 'id, name, hint, scope, expires_at, created_at, last_used_at, revoked_at, daily_writes, writes_today, writes_on'
 const HOOK_COLUMNS = 'id, url, secret, kinds, active, last_fired_at, last_status'
 
 export async function listKeys(): Promise<Key[]> {
@@ -67,6 +70,11 @@ export async function makeKey(name: string, scope: Scope, days: number): Promise
 }
 
 export const expired = (key: Key) => !!key.expires_at && Date.parse(key.expires_at) <= Date.now()
+
+// A count from another day is not today's, and the door only rolls it over when the key is next
+// used — so a key left alone since Tuesday would otherwise read as Tuesday's total.
+export const writesToday = (key: Key) =>
+  key.writes_on === new Date().toISOString().slice(0, 10) ? key.writes_today : 0
 
 // Revoked rather than deleted, so a key that turns up in somebody's logs later can still be
 // recognised as one of ours and as one we had already stopped trusting.

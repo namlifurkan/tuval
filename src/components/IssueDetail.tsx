@@ -9,6 +9,7 @@ import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 import { openIssueBody } from '../board/issueBody'
 import { IssueLinks } from './IssueLinks'
+import { RecordHistory } from './RecordHistory'
 import { TimeLog } from './TimeLog'
 import { Popover } from './Popover'
 
@@ -227,6 +228,8 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
       <TimeLog record={issue.id} team={team} />
 
       <IssueLinks issue={issue} prefix={prefix} />
+
+      <RecordHistory record={issue} nameOf={nameOf} />
 
       <div className="mt-6 flex gap-2">
         <button

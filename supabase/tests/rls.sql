@@ -1206,6 +1206,99 @@ where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
 select pg_temp.check('a guest cannot hold a key that writes', true,
   (select k.scope from public.workspace_for_key('tuv_read_write') k) = 'read');
 
+-- What a write leaves behind -----------------------------------------------------------------------
+-- Behind a key there is no session to read, so the gateway says who it is acting for and what to
+-- sign with. Every change is kept beside the record, nobody can tidy that up afterwards, and a
+-- key runs out of writes before it can run all night.
+
+set local role postgres;
+update public.workspace_members set role = 'admin'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+-- The gateway holds the service key and carries no session at all, which is the whole reason
+-- auth.uid() could not answer this question.
+select set_config('request.jwt.claims', '', true);
+
+select pg_temp.check('a key says what name to sign with', true,
+  (select k.agent from public.workspace_for_key('tuv_read_write') k) = 'reads and writes');
+
+update public.records
+   set title       = 'Renamed by a robot',
+       updated_by  = 'bbbbbbbb-0000-4000-8000-000000000002',
+       updated_via = 'reads and writes'
+ where id = 'b0b0b0b0-0000-4000-8000-00000000000b';
+
+select pg_temp.check('a write with no session is signed with whoever the key speaks for', true,
+  (select r.updated_by from public.records r
+   where r.id = 'b0b0b0b0-0000-4000-8000-00000000000b') = 'bbbbbbbb-0000-4000-8000-000000000002');
+select pg_temp.check('and says which key made it', true,
+  (select r.updated_via from public.records r
+   where r.id = 'b0b0b0b0-0000-4000-8000-00000000000b') = 'reads and writes');
+select pg_temp.check('the change is kept, with what the title was before it', true,
+  exists(select 1 from public.record_revisions v
+         where v.record_id = 'b0b0b0b0-0000-4000-8000-00000000000b'
+           and v.changed = array['title'] and v.was ->> 'title' = 'Open page'
+           and v.via = 'reads and writes'));
+
+update public.records set position = 42
+where id = 'b0b0b0b0-0000-4000-8000-00000000000b';
+-- Two kept: the page being made, and the rename. The move is not one of them.
+select pg_temp.check('but moving a card is not a change worth keeping', true,
+  (select count(*) from public.record_revisions v
+   where v.record_id = 'b0b0b0b0-0000-4000-8000-00000000000b') = 2);
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+update public.records set title = 'Renamed by a person'
+where id = 'b0b0b0b0-0000-4000-8000-00000000000b';
+
+select pg_temp.check('a person writing takes the key name back off', true,
+  (select r.updated_via from public.records r
+   where r.id = 'b0b0b0b0-0000-4000-8000-00000000000b') is null);
+select pg_temp.check('and is the one signed for it', true,
+  (select r.updated_by from public.records r
+   where r.id = 'b0b0b0b0-0000-4000-8000-00000000000b') = 'aaaaaaaa-0000-4000-8000-000000000001');
+select pg_temp.check('the owner reads the trail', true,
+  exists(select 1 from public.record_revisions
+         where record_id = 'b0b0b0b0-0000-4000-8000-00000000000b'));
+select pg_temp.check('but cannot write anything into it', true, pg_temp.refused(
+  $q$insert into public.record_revisions (record_id, workspace_id, changed)
+     values ('b0b0b0b0-0000-4000-8000-00000000000b',
+             'cccccccc-0000-4000-8000-000000000003', '{}')$q$));
+
+delete from public.record_revisions
+where record_id = 'b0b0b0b0-0000-4000-8000-00000000000b';
+select pg_temp.check('nor take anything out of it', true,
+  exists(select 1 from public.record_revisions
+         where record_id = 'b0b0b0b0-0000-4000-8000-00000000000b'));
+
+select pg_temp.becomes('99999999-0000-4000-8000-000000000009', 'nobody@rls.test');
+select pg_temp.check('somebody outside the workspace sees no trail at all', false,
+  exists(select 1 from public.record_revisions
+         where record_id = 'b0b0b0b0-0000-4000-8000-00000000000b'));
+
+-- The allowance ------------------------------------------------------------------------------------
+
+set local role postgres;
+select set_config('request.jwt.claims', '', true);
+update public.api_keys set daily_writes = 2, writes_on = null, writes_today = 0
+where token_sha = encode(extensions.digest('tuv_read_write', 'sha256'), 'hex');
+
+select pg_temp.check('the first write of the day spends one of two', true,
+  (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = 1);
+select pg_temp.check('the second spends the last of it', true,
+  (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = 0);
+select pg_temp.check('and the one after that is refused', true,
+  (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = -1);
+select pg_temp.check('a key out of writes still reads', true,
+  (select k.scope from public.workspace_for_key('tuv_read_write') k) = 'write');
+select pg_temp.check('a key that only reads spends nothing', true,
+  (select k.writes_left from public.workspace_for_key('tuv_read_only', true) k) = 1000);
+
+update public.api_keys set writes_on = current_date - 1, writes_today = 2
+where token_sha = encode(extensions.digest('tuv_read_write', 'sha256'), 'hex');
+select pg_temp.check('and yesterday''s count is not today''s', true,
+  (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = 1);
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

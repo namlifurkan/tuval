@@ -724,6 +724,9 @@ const tr: Record<string, string> = {
     'Bir anahtar, dışarıdaki bir şeyin bu çalışma alanını okuyup yazmasını sağlar. Bearer token olarak {url} adresine gönder.',
   'It opens the pages you can open and no others, so a page with people named on it stays shut.':
     'Senin açabildiğin sayfaları açar, başkasını değil; üzerinde kişi adı geçen bir sayfa kapalı kalır.',
+  'Every change it makes is signed with its name, kept as a version you can go back to, and counted against what it may write in a day.':
+    'Yaptığı her değişiklik kendi adıyla imzalanır, geri dönebileceğin bir sürüm olarak saklanır ve günlük yazma hakkından düşülür.',
+  '{used} of {cap} writes today': 'bugün {cap} yazmanın {used} tanesi',
   'What is it for?': 'Ne için?',
   'What it may do': 'Ne yapabilir',
   'How long it lasts': 'Ne kadar geçerli',
@@ -793,6 +796,19 @@ const tr: Record<string, string> = {
   'Nothing has changed yet.': 'Henüz bir şey değişmedi.',
   'made by': 'oluşturan',
   'changed by': 'değiştiren',
+  'agent': 'ajan',
+
+  // record history
+  'Changes': 'Değişiklikler',
+  'made it': 'oluşturdu',
+  'Put it back': 'Eski hâline getir',
+  'Kind': 'Tür',
+  'Description': 'Açıklama',
+  'Parent': 'Üst kayıt',
+  'Icon': 'Simge',
+  'Cover': 'Kapak',
+  'Fields': 'Alanlar',
+  'Archived': 'Arşiv',
   'The last change to everything in this workspace. Not every change to it: what a page said before is in that page\'s own history.':
     'Bu çalışma alanındaki her şeyin son değişikliği. Her değişiklik değil: bir sayfanın eski hâli o sayfanın kendi geçmişinde.',
   'Everything': 'Her şey',

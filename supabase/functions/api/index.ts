@@ -6,6 +6,9 @@
 // every method that is not a read. And a page with people named on it is asked about on behalf
 // of the person who made the key, so restricting a page shuts this door as well as the app.
 //
+// Every write it makes is signed with the person the key speaks for and with the key's own name,
+// and spends one of that key's writes for the day. The database keeps the version.
+//
 // Deliberately small. This is not a mirror of the app: it is the handful of things an
 // integration asks for, which is records in and records out.
 
@@ -53,16 +56,27 @@ Deno.serve(async (request) => {
   const token = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim()
   if (!token) return send({ error: 'Send an API key as a bearer token.' }, 401)
 
-  const { data: keyed } = await db.rpc('workspace_for_key', { token })
+  // Asked once, and told up front whether this is a write, because the allowance is spent at the
+  // door rather than after the row has already moved.
+  const writing = request.method !== 'GET' && request.method !== 'OPTIONS'
+  const { data: keyed } = await db.rpc('workspace_for_key', { token, writing })
   const key = (Array.isArray(keyed) ? keyed[0] : keyed) as
-    { workspace_id: string; acting: string; scope: string } | undefined
+    { workspace_id: string; acting: string; agent: string; scope: string; writes_left: number }
+    | undefined
   if (!key?.workspace_id) return send({ error: 'That key is not valid.' }, 401)
 
   const workspace = key.workspace_id
   const acting = key.acting
-  if (request.method !== 'GET' && key.scope !== 'write') {
+  if (writing && key.scope !== 'write') {
     return send({ error: 'That key may only read.' }, 403)
   }
+  if (writing && key.writes_left < 0) {
+    return send({ error: 'That key has written as much as it may today.' }, 429)
+  }
+
+  // What the row is signed with. A caller cannot send these — they are not in WRITABLE — so an
+  // agent cannot pass itself off as somebody, and a change made out here always says so.
+  const signature = { updated_by: acting, updated_via: key.agent || 'API key' }
 
   // The page gate, asked once for a whole page of rows rather than once per row.
   const readable = async (ids: string[]) => {
@@ -86,6 +100,7 @@ Deno.serve(async (request) => {
     return send({
       workspace,
       scope: key.scope,
+      writes_left: key.writes_left,
       records: '/records',
       one: '/records/<id>',
       markdown: '/records/<id>/markdown',
@@ -199,7 +214,8 @@ Deno.serve(async (request) => {
     }
 
     const { data, error } = await db.from('records')
-      .insert({ ...row, workspace_id: workspace }).select(COLUMNS).single()
+      .insert({ ...row, ...signature, created_by: acting, workspace_id: workspace })
+      .select(COLUMNS).single()
     return error ? send({ error: error.message }, 400) : send(data, 201)
   }
 
@@ -209,7 +225,7 @@ Deno.serve(async (request) => {
     if (!(await writable(id))) return send({ error: 'No such record.' }, 404)
 
     const { data, error } = await db.from('records')
-      .update(only(body as Record<string, unknown>, WRITABLE))
+      .update({ ...only(body as Record<string, unknown>, WRITABLE), ...signature })
       .eq('workspace_id', workspace).eq('id', id).select(COLUMNS).maybeSingle()
     if (error) return send({ error: error.message }, 400)
     return data ? send(data) : send({ error: 'No such record.' }, 404)
@@ -220,7 +236,7 @@ Deno.serve(async (request) => {
   if (request.method === 'DELETE' && id) {
     if (!(await writable(id))) return send({ error: 'No such record.' }, 404)
     const { data, error } = await db.from('records')
-      .update({ archived_at: new Date().toISOString() })
+      .update({ archived_at: new Date().toISOString(), ...signature })
       .eq('workspace_id', workspace).eq('id', id).select('id').maybeSingle()
     if (error) return send({ error: error.message }, 400)
     return data ? send({ archived: id }) : send({ error: 'No such record.' }, 404)

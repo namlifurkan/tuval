@@ -24,6 +24,22 @@ a page with people named on it stays shut unless they are one of them — `GET /
 leaves those rows out, and asking for one by id answers `404`. Taking that person out of the
 workspace closes their key with them.
 
+## What a write leaves behind
+
+Every write is signed and counted, and the row it changed keeps what it used to say.
+
+- **Signed.** The row records the person the key speaks for and the key's own name, so a change
+  made out here is never attributed to whoever happened to edit it last in the app. The workspace
+  activity list shows the key name rather than a person.
+- **Kept.** The previous value of every column the write moved is stored beside the record. The
+  last thirty changes are kept, and any of them can be put back from the record itself. Moving a
+  card — `position` — is not counted as a change.
+- **Counted.** A key may make **1000 writes a day**. The allowance is spent at the door, before
+  the row moves, and a call past it answers `429`. `GET /` reports `writes_left`. Reads are never
+  counted and are never refused for it. The count starts again at midnight UTC.
+
+To give one key a different allowance, set `daily_writes` on its row in `api_keys`.
+
 Available on the `team` plan, and on any install where
 [`self_hosted`](self-hosting.md#the-fourth-command-is-not-optional) is true. On a `free` hosted
 workspace every call answers `401`.
@@ -101,7 +117,8 @@ does not have keeps working.
 
 `401` no key, or a key that is not valid, expired or revoked, or the API is off for this plan ·
 `403` a `read` key asked to write · `400` malformed body or a rejected write · `404` no such
-record in this workspace, or one the key's holder is not on · `405` a method this door does not do.
+record in this workspace, or one the key's holder is not on · `405` a method this door does not
+do · `429` the key has written as much as it may today.
 
 ## Related
 
