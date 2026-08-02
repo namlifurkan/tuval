@@ -163,6 +163,7 @@ const DOCS = [
   ['self-hosting', 'Self-hosting', 'Run Tuval on your own Postgres and your own disks.'],
   ['api', 'HTTP API', 'One door for a script, a bot, n8n or a spreadsheet.'],
   ['mcp', 'MCP server', 'Mount the workspace in Claude Code or Cursor.'],
+  ['agents', 'Agents', 'What an agent can do with a workspace, and what it cannot.'],
   ['keyboard', 'Keyboard', 'Every shortcut, in the three places that have them.'],
 ].filter(([name]) => existsSync(join('docs', `${name}.md`)))
 
