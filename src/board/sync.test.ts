@@ -16,12 +16,16 @@ const mocked = vi.hoisted(() => {
     claimBoard: vi.fn(),
     applyUpdate: vi.fn(),
     loadWorkspace: vi.fn(),
+    appendUpdate: vi.fn(),
+    pullUpdates: vi.fn(),
+    compactUpdates: vi.fn(),
   }
 })
 
 vi.mock('yjs', () => ({
   applyUpdate: mocked.applyUpdate,
   encodeStateAsUpdate: () => new Uint8Array([1, 2, 3]),
+  mergeUpdates: (all: Uint8Array[]) => all[0],
 }))
 vi.mock('./doc', () => ({
   room: 'board-1',
@@ -38,6 +42,10 @@ vi.mock('./cloud', () => ({
   pushSnapshot: mocked.pushSnapshot,
   snapshotStamp: mocked.snapshotStamp,
   sweepImages: vi.fn(),
+  appendUpdate: mocked.appendUpdate,
+  pullUpdates: mocked.pullUpdates,
+  compactUpdates: mocked.compactUpdates,
+  LOG_MAX: 1_048_576,
 }))
 vi.mock('./supabase', () => ({
   getUser: () => mocked.user,
@@ -60,6 +68,9 @@ beforeEach(() => {
   mocked.claimBoard.mockReset().mockResolvedValue(null)
   mocked.applyUpdate.mockReset()
   mocked.loadWorkspace.mockReset().mockResolvedValue({ id: 'workspace-1' })
+  mocked.appendUpdate.mockReset().mockResolvedValue(1)
+  mocked.pullUpdates.mockReset().mockResolvedValue([])
+  mocked.compactUpdates.mockReset().mockResolvedValue(0)
 })
 
 afterEach(() => vi.useRealTimers())
@@ -115,5 +126,23 @@ describe('cloud sync', () => {
     await vi.advanceTimersByTimeAsync(2_500)
     await settle()
     expect(mocked.pushSnapshot).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('what the log no longer has to keep', () => {
+  it('drops only what the row holds and the lag has released', async () => {
+    const { compactableSeq } = await import('./sync')
+    const seen = [
+      { seq: 1, at: 1_000 },
+      { seq: 2, at: 2_000 },
+      { seq: 3, at: 9_000 },
+    ]
+
+    expect(compactableSeq(seen, 5_000, 9)).toBe(2)
+    // Covered by the row but younger than the lag: a tab that lost the race still has a minute
+    // to write it again.
+    expect(compactableSeq(seen, 500, 9)).toBe(0)
+    // Old enough, but the row this tab just wrote does not contain it.
+    expect(compactableSeq(seen, 20_000, 1)).toBe(1)
   })
 })

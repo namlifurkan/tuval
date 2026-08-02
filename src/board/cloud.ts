@@ -243,6 +243,47 @@ export async function pullSnapshot(room: string): Promise<Uint8Array | null> {
   return data?.doc ? decodeSnapshot(data.doc as string) : null
 }
 
+// The board's record is the log, not the row: one row per update, numbered per board with no
+// gaps, so a reader catches up by asking for everything past the number it already has. The row
+// is a compaction of it, which is why losing a race to write the row is no longer losing work.
+
+export const LOG_MAX = 1_048_576
+
+export interface LoggedUpdate { seq: number; at: number; update: Uint8Array }
+
+export async function appendUpdate(room: string, update: Uint8Array): Promise<number | null> {
+  if (!supabase || !getUser()) return null
+  const { data, error } = await supabase.rpc('append_board_update', {
+    room,
+    payload: await snapshotBase64(update),
+  })
+  if (error) throw new Error(error.message)
+  return data == null ? null : Number(data)
+}
+
+export async function pullUpdates(room: string, after: number): Promise<LoggedUpdate[]> {
+  if (!supabase || !getUser()) return []
+  const { data, error } = await supabase
+    .from('board_updates')
+    .select('seq, update, created_at')
+    .eq('board_id', room)
+    .gt('seq', after)
+    .order('seq')
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row) => ({
+    seq: Number(row.seq),
+    at: Date.parse(row.created_at as string),
+    update: decodeSnapshot(row.update as string),
+  }))
+}
+
+export async function compactUpdates(room: string, through: number): Promise<number> {
+  if (!supabase || !getUser() || through <= 0) return 0
+  const { data, error } = await supabase.rpc('compact_board_updates', { room, through_seq: through })
+  if (error) throw new Error(error.message)
+  return Number(data ?? 0)
+}
+
 // When the row last changed, which is all a tab needs to notice that another one has written
 // under it. Cheap enough to ask before every save; the document itself is not.
 export async function snapshotStamp(room: string): Promise<string | null> {

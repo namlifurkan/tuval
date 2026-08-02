@@ -25,6 +25,8 @@ const shared = vi.hoisted(() => ({
   current: null as unknown,
   wires: [] as unknown[],
   row: { doc: null as string | null, stamp: 0 },
+  log: [] as { seq: number; at: number; update: Uint8Array }[],
+  seq: 0,
   ids: 0,
 }))
 
@@ -56,6 +58,19 @@ vi.mock('./cloud', async () => {
       shared.row.doc ? Uint8Array.from(atob(shared.row.doc), (c) => c.charCodeAt(0)) : null
     ),
     snapshotStamp: async () => (shared.row.doc ? String(shared.row.stamp) : null),
+    // One row per update, numbered with no gaps, exactly as append_board_update does it.
+    appendUpdate: async (_room: string, update: Uint8Array) => {
+      if (update.length > 1_048_576) throw new Error('board_updates_size')
+      shared.seq += 1
+      shared.log.push({ seq: shared.seq, at: Date.now(), update })
+      return shared.seq
+    },
+    pullUpdates: async (_room: string, after: number) => shared.log.filter((one) => one.seq > after),
+    compactUpdates: async (_room: string, through: number) => {
+      const before = shared.log.length
+      shared.log = shared.log.filter((one) => one.seq > through)
+      return before - shared.log.length
+    },
   }
 })
 vi.mock('./supabase', async () => ({
@@ -140,6 +155,20 @@ async function tab(name: string) {
   return { peer, sync }
 }
 
+// A real tab is both halves at once: the transport and the thing that writes the log.
+async function both(name: string) {
+  const peer = make(name)
+  bind(peer)
+  const sync = await import('./sync')
+  const realtime = await import('./realtime')
+  sync.startCloudSync()
+  realtime.startRealtime()
+  peer.channel.subscribed?.('SUBSCRIBED')
+  peers.push(peer)
+  await settle()
+  return { peer, sync }
+}
+
 function pump() {
   for (let guard = 0; wires.length; guard++) {
     // A repair that answers itself would loop for ever; a bounded drain turns that into a
@@ -205,6 +234,8 @@ beforeEach(async () => {
   wires.length = 0
   row.doc = null
   row.stamp = 0
+  shared.log.length = 0
+  shared.seq = 0
   drop = () => false
   bind(make('importer'))
   briefToItems = (await import('./importer')).briefToItems
@@ -337,6 +368,95 @@ describe('the snapshot row two tabs write to', () => {
     await settle()
 
     expect(rowItems()).toHaveLength(written)
+  })
+
+  // The row is a compaction of the log, not the record. A row that never landed, or landed
+  // holding an older document, costs a rewrite rather than the work it was missing.
+  it('opens a board the row never held', async () => {
+    const a = await both('a')
+    const written = importBrief(a.peer, 1)
+    await tick()
+    await a.sync.flushCloud()
+    await settle()
+
+    row.doc = null
+    const late = await tab('late')
+
+    expect(shared.log.length).toBeGreaterThan(0)
+    expect(ids(late.peer)).toHaveLength(written)
+  })
+
+  it('keeps what a row written from a stale tab left out', async () => {
+    const a = await both('a')
+    const b = await both('b')
+
+    drop = () => true
+    const written = importBrief(a.peer, 1) + importBrief(b.peer, 2)
+    // Long enough for both tabs to have written to the log, and neither to have written the row.
+    await tick(200)
+
+    await a.sync.flushCloud()
+    await settle()
+    // Exactly what the round trip between the stamp and the write allows: a document with no
+    // knowledge of b lands on top of one that had it.
+    row.doc = await (await import('./cloud')).snapshotBase64(Y.encodeStateAsUpdate(a.peer.doc))
+    row.stamp += 1
+
+    drop = () => false
+    const late = await tab('late')
+
+    expect(ids(late.peer)).toHaveLength(written)
+  })
+})
+
+describe('a tab that dies holding the only copy', () => {
+  it('gives the board up to the log rather than to the tab that left', async () => {
+    const a = await both('a')
+    const b = await spawn('b')
+    await tick()
+
+    let dropped = 0
+    drop = (sent, to) => {
+      const lose = to === b && sent.wire.k === 'u' && sent.wire.n > 1 && sent.wire.i === 1 && !dropped
+      if (lose) dropped++
+      return lose
+    }
+
+    const written = importBrief(a.peer, 1, 900)
+    await tick()
+    expect(dropped).toBe(1)
+    expect(ids(b)).toHaveLength(0)
+
+    // The only tab that could answer a repair is gone, and its timers never fire again.
+    a.peer.alive = false
+    drop = () => false
+    await tick(2_000)
+
+    expect(ids(b)).toHaveLength(written)
+  })
+})
+
+describe('an update queued as the channel goes', () => {
+  it('is still sent when the channel comes back', async () => {
+    const a = await spawn('a')
+    const b = await spawn('b')
+    await tick()
+
+    // Queued, then the channel drops before the flush window closes.
+    const written = importBrief(b, 1)
+    b.channel.subscribed?.('CHANNEL_ERROR')
+    await tick()
+    expect(ids(a)).toHaveLength(0)
+
+    // Only the queue can deliver this: the state-vector handshake is cut, so nothing depends on
+    // another tab being there to answer for what this one was holding.
+    drop = (sent) => sent.wire.k !== 'u'
+    shared.current = b
+    await tick(1_000)
+    b.channel.subscribed?.('SUBSCRIBED')
+    await tick()
+
+    expect(ids(a)).toHaveLength(written)
   })
 })
 

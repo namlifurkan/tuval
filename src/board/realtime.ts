@@ -4,6 +4,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { awareness, provider, room, ydoc } from './doc'
 import { requestRender } from './store'
 import { getUser, subscribeAuth, supabase } from './supabase'
+import { catchUp } from './sync'
 
 const ORIGIN = 'realtime'
 const FLUSH = 130
@@ -85,8 +86,11 @@ function send(k: Kind, bytes: Uint8Array, r?: number) {
   }
 }
 
+// Nothing is dropped for want of a channel: what was queued as it went waits here, and the
+// subscribe handler schedules another flush the moment there is somewhere to send it.
 function flush() {
   timer = 0
+  if (!channel) return
   if (pending.length) {
     send('u', pending.length === 1 ? pending[0] : Y.mergeUpdates(pending))
     pending = []
@@ -126,8 +130,10 @@ function receive(w: Wire) {
       const incomplete = parts.get(w.id)
       if (!incomplete) return
       parts.delete(w.id)
-      // Asking for the current diff repairs the edit whose broadcast lost one of its chunks.
+      // Asking for the current diff repairs the edit whose broadcast lost one of its chunks —
+      // but only while the tab that sent it is still there to answer. The log answers either way.
       send('sv', Y.encodeStateVector(ydoc), 1)
+      void catchUp().catch(() => {})
     }, PART_WAIT)
     slot = { got: new Array<string>(w.n).fill(''), left: w.n, k: w.k, r: w.r, timer }
     parts.set(w.id, slot)
@@ -183,6 +189,7 @@ function connect() {
       awarePending = true
       schedule()
       resyncLater()
+      void catchUp().catch(() => {})
       return
     }
     if (!['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(status)) return
