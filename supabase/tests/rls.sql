@@ -1299,6 +1299,112 @@ where token_sha = encode(extensions.digest('tuv_read_write', 'sha256'), 'hex');
 select pg_temp.check('and yesterday''s count is not today''s', true,
   (select k.writes_left from public.workspace_for_key('tuv_read_write', true) k) = 1);
 
+-- The board's append log ---------------------------------------------------------------------------
+-- The document was one row that every save overwrote, so two people saving meant the last writer
+-- won and the other one's work went with it. Updates are appended instead: each gets its own row
+-- and its own number, nobody's number can collide with anybody else's, and an update too big to
+-- be one row is refused rather than stored half-written.
+
+set local role postgres;
+select set_config('request.jwt.claims', '', true);
+delete from public.board_members where board_id = 'rls-team-board';
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
+update public.boards set allowed_domain = null where id = 'rls-team-board';
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('the owner appends an update and is told its number', true,
+  public.append_board_update('rls-team-board', 'AQID') = 1);
+select pg_temp.check('the next one gets the next number', true,
+  public.append_board_update('rls-team-board', 'BAUG') = 2);
+select pg_temp.check('the bytes come back out as they went in', true,
+  (select u.update = decode('AQID', 'base64') from public.board_updates u
+   where u.board_id = 'rls-team-board' and u.seq = 1));
+select pg_temp.check('and the owner reads the whole log', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 2);
+
+-- Two writers at the same instant cannot be handed the same number. The lock that keeps them
+-- apart is taken before the last number is read and held to the end of the transaction, so the
+-- second writer cannot even look until the first has committed. It is per board, so a busy board
+-- does not hold up a quiet one.
+select pg_temp.check('appending holds a lock of its own on that board', true,
+  exists(select 1 from pg_locks
+         where locktype = 'advisory' and classid = 8102 and objsubid = 2
+           and objid = hashtext('rls-team-board')::oid));
+select pg_temp.check('and holds nothing on any other board', false,
+  exists(select 1 from pg_locks
+         where locktype = 'advisory' and classid = 8102 and objsubid = 2
+           and objid = hashtext('rls-other-board')::oid));
+-- Whatever the lock does, the number is the primary key, so a repeat is refused by the table.
+select pg_temp.check('the same number twice is refused outright', true, pg_temp.refused(
+  $q$insert into public.board_updates (board_id, seq, update)
+     values ('rls-team-board', 1, '\x01'::bytea)$q$));
+
+-- 1,400,000 base64 characters is 1,050,000 bytes, just over the limit.
+select pg_temp.check('an update over the size limit is refused, not cut short', true, pg_temp.refused(
+  $q$select public.append_board_update('rls-team-board', repeat('A', 1400000))$q$));
+select pg_temp.check('an empty update is refused too', true, pg_temp.refused(
+  $q$select public.append_board_update('rls-team-board', '')$q$));
+select pg_temp.check('and neither of them left a row behind', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 2);
+
+set local role postgres;
+insert into public.board_members (board_id, user_id, role, email)
+values ('rls-team-board', 'bbbbbbbb-0000-4000-8000-000000000002', 'viewer', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('a viewer reads the log', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 2);
+select pg_temp.check('but cannot append to it', true, pg_temp.refused(
+  $q$select public.append_board_update('rls-team-board', 'AQID')$q$));
+select pg_temp.check('nor put a row in by hand', true, pg_temp.refused(
+  $q$insert into public.board_updates (board_id, seq, update)
+     values ('rls-team-board', 99, '\x01'::bytea)$q$));
+select pg_temp.check('nor compact any of it away', true,
+  public.compact_board_updates('rls-team-board', 2) = 0);
+select pg_temp.check('so the log is still whole', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 2);
+
+set local role postgres;
+update public.board_members set role = 'editor' where board_id = 'rls-team-board';
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('an editor appends, and carries on from the last number', true,
+  public.append_board_update('rls-team-board', 'BwgJ') = 3);
+
+select pg_temp.becomes('99999999-0000-4000-8000-000000000009', 'nobody@rls.test');
+select pg_temp.check('a stranger sees none of the log', false,
+  exists(select 1 from public.board_updates where board_id = 'rls-team-board'));
+select pg_temp.check('and cannot append to it', true, pg_temp.refused(
+  $q$select public.append_board_update('rls-team-board', 'AQID')$q$));
+select pg_temp.check('nor compact it away behind everyone''s back', true,
+  public.compact_board_updates('rls-team-board', 3) = 0);
+
+set local role postgres;
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('a caller with no account at all cannot append', true, pg_temp.refused(
+  $q$select public.append_board_update('rls-team-board', 'AQID')$q$));
+
+set local role postgres;
+select pg_temp.check('nothing a stranger tried changed the log', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 3);
+
+-- Compacting is the other half: fold the old rows into the snapshot, then drop them. Numbering
+-- carries on from what is left, so a reader holding number 3 is not handed a different number 3.
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('the owner compacts everything up to a number away', true,
+  public.compact_board_updates('rls-team-board', 2) = 2);
+select pg_temp.check('and what came after it stays', true,
+  (select count(*) from public.board_updates where board_id = 'rls-team-board') = 1);
+select pg_temp.check('the numbers carry on rather than starting over', true,
+  public.append_board_update('rls-team-board', 'CgsM') = 4);
+
+set local role postgres;
+delete from public.board_updates where board_id = 'rls-team-board';
+delete from public.board_members where board_id = 'rls-team-board';
+insert into public.workspace_members (workspace_id, user_id, role, email)
+values ('cccccccc-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000002', 'admin', 'bob@other.test');
+
 -- The issue prefix, on real data ------------------------------------------------------------------
 -- The migration that introduced it asks the table to promise the shape of every prefix, and a row
 -- that breaks the promise takes the whole file down with it. What follows is the repair standing
