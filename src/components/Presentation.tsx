@@ -1,8 +1,7 @@
 import { t } from '../i18n'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect } from 'react'
-import { animateCamera, fitRect } from '../board/camera'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, useBoardStore } from '../board/store'
 import { sortedFrames } from '../board/items'
 import { useItems } from '../board/useBoard'
 import type { FrameItem } from '../board/types'
@@ -14,21 +13,14 @@ export function usePresentationFrames(): FrameItem[] {
 export function Presentation() {
   const presenting = useBoardStore((s) => s.presenting)
   const update = useBoardStore((s) => s.update)
-  const setCamera = useBoardStore((s) => s.setCamera)
   const frames = usePresentationFrames()
 
   useEffect(() => {
     if (presenting === null) return
     const frame = frames[presenting]
     if (!frame) return
-    const el = document.querySelector('canvas')
-    if (!el) return
-    const target = fitRect(frame, el.clientWidth, el.clientHeight, 40)
-    animateCamera(useBoardStore.getState().camera, target, (c) => {
-      setCamera(c)
-      requestRender()
-    })
-  }, [presenting, frames, setCamera])
+    flyToRect(frame, 40)
+  }, [presenting, frames])
 
   useEffect(() => {
     if (presenting === null) return

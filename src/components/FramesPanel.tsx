@@ -1,13 +1,12 @@
 import { t } from '../i18n'
 import { ChevronDown, ChevronUp, Play, Printer, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
-import { fitRect } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
 import { renderToCanvas } from '../board/export'
 import { patchItems } from '../board/doc'
 import { sortedFrames } from '../board/items'
 import { printFrames } from '../board/print'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { FrameItem } from '../board/types'
 import { aabb, contains } from '../board/geometry'
@@ -34,7 +33,6 @@ function Thumb({ frame }: { frame: FrameItem }) {
 export function FramesPanel() {
   const open = useBoardStore((s) => s.framesPanel)
   const update = useBoardStore((s) => s.update)
-  const setCamera = useBoardStore((s) => s.setCamera)
   const setSelection = useBoardStore((s) => s.setSelection)
   const items = useItems()
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -57,8 +55,7 @@ export function FramesPanel() {
   if (!open) return null
 
   const jump = (frame: FrameItem) => {
-    const el = document.querySelector('canvas')!
-    setCamera(fitRect(frame, el.clientWidth, el.clientHeight))
+    flyToRect(frame)
     setSelection([frame.id])
     requestRender()
   }

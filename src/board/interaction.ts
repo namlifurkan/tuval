@@ -1,5 +1,5 @@
 import { readOnly } from './access'
-import { fitRect, toBoard, toScreen, zoomAt } from './camera'
+import { toBoard, toScreen, zoomAt } from './camera'
 import type { Camera } from './camera'
 import {
   childrenOf, connectorsFor, createItems, getIndex, getItems, patchItems, removeItems, transact,
@@ -23,7 +23,7 @@ import {
   boxOf, commentPinScreen, connectorGeometry, connectorHandles, handleScreenRects, PIN_R, quickHit,
   QUICK_TYPES,
 } from './render'
-import { requestRender, session, useBoardStore } from './store'
+import { flyToRect, requestRender, session, useBoardStore } from './store'
 import type { Tool } from './store'
 import type { AnchorSide, Endpoint, Id, Item, Rect, Vec } from './types'
 
@@ -1141,7 +1141,7 @@ export function insertItems(list: Item[], fit: boolean, el: HTMLCanvasElement | 
     // back to the world origin and throws the camera off.
     const index = getIndex()
     const stored = list.map((i) => index.get(i.id) ?? i)
-    s.setCamera(fitRect(boxOf(stored), el.clientWidth, el.clientHeight))
+    flyToRect(boxOf(stored))
     s.setSelection([])
   } else s.setSelection(list.map((i) => i.id))
   requestRender()

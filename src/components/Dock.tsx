@@ -2,7 +2,7 @@ import { Minus, Plus, Redo2, RotateCcw, Settings2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { readOnly, subscribeAccess } from '../board/access'
-import { clampZoom, fitRect, zoomAt } from '../board/camera'
+import { clampZoom, skipsMotion, zoomAt } from '../board/camera'
 import { getItems, redo, undo } from '../board/doc'
 import {
   DEFAULT_ORDER, DOCK_LABELS, DOCK_SIDES, getDockPrefs, moveDockItem, resetDock, setDockSide,
@@ -17,7 +17,7 @@ import { insertItems } from '../board/interaction'
 import { boxOf } from '../board/render'
 import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
 import { TEMPLATES } from '../board/templates'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { t } from '../i18n'
 import { LINE_COLORS, STICKY_COLORS, type Item, type ShapeKind } from '../board/types'
@@ -82,9 +82,7 @@ export function Dock() {
   const barRef = useRef<HTMLDivElement>(null)
   const [dragId, setDragId] = useState<DockItemId | null>(null)
 
-  const reduceMotion = typeof matchMedia === 'function'
-    && matchMedia('(prefers-reduced-motion: reduce)').matches
-  const magnify = prefs.magnify && !reduceMotion
+  const magnify = prefs.magnify && !skipsMotion()
   const side = prefs.side
   const vertical = side === 'left' || side === 'right'
   const originClass = { bottom: 'origin-bottom', top: 'origin-top', left: 'origin-left', right: 'origin-right' }[side]
@@ -168,10 +166,9 @@ export function Dock() {
   }
 
   const fitAll = () => {
-    const el = canvasEl()!
     const all = getItems()
-    setCamera(all.length ? fitRect(boxOf(all), el.clientWidth, el.clientHeight) : { ...camera, z: 1 })
-    requestRender()
+    if (!all.length) { setCamera({ ...camera, z: 1 }); requestRender(); return }
+    flyToRect(boxOf(all))
   }
 
   const button = (title: string, active: boolean, onClick: () => void, icon: ReactNode) => (

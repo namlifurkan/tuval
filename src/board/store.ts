@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { room } from './doc'
 import { loadCamera } from './viewport'
+import { animateCamera, fitRect } from './camera'
 import type { Camera } from './camera'
-import type { Cap, ConnectorShape, Id, ShapeKind, StrokeStyle, TextStyle, Vec } from './types'
+import type { Cap, ConnectorShape, Id, Rect, ShapeKind, StrokeStyle, TextStyle, Vec } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
 
 export type Tool =
@@ -144,6 +145,18 @@ export const consumeDirty = () => {
   const d = dirty
   dirty = false
   return d
+}
+
+// Every arrival on the canvas — a search hit, a frame, a comment, a freshly dropped template —
+// goes through here, so they all travel the same way instead of teleporting.
+export function flyToRect(rect: Rect, padding?: number) {
+  const el = document.querySelector('canvas')
+  if (!el) return
+  const { camera, setCamera } = useBoardStore.getState()
+  animateCamera(camera, fitRect(rect, el.clientWidth, el.clientHeight, padding), (c) => {
+    setCamera(c)
+    requestRender()
+  })
 }
 
 if (import.meta.hot) {

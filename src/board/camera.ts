@@ -53,7 +53,7 @@ export function ease(t: number): number {
   return bezier(1, 1, u)
 }
 
-const skipsMotion = () =>
+export const skipsMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 let tween = 0

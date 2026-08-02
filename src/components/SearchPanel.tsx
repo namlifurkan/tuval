@@ -1,9 +1,8 @@
 import { t } from '../i18n'
 import { Search, X } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { fitRect } from '../board/camera'
 import { aabb } from '../board/geometry'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { Item } from '../board/types'
 
@@ -20,7 +19,6 @@ const textOf = (i: Item): string =>
 export function SearchPanel() {
   const open = useBoardStore((s) => s.searchOpen)
   const update = useBoardStore((s) => s.update)
-  const setCamera = useBoardStore((s) => s.setCamera)
   const setSelection = useBoardStore((s) => s.setSelection)
   const items = useItems()
   const [query, setQuery] = useState('')
@@ -43,10 +41,9 @@ export function SearchPanel() {
   const active = Math.min(cursor, Math.max(0, hits.length - 1))
 
   const jump = (item: Item) => {
-    const el = document.querySelector('canvas')!
     const b = aabb(item)
     const pad = Math.max(b.w, b.h) * 0.6 + 120
-    setCamera(fitRect({ x: b.x - pad, y: b.y - pad, w: b.w + pad * 2, h: b.h + pad * 2 }, el.clientWidth, el.clientHeight))
+    flyToRect({ x: b.x - pad, y: b.y - pad, w: b.w + pad * 2, h: b.h + pad * 2 })
     setSelection([item.id])
     requestRender()
   }

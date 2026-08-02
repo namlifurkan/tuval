@@ -5,7 +5,7 @@ import { refreshThumb } from '../board/sync'
 import { readTexture } from '../board/paperPrefs'
 import { touchBoard } from '../board/boards'
 import { flushCamera, saveCamera } from '../board/viewport'
-import { fitRect, toBoard } from '../board/camera'
+import { toBoard } from '../board/camera'
 import { awareness, createItems, getIndex, getItems, getMeta, room, subscribeDoc, subscribeMeta, redo, undo } from '../board/doc'
 import {
   cancelDrag, contextMenuAt, copyStyle, deleteSelection, doubleClick, duplicateSelection, getPointer,
@@ -19,7 +19,7 @@ import { addPdf, isPdf, MAX_PAGES } from '../board/pdf'
 import { cloneItems, makeEmbed, makeSticky, makeText, withPreview } from '../board/items'
 import { me, subscribeMe } from '../board/me'
 import { boxOf, render } from '../board/render'
-import { consumeDirty, requestRender, session, useBoardStore } from '../board/store'
+import { consumeDirty, flyToRect, requestRender, session, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { Item, Vec } from '../board/types'
@@ -363,13 +363,12 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
         return
       }
       if (e.shiftKey && !mod && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
-        const el = ref.current!
         const all = getItems()
-        if (e.code === 'Digit1' && all.length) s.setCamera(fitRect(boxOf(all), el.clientWidth, el.clientHeight))
+        if (e.code === 'Digit1' && all.length) flyToRect(boxOf(all))
         if (e.code === 'Digit2' && s.selection.length) {
           const index = getIndex()
           const sel = s.selection.map((id) => index.get(id)!).filter(Boolean)
-          s.setCamera(fitRect(boxOf(sel), el.clientWidth, el.clientHeight))
+          flyToRect(boxOf(sel))
         }
         if (e.code === 'Digit3') s.setCamera((c) => ({ ...c, z: 1 }))
         return

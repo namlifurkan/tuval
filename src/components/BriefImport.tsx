@@ -1,11 +1,10 @@
 import { Upload, X } from 'lucide-react'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { animateCamera, fitRect } from '../board/camera'
 import { createItems, getMeta, setMeta } from '../board/doc'
 import { briefToItems, parseBrief } from '../board/importer'
 import { miroToItems } from '../board/miro'
 import { boxOf } from '../board/render'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import { t } from '../i18n'
 
 const SAMPLE = `# Checkout redesign
@@ -34,7 +33,6 @@ flowchart TD
 export function BriefImport() {
   const open = useBoardStore((s) => s.briefOpen)
   const update = useBoardStore((s) => s.update)
-  const setCamera = useBoardStore((s) => s.setCamera)
   const setSelection = useBoardStore((s) => s.setSelection)
   const camera = useBoardStore((s) => s.camera)
   const [text, setText] = useState('')
@@ -72,11 +70,7 @@ export function BriefImport() {
     if (!items.length) return
     createItems(items)
     if (title && !getMeta().name) setMeta('name', title)
-    const target = fitRect(boxOf(items), el.clientWidth, el.clientHeight)
-    animateCamera(useBoardStore.getState().camera, target, (c) => {
-      setCamera(c)
-      requestRender()
-    })
+    flyToRect(boxOf(items))
     setSelection([])
     update({ briefOpen: false })
     setText('')

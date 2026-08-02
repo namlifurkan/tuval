@@ -1,10 +1,9 @@
 import { t } from '../i18n'
 import { Check, MessageSquare, X } from 'lucide-react'
 import { useState } from 'react'
-import { fitRect } from '../board/camera'
 import { patchItem } from '../board/doc'
 import { initials } from '../board/me'
-import { requestRender, useBoardStore } from '../board/store'
+import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { CommentItem } from '../board/types'
 
@@ -19,7 +18,6 @@ const timeAgo = (at: number) => {
 export function CommentsPanel() {
   const open = useBoardStore((s) => s.commentsPanel)
   const update = useBoardStore((s) => s.update)
-  const setCamera = useBoardStore((s) => s.setCamera)
   const setSelection = useBoardStore((s) => s.setSelection)
   const items = useItems()
   const [showResolved, setShowResolved] = useState(false)
@@ -31,8 +29,7 @@ export function CommentsPanel() {
   const resolvedCount = all.length - all.filter((c) => !c.resolved).length
 
   const jump = (comment: CommentItem) => {
-    const el = document.querySelector('canvas')!
-    setCamera(fitRect({ x: comment.x - 500, y: comment.y - 350, w: 1000, h: 700 }, el.clientWidth, el.clientHeight, 0))
+    flyToRect({ x: comment.x - 500, y: comment.y - 350, w: 1000, h: 700 }, 0)
     setSelection([comment.id])
     update({ openComment: comment.id })
     requestRender()
