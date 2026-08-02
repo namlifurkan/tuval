@@ -20,6 +20,7 @@ import { getUser } from '../board/supabase'
 import { getWorkspace, listTeam, subscribeWorkspace } from '../board/workspace'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
+import { changedSince, lastLooked, loadSeen, markSeen, subscribeSeen, writtenByAgent } from '../board/seen'
 import { CycleBar } from './CycleBar'
 import { IssueBoard } from './IssueBoard'
 import { IssueDetail } from './IssueDetail'
@@ -57,6 +58,12 @@ function Dot({ status, onPick }: { status: Status | null; onPick?: (next: Status
   )
 }
 
+const CHIP: { [key: string]: string } = {
+  mine: 'Mine',
+  new: 'Since you looked',
+  agent: 'By an agent',
+}
+
 export function Issues() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const records = useSyncExternalStore(subscribeRecords, issues, issues)
@@ -65,11 +72,12 @@ export function Issues() {
   const known = useSyncExternalStore(subscribeIssues, labels, labels)
   const [team, setTeam] = useState<Teammate[]>([])
   const [title, setTitle] = useState('')
-  const [filter, setFilter] = useState<Status | 'all' | 'mine'>('all')
+  const [filter, setFilter] = useState<Status | 'all' | 'mine' | 'new' | 'agent'>('all')
   const [view, setView] = useState<'list' | 'board'>('list')
   const [group, setGroup] = useState<GroupBy>('status')
   const [cycleOnly, setCycleOnly] = useState('')
   const [at, setAt] = useState(-1)
+  const looked = useSyncExternalStore(subscribeSeen, lastLooked, lastLooked)
   const [picked, setPicked] = useState<string[]>([])
   const box = useRef<HTMLInputElement>(null)
 
@@ -89,6 +97,7 @@ export function Issues() {
     void loadRelations()
     void loadTime()
     void listTeam().then(setTeam)
+    void loadSeen()
   }, [workspace])
 
   const prefix = workspace?.prefix ?? ''
@@ -120,11 +129,14 @@ export function Issues() {
   const shown = useMemo(() => {
     let held = cycleOnly ? top.filter((r) => r.cycle_id === cycleOnly) : top
     if (filter === 'mine') held = held.filter((r) => r.assignee === mine)
+    else if (filter === 'new') held = held.filter((r) => changedSince(r.updated_at, looked))
+    else if (filter === 'agent') held = held.filter((r) => writtenByAgent(r.updated_via))
     else if (filter !== 'all') held = held.filter((r) => r.status === filter)
     return held
-  }, [top, filter, cycleOnly, mine])
+  }, [top, filter, cycleOnly, mine, looked])
 
   const counted = cycleOnly ? top.filter((r) => r.cycle_id === cycleOnly) : top
+  const fresh = counted.filter((r) => changedSince(r.updated_at, looked)).length
 
   const bands = useMemo(
     () => bandsOf(shown, group, { person: nameOf, cycle: cycleName }),
@@ -217,7 +229,7 @@ export function Issues() {
       </div>
 
       <div className={`flex flex-wrap items-center gap-1.5 ${view === 'board' ? 'hidden' : ''}`}>
-        {(['all', 'mine', ...STATUSES] as const).map((s) => (
+        {(['all', 'mine', 'new', 'agent', ...STATUSES] as const).map((s) => (
           <button
             key={s}
             type="button"
@@ -225,16 +237,27 @@ export function Issues() {
             className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
               ${filter === s ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
           >
-            {t(s === 'mine' ? 'Mine' : s)}
+            {t(CHIP[s as keyof typeof CHIP] ?? s)}
             {s !== 'all' && (
               <span className="ml-1.5 text-[#B6B1A6]">
-                {s === 'mine'
-                  ? counted.filter((r) => r.assignee === mine).length
+                {s === 'mine' ? counted.filter((r) => r.assignee === mine).length
+                  : s === 'new' ? fresh
+                  : s === 'agent' ? counted.filter((r) => writtenByAgent(r.updated_via)).length
                   : counted.filter((r) => r.status === s).length}
               </span>
             )}
           </button>
         ))}
+        {!!fresh && (
+          <button
+            type="button"
+            onClick={() => void markSeen()}
+            className="ml-auto rounded-lg px-2.5 py-1 text-xs font-semibold text-[#4A463E]
+              transition-colors hover:bg-[#EAE6DD]"
+          >
+            {t('Mark all as seen')}
+          </button>
+        )}
       </div>
 
       <input
@@ -284,6 +307,18 @@ export function Issues() {
                   <Dot
                     status={issue.status}
                     onPick={(next) => void patchRecord(issue.id, { status: next })}
+                  />
+
+                  <span
+                    aria-label={changedSince(issue.updated_at, looked)
+                      ? t(writtenByAgent(issue.updated_via) ? 'By an agent' : 'Since you looked')
+                      : undefined}
+                    title={changedSince(issue.updated_at, looked)
+                      ? t(writtenByAgent(issue.updated_via) ? 'By an agent' : 'Since you looked')
+                      : undefined}
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full
+                      ${!changedSince(issue.updated_at, looked) ? 'bg-transparent'
+                        : writtenByAgent(issue.updated_via) ? 'bg-[#C8452D]' : 'bg-[#141310]'}`}
                   />
 
                   <span className="w-[62px] shrink-0 font-mono text-[11px] tabular-nums text-[#B6B1A6]">

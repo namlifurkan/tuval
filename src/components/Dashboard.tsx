@@ -15,6 +15,7 @@ import { getScope, subscribeScope } from '../board/scope'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { duplicateBoard } from '../board/duplicate'
 import { TEMPLATES } from '../board/templates'
+import { changedSince, lastLooked, loadSeen, subscribeSeen } from '../board/seen'
 import { t } from '../i18n'
 import { PasswordGate } from './PasswordGate'
 import { Shell } from './Shell'
@@ -46,6 +47,11 @@ function Tile({ board, mine, onForget, onCopy }: {
   onForget?: () => void
   onCopy?: () => void
 }) {
+  const looked = useSyncExternalStore(subscribeSeen, lastLooked, lastLooked)
+  const fresh = changedSince(
+    board.changed ? new Date(board.changed).toISOString() : null, looked,
+  )
+
   return (
     <div className="group relative">
       <button
@@ -63,6 +69,13 @@ function Tile({ board, mine, onForget, onCopy }: {
       </button>
 
       <div className="mt-2 flex items-baseline gap-2 px-0.5">
+        {fresh && (
+          <span
+            title={t('Since you looked')}
+            aria-label={t('Since you looked')}
+            className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-[#141310]"
+          />
+        )}
         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#141310]">
           {board.name || t('Untitled board')}
         </span>
@@ -132,7 +145,7 @@ export function Dashboard() {
   const scope = useSyncExternalStore(subscribeScope, getScope, getScope)
   const remoteRoomKey = [...local, ...localTrash].map((board) => board.room).sort().join('\n')
 
-  useEffect(() => { void discoverBoards() }, [])
+  useEffect(() => { void discoverBoards(); void loadSeen() }, [])
   useEffect(() => {
     if (!user) { setCloud([]); setRemote(new Set()); setLoading(false); return }
     const rooms = remoteRoomKey ? remoteRoomKey.split('\n') : []

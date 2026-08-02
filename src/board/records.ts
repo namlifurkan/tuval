@@ -36,6 +36,9 @@ export interface Record {
   created_at: string
   created_by: string | null
   updated_by: string | null
+  // The name of the API key that wrote this, and null when a person did. What makes an agent's
+  // night of work separable from everybody else's day.
+  updated_via: string | null
   // An issue's number within its workspace. TUV-12 is the workspace prefix and this.
   seq: number | null
   estimate: number | null
@@ -48,7 +51,7 @@ export interface Record {
 
 const COLUMNS =
   'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, '
-  + 'position, created_at, created_by, updated_at, updated_by, published_at, public_slug, '
+  + 'position, created_at, created_by, updated_at, updated_by, updated_via, published_at, public_slug, '
   + 'seq, estimate, cycle_id, project_id, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so

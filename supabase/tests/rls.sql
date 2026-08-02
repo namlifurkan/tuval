@@ -1491,6 +1491,35 @@ select pg_temp.check('the person named on the gate may move a page inside it', f
   pg_temp.refused($$update public.records set title = 'Still inside'
     where id = 'c0c0c0c0-0000-4000-8000-00000000000c'$$));
 
+-- Saying you have looked ----------------------------------------------------------------------------
+-- A member may stamp their own row and nothing else on it. Somebody outside the workspace, and
+-- somebody blocked from it, stamp nothing at all.
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "bbbbbbbb-0000-4000-8000-000000000002", "role": "authenticated"}';
+
+select pg_temp.check('a member can say they have looked', true,
+  public.mark_workspace_seen('cccccccc-0000-4000-8000-000000000003') is not null);
+select pg_temp.check('and it is their own row that moved', true,
+  (select seen_at is not null from public.workspace_members
+   where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+     and user_id = 'bbbbbbbb-0000-4000-8000-000000000002'));
+set local role postgres;
+select pg_temp.check('nobody else was stamped', true,
+  (select count(*) = 1 from public.workspace_members
+   where workspace_id = 'cccccccc-0000-4000-8000-000000000003' and seen_at is not null));
+set local role authenticated;
+
+set local request.jwt.claims = '{"sub": "99999999-0000-4000-8000-000000000009", "role": "authenticated"}';
+select pg_temp.check('somebody outside the workspace stamps nothing', true,
+  public.mark_workspace_seen('cccccccc-0000-4000-8000-000000000003') is null);
+
+set local role anon;
+set local request.jwt.claims = '{"role": "anon"}';
+select pg_temp.check('and a caller with no account cannot reach it at all', true,
+  pg_temp.refused($$select public.mark_workspace_seen(
+    'cccccccc-0000-4000-8000-000000000003')$$));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;

@@ -153,6 +153,7 @@ const dealRows: Row[] = DEALS.map(([title, stage, value, closes, signed], at) =>
   created_at: '2026-07-01T09:00:00.000Z',
   created_by: null,
   updated_by: null,
+  updated_via: null,
   seq: null,
   estimate: null,
   cycle_id: null,

@@ -25,6 +25,7 @@ const row = (id: string, title: string, data: { [k: string]: unknown } = {}, pos
   created_at: '2026-08-01T00:00:00Z',
   created_by: null,
   updated_by: null,
+  updated_via: null,
   seq: null,
   estimate: null,
   cycle_id: null,

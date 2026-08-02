@@ -8,6 +8,9 @@ export interface BoardEntry {
   frames: number
   thumb?: string
   deleted?: number
+  // When the board itself last changed, which is not when this browser last opened it. Only the
+  // cloud knows the first, and only it can answer whether somebody else has been in here.
+  changed?: number
 }
 
 const KEY = 'tuval:boards'

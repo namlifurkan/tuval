@@ -22,7 +22,14 @@ export function mergeBoardLists(local: BoardEntry[], cloud: CloudBoard[]): Board
   for (const board of local) all.set(board.room, board)
   // Cloud carries shared boards this browser has never opened. It also has the authoritative
   // name for a board renamed by somebody else.
-  for (const board of cloud) if (!board.deleted) all.set(board.room, board)
+  for (const board of cloud) {
+    if (board.deleted) continue
+    // Keeping this browser's own idea of when it last opened the board, and taking the cloud's
+    // idea of when the board changed: a board is new to you because somebody wrote it, not
+    // because you looked at it.
+    const held = all.get(board.room)
+    all.set(board.room, { ...board, opened: Math.max(board.opened, held?.opened ?? 0) })
+  }
   return [...all.values()]
 }
 
@@ -53,6 +60,7 @@ export async function listCloudBoards(): Promise<CloudBoard[]> {
       room: row.id as string,
       name: (row.name as string) ?? '',
       opened: Date.parse(row.updated_at as string) || 0,
+      changed: Date.parse(row.updated_at as string) || 0,
       items: snap?.items ?? 0,
       frames: snap?.frames ?? 0,
       thumb: snap?.thumb ?? '',
