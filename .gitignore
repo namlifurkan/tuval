@@ -34,5 +34,6 @@ supabase/.temp
 WORKSPACE.md
 LEGAL.md
 PANEL.md
+.mcp.json
 .rls-run-*.sql
 worker/env.generated.ts
