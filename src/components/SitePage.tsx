@@ -737,7 +737,7 @@ export function SitePage() {
   const body = page.compare ? <CompareLayout page={page} />
     : page.path === '/' ? <HomeLayout page={page} />
     : page.path === '/pricing' ? <PricingLayout page={page} />
-      : page.path === '/self-hosting' ? <SpecLayout page={page} />
+      : ['/self-hosting', '/mcp'].includes(page.path) ? <SpecLayout page={page} />
         : page.path.startsWith('/for/') ? <TradeLayout page={page} />
           : <SurfaceLayout page={page} />
 

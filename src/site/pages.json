@@ -131,6 +131,7 @@
         "/databases",
         "/issues",
         "/self-hosting",
+        "/mcp",
         "/pricing",
         "/import/miro"
       ]
@@ -442,9 +443,88 @@
       ],
       "next": [
         "/pricing",
+        "/mcp",
         "/canvas",
         "/databases",
         "/for/software-teams"
+      ]
+    },
+    {
+      "path": "/mcp",
+      "title": "MCP server — the workspace in Claude Code | Tuval",
+      "description": "A read-only MCP server for Claude Code and Cursor: search the workspace, read a page as Markdown, list what is in flight. One line to mount it, and the key decides what it sees.",
+      "claim": "Mount the workspace in Claude Code.",
+      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Four tools, all of them reads: search pages, databases, issues and projects in one call, open any of them as Markdown, list what is in flight. The key decides which workspace, and the agent is shown exactly what the person who made that key can see.",
+      "bands": [
+        {
+          "id": "tools",
+          "tone": "paper",
+          "heading": "The four tools",
+          "points": [
+            {
+              "title": "search",
+              "body": "Words in titles and bodies, across pages, databases, issues and projects in one call. Postgres full-text does the matching, and an excerpt comes back with each id so a result can be judged before it is opened."
+            },
+            {
+              "title": "read_page",
+              "body": "One page or issue in full, as Markdown, with its headings, lists and code intact. Not the JSON shape of a row — the text a model can reason over."
+            },
+            {
+              "title": "list_records",
+              "body": "Records of one kind, narrowed by status, project or assignee. Archived rows are left out, so an agent is never arguing about work somebody already put away."
+            },
+            {
+              "title": "workspace",
+              "body": "What this key can reach, and the addresses inside it. The first call an agent makes when it is working out what it has been handed."
+            }
+          ]
+        },
+        {
+          "id": "commands",
+          "tone": "paper",
+          "heading": "Two lines",
+          "body": "The server is a file in the repository and it speaks the protocol over stdin and stdout, so there is nothing to deploy and nothing listening on a port. It wants a key, made in Settings → API and webhooks, hashed the moment it exists and therefore shown exactly once. The full reference is docs/mcp.md in the checkout, rendered at /docs/mcp, because two copies of the same prose disagree within a month.",
+          "lines": [
+            "claude mcp add tuval -- node /path/to/tuval/scripts/mcp.mjs",
+            "TUVAL_API_KEY=tuv_...   # in the environment, or in .env.local"
+          ]
+        },
+        {
+          "tone": "paper",
+          "heading": "What is not behind this door",
+          "body": "Boards are not records, so no tool here opens one. A canvas reaches a model the other way and on purpose: the board turns its frames, connectors and comments into a Markdown brief you hand over. What this server reads is the rows — pages, databases, issues, projects, people, companies, events and files — and it stops there."
+        },
+        {
+          "tone": "paper",
+          "heading": "Read-only, and not by accident",
+          "body": "All four tools are GET requests, and the single helper that makes them sends no method, no body and no content type. There is no path through this server that could write, so an agent that decides to reorganise your workspace finds nothing to do it with. Writing is a separate decision taken at the HTTP API, with a key issued to write and revocable on its own."
+        },
+        {
+          "tone": "paper",
+          "heading": "A key is never more than the person who made it",
+          "body": "The agent reads with its maker's eyes. A page with people named on it stays shut unless they are one of them. Taking that person out of the workspace closes their key with them, and no parameter can move a call into another workspace, because the caller never chooses the workspace — the key does."
+        },
+        {
+          "tone": "paper",
+          "heading": "Held for the paid plan, open on your own install",
+          "body": "The API and the MCP server that rides on it are what the hosted plan charges for, so on a free hosted workspace every call answers 401. Run it yourself and the same check passes: the self-hosted setting is read as the team plan and the seat, storage and API limits stop applying. Either way the reason comes back as text the model can read rather than as a broken pipe."
+        },
+        {
+          "tone": "pigment",
+          "heading": "The half that does not exist yet",
+          "body": "A board goes out to an agent as a brief. A workspace comes back to an agent as records. Neither direction ends with an agent drawing on a canvas, and this server reads without writing, so whatever the model concludes still comes back through a person or through the HTTP API. That is a limit rather than an oversight, and it belongs on the page where you are deciding rather than in week two."
+        },
+        {
+          "tone": "pigment",
+          "heading": "You should not have to paste your own work into a prompt",
+          "body": "The alternative to this door is copying a page into a chat window and copying the answer back. It works once. It does not survive the second week, and from the moment the tab closes the workspace and the model's idea of it drift apart. A key, one line, and the agent is reading the work rather than a paraphrase of it."
+        }
+      ],
+      "next": [
+        "/self-hosting",
+        "/issues",
+        "/databases",
+        "/pricing"
       ]
     },
     {
@@ -496,6 +576,7 @@
       ],
       "next": [
         "/self-hosting",
+        "/mcp",
         "/canvas",
         "/databases"
       ]
@@ -1025,6 +1106,7 @@
     "/for/software-teams": "For software teams",
     "/for/client-work": "For client work",
     "/self-hosting": "Self-hosting",
+    "/mcp": "MCP server",
     "/pricing": "Pricing",
     "/alternatives/miro": "Compared with Miro",
     "/alternatives/notion": "Compared with Notion",
