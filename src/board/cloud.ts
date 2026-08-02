@@ -205,7 +205,32 @@ export async function snapshotBase64(doc: Uint8Array): Promise<string> {
   return chunks.join('')
 }
 
-const HEX = /^\\x/
+const HEX = /^[0-9a-fA-F]*$/
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/
+
+const nibble = (code: number) => (code <= 57 ? code - 48 : (code & 0xdf) - 55)
+
+// PostgREST returns bytea as a hex literal, but which encoding it uses is a server setting, so
+// base64 is read too. Anything else throws: a snapshot read as empty would be overwritten by
+// whatever this tab happens to hold, which is the whole board.
+export function decodeSnapshot(raw: string): Uint8Array {
+  if (raw.startsWith('\\x')) {
+    const body = raw.slice(2)
+    if (body.length % 2 || !HEX.test(body)) throw new Error('Snapshot is not readable hex')
+    const out = new Uint8Array(body.length / 2)
+    // Arithmetic on character codes, not a slice and a parseInt per byte: a five megabyte board
+    // is five million throwaway strings that way, and the tab stops until they are collected.
+    for (let i = 0; i < out.length; i++) {
+      out[i] = (nibble(body.charCodeAt(i * 2)) << 4) | nibble(body.charCodeAt(i * 2 + 1))
+    }
+    return out
+  }
+  // atob is forgiving about both padding and stray characters, so a plain sentence decodes to
+  // rubbish rather than failing. The row is checked before it is trusted.
+  const body = raw.replace(/\s+/g, '')
+  if (body.length % 4 || !BASE64.test(body)) throw new Error('Snapshot is in an unknown encoding')
+  return Uint8Array.from(atob(body), (c) => c.charCodeAt(0))
+}
 
 export async function pullSnapshot(room: string): Promise<Uint8Array | null> {
   if (!supabase || !getUser()) return null
@@ -215,13 +240,20 @@ export async function pullSnapshot(room: string): Promise<Uint8Array | null> {
     .eq('board_id', room)
     .maybeSingle()
   if (error) throw error
-  if (!data?.doc) return null
-  const raw = data.doc as string
-  if (!HEX.test(raw)) return null
-  const body = raw.slice(2)
-  const out = new Uint8Array(body.length / 2)
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(body.slice(i * 2, i * 2 + 2), 16)
-  return out
+  return data?.doc ? decodeSnapshot(data.doc as string) : null
+}
+
+// When the row last changed, which is all a tab needs to notice that another one has written
+// under it. Cheap enough to ask before every save; the document itself is not.
+export async function snapshotStamp(room: string): Promise<string | null> {
+  if (!supabase || !getUser()) return null
+  const { data, error } = await supabase
+    .from('board_snapshots')
+    .select('updated_at')
+    .eq('board_id', room)
+    .maybeSingle()
+  if (error) throw error
+  return (data?.updated_at as string) ?? null
 }
 
 export async function uploadImage(room: string, blob: Blob, ext: string): Promise<string | null> {

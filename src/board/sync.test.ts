@@ -12,6 +12,7 @@ const mocked = vi.hoisted(() => {
     user: { id: 'user-1' } as { id: string } | null,
     pullSnapshot: vi.fn(),
     pushSnapshot: vi.fn(),
+    snapshotStamp: vi.fn(),
     claimBoard: vi.fn(),
     applyUpdate: vi.fn(),
     loadWorkspace: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('./cloud', () => ({
   claimBoard: mocked.claimBoard,
   pullSnapshot: mocked.pullSnapshot,
   pushSnapshot: mocked.pushSnapshot,
+  snapshotStamp: mocked.snapshotStamp,
   sweepImages: vi.fn(),
 }))
 vi.mock('./supabase', () => ({
@@ -44,11 +46,8 @@ vi.mock('./supabase', () => ({
 }))
 vi.mock('./workspace', () => ({ loadWorkspace: mocked.loadWorkspace }))
 
-const settle = async () => {
-  await Promise.resolve()
-  await Promise.resolve()
-  await Promise.resolve()
-}
+// A save is a chain of awaits now that it reconciles the row before writing it.
+const settle = async () => { for (let i = 0; i < 10; i++) await Promise.resolve() }
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -57,6 +56,7 @@ beforeEach(() => {
   mocked.user = { id: 'user-1' }
   mocked.pullSnapshot.mockReset().mockResolvedValue(null)
   mocked.pushSnapshot.mockReset().mockResolvedValue(null)
+  mocked.snapshotStamp.mockReset().mockResolvedValue(null)
   mocked.claimBoard.mockReset().mockResolvedValue(null)
   mocked.applyUpdate.mockReset()
   mocked.loadWorkspace.mockReset().mockResolvedValue({ id: 'workspace-1' })

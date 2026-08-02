@@ -4,7 +4,7 @@ import { readOnly } from './access'
 import { storagePath } from './storage'
 import { surfaceColor } from './brand'
 import { makeThumb } from './thumb'
-import { claimBoard, pullSnapshot, pushSnapshot, sweepImages } from './cloud'
+import { claimBoard, pullSnapshot, pushSnapshot, snapshotStamp, sweepImages } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta } from './doc'
 import { loadWorkspace } from './workspace'
@@ -18,6 +18,7 @@ let dirty = false
 let restored = false
 let restoring = false
 let revision = 0
+let stamp: string | null = null
 
 const counts = () => {
   const all = getItems()
@@ -41,13 +42,32 @@ function setCloudError(next: string | null) {
   errorListeners.forEach((listener) => listener())
 }
 
+// The board is one bytea in one row, so two tabs saving at once is last-writer-wins and the
+// slower one erases the other. Whatever moved under us is merged in first, which makes the
+// write a union rather than a replacement.
+// shortcut: the check is a round trip wide, so a write landing inside it is still lost. Closing
+// that needs the row to append updates instead of replacing them, which is a schema change.
+async function merge() {
+  try {
+    const seen = await snapshotStamp(room)
+    if (seen === stamp) return null
+    const update = await pullSnapshot(room)
+    if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
+    return null
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error)
+  }
+}
+
 async function save() {
   timer = 0
   if (!room || !dirty || !restored || !getUser() || readOnly()) return
   const saving = revision
+  const conflict = await merge()
   const { items, frames } = counts()
   const name = (getMeta().name as string) ?? ''
-  const error = await claimBoard(room, name)
+  const error = conflict
+    ?? await claimBoard(room, name)
     ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems(), surfaceColor(String(getMeta().surface ?? 'paper'))))
   if (error) {
     setCloudError(error)
@@ -57,6 +77,7 @@ async function save() {
     return
   }
   setCloudError(null)
+  stamp = await snapshotStamp(room).catch(() => null)
   dirty = revision !== saving
   if (dirty && !timer) timer = window.setTimeout(() => { void save() }, SAVE_AFTER)
 }
@@ -100,6 +121,7 @@ async function restore() {
   try {
     if (!await loadWorkspace()) throw new Error('No workspace')
     const update = await pullSnapshot(room)
+    stamp = await snapshotStamp(room)
     if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
     restored = true
     revision += 1

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeBoardLists, orphansIn, pickSnapshot, snapshotBase64 } from './cloud'
+import { decodeSnapshot, mergeBoardLists, orphansIn, pickSnapshot, snapshotBase64 } from './cloud'
 
 describe('embedded snapshot', () => {
   const snap = { items: 90, frames: 7, thumb: 'data:image/webp;base64,xx' }
@@ -70,11 +70,27 @@ describe('boards offered to search', () => {
 })
 
 describe('snapshot transport', () => {
+  const bytes = Uint8Array.from({ length: 100_003 }, (_, i) => i % 251)
+  const hex = `\\x${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`
+
   it('base64-encodes across chunk boundaries without changing a byte', async () => {
-    const bytes = Uint8Array.from({ length: 100_003 }, (_, i) => i % 251)
     const encoded = await snapshotBase64(bytes)
     const decoded = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0))
     expect(decoded).toEqual(bytes)
     expect(encoded.length).toBeLessThan(bytes.length * 1.34 + 4)
+  })
+
+  it('reads back what it wrote, whichever encoding the row comes in', async () => {
+    expect(decodeSnapshot(hex)).toEqual(bytes)
+    expect(decodeSnapshot(hex.toUpperCase().replace('\\X', '\\x'))).toEqual(bytes)
+    expect(decodeSnapshot(await snapshotBase64(bytes))).toEqual(bytes)
+  })
+
+  // Returning nothing here used to be indistinguishable from an empty board, and the next save
+  // would write this tab's document over the one it could not read.
+  it('refuses a row it cannot read instead of reporting an empty board', () => {
+    expect(() => decodeSnapshot('\\xabc')).toThrow()
+    expect(() => decodeSnapshot('\\xzz')).toThrow()
+    expect(() => decodeSnapshot('a snapshot service is down')).toThrow()
   })
 })
