@@ -1,3 +1,5 @@
+import { FONT } from './brand'
+
 export type Id = string
 
 export type ShapeKind =
@@ -208,7 +210,7 @@ export const FONT_SIZES = [8, 10, 11, 12, 14, 18, 24, 29, 36, 48, 59, 72, 98, 14
 
 export const DEFAULT_TEXT_STYLE: TextStyle = {
   fontSize: 24,
-  fontFamily: 'Instrument Sans',
+  fontFamily: FONT.family,
   textColor: '#1F1D1A',
   align: 'center',
   valign: 'middle',

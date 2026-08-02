@@ -1,4 +1,5 @@
 import getStroke from 'perfect-freehand'
+import { FONT } from './brand'
 import type { Camera } from './camera'
 import { toScreen, viewportRect } from './camera'
 import {
@@ -129,7 +130,7 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
   ctx.strokeRect(item.x, item.y, item.w, item.h)
   const size = 11 / cam.z
   ctx.fillStyle = s.selection.has(item.id) ? BRAND.selection : '#8A867C'
-  ctx.font = fontString({ bold: true, italic: false, fontFamily: 'Instrument Sans' }, size)
+  ctx.font = fontString({ bold: true, italic: false, fontFamily: FONT.family }, size)
   ctx.letterSpacing = `${1.4 / cam.z}px`
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
@@ -149,7 +150,7 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
       ctx.fillStyle = person.color
       ctx.fill(box)
       ctx.fillStyle = '#FCFBF8'
-      ctx.font = `700 ${chip * 0.5}px "Instrument Sans", system-ui, sans-serif`
+      ctx.font = `700 ${chip * 0.5}px ${FONT.stack}`
       ctx.fillText(initials(person.name), x + chip / 2, item.y - 7 / cam.z - chip * 0.28)
       x += chip + 3 / cam.z
     }
@@ -227,7 +228,7 @@ function drawSticky(s: Scene, item: Item & { type: 'sticky' }) {
   let room = item.h - inset * 2
   if (item.label) {
     const chipH = labelHeight(item.w, item.h, item.labelSize)
-    const font = `700 ${labelFontSize(item.w, item.h, item.labelSize)}px "Instrument Sans", system-ui, sans-serif`
+    const font = `700 ${labelFontSize(item.w, item.h, item.labelSize)}px ${FONT.stack}`
     ctx.font = font
     ctx.letterSpacing = `${chipH * 0.07}px`
     const text = item.label.toUpperCase()
@@ -493,7 +494,7 @@ function drawCode(s: Scene, item: Item & { type: 'code' }) {
   ctx.restore()
 
   ctx.fillStyle = t.gutter
-  ctx.font = '600 10px "Instrument Sans", system-ui, sans-serif'
+  ctx.font = `600 10px ${FONT.stack}`
   ctx.textAlign = 'right'
   ctx.textBaseline = 'alphabetic'
   ctx.letterSpacing = '1px'
@@ -513,7 +514,7 @@ function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {
   ctx.stroke()
   const size = Math.min(item.h * 0.16, 26)
   ctx.fillStyle = '#8A867C'
-  ctx.font = fontString({ bold: false, italic: false, fontFamily: 'Instrument Sans' }, size)
+  ctx.font = fontString({ bold: false, italic: false, fontFamily: FONT.family }, size)
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(item.title, item.x + item.w / 2, item.y + item.h / 2)
@@ -660,7 +661,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.fillStyle = first?.color ?? '#8A867C'
   ctx.fillRect(c.x - PIN_R + 4, c.y - PIN_R + 4, (PIN_R - 4) * 2, (PIN_R - 4) * 2)
   ctx.fillStyle = '#FCFBF8'
-  ctx.font = '700 11px "Instrument Sans", system-ui, sans-serif'
+  ctx.font = `700 11px ${FONT.stack}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(
@@ -875,7 +876,7 @@ function drawOverlay(s: Scene) {
     const box = selected.length ? boxOf(selected) : null
     if (box) {
       const at = toScreen(cam, box.x + box.w / 2, box.y + box.h)
-      ctx.font = '600 12px "Instrument Sans", system-ui, sans-serif'
+      ctx.font = `600 12px ${FONT.stack}`
       const w = ctx.measureText(session.badge).width + 16
       ctx.beginPath()
       ctx.roundRect(at.x - w / 2, at.y + 12, w, 24, 6)
@@ -989,7 +990,7 @@ function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
 
 function drawChatBubble(ctx: CanvasRenderingContext2D, p: Vec, color: string, text: string) {
   ctx.save()
-  ctx.font = '500 12px "Instrument Sans", system-ui, sans-serif'
+  ctx.font = `500 12px ${FONT.stack}`
   const w = Math.min(260, ctx.measureText(text).width + 20)
   const x = p.x + 12
   const y = p.y + 36
@@ -1021,7 +1022,7 @@ function drawCursor(ctx: CanvasRenderingContext2D, p: Vec, color: string, name: 
   ctx.lineWidth = 1.4
   ctx.fill()
   ctx.stroke()
-  ctx.font = '600 11px "Instrument Sans", system-ui, sans-serif'
+  ctx.font = `600 11px ${FONT.stack}`
   const w = ctx.measureText(name).width
   ctx.beginPath()
   ctx.roundRect(12, 12, w + 14, 20, 6)

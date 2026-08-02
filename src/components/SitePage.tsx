@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { go, readRoute, routePath } from '../board/boards'
-import { PRODUCT } from '../board/brand'
+import { FONT, PRODUCT } from '../board/brand'
 import { PRICE } from '../board/plan'
 import { bandOf, filled, findPage, LINK_NAMES, PAGES } from '../site/pages'
 import type { Band, Page } from '../site/pages'
@@ -15,7 +15,7 @@ const DEEP = '#9E2F1B'
 const PAPER = '#F2EFE9'
 
 const DISPLAY = { fontFamily: '"Instrument Serif", "Iowan Old Style", Georgia, serif' }
-const READING = { fontFamily: '"Instrument Sans", system-ui, sans-serif' }
+const READING = { fontFamily: FONT.stack }
 
 const say = (text: string) => filled(text, PRICE)
 

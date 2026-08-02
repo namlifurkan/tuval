@@ -1,4 +1,4 @@
-import { COLOR, PIGMENTS } from './brand'
+import { COLOR, FONT, PIGMENTS } from './brand'
 
 // Mermaid is large and most pages have no diagram on them, so it arrives the first time one is
 // drawn and never in the first load.
@@ -9,7 +9,7 @@ const start = () => {
     mermaid.initialize({
       startOnLoad: false,
       securityLevel: 'strict',
-      fontFamily: '"Instrument Sans", system-ui, sans-serif',
+      fontFamily: FONT.stack,
       theme: 'base',
       themeVariables: {
         background: COLOR.paper,

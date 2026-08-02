@@ -1,3 +1,4 @@
+import { FONT } from './brand'
 import type { TextStyle } from './types'
 
 const measureCtx = document.createElement('canvas').getContext('2d')!
@@ -19,7 +20,7 @@ export interface LayoutText {
 }
 
 export function fontString(style: Pick<TextStyle, 'bold' | 'italic' | 'fontFamily'>, size: number) {
-  return `${style.italic ? 'italic ' : ''}${style.bold ? 700 : 400} ${size}px "${style.fontFamily}", "Instrument Sans", system-ui, sans-serif`
+  return `${style.italic ? 'italic ' : ''}${style.bold ? 700 : 400} ${size}px "${style.fontFamily}", ${FONT.stack}`
 }
 
 export function measureWidth(text: string, font: string) {

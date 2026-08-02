@@ -4,7 +4,7 @@ import { createReactInlineContentSpec } from '@blocknote/react'
 import type { Theme } from '@blocknote/mantine'
 import '@blocknote/mantine/style.css'
 import { go } from '../board/boards'
-import { COLOR, PIGMENTS } from '../board/brand'
+import { COLOR, FONT, PIGMENTS } from '../board/brand'
 import { MENTION } from '../board/mention'
 import { Bookmark, Callout, Contents, Diagram, Equation, Frame } from './pageBlocks'
 
@@ -36,7 +36,7 @@ const theme: Theme = {
     },
   },
   borderRadius: 8,
-  fontFamily: '"Instrument Sans", ui-sans-serif, system-ui, sans-serif',
+  fontFamily: FONT.stack,
 }
 
 // The same paper whichever way the machine is set. BlockNote follows the system otherwise, and

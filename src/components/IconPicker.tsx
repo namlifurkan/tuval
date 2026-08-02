@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { FONT } from '../board/brand'
 import { t } from '../i18n'
 
 // emoji-mart's own element rather than its React wrapper: the wrapper's peer range stops at
@@ -11,7 +12,7 @@ const SKIN = {
   '--rgb-color': '20, 19, 16',
   '--rgb-accent': '200, 69, 45',
   '--color-border': '#E2DED5',
-  '--font-family': '"Instrument Sans", system-ui, sans-serif',
+  '--font-family': FONT.stack,
   '--shadow': 'none',
 }
 

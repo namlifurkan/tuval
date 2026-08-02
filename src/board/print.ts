@@ -1,3 +1,4 @@
+import { FONT } from './brand'
 import { renderToCanvas } from './export'
 import { aabb, contains } from './geometry'
 import { sortedFrames } from './items'
@@ -27,7 +28,7 @@ const PRINT_CSS = `
   #${ROOT_ID} img { max-width: 96vw; max-height: 88vh; object-fit: contain; }
   #${ROOT_ID} figcaption {
     margin-top: 8mm;
-    font: 500 10pt "Instrument Sans", system-ui, sans-serif;
+    font: 500 10pt ${FONT.stack};
     color: #4a463e;
   }
 }

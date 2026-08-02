@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, Copy, RotateCcw } from 'lucide-react'
 import { boardToGraph, graphToMarkdown } from '../board/agent'
+import { FONT } from '../board/brand'
 import { fitRect } from '../board/camera'
 import {
   connectorsFor, createItems, getItems, getMeta, patchItems, removeItems, setMeta, transact,
@@ -27,7 +28,7 @@ import { TextEditor } from './TextEditor'
 
 type Card = Item & { type: 'record' }
 
-const READING = { fontFamily: '"Instrument Sans", system-ui, sans-serif' }
+const READING = { fontFamily: FONT.stack }
 
 const FLOW = ['todo', 'doing', 'done'] as const
 const TONE: { [k: string]: string } = { todo: '#8A867C', doing: '#DE9A4E', done: '#5E9A8A' }

@@ -9,6 +9,13 @@ export const PRODUCT = {
   // the page that explains running it yourself. One line to flip on the day it publishes.
 }
 
+const FAMILY = 'Instrument Sans'
+
+export const FONT = {
+  family: FAMILY,
+  stack: `"${FAMILY}", system-ui, sans-serif`,
+}
+
 export const GUIDE = {
   name: 'Ada',
   color: '#5E9A8A',
