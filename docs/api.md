@@ -106,4 +106,5 @@ record in this workspace, or one the key's holder is not on · `405` a method th
 ## Related
 
 - [MCP server](mcp.md) — the same data, mounted in an agent
+- [Agents](agents.md) — what an agent can and cannot do with this key
 - [Self-hosting](self-hosting.md)

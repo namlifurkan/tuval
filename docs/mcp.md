@@ -49,4 +49,5 @@ the reason as text rather than a transport error, so the model can read it and d
 ## Related
 
 - [HTTP API](api.md)
+- [Agents](agents.md) — both directions, and where they stop
 - [Self-hosting](self-hosting.md)
