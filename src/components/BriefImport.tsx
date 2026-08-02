@@ -1,6 +1,6 @@
 import { Upload, X } from 'lucide-react'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { fitRect } from '../board/camera'
+import { animateCamera, fitRect } from '../board/camera'
 import { createItems, getMeta, setMeta } from '../board/doc'
 import { briefToItems, parseBrief } from '../board/importer'
 import { miroToItems } from '../board/miro'
@@ -72,7 +72,11 @@ export function BriefImport() {
     if (!items.length) return
     createItems(items)
     if (title && !getMeta().name) setMeta('name', title)
-    setCamera(fitRect(boxOf(items), el.clientWidth, el.clientHeight))
+    const target = fitRect(boxOf(items), el.clientWidth, el.clientHeight)
+    animateCamera(useBoardStore.getState().camera, target, (c) => {
+      setCamera(c)
+      requestRender()
+    })
     setSelection([])
     update({ briefOpen: false })
     setText('')

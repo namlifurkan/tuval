@@ -487,7 +487,7 @@ export function Dock() {
             onDragEnd={() => setDragId(null)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => { if (dragId && dragId !== id) moveDockItem(dragId, id); setDragId(null) }}
-            style={{ transition: 'transform 130ms cubic-bezier(0.22, 1, 0.36, 1)' }}
+            style={{ transition: 'transform 130ms var(--ease)' }}
             className={`shrink-0 ${originClass} ${dragId === id ? 'opacity-40' : ''}
               ${ro && !VIEW_SAFE.has(id) ? 'pointer-events-none opacity-30' : ''}`}
           >

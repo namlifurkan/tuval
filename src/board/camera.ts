@@ -36,7 +36,25 @@ export function fitRect(target: Rect, vw: number, vh: number, padding = 80): Cam
   }
 }
 
-const easeOutQuart = (t: number) => 1 - (1 - t) ** 4
+const bezier = (a: number, b: number, u: number) =>
+  ((3 * a - 3 * b + 1) * u + (3 * b - 6 * a)) * u * u + 3 * a * u
+
+export function ease(t: number): number {
+  if (t <= 0) return 0
+  if (t >= 1) return 1
+  let lo = 0
+  let hi = 1
+  let u = t
+  for (let i = 0; i < 24; i++) {
+    u = (lo + hi) / 2
+    if (bezier(0.16, 0.3, u) < t) lo = u
+    else hi = u
+  }
+  return bezier(1, 1, u)
+}
+
+const skipsMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 let tween = 0
 
@@ -44,16 +62,18 @@ export function animateCamera(
   from: Camera, to: Camera, apply: (c: Camera) => void, ms = 420,
 ) {
   cancelAnimationFrame(tween)
+  if (skipsMotion()) { apply(to); return }
   const start = performance.now()
   const step = (now: number) => {
-    const t = Math.min(1, (now - start) / ms)
-    const k = easeOutQuart(t)
+    const t = (now - start) / ms
+    if (t >= 1) { apply(to); return }
+    const k = ease(t)
     apply({
       x: from.x + (to.x - from.x) * k,
       y: from.y + (to.y - from.y) * k,
       z: from.z + (to.z - from.z) * k,
     })
-    if (t < 1) tween = requestAnimationFrame(step)
+    tween = requestAnimationFrame(step)
   }
   tween = requestAnimationFrame(step)
 }

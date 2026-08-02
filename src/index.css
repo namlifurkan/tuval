@@ -45,6 +45,10 @@ svg.lucide {
    A wipe rather than a float: content is uncovered, the way a printed sheet is drawn out of a
    folder, and nothing that drives layout is animated. Long and calm reads expensive; short and
    snappy reads like a template. */
+:root {
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @property --reveal {
   syntax: '<length-percentage>';
   inherits: false;
@@ -55,8 +59,8 @@ svg.lucide {
   opacity: 0;
   clip-path: inset(0 0 12% 0);
   transition:
-    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 700ms var(--ease),
+    clip-path 900ms var(--ease);
   transition-delay: calc(var(--step, 0) * 70ms);
 }
 
@@ -69,7 +73,7 @@ svg.lucide {
    Arriving is what makes an event of one. Colour is safe to animate; layout is not. */
 [data-arrive] {
   background-color: #F2EFE9;
-  transition: background-color 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 620ms var(--ease);
 }
 
 [data-arrive].seen {
@@ -82,7 +86,7 @@ svg.lucide {
 }
 
 .ada-label {
-  animation: ada-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: ada-in 180ms var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
