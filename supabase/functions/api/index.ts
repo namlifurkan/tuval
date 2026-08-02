@@ -237,8 +237,15 @@ Deno.serve(async (request) => {
     if (!body || typeof body !== 'object') return send({ error: 'Send a JSON object.' }, 400)
     if (!(await writable(id))) return send({ error: 'No such record.' }, 404)
 
+    const row = only(body as Record<string, unknown>, WRITABLE)
+    // Moving a page changes who may read everything under it, so the place it lands has to be a
+    // place this caller could have written to in the first place.
+    if ('parent_id' in row && !(await writable((row.parent_id as string | null) ?? null))) {
+      return send({ error: 'No such record.' }, 404)
+    }
+
     const { data, error } = await db.from('records')
-      .update({ ...only(body as Record<string, unknown>, WRITABLE), ...signature })
+      .update({ ...row, ...signature })
       .eq('workspace_id', workspace).eq('id', id).select(COLUMNS).maybeSingle()
     if (error) return send({ error: error.message }, 400)
     return data ? send(data) : send({ error: 'No such record.' }, 404)

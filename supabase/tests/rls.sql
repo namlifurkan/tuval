@@ -1463,6 +1463,34 @@ select pg_temp.check('and the promise can then be asked for without aborting', f
   pg_temp.refused($$alter table public.workspaces add constraint workspaces_prefix_check
     check (prefix is null or prefix ~ '^[A-Z]{1,5}$')$$));
 
+-- Moving a page under a gate it is not on ----------------------------------------------------------
+-- a0a0…0a is restricted to alice; b0b0…0b is not. Bob may write b0b0 and is not on a0a0, so he
+-- may not make b0b0 a child of a0a0 (which would hand the subtree to a0a0's people), and he may
+-- not lift a restricted page out from under its gate either.
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "bbbbbbbb-0000-4000-8000-000000000002", "role": "authenticated"}';
+
+select pg_temp.check('bob can still write the unrestricted page', false,
+  pg_temp.refused($$update public.records set title = 'Moved by bob'
+    where id = 'b0b0b0b0-0000-4000-8000-00000000000b'$$));
+select pg_temp.check('but cannot push it under a page he is not named on', true,
+  pg_temp.refused($$update public.records
+    set parent_id = 'a0a0a0a0-0000-4000-8000-00000000000a'
+    where id = 'b0b0b0b0-0000-4000-8000-00000000000b'$$));
+
+set local role postgres;
+insert into public.records (id, workspace_id, kind, title, parent_id)
+values ('c0c0c0c0-0000-4000-8000-00000000000c', 'cccccccc-0000-4000-8000-000000000003',
+        'doc', 'Under the gate', 'a0a0a0a0-0000-4000-8000-00000000000a');
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "aaaaaaaa-0000-4000-8000-000000000001", "role": "authenticated"}';
+
+select pg_temp.check('the person named on the gate may move a page inside it', false,
+  pg_temp.refused($$update public.records set title = 'Still inside'
+    where id = 'c0c0c0c0-0000-4000-8000-00000000000c'$$));
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
