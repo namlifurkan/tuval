@@ -58,7 +58,8 @@ A record is one row of work: an issue, a page, a database, a project. `kind` say
 | `status` | `backlog` `todo` `doing` `review` `blocked` `done` `cancelled` |
 | `assignee` | A user id |
 | `project` · `cycle` | A record id |
-| `limit` · `offset` | Page through. Archived rows are left out |
+| `limit` · `offset` | Page through. `limit` defaults to 100 and stops at 500 |
+| `archived` | `true` includes archived rows. They are left out otherwise |
 
 ### `GET /records/<id>`
 
