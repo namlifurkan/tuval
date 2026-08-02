@@ -22,6 +22,14 @@ if (!existsSync(join(DIST, 'index.html'))) {
   process.exit(1)
 }
 
+// The shell is dist/index.html, and the home page is written back over it. Run twice and the
+// empty #root this looks for is gone, every page silently inherits the home page's body, and
+// nothing says so. It is cheaper to refuse than to be subtly wrong.
+if (!readFileSync(join(DIST, 'index.html'), 'utf8').includes('<div id="root"></div>')) {
+  console.error('prerender: dist is already rendered - run the build again first')
+  process.exit(1)
+}
+
 // The words live in JSON so that both readers are readers: the React pages import it and this
 // writes it out. Parsing the TypeScript with a regular expression was the first attempt and it
 // silently found three pages out of ten, which is exactly the failure a build step must not have.
