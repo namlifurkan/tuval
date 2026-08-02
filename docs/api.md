@@ -127,6 +127,23 @@ indexes the document, and the text is not in the document yet.
 | `GET /labels` | The workspace's labels |
 | `GET /` | What this key can reach |
 
+## From n8n
+
+There is no Tuval node to install. There is an HTTP Request node, which is the whole
+integration: four fields, and every endpoint above is reachable from it.
+
+| Field | Value |
+|---|---|
+| Method | `POST` |
+| URL | `https://<project>.supabase.co/functions/v1/api/records` |
+| Authentication | Generic → Header Auth. Name `authorization`, value `Bearer tuv_…` |
+| Body | JSON, e.g. `{"title": "{{$json.subject}}", "status": "todo"}` |
+
+Store the key as an n8n credential rather than in the node, so it does not travel in an exported
+workflow. To go the other way — Tuval telling n8n that something changed — point a webhook at an
+n8n Webhook node's URL in Settings → API and webhooks; every call is signed, and the signature is
+`sha256=` plus an HMAC of the raw body with the webhook's secret.
+
 ## Errors
 
 `401` no key, or a key that is not valid, expired or revoked, or the API is off for this plan ·
