@@ -323,7 +323,7 @@
         {
           "tone": "pigment",
           "heading": "The API is a door, not a demo",
-          "body": "API keys, webhooks and an MCP server, so n8n, a script or a coding agent can read and write the workspace. We integrate rather than clone."
+          "body": "API keys and webhooks, so n8n or a script can read and write the workspace, and a read-only MCP server so a coding agent can look at it. We integrate rather than clone."
         }
       ],
       "next": [
@@ -975,7 +975,7 @@
           },
           {
             "feature": "Integrations",
-            "tuval": "REST API with keys hashed at rest, webhooks, and an MCP server so a coding agent can read and write the workspace. No GitHub, GitLab, Slack or Figma integration; branch and pull-request linking does not exist.",
+            "tuval": "REST API with keys hashed at rest, webhooks, and a read-only MCP server so a coding agent can read the workspace. No GitHub, GitLab, Slack or Figma integration; branch and pull-request linking does not exist.",
             "them": "Git provider, chat and design-tool integrations, including the pull-request linking most teams build their habits on."
           },
           {
