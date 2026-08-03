@@ -15,11 +15,11 @@ are our own; no visual identity or asset is copied from any commercial product.
 |---|---|
 | **Canvas** | Infinite board, 32 shapes, connectors, frames, comments, templates, Miro and PDF import |
 | **Pages** | Block editor, sub-pages, backlinks, `@` mentions, version history, trash, export to md/html/pdf |
-| **Databases** | Six views — table, list, board, gallery, calendar, timeline — and 18 column types |
+| **Databases** | Six views — table, list, board, gallery, calendar, timeline — and 20 column types |
 | **Issues** | `TUV-12` numbers, estimates, labels, sub-issues, blocking relations, seven statuses |
 | **Projects and cycles** | Two-week cycles with a burn line, projects with a roadmap read from their issues |
 | **Forms and bookings** | Answers land straight in a database |
-| **Workspace** | `⌘K` search across bodies, inbox, activity, page permissions, publish to `/p/<slug>`, backup |
+| **Workspace** | `⌘K` search across bodies, inbox, activity, what changed since you last looked, page permissions, publish to `/p/<slug>`, backup |
 | **Outside** | [HTTP API](docs/api.md), webhooks, [MCP server](docs/mcp.md), Notion and CSV import |
 
 ## Why
@@ -49,11 +49,16 @@ Your camera is remembered per board, so a refresh puts you back where you were.
 
 ## Cloud (optional)
 
-Tuval is local-first and needs no backend. Add Supabase and boards leave the browser:
-accounts, a board list shared across devices, images in object storage, and a document
-snapshot kept server side.
+Tuval is local-first and needs no backend. Add a backend and boards leave the browser:
+accounts, a board list shared across devices, images in object storage, and every update kept
+server side.
 
-1. Create a project at [supabase.com](https://supabase.com).
+The backend is a Postgres with PostgREST, GoTrue and storage-api in front of it. Rent them from
+supabase.com or run the same open-source containers yourself — `deploy/compose.yml` brings them
+up and [docs/self-hosting.md](docs/self-hosting.md) walks through it. Nothing in the app knows
+the difference: it is one URL and one key.
+
+1. Create a project at [supabase.com](https://supabase.com), or `cd deploy && docker compose up -d`.
 2. Apply [`supabase/migrations`](supabase/migrations). Either link the project once and let
    the CLI track what is applied:
 
@@ -81,8 +86,10 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
    the limits that exist because somebody pays for the hosted service. There is no somebody else
    on your install. [The whole story](docs/self-hosting.md).
 
-Sign-in is a magic link, so there are no passwords to store. Without the keys every control
-disappears and nothing changes: the board list stays local and images stay inline.
+Sign-in is an emailed link, GitHub, Google or Apple. A link proves the address once and then a
+password can be set from the account menu, so the second visit does not need the inbox. Without
+the keys every control disappears and nothing changes: the board list stays local and images
+stay inline.
 
 Sharing is by email. The owner invites an address from the **Share** menu; the invite waits in
 `board_invites` until that address signs in, at which point it becomes a membership. So you can
@@ -113,8 +120,10 @@ it: the built-in sender is throttled to a handful of messages an hour and is not
 production. Editing the *Magic Link* template under **Authentication → Email Templates** is
 worth the two minutes, since that is the text an invited colleague reads.
 
-The document itself is still a Yjs CRDT. The snapshot is *merged* on open rather than
-assigned, so a board edited offline on two machines converges instead of one side winning.
+The document itself is still a Yjs CRDT. Every update is appended to `board_updates` as it
+happens and the snapshot row is a compaction of that log, so a board edited in two places
+converges instead of one side winning — and the tab that loses a race to write the row loses a
+rewrite rather than the work.
 
 ## Agent skill
 
@@ -135,9 +144,11 @@ npm run dev            # app  → http://localhost:5173
 npm run collab         # optional y-websocket server on :1234
 ```
 
-For multiplayer put `VITE_COLLAB_URL=ws://localhost:1234` in `.env.local`, start the collab
-server and restart the dev server (Vite reads env at boot). Open two tabs: items, selection
-and live cursors sync. The board room comes from the URL: `http://localhost:5173/b/team-board`.
+Signed in, live editing needs nothing extra: it runs over the backend's realtime channel, which
+is private and checked by the same policies as the tables. `npm run collab` is the other path —
+a y-websocket server for working on the canvas with no backend at all. Put
+`VITE_COLLAB_URL=ws://localhost:1234` in `.env.local`, restart the dev server (Vite reads env at
+boot), and open two tabs. The board room comes from the URL: `http://localhost:5173/b/team-board`.
 
 ## Deploy
 
@@ -149,15 +160,16 @@ elsewhere it is the usual SPA fallback.
 After the site is up, point Supabase at it: **Authentication → URL Configuration**, set
 Site URL to your origin and add it to Redirect URLs. Sign-in links break without this.
 
-Multiplayer needs the y-websocket server hosted separately over `wss://` and
-`VITE_COLLAB_URL` set at build time. Without it Tuval still saves to Supabase, boards just
-do not update live between people.
+Live editing comes with the backend and needs nothing else deployed. The y-websocket server is
+only for the backendless path; hosting it separately over `wss://` with `VITE_COLLAB_URL` set at
+build time is the alternative, not the requirement.
 
 ## Architecture
 
 Single `<canvas>` with a dirty-flag rAF loop. DOM overlays only where they earn it: text
-editing, embeds, popovers. The document is a Yjs CRDT; persistence is IndexedDB, multiplayer
-is y-websocket.
+editing, embeds, popovers. The document is a Yjs CRDT; persistence is IndexedDB in the browser
+and an append log in Postgres, and live editing rides the backend's realtime channel — or a
+y-websocket server when there is no backend.
 
 | File | Responsibility |
 |---|---|
@@ -199,7 +211,7 @@ and register it in `CATALOG` and `LANGS`.
 ## Verifying changes
 
 ```bash
-npx tsc -b --noEmit && npm test && npm run build
+npx tsc -b --noEmit && npm run lint && npm test && npm run build
 ```
 
 `npx tsc --noEmit` without `-b` checks nothing here: the root `tsconfig.json` is a solution
@@ -208,8 +220,9 @@ file with `"files": []`. It exits successfully and hides every error.
 Tests cover the pure core: geometry (resize, snapping, connector bounds, frame title hit
 area), the Markdown importer and the agent export including their round trip, the syntax
 tokenizer, status labels, the board registry and camera memory. Rendering and pointer
-handling are not covered; those are verified in the browser. CI runs the same four commands
-on every push and pull request.
+handling are not covered; those are verified in the browser, and the write path — three tabs,
+one killed mid-import — has a suite of its own. CI runs the same commands on every pull request
+and on a push to `main`.
 
 ## License
 
