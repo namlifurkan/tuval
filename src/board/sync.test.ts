@@ -43,6 +43,8 @@ vi.mock('./cloud', () => ({
   pushSnapshot: mocked.pushSnapshot,
   snapshotStamp: mocked.snapshotStamp,
   sweepImages: vi.fn(),
+  readPendingBrief: vi.fn(async () => null),
+  clearPendingBrief: vi.fn(async () => false),
   appendUpdate: mocked.appendUpdate,
   pullUpdates: mocked.pullUpdates,
   compactUpdates: mocked.compactUpdates,
@@ -56,7 +58,7 @@ vi.mock('./supabase', () => ({
 vi.mock('./workspace', () => ({ loadWorkspace: mocked.loadWorkspace }))
 
 // A save is a chain of awaits now that it reconciles the row before writing it.
-const settle = async () => { for (let i = 0; i < 10; i++) await Promise.resolve() }
+const settle = async () => { for (let i = 0; i < 20; i++) await Promise.resolve() }
 
 beforeEach(() => {
   vi.useFakeTimers()
