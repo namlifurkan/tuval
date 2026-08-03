@@ -13,11 +13,16 @@ export interface MiroItem {
     title?: string
     shape?: string
     url?: string
-    startItem?: { id: string }
-    endItem?: { id: string }
+    imageUrl?: string
   }
+  // A connector keeps its ends and its labels at the top level rather than under `data`, which
+  // is the shape the items endpoint uses for everything else.
+  startItem?: { id: string }
+  endItem?: { id: string }
+  captions?: { content?: string }[]
+  shape?: string
   style?: Record<string, string | number>
-  position?: { x: number; y: number; origin?: string }
+  position?: { x: number; y: number; origin?: string; relativeTo?: string }
   geometry?: { width?: number; height?: number; rotation?: number }
 }
 
@@ -100,7 +105,10 @@ const NAMED: Record<string, string> = {
 
 const num = (v: unknown, fallback: number) => (typeof v === 'number' ? v : fallback)
 
-// Miro positions from the centre; children are placed relative to their parent frame.
+// Miro positions from the centre, and a child of a frame is measured from that frame's TOP LEFT
+// rather than from its centre — `position.relativeTo` says which. Adding the parent's centre to a
+// top-left offset puts every child half a frame down and to the right of where it belongs, which
+// on a 2500x3900 frame is far enough that nothing lands inside the frame at all.
 function topLeft(item: MiroItem, frames: Map<string, MiroItem>) {
   const w = num(item.geometry?.width, 200)
   const h = num(item.geometry?.height, 200)
@@ -108,8 +116,11 @@ function topLeft(item: MiroItem, frames: Map<string, MiroItem>) {
   let cy = num(item.position?.y, 0)
   const parent = item.parent?.id ? frames.get(item.parent.id) : null
   if (parent) {
-    cx += num(parent.position?.x, 0)
-    cy += num(parent.position?.y, 0)
+    const pw = num(parent.geometry?.width, 0)
+    const ph = num(parent.geometry?.height, 0)
+    const anchored = item.position?.relativeTo === 'parent_top_left'
+    cx += num(parent.position?.x, 0) - (anchored ? pw / 2 : 0)
+    cy += num(parent.position?.y, 0) - (anchored ? ph / 2 : 0)
   }
   return { x: cx - w / 2, y: cy - h / 2, w, h }
 }
@@ -167,9 +178,17 @@ export function miroToItems(raw: unknown): MiroImport {
       }
       case 'image':
       case 'document':
-      case 'preview':
-        if (m.data?.url) made = makeImage(box.x, box.y, box.w, box.h, m.data.url)
+      case 'preview': {
+        const src = m.data?.imageUrl ?? m.data?.url
+        // A picture on api.miro.com is only served to a token, and the browser drawing this board
+        // has none. Counting it says six pictures did not come rather than leaving six holes.
+        if (src && !/^https?:\/\/api\.miro\.com\//.test(src)) {
+          made = makeImage(box.x, box.y, box.w, box.h, src)
+        } else {
+          skipped[m.type] = (skipped[m.type] ?? 0) + 1
+        }
         break
+      }
       case 'card':
       case 'app_card':
         made = makeSticky(box.x, box.y, STICKY_COLORS[12], text)
@@ -195,14 +214,15 @@ export function miroToItems(raw: unknown): MiroImport {
   // Connectors last: both endpoints must already have a Tuval id.
   for (const m of list) {
     if (m.type !== 'connector') continue
-    const from = m.data?.startItem?.id && idOf.get(m.data.startItem.id)
-    const to = m.data?.endItem?.id && idOf.get(m.data.endItem.id)
+    const ends = m as { startItem?: { id: string }; endItem?: { id: string } }
+    const from = ends.startItem?.id && idOf.get(ends.startItem.id)
+    const to = ends.endItem?.id && idOf.get(ends.endItem.id)
     if (!from || !to) { skipped.connector = (skipped.connector ?? 0) + 1; continue }
     const c = makeConnector(
       { itemId: from, anchor: null, x: 0, y: 0 },
       { itemId: to, anchor: null, x: 0, y: 0 },
       {
-        shape: 'curved',
+        shape: m.shape === 'elbowed' ? 'elbow' : m.shape === 'straight' ? 'straight' : 'curved',
         stroke: hex(String(m.style?.strokeColor ?? '')) ?? '#141310',
         strokeWidth: num(Number(m.style?.strokeWidth), 2),
         strokeStyle: 'solid',
@@ -210,7 +230,11 @@ export function miroToItems(raw: unknown): MiroImport {
         capEnd: 'arrow',
       },
     )
-    c.text = plain(m.data?.content)
+    // "EVET" and "HAYIR" on the branches of a flow chart are captions, not content, and a
+    // decision diagram that loses them is a diagram nobody can read.
+    const [first, ...rest] = m.captions ?? []
+    c.text = plain(first?.content)
+    if (rest.length) c.labels = rest.map((cap) => ({ t: 0.5, text: plain(cap.content) }))
     items.push(c)
   }
 

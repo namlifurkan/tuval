@@ -40,3 +40,8 @@ PANEL.md
 .mcp.json
 .rls-run-*.sql
 worker/env.generated.ts
+
+# Boards pulled out of Miro: a company's own content, and not something a public repo carries.
+board.json
+miro-board.json
+*.miro.json
