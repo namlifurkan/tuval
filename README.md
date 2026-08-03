@@ -258,17 +258,20 @@ simply stops working.
 
 ## Coming from Miro
 
-There is no lock-in on either side. Pull a board out of Miro and rebuild it here:
+There is no lock-in on either side. Miro's own export menu will not help — it offers a PDF, an
+image, a CSV of sticky text and a backup only Miro can read, and none of them carry the frames,
+the connectors and the positions. The API does, so pull the board from there:
 
 ```bash
-MIRO_TOKEN=xxx node scripts/miro-export.mjs <board-id> board.json
+MIRO_TOKEN=xxx node scripts/miro-export.mjs https://miro.com/app/board/xxxx=/ board.json
 ```
 
-The token is created at *miro.com → Settings → Your apps* (a developer team app with
-`boards:read`) and never leaves your shell: Tuval does not talk to Miro, and the browser
-never sees the token.
+Paste the board's address straight from the browser, or give just the id if you have it. The
+token is created at *miro.com → Settings → Your apps* (a developer team app with `boards:read`)
+and never leaves your shell: Tuval does not talk to Miro, and the browser never sees the token.
 
-Then **Hand off to AI → Build a board from a brief → Open a file** and pick the JSON.
+Then **board menu → Import from Miro** and pick the JSON — or drop the file straight onto a
+board.
 Frames, sticky notes, text, shapes, images, cards and connectors come over; positions are
 converted from Miro's centre origin to top-left, items keep their frame, and colours land on
 the nearest tone of our palette rather than being copied. Anything unsupported is counted and
