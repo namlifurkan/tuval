@@ -226,7 +226,8 @@ and on a push to `main`.
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE). Use, modify and self-host Tuval freely. If you run a modified
+[AGPL-3.0-or-later](LICENSE), copyright in [NOTICE](NOTICE). Use, modify and self-host Tuval
+freely. If you run a modified
 version as a network service, you must offer its source to your users.
 
 ### Changing the database
