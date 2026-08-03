@@ -181,7 +181,7 @@ values
    '{"provider":"email","providers":["email"]}', '{}');
 
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
-select pg_temp.check('a workspace cannot be opened to a domain its owner is not at', true,
+select pg_temp.check('a workspace cannot be opened to a domain you are not at', true,
   pg_temp.refused($q$update public.workspaces set allowed_domain = 'other.test'
                      where id = 'cccccccc-0000-4000-8000-000000000003'$q$));
 
@@ -193,9 +193,11 @@ select pg_temp.check('a mailbox provider does not stand for a company', true,
   pg_temp.refused($q$update public.workspaces set allowed_domain = 'gmail.com'
                      where id = 'ffffffff-0000-4000-8000-000000000006'$q$));
 
-set local role postgres;
-update public.workspaces set allowed_domain = 'rls.test', domain_role = 'guest'
-where id = 'cccccccc-0000-4000-8000-000000000003';
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('and is opened to the one you are at', true,
+  not pg_temp.refused($q$update public.workspaces
+                        set allowed_domain = 'rls.test', domain_role = 'guest'
+                        where id = 'cccccccc-0000-4000-8000-000000000003'$q$));
 
 select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
 select pg_temp.check('the rule alone lets nobody in', false, public.can_read_board('rls-team-board'));

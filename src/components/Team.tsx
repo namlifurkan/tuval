@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  getWorkspace, inviteToWorkspace, listTeam, listWorkspaceInvites, myDomain, removeFromWorkspace,
-  renameWorkspace, revokeWorkspaceInvite, ROLES, setTeamRole, setWorkspaceDomain,
-  subscribeWorkspace,
+  getWorkspace, inviteToWorkspace, listTeam, listWorkspaceInvites, myDomain, personalDomains,
+  removeFromWorkspace, renameWorkspace, revokeWorkspaceInvite, ROLES, setTeamRole,
+  setWorkspaceDomain, subscribeWorkspace,
 } from '../board/workspace'
 import type { Teammate, WorkspaceRole } from '../board/workspace'
 import { go } from '../board/boards'
@@ -33,11 +33,14 @@ export function Team() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<WorkspaceRole>('member')
   const [note, setNote] = useState('')
+  const [personal, setPersonal] = useState<string[]>([])
 
   const refresh = useCallback(() => {
     void listTeam().then(setTeam)
     void listWorkspaceInvites().then(setInvites)
   }, [])
+
+  useEffect(() => { void personalDomains().then(setPersonal) }, [])
 
   useEffect(() => {
     if (!getUser()) { go('/login'); return }
@@ -52,6 +55,10 @@ export function Team() {
     || team.some((m) => m.userId === getUser()?.id && m.role === 'admin')
   const open = !!workspace.allowed_domain
   const home = workspace.allowed_domain ?? myDomain()
+  // The rule is written from the address you are signed in with, so a personal one cannot set it
+  // and this says so instead of leaving a switch that only errors.
+  const mine = !open && personal.includes(myDomain())
+  const joined = team.filter((m) => m.viaDomain).length
 
   const invite = async () => {
     const to = email.trim()
@@ -70,10 +77,6 @@ export function Team() {
   return (
     <Shell title={t('Team')}>
       <div className="max-w-[720px]">
-        <h1 className="mb-8 font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-ink">
-          {t('Team')}
-        </h1>
-
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -106,7 +109,7 @@ export function Team() {
               role="switch"
               aria-checked={open}
               aria-label={t('Everyone at {domain}', { domain: home || '—' })}
-              disabled={!admin || !home}
+              disabled={!admin || !home || mine}
               onClick={() => void rule(!open, workspace.domain_role)}
               className={`relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:opacity-40
                 ${open ? 'bg-pigment' : 'bg-dim'}`}
@@ -118,12 +121,21 @@ export function Team() {
             </button>
           </div>
           <p className="mt-2 text-[12px] leading-snug text-muted">
-            {open
-              ? workspace.domain_role === 'guest'
-                ? t('Anyone signing in with that address joins and can read the boards, docs and projects here. They take no seat.')
-                : t('Anyone signing in with that address joins and can work on everything here. Each of them takes a seat.')
-              : t('Off: only the people below are in this workspace.')}
+            {mine
+              ? t('{domain} is a mailbox provider, not a company. Sign in with your work address to open this workspace to it.', { domain: myDomain() })
+              : open
+                ? workspace.domain_role === 'guest'
+                  ? t('Anyone signing in with that address joins and can read the boards, docs and projects here. They take no seat.')
+                  : t('Anyone signing in with that address joins and can work on everything here. Each of them takes a seat.')
+                : t('Off: only the people below are in this workspace.')}
           </p>
+          {open && (
+            <p className="mt-1 text-[12px] leading-snug text-faint">
+              {joined
+                ? t('{n} joined this way so far.', { n: joined })
+                : t('Nobody has arrived through it yet: somebody joins the next time they open the app.')}
+            </p>
+          )}
         </div>
 
         <div className="mt-6 divide-y divide-shade border-y border-shade">

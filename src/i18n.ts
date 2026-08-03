@@ -981,6 +981,11 @@ const tr: Record<string, string> = {
     'O adresle giriş yapan herkes katılır ve buradaki her şeyde çalışabilir. Her biri bir koltuk tutar.',
   'Off: only the people below are in this workspace.':
     'Kapalı: bu çalışma alanında yalnızca aşağıdaki kişiler var.',
+  '{domain} is a mailbox provider, not a company. Sign in with your work address to open this workspace to it.':
+    '{domain} bir posta sağlayıcısı, şirket değil. Bu çalışma alanını şirketine açmak için iş adresinle giriş yap.',
+  '{n} joined this way so far.': 'Şimdiye kadar {n} kişi böyle katıldı.',
+  'Nobody has arrived through it yet: somebody joins the next time they open the app.':
+    'Henüz kimse bu yoldan gelmedi: kişi uygulamayı bir sonraki açışında katılır.',
   'Invited {email}. They join when they sign in with that address.':
     '{email} davet edildi. O adresle giriş yapınca katılır.',
   'admin': 'yönetici',

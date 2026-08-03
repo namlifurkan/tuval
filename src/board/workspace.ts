@@ -208,6 +208,15 @@ export async function listTeam(): Promise<Teammate[]> {
   return team
 }
 
+// Addresses too many people share for one of them to stand for a company. The instance decides
+// which, so it is asked rather than assumed, and asked before the switch is offered: a switch
+// that can only answer with an error is worse than one that says why it is off.
+export async function personalDomains(): Promise<string[]> {
+  if (!supabase) return []
+  const { data } = await supabase.from('tuval_settings').select('blocked_domains').maybeSingle()
+  return (data?.blocked_domains as string[]) ?? []
+}
+
 // The rule that lets a colleague in without being asked for. The domain itself is never typed:
 // it is the one this account signs in with, which is the only one the database will accept.
 export async function setWorkspaceDomain(open: boolean, role: 'member' | 'guest') {
