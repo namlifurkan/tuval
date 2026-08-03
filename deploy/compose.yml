@@ -1,0 +1,159 @@
+# Tuval's backend, without anybody's cloud --------------------------------------------------------
+# Four open-source services and a proxy in front of them. That is all "a Supabase project" is from
+# this application's side: PostgREST answers the queries, GoTrue issues the tokens the row policies
+# read, storage-api holds the files, realtime carries the live document. Every one of them is a
+# container you run, and none of them phones anywhere.
+#
+# Brought up on 2026-08-03 and checked: the whole schema applies with no errors and all 256 access
+# checks pass against it. What was not exercised is realtime's private channel — the service starts
+# and listens, and nobody has yet opened a board through it.
+#
+#   cp .env.example .env
+#   node keys.mjs                     # paste the three lines it prints into .env
+#   docker compose up -d db           # wait for healthy
+#   docker compose up -d auth storage rest proxy
+#   cat ../supabase/migrations/*.sql | docker compose exec -T db psql -U postgres
+#
+# The order matters: GoTrue creates auth.users and storage-api creates storage.buckets, and the
+# schema is written against both. Applying it first fails on columns that do not exist yet.
+
+name: tuval
+
+services:
+  # Plain Postgres with the three extensions the schema asks for: pgcrypto (key hashes and webhook
+  # signatures), pg_net (webhook delivery), pg_cron (optional — recurrences also run on the way in).
+  # Build your own image if you would rather; nothing here depends on this one in particular.
+  db:
+    image: supabase/postgres:15.8.1.060
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./init/01-roles.sql:/docker-entrypoint-initdb.d/init-scripts/98-tuval-roles.sql:ro
+      - ./init/02-realtime-messages.sql:/docker-entrypoint-initdb.d/init-scripts/99-tuval-realtime.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Every supabase.from() and supabase.rpc() in the app is one of these requests. The row policies
+  # do the deciding; this only carries the JWT through so they can.
+  rest:
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: 'false'
+
+  # auth.uid() is a claim out of the token this issues, so the whole access model rests on it and
+  # on nothing else. Confirmations stay on: an unconfirmed address is a claim somebody types.
+  auth:
+    image: supabase/gotrue:v2.170.0
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: '9999'
+      API_EXTERNAL_URL: ${PUBLIC_URL}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: ${SITE_URL}
+      GOTRUE_URI_ALLOW_LIST: ${SITE_URL}/**
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: '3600'
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_DISABLE_SIGNUP: 'false'
+      GOTRUE_MAILER_AUTOCONFIRM: 'false'
+      GOTRUE_SMTP_HOST: ${SMTP_HOST}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT}
+      GOTRUE_SMTP_USER: ${SMTP_USER}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_FROM}
+
+  # Images, PDFs and covers. The bucket policies are in the migrations like every other policy, so
+  # this holds the bytes and answers to the same rules.
+  storage:
+    image: supabase/storage-api:v1.14.5
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+      rest: { condition: service_started }
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_KEY}
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      POSTGREST_URL: http://rest:3000
+      FILE_SIZE_LIMIT: '52428800'
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: tuval
+      REGION: local
+      GLOBAL_S3_BUCKET: tuval
+    volumes:
+      - files:/var/lib/storage
+
+  # Optional. Without it two tabs still converge — the board's updates are appended to
+  # board_updates and pulled back on save and on open — but not while you watch, and there are no
+  # cursors. Leave it out on a single-person install.
+  realtime:
+    image: supabase/realtime:v2.34.31
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PORT: '4000'
+      DB_HOST: db
+      DB_PORT: '5432'
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: postgres
+      DB_ENC_KEY: ${REALTIME_ENC_KEY}
+      API_JWT_SECRET: ${JWT_SECRET}
+      SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: '10000'
+      APP_NAME: realtime
+      SEED_SELF_HOST: 'true'
+      RUN_JANITOR: 'true'
+
+  # The HTTP API for scripts, n8n and the MCP server. A single Deno file; the hosted one runs it as
+  # an edge function and there is nothing edge-specific in it.
+  functions:
+    image: denoland/deno:2.1.4
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      SUPABASE_URL: http://proxy:8000
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_KEY}
+    command: run --allow-net --allow-env /srv/api/index.ts
+    volumes:
+      - ../supabase/functions/api:/srv/api:ro
+
+  # One origin in front of the four, because the client library expects them at fixed paths under a
+  # single URL. This is the whole job Kong does in Supabase's own compose file.
+  proxy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on: [rest, auth, storage]
+    ports:
+      - '${PUBLIC_PORT:-8000}:8000'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data
+
+volumes:
+  db:
+  files:
+  caddy:

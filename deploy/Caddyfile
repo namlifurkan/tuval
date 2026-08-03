@@ -1,0 +1,30 @@
+# One origin, four services. The client library asks for fixed paths under a single URL, so this
+# is the only piece of glue the arrangement needs.
+
+:8000 {
+	handle_path /rest/v1/* {
+		reverse_proxy rest:3000
+	}
+
+	handle_path /auth/v1/* {
+		reverse_proxy auth:9999
+	}
+
+	handle_path /storage/v1/* {
+		reverse_proxy storage:5000
+	}
+
+	# The realtime server serves its socket at /socket; the client asks for it under /realtime/v1.
+	handle_path /realtime/v1/* {
+		rewrite * /socket{uri}
+		reverse_proxy realtime:4000
+	}
+
+	handle_path /functions/v1/* {
+		reverse_proxy functions:8080
+	}
+
+	handle {
+		respond "tuval" 200
+	}
+}

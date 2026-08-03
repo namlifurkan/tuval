@@ -1,6 +1,13 @@
 # Self-hosting
 
-Tuval runs on your own Supabase project and a folder of static files. Nothing calls home.
+Tuval runs on a Postgres, three services in front of it, and a folder of static files. Nothing
+calls home.
+
+Those services are Supabase's, and Supabase is open source: PostgREST answers the queries, GoTrue
+issues the tokens the row policies read, storage-api holds the files. You can rent them from
+supabase.com or run the same containers yourself — the application cannot tell, because from its
+side the whole backend is one URL and one key. If you would rather run them, skip to
+[without anybody's cloud](#without-anybodys-cloud).
 
 ## Five commands
 
@@ -64,6 +71,39 @@ themselves by typing it.
 
 Empty by default, and it stays empty in the repository: one install's arrangement is not
 another's.
+
+## Without anybody's cloud
+
+`deploy/compose.yml` is the same four services as containers, with a Caddy in front of them
+because the client library expects them at fixed paths under one origin. No dashboard, no
+analytics, no pooler — six containers.
+
+```bash
+cd deploy
+cp .env.example .env
+node keys.mjs                          # paste the three lines it prints into .env
+docker compose up -d db                # wait for healthy
+docker compose up -d auth storage rest proxy
+cat ../supabase/migrations/*.sql | docker compose exec -T db psql -U postgres
+```
+
+Then point the app at it: `VITE_SUPABASE_URL=http://localhost:8000` and the `ANON_KEY` from
+`.env`.
+
+**The order is not decoration.** GoTrue creates `auth.users`, storage-api creates
+`storage.buckets`, and the schema is written against both. Applying the migrations before those
+services have started fails on columns that do not exist yet.
+
+Two things the hosted platform provides that a hand-built stack does not, so `deploy/init/` creates
+them on an empty database: passwords for the roles the three services sign in as, and
+`realtime.messages`, which the private board channel's policies are written against.
+
+Checked on 2026-08-03: the schema applies with no errors and all 256 access checks pass against
+this stack, PostgREST answers with the anon key, and `records` reads back empty for an anonymous
+caller — the policies hold. **Realtime is the gap**: the container starts and listens, and nobody
+has opened a board through its private channel yet. Until somebody has, treat live co-editing as
+unproven here; boards still converge, because every update is appended to `board_updates` and
+pulled back on save and on open.
 
 ## What you need
 

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Secrets for a self-hosted stack: keys.mjs mints them, they never travel.
+deploy/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
