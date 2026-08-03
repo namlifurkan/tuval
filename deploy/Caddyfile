@@ -2,6 +2,19 @@
 # is the only piece of glue the arrangement needs.
 
 :8000 {
+	# The browser asks before it posts, and none of the four services answers that question in a
+	# way it accepts. Supabase's own gateway does this; without it every call from a page on a
+	# different port dies as "Failed to fetch" with a 204 nobody can read.
+	@preflight method OPTIONS
+	handle @preflight {
+		header Access-Control-Allow-Origin "{header.Origin}"
+		header Access-Control-Allow-Credentials "true"
+		header Access-Control-Allow-Methods "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "authorization, apikey, content-type, x-client-info, x-supabase-api-version, prefer, range, accept-profile, content-profile"
+		header Access-Control-Max-Age "3600"
+		respond 204
+	}
+
 	handle_path /rest/v1/* {
 		reverse_proxy rest:3000
 	}

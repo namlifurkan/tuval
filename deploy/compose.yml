@@ -4,9 +4,9 @@
 # read, storage-api holds the files, realtime carries the live document. Every one of them is a
 # container you run, and none of them phones anywhere.
 #
-# Brought up on 2026-08-03 and checked: the whole schema applies with no errors and all 256 access
-# checks pass against it. What was not exercised is realtime's private channel — the service starts
-# and listens, and nobody has yet opened a board through it.
+# Brought up on 2026-08-03 and checked end to end: the whole schema applies with no errors, all
+# 261 access checks pass against it, a person signs in, and a sticky note dropped in one browser
+# appears in another through the private channel.
 #
 #   cp .env.example .env
 #   node keys.mjs                     # paste the three lines it prints into .env
@@ -102,9 +102,9 @@ services:
     volumes:
       - files:/var/lib/storage
 
-  # Optional. Without it two tabs still converge — the board's updates are appended to
-  # board_updates and pulled back on save and on open — but not while you watch, and there are no
-  # cursors. Leave it out on a single-person install.
+  # Optional, and proven: two browsers on one board see each other's work as it happens. Without
+  # it they still converge — every update is appended to board_updates and pulled back on save and
+  # on open — but not while you watch, and there are no cursors.
   realtime:
     image: supabase/realtime:v2.34.31
     restart: unless-stopped
@@ -124,7 +124,10 @@ services:
       DNS_NODES: "''"
       RLIMIT_NOFILE: '10000'
       APP_NAME: realtime
+      # It is multi-tenant and works the tenant out from the Host it was asked on, so the tenant
+      # it seeds has to be named the same thing or every socket is answered TenantNotFound.
       SEED_SELF_HOST: 'true'
+      SELF_HOST_TENANT_NAME: ${REALTIME_TENANT:-localhost}
       RUN_JANITOR: 'true'
 
   # The HTTP API for scripts, n8n and the MCP server. A single Deno file; the hosted one runs it as

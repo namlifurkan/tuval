@@ -98,12 +98,14 @@ Two things the hosted platform provides that a hand-built stack does not, so `de
 them on an empty database: passwords for the roles the three services sign in as, and
 `realtime.messages`, which the private board channel's policies are written against.
 
-Checked on 2026-08-03: the schema applies with no errors and all 256 access checks pass against
-this stack, PostgREST answers with the anon key, and `records` reads back empty for an anonymous
-caller — the policies hold. **Realtime is the gap**: the container starts and listens, and nobody
-has opened a board through its private channel yet. Until somebody has, treat live co-editing as
-unproven here; boards still converge, because every update is appended to `board_updates` and
-pulled back on save and on open.
+Checked on 2026-08-03, end to end: the schema applies with no errors, all 261 access checks pass
+against this stack, `records` reads back empty for an anonymous caller, a person signs in with a
+password, and a sticky note dropped in one browser turns up in another through the private
+channel. Two more things the hosted platform hides, both of which cost a broken run to find: the
+gateway has to answer CORS preflights itself, because none of the four services answers them in a
+way a browser accepts, and realtime works out which tenant it is serving from the Host it was
+asked on — so the tenant it seeds has to be named the same thing or every socket comes back
+`TenantNotFound`.
 
 ## What you need
 
