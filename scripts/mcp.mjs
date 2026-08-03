@@ -251,6 +251,28 @@ const TOOLS = [
       })
     },
   },
+  {
+    name: 'create_board',
+    description:
+      'Draw a flow on an infinite canvas, for somebody who would rather look at a board than '
+      + 'read a list. Needs a key with write access.\n\n'
+      + 'The brief is Markdown with a shape. The first heading names the board. Every "## " '
+      + 'heading becomes a frame, and the bullets under it become notes inside that frame. A '
+      + 'section headed "## Flow" holding a mermaid flowchart becomes the arrows: name a node '
+      + 'with the same words as a bullet and the arrow lands on that note.\n\n'
+      + 'Be aware of when it lands. A canvas is a shared document that only a browser can draw, '
+      + 'so the brief waits on the board and becomes real frames, notes and arrows the first '
+      + 'time somebody opens it in Tuval. Say so rather than reporting a board full of work.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'What the board is called' },
+        brief: { type: 'string', description: 'The Markdown the board is drawn from' },
+      },
+      required: ['title', 'brief'],
+    },
+    run: ({ title, brief }) => ask('/boards', { method: 'POST', body: { title, brief } }),
+  },
 ]
 
 const reply = (id, result) => ({ jsonrpc: '2.0', id, result })

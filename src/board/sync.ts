@@ -1,14 +1,14 @@
 import * as Y from 'yjs'
-import { getItems, room, ydoc } from './doc'
+import { createItems, getItems, room, ydoc } from './doc'
 import { readOnly } from './access'
 import { storagePath } from './storage'
 import { makeThumb } from './thumb'
 import {
-  appendUpdate, claimBoard, compactUpdates, LOG_MAX, pullSnapshot, pullUpdates,
-  pushSnapshot, snapshotStamp, sweepImages,
+  appendUpdate, claimBoard, clearPendingBrief, compactUpdates, LOG_MAX, pullSnapshot,
+  pullUpdates, pushSnapshot, readPendingBrief, snapshotStamp, sweepImages,
 } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
-import { getMeta } from './doc'
+import { getMeta, setMeta } from './doc'
 import { loadWorkspace } from './workspace'
 
 const SAVE_AFTER = 2500
@@ -185,6 +185,27 @@ function schedule() {
   timer = window.setTimeout(() => void save(), SAVE_AFTER)
 }
 
+// What an agent left on the row, drawn the first time somebody arrives. The order is the whole
+// of it: parse, then claim the brief, then create. Parsing before the claim means a brief that
+// cannot be read stays on the row for the next visitor, and claiming before the items are made
+// means two tabs opening together draw one board rather than two overlapping ones.
+export async function drawPendingBrief() {
+  if (readOnly()) return
+  const brief = await readPendingBrief(room)
+  if (!brief) return
+
+  const { briefToItems } = await import('./importer')
+  const { items, title } = briefToItems(brief, { x: 0, y: 0 })
+  if (!items.length) {
+    await clearPendingBrief(room, brief)
+    return
+  }
+  if (!await clearPendingBrief(room, brief)) return
+
+  createItems(items)
+  if (title && !getMeta().name) setMeta('name', title)
+}
+
 // The cloud copy is merged, never assigned: a CRDT update applied on top of the local doc
 // converges whatever each side missed while offline.
 async function restore() {
@@ -197,6 +218,7 @@ async function restore() {
     if (update?.length) Y.applyUpdate(ydoc, update, 'cloud')
     await catchUp()
     restored = true
+    await drawPendingBrief()
     revision += 1
     dirty = true
     await save()

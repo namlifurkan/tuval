@@ -37,10 +37,11 @@ install.
 | `create_record` | File an issue, a page, a project, a person, a company or an event |
 | `update_record` | Change a title, status, assignee, priority, due date, parent, project or cycle |
 | `append_to_page` | Add Markdown to the end of a page or issue |
+| `create_board` | Open an infinite canvas drawn from a Markdown brief |
 
 ## Writing
 
-The last three want a key whose scope is **write**. Scope is chosen when the key is made, in
+The last four want a key whose scope is **write**. Scope is chosen when the key is made, in
 Settings → API and webhooks; a `read` key answers `403` to all three and the server says so in
 words rather than as a number. There is a daily allowance — 1000 writes by default — and past it
 every write answers `429`, which is a different problem from `403` and worth telling apart: one
@@ -67,6 +68,42 @@ Until it is folded in:
 Both stop being true the moment somebody opens the page. It is a delay, not a separate place, and
 nothing is lost either way. If a promise you made depends on the text being findable right now,
 say so.
+
+### Where `create_board` lands, exactly
+
+The same bargain, for the canvas. A board is a CRDT too, so no server can place a sticky on one.
+`create_board` opens the board and leaves the brief on its row; the first browser to open it turns
+the brief into frames, notes and arrows and empties the column. Two people opening at once draw it
+once.
+
+The brief is Markdown with a shape, the one [`briefToItems`](../src/board/importer.ts) already
+reads:
+
+```markdown
+# Legal compliance test
+
+## Acceptance flow
+
+- Phone verification
+- Document acceptance
+
+## Flow
+
+```mermaid
+flowchart TD
+  n1["Phone verification"]
+  n2["Document acceptance"]
+  n1 -- then --> n2
+```
+```
+
+The first heading names the board. Each `##` becomes a frame and its bullets become notes inside
+it. A `## Flow` section holding a mermaid flowchart becomes the arrows: a node named with the same
+words as a bullet lands on that note. A brief that draws nothing is cleared rather than retried on
+every open.
+
+The point of it is somebody who does not read issue lists: a tester, a client, anybody who would
+rather look at a board and see what to try.
 
 `body` and `markdown` are not writable, on the API or here, and will not become writable. They are
 the flattened copies of the document that the browser writes beside it so Postgres has something

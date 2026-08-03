@@ -109,6 +109,26 @@ export async function claimBoard(room: string, name: string): Promise<string | n
   return created.error ? created.error.message : null
 }
 
+// A brief an agent left for whoever opens the board first. Reading it does not take it: the
+// brief is turned into items before it is cleared, so a failure to draw leaves the words where
+// they were rather than losing them.
+export async function readPendingBrief(room: string): Promise<string | null> {
+  if (!supabase || !getUser()) return null
+  const { data } = await supabase
+    .from('boards').select('pending_brief').eq('id', room).maybeSingle()
+  return (data?.pending_brief as string | null) || null
+}
+
+// Cleared with the text that was read as the condition, so two tabs opening at once draw it
+// once: the second matches no row and knows not to draw.
+export async function clearPendingBrief(room: string, brief: string): Promise<boolean> {
+  if (!supabase || !getUser()) return false
+  const { data } = await supabase
+    .from('boards').update({ pending_brief: null })
+    .eq('id', room).eq('pending_brief', brief).select('id')
+  return !!data?.length
+}
+
 export async function renameCloudBoard(room: string, name: string) {
   if (!supabase || !getUser()) return
   await table()?.update({ name, updated_at: new Date().toISOString() }).eq('id', room)

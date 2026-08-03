@@ -39,6 +39,10 @@ const WRITABLE = [
   'estimate', 'parent_id', 'project_id', 'cycle_id', 'position', 'data',
 ]
 
+// Long enough for a real plan, short enough that a runaway agent cannot park a book on a row
+// nothing reads until a browser tries to draw it.
+const BRIEF_MAX = 100_000
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type, x-tuval-run',
@@ -120,7 +124,34 @@ Deno.serve(async (request) => {
       search: '/search?q=<words>',
       cycles: '/cycles',
       labels: '/labels',
+      boards: '/boards',
     })
+  }
+
+  // A board drawn from a brief. The items are not made here: the canvas is a CRDT this door
+  // cannot compose, so the brief waits on the row and the first browser to open the board draws
+  // it. Which is why the answer says so rather than claiming a board full of stickies.
+  if (parts[0] === 'boards' && request.method === 'POST') {
+    const body = await request.json().catch(() => null)
+    if (!body || typeof body !== 'object') return send({ error: 'Send a JSON object.' }, 400)
+    const asked = body as Record<string, unknown>
+    const title = String(asked.title ?? '').trim().slice(0, 200)
+    const brief = String(asked.brief ?? '').trim()
+    if (!brief) return send({ error: 'Send a brief for the board to be drawn from.' }, 400)
+    if (brief.length > BRIEF_MAX) {
+      return send({ error: `A brief may be at most ${BRIEF_MAX} characters.` }, 413)
+    }
+
+    const id = crypto.randomUUID().replace(/-/g, '').slice(0, 10)
+    const { error } = await db.from('boards')
+      .insert({ id, owner: acting, name: title, workspace_id: workspace, pending_brief: brief })
+    if (error) return send({ error: error.message }, 400)
+    return send({
+      id,
+      title,
+      url: `/b/${id}`,
+      waiting: 'The brief becomes items the first time somebody opens this board.',
+    }, 201)
   }
 
   if (parts[0] === 'cycles' && request.method === 'GET') {
