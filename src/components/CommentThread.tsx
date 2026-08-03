@@ -15,7 +15,7 @@ function MentionText({ text }: { text: string }) {
     <>
       {parts.map((part, i) =>
         part.startsWith('@')
-          ? <span key={i} className="font-semibold text-[#C8452D]">{part}</span>
+          ? <span key={i} className="font-semibold text-pigment">{part}</span>
           : <span key={i}>{part}</span>,
       )}
     </>
@@ -83,13 +83,13 @@ export function CommentThread() {
 
   return (
     <div
-      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+      className="absolute z-50 w-[286px] rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
       style={{ left: pin.x + 24, top: Math.max(12, pin.y - 20) }}
       onPointerDown={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
-        <span className="text-xs font-semibold text-[#8A867C]">
+      <div className="flex items-center justify-between border-b border-shade px-3 py-2">
+        <span className="text-xs font-semibold text-muted">
           {item.replies.length ? `${item.replies.length} yorum` : 'Yeni yorum'}
         </span>
         <div className="flex items-center gap-1">
@@ -97,7 +97,7 @@ export function CommentThread() {
             type="button"
             title={t(item.resolved ? 'Reopen' : 'Mark resolved')}
             onClick={() => { patchItem(item.id, { resolved: !item.resolved }); requestRender() }}
-            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-[#EFEBE2]'}`}
+            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-tint'}`}
           >
             <Check size={15} strokeWidth={2.2} />
           </button>
@@ -105,7 +105,7 @@ export function CommentThread() {
             type="button"
             title={t('Delete')}
             onClick={remove}
-            className="grid h-7 w-7 place-items-center rounded-md text-[#A83621] hover:bg-[#F7E9E4]"
+            className="grid h-7 w-7 place-items-center rounded-md text-[#943321] hover:bg-[#F7E9E4]"
           >
             <Trash2 size={14} strokeWidth={2} />
           </button>
@@ -123,8 +123,8 @@ export function CommentThread() {
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-xs font-semibold text-[#141310]">{r.author}</span>
-                <span className="text-[10px] text-[#8A867C]">{timeAgo(r.at)}</span>
+                <span className="text-xs font-semibold text-ink">{r.author}</span>
+                <span className="text-[10px] text-muted">{timeAgo(r.at)}</span>
               </div>
               <p className="whitespace-pre-wrap break-words text-sm text-[#2E2B26]">
                 <MentionText text={r.text} />
@@ -135,7 +135,7 @@ export function CommentThread() {
       </div>
 
       {suggestions.length > 0 && (
-        <div className="border-t border-[#EAE6DD] px-2 py-1">
+        <div className="border-t border-shade px-2 py-1">
           {suggestions.map((name) => (
             <button
               key={name}
@@ -145,11 +145,11 @@ export function CommentThread() {
                 setDraft(draft.replace(/@[\p{L}\p{N}_]*$/u, `@${name} `))
                 inputRef.current?.focus()
               }}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-[#EFEBE2]"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-tint"
             >
               <span
                 className="grid h-5 w-5 place-items-center rounded-[2px] text-[9px] font-bold text-white"
-                style={{ background: name === me.name ? me.color : '#8A867C' }}
+                style={{ background: name === me.name ? me.color : '#69665E' }}
               >
                 {initials(name)}
               </span>
@@ -159,7 +159,7 @@ export function CommentThread() {
         </div>
       )}
 
-      <div className="flex items-end gap-2 border-t border-[#EAE6DD] p-2">
+      <div className="flex items-end gap-2 border-t border-shade p-2">
         <div
           className="grid h-6 w-6 shrink-0 place-items-center rounded-[2px] text-[10px] font-bold text-white"
           style={{ background: me.color }}
@@ -177,13 +177,13 @@ export function CommentThread() {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
             if (e.key === 'Escape') close()
           }}
-          className="max-h-24 min-h-[30px] w-full min-w-0 flex-1 resize-none rounded-lg bg-[#F2EFE9] px-2.5 py-1.5 text-sm outline-none focus:bg-[#FCFBF8] focus:ring-1 focus:ring-[#C8452D]"
+          className="max-h-24 min-h-[30px] w-full min-w-0 flex-1 resize-none rounded-lg bg-paper px-2.5 py-1.5 text-sm outline-none focus:bg-surface focus:ring-1 focus:ring-pigment"
         />
         <button
           type="button"
           onClick={submit}
           disabled={!draft.trim()}
-          className="shrink-0 rounded-lg bg-[#C8452D] px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
+          className="shrink-0 rounded-lg bg-pigment px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
         >
           {t('Send')}
         </button>

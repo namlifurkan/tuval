@@ -18,7 +18,7 @@ export function KitPicker() {
           type="button"
           disabled={busy}
           onClick={toggle}
-          className="flex items-center gap-1.5 rounded-lg border border-[#E2DED5] px-3 py-2 text-sm font-semibold text-[#4A463E] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-lg border border-hairline px-3 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-pigment hover:text-pigment disabled:opacity-40"
         >
           <Boxes size={15} /> {busy ? t('Making…') : t('Start from a kit')}
         </button>
@@ -37,10 +37,10 @@ export function KitPicker() {
                   .then((id) => { if (id) go(`/d/${id}`); else setBusy(false) })
                   .catch(() => setBusy(false))
               }}
-              className="w-full rounded-md px-2 py-1.5 text-left hover:bg-[#EAE6DD]"
+              className="w-full rounded-md px-2 py-1.5 text-left hover:bg-shade"
             >
-              <span className="block text-[13px] font-semibold text-[#141310]">{t(kit.name)}</span>
-              <span className="block text-[11px] leading-snug text-[#8A867C]">{t(kit.blurb)}</span>
+              <span className="block text-[13px] font-semibold text-ink">{t(kit.name)}</span>
+              <span className="block text-[11px] leading-snug text-muted">{t(kit.blurb)}</span>
               <span className="mt-0.5 block text-[10px] text-[#B6B1A6]">
                 {kit.tables.map((table) => table.name).join(' · ')}
               </span>

@@ -41,7 +41,7 @@ function Bar({ project, from }: { project: Row; from: string }) {
         className="absolute inset-y-0 left-0 rounded-md"
         style={{ width: `${Math.round(share * 100)}%`, background: PHASE_TONE[phase] }}
       />
-      <span className="absolute inset-y-0 left-2 flex items-center text-[11px] font-semibold text-[#141310]">
+      <span className="absolute inset-y-0 left-2 flex items-center text-[11px] font-semibold text-ink">
         {project.title || t('Untitled')}
       </span>
     </div>
@@ -59,9 +59,9 @@ function Roadmap({ rows }: { rows: Row[] }) {
   const locale = getLang() === 'tr' ? 'tr-TR' : 'en-GB'
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-xl border border-[#E2DED5] bg-[#FCFBF8]">
+    <div className="mt-4 overflow-x-auto rounded-xl border border-hairline bg-surface">
       <div style={{ width: NAMES + days * DAY }}>
-        <div className="flex border-b border-[#E2DED5] bg-[#F7F5F0]">
+        <div className="flex border-b border-hairline bg-[#F7F5F0]">
           <div className="shrink-0" style={{ width: NAMES }} />
           <div className="flex">
             {Array.from({ length: days }, (_, i) => addDays(from, i)).map((iso) => {
@@ -72,12 +72,12 @@ function Roadmap({ rows }: { rows: Row[] }) {
                   key={iso}
                   style={{ width: DAY }}
                   className={`shrink-0 py-1.5 text-center text-[9px] leading-tight
-                    ${first ? 'border-l border-[#D8D5CD] font-bold text-[#141310]' : 'text-[#C6C2B6]'}`}
+                    ${first ? 'border-l border-[#D8D5CD] font-bold text-ink' : 'text-[#C6C2B6]'}`}
                 >
                   {first
                     ? new Date(`${iso}T00:00:00Z`)
                       .toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })
-                    : now ? <span className="font-bold text-[#C8452D]">•</span> : ''}
+                    : now ? <span className="font-bold text-pigment">•</span> : ''}
                 </div>
               )
             })}
@@ -85,12 +85,12 @@ function Roadmap({ rows }: { rows: Row[] }) {
         </div>
 
         {rows.map((project) => (
-          <div key={project.id} className="flex items-center border-b border-[#EAE6DD] last:border-0">
+          <div key={project.id} className="flex items-center border-b border-shade last:border-0">
             <button
               type="button"
               onClick={() => go(`/w/${project.id}`)}
               style={{ width: NAMES }}
-              className="shrink-0 truncate px-2.5 py-2 text-left text-[13px] text-[#141310] hover:text-[#C8452D]"
+              className="shrink-0 truncate px-2.5 py-2 text-left text-[13px] text-ink hover:text-pigment"
             >
               {project.title || t('Untitled')}
             </button>
@@ -101,14 +101,14 @@ function Roadmap({ rows }: { rows: Row[] }) {
         ))}
 
         {!rows.length && (
-          <p className="px-2.5 py-4 text-[13px] text-[#8A867C]">{t('No projects yet.')}</p>
+          <p className="px-2.5 py-4 text-[13px] text-muted">{t('No projects yet.')}</p>
         )}
       </div>
     </div>
   )
 }
 
-const field = 'rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-xs outline-none'
+const field = 'rounded-md border border-hairline bg-surface px-1.5 py-1 text-xs outline-none'
 
 export function Projects() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
@@ -142,7 +142,7 @@ export function Projects() {
             type="button"
             onClick={() => setView(v)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-              ${view === v ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+              ${view === v ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >{t(v)}</button>
         ))}
       </div>
@@ -153,12 +153,12 @@ export function Projects() {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') void add() }}
           placeholder={t('Name a project and press enter')}
-          className="flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]"
+          className="flex-1 rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment"
         />
         <button
           type="button"
           onClick={() => void add()}
-          className="grid h-9 w-9 place-items-center rounded-lg bg-[#C8452D] text-white hover:bg-[#A83621]"
+          className="grid h-9 w-9 place-items-center rounded-lg bg-pigment text-white hover:bg-[#943321]"
           aria-label={t('Add')}
         >
           <Plus size={16} />
@@ -168,7 +168,7 @@ export function Projects() {
       {view === 'roadmap' && <Roadmap rows={rows} />}
 
       {view === 'list' && (
-        <div className="mt-5 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+        <div className="mt-5 divide-y divide-shade border-y border-shade">
           {rows.map((project) => {
             const held = progressOf(project.id)
             const phase = phaseOf(project.id)
@@ -183,30 +183,30 @@ export function Projects() {
                   <input
                     value={project.title}
                     onChange={(e) => patchRecord(project.id, { title: e.target.value })}
-                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[#141310] outline-none"
+                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none"
                   />
                   {isLate(project) && (
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-[#A83621]">
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-[#943321]">
                       {t('late')}
                     </span>
                   )}
-                  <span className="shrink-0 text-[11px] text-[#8A867C]">
+                  <span className="shrink-0 text-[11px] text-muted">
                     {held.done}/{held.total} · {held.closed}/{held.points} {t('points')}
                   </span>
                   <button
                     type="button"
                     onClick={() => go(`/w/${project.id}`)}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] opacity-0 hover:text-[#C8452D] group-hover:opacity-100"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-muted opacity-0 hover:text-pigment group-hover:opacity-100"
                   >{t('Open')}</button>
                   <button
                     type="button"
                     onClick={() => void archiveRecord(project.id)}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
                   >{t('Archive')}</button>
                 </div>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 pl-5">
-                  <span className="text-[11px] text-[#8A867C]">{t(phase)}</span>
+                  <span className="text-[11px] text-muted">{t(phase)}</span>
                   <input
                     type="date"
                     value={startOf(project)}
@@ -238,7 +238,7 @@ export function Projects() {
           })}
 
           {!rows.length && (
-            <p className="py-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+            <p className="py-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
               {t('A project is a run of issues with a target date. It has no status of its own: it is planned until something under it starts, and finished when nothing under it is open.')}
             </p>
           )}

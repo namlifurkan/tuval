@@ -8,7 +8,7 @@ import { getUser } from '../board/supabase'
 import { t } from '../i18n'
 import { Trash2 } from 'lucide-react'
 
-const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
+const field = 'w-full rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment'
 
 export function Team() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
@@ -54,20 +54,20 @@ export function Team() {
         className={`${field} disabled:opacity-60`}
       />
 
-      <div className="mt-4 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+      <div className="mt-4 divide-y divide-shade border-y border-shade">
         {team.map((mate) => (
           <div key={mate.userId} className="flex items-center gap-2 py-2.5">
-            <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+            <span className="min-w-0 flex-1 truncate text-sm text-ink">
               {mate.email || t('Member')}
             </span>
             {mate.owner ? (
-              <span className="shrink-0 text-xs text-[#8A867C]">{t('owner')}</span>
+              <span className="shrink-0 text-xs text-muted">{t('owner')}</span>
             ) : admin ? (
               <>
                 <select
                   value={mate.role}
                   onChange={(e) => { void setTeamRole(mate.userId, e.target.value as WorkspaceRole).then(refresh) }}
-                  className="shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0.5 text-xs outline-none"
+                  className="shrink-0 rounded-md border border-hairline bg-surface px-1 py-0.5 text-xs outline-none"
                 >
                   {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
                 </select>
@@ -75,27 +75,27 @@ export function Team() {
                   type="button"
                   title={t('Remove from workspace')}
                   onClick={() => { void removeFromWorkspace(mate.userId).then(refresh) }}
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
                 >
                   <Trash2 size={13} />
                 </button>
               </>
             ) : (
-              <span className="shrink-0 text-xs text-[#8A867C]">{t(mate.role)}</span>
+              <span className="shrink-0 text-xs text-muted">{t(mate.role)}</span>
             )}
           </div>
         ))}
 
         {invites.map((waiting) => (
           <div key={waiting.email} className="flex items-center gap-2 py-2.5">
-            <span className="min-w-0 flex-1 truncate text-sm text-[#8A867C]">{waiting.email}</span>
-            <span className="shrink-0 text-xs text-[#8A867C]">{t('pending')}</span>
+            <span className="min-w-0 flex-1 truncate text-sm text-muted">{waiting.email}</span>
+            <span className="shrink-0 text-xs text-muted">{t('pending')}</span>
             {admin && (
               <button
                 type="button"
                 title={t('Remove')}
                 onClick={() => { void revokeWorkspaceInvite(waiting.email).then(refresh) }}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
               >
                 <Trash2 size={13} />
               </button>
@@ -118,7 +118,7 @@ export function Team() {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as WorkspaceRole)}
-            className="shrink-0 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 text-sm outline-none"
+            className="shrink-0 rounded-lg border border-hairline bg-surface px-2 text-sm outline-none"
           >
             {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
           </select>
@@ -126,14 +126,14 @@ export function Team() {
             type="button"
             disabled={!email.trim()}
             onClick={() => void invite()}
-            className="shrink-0 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="shrink-0 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
             {t('Invite')}
           </button>
         </div>
       )}
 
-      {note && <p className="mt-2 text-[12px] leading-snug text-[#8A867C]">{note}</p>}
+      {note && <p className="mt-2 text-[12px] leading-snug text-muted">{note}</p>}
     </>
   )
 }

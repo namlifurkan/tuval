@@ -56,11 +56,11 @@ export function Activity() {
     })
 
   if (!changes.length) {
-    return <p className="text-sm text-[#8A867C]">{t('Nothing has changed yet.')}</p>
+    return <p className="text-sm text-muted">{t('Nothing has changed yet.')}</p>
   }
 
   return (
-    <div className="divide-y divide-[#EAE6DD] rounded-xl border border-[#E2DED5] bg-[#FCFBF8]">
+    <div className="divide-y divide-shade rounded-xl border border-hairline bg-surface">
       {changes.map((change) => {
         const Icon = ICON[change.kind] ?? FileText
         const who = team.find((m) => m.userId === change.updated_by)
@@ -73,14 +73,14 @@ export function Activity() {
             onClick={() => go(change.kind === 'issue' ? `/i/${change.id}` : `/d/${change.id}`)}
             className="group flex w-full items-center gap-2.5 px-3 py-2 text-left"
           >
-            <Icon size={13} className="shrink-0 text-[#8A867C]" />
-            <span className="min-w-0 flex-1 truncate text-sm text-[#141310] group-hover:text-[#C8452D]">
+            <Icon size={13} className="shrink-0 text-muted" />
+            <span className="min-w-0 flex-1 truncate text-sm text-ink group-hover:text-pigment">
               {change.title || t('Untitled page')}
             </span>
-            <span className="shrink-0 text-[11px] text-[#8A867C]">
+            <span className="shrink-0 text-[11px] text-muted">
               {fresh ? t('made by') : t('changed by')}{' '}
               {change.updated_via
-                ? <span className="text-[#C8452D]">{change.updated_via} · {t('agent')}</span>
+                ? <span className="text-pigment">{change.updated_via} · {t('agent')}</span>
                 : displayName(who?.email) || t('Somebody')}
             </span>
             <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(change.updated_at)}</span>

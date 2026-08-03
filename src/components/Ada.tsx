@@ -60,12 +60,12 @@ export function Ada() {
   return (
     <aside
       style={{ left: place.left, top: place.top, bottom: place.bottom, width: WIDTH }}
-      className="ada-label pointer-events-auto fixed z-50 rounded-xl border border-[#E2DED5] bg-[#FCFBF8] px-3 pb-2.5 pt-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+      className="ada-label pointer-events-auto fixed z-50 rounded-xl border border-hairline bg-surface px-3 pb-2.5 pt-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
     >
       <span
         aria-hidden
         style={{ left: place.tick - 0.5, [place.below ? 'top' : 'bottom']: -8 }}
-        className="absolute h-2 w-px bg-[#E2DED5]"
+        className="absolute h-2 w-px bg-hairline"
       />
 
       <div className="flex items-center gap-1.5">
@@ -85,19 +85,19 @@ export function Ada() {
           type="button"
           title={t('Dismiss')}
           onClick={() => dismissTip(tip.id)}
-          className="ml-auto grid h-5 w-5 place-items-center rounded-md text-[#8A867C] hover:bg-[#EFEBE2]"
+          className="ml-auto grid h-5 w-5 place-items-center rounded-md text-muted hover:bg-tint"
         >
           <X size={12} />
         </button>
       </div>
 
-      <p className="mt-1.5 text-[13px] font-semibold leading-snug text-[#141310]">{t(tip.title)}</p>
-      <p className="mt-0.5 text-xs leading-relaxed text-[#4A463E]">{t(tip.body)}</p>
+      <p className="mt-1.5 text-[13px] font-semibold leading-snug text-ink">{t(tip.title)}</p>
+      <p className="mt-0.5 text-xs leading-relaxed text-ink-soft">{t(tip.body)}</p>
 
       <button
         type="button"
         onClick={() => dismissTip(tip.id)}
-        className="mt-2 text-xs font-semibold text-[#C8452D] hover:text-[#A83621]"
+        className="mt-2 text-xs font-semibold text-pigment hover:text-[#943321]"
       >
         {t('Got it')}
       </button>

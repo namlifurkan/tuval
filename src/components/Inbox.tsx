@@ -70,24 +70,24 @@ export function Inbox() {
             <button
               type="button"
               onClick={() => void markAllRead()}
-              className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+              className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
             >{t('Mark all read')}</button>
           )}
           <button
             type="button"
             onClick={() => void clearInbox()}
-            className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
           >{t('Clear')}</button>
         </span>
       )}
     >
       {!notices.length && (
-        <p className="max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+        <p className="max-w-[62ch] text-sm leading-relaxed text-ink-soft">
           {t('Nothing waiting. Being given an issue or named in a page turns up here.')}
         </p>
       )}
 
-      <div className="divide-y divide-[#EAE6DD]">
+      <div className="divide-y divide-shade">
         {notices.map((notice) => {
           const Icon = ICON[notice.kind]
           return (
@@ -99,12 +99,12 @@ export function Inbox() {
             >
               <span
                 aria-hidden
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${notice.read_at ? '' : 'bg-[#C8452D]'}`}
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${notice.read_at ? '' : 'bg-pigment'}`}
               />
-              <Icon size={15} className="shrink-0 text-[#8A867C]" />
+              <Icon size={15} className="shrink-0 text-muted" />
               <span className="min-w-0 flex-1">
-                <span className={`block truncate text-sm group-hover:text-[#C8452D]
-                  ${notice.read_at ? 'text-[#4A463E]' : 'font-semibold text-[#141310]'}`}
+                <span className={`block truncate text-sm group-hover:text-pigment
+                  ${notice.read_at ? 'text-ink-soft' : 'font-semibold text-ink'}`}
                 >
                   {said(notice)} {named(notice.record_id)}
                 </span>

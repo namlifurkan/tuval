@@ -39,7 +39,7 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
     <section
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => { e.preventDefault(); onDrop(e.dataTransfer.getData('text/plain'), rows.at(-1) ?? null) }}
-      className="flex w-[260px] shrink-0 flex-col rounded-xl border border-[#E2DED5] bg-[#F7F5F0] p-2"
+      className="flex w-[260px] shrink-0 flex-col rounded-xl border border-hairline bg-[#F7F5F0] p-2"
     >
       <header className="mb-2 flex items-center justify-between px-1">
         <span className="flex items-center gap-1.5">
@@ -48,7 +48,7 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
             className="h-2.5 w-2.5 rounded-[3px]"
             style={{ background: choice?.tone ?? '#D6D1C6' }}
           />
-          <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#4A463E]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-ink-soft">
             {choice?.name ?? t('No value')}
           </span>
         </span>
@@ -62,12 +62,12 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
           draggable
           onDragStart={(e) => e.dataTransfer.setData('text/plain', row.id)}
           onClick={() => onOpen(row)}
-          className="mb-1.5 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-2 text-left text-sm text-[#141310] hover:border-[#C8452D]"
+          className="mb-1.5 w-full rounded-lg border border-hairline bg-surface px-2.5 py-2 text-left text-sm text-ink hover:border-pigment"
         >
           {row.icon && <span className="mr-1.5">{row.icon}</span>}
           {row.title || t('Untitled')}
           {fields.filter((f) => f.type !== 'select' && cellsOf(row)[f.id] !== undefined).slice(0, 2).map((f) => (
-            <span key={f.id} className="mt-1 block truncate text-[11px] text-[#8A867C]">
+            <span key={f.id} className="mt-1 block truncate text-[11px] text-muted">
               {f.name}: {String(cellsOf(row)[f.id])}
             </span>
           ))}
@@ -77,7 +77,7 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
       <button
         type="button"
         onClick={onAdd}
-        className="rounded-lg px-2 py-1.5 text-left text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+        className="rounded-lg px-2 py-1.5 text-left text-[12px] font-semibold text-muted hover:bg-shade hover:text-pigment"
       >
         <Plus size={12} className="mr-1 inline" /> {t('New row')}
       </button>
@@ -97,7 +97,7 @@ function Board({ db, rows, view, fields }: { db: Row; rows: Row[]; view: View; f
 
   if (!grouping) {
     return (
-      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
         {t('A board groups rows by a select column. Add one, then choose it above.')}
       </p>
     )
@@ -141,7 +141,7 @@ export function Database({ db }: { db: Row }) {
 
   return (
     <div className="mt-5">
-      <div className="flex flex-wrap items-center gap-1 border-b border-[#EAE6DD] pb-2">
+      <div className="flex flex-wrap items-center gap-1 border-b border-shade pb-2">
         {schema.views.map((one, i) => (
           <span key={one.id} className="group flex items-center">
             <button
@@ -149,14 +149,14 @@ export function Database({ db }: { db: Row }) {
               aria-current={i === at ? 'true' : undefined}
               onClick={() => setAt(i)}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-                ${i === at ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+                ${i === at ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
             >{one.name}</button>
             {i === at && schema.views.length > 1 && (
               <button
                 type="button"
                 aria-label={t('Remove view')}
                 onClick={() => { removeView(db, one.id); setAt(0) }}
-                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
+                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
               >
                 <X size={11} />
               </button>
@@ -171,7 +171,7 @@ export function Database({ db }: { db: Row }) {
             key={kind}
             type="button"
             onClick={() => { addView(db, kind, t(KIND_NAME[kind])); setAt(schema.views.length) }}
-            className="rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            className="rounded-lg px-2 py-1 text-xs font-semibold text-muted hover:bg-shade hover:text-ink"
           >+ {t(KIND_NAME[kind])}</button>
         ))}
 
@@ -179,7 +179,7 @@ export function Database({ db }: { db: Row }) {
           <select
             value={view.groupBy ?? ''}
             onChange={(e) => editView(db, view.id, { groupBy: e.target.value || undefined })}
-            className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
+            className="ml-auto rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-xs outline-none"
           >
             <option value="">{view.kind === 'board' ? t('Group by…') : t('No grouping')}</option>
             {schema.fields.filter((f) => f.type === 'select' || f.type === 'status').map((f) => (
@@ -192,7 +192,7 @@ export function Database({ db }: { db: Row }) {
           <select
             value={view.dateBy ?? ''}
             onChange={(e) => editView(db, view.id, { dateBy: e.target.value || undefined })}
-            className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
+            className="ml-auto rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-xs outline-none"
           >
             <option value="">{view.kind === 'calendar' ? t('Place by…') : t('Starts on…')}</option>
             {schema.fields.filter((f) => f.type === 'date').map((f) => (
@@ -205,7 +205,7 @@ export function Database({ db }: { db: Row }) {
           <select
             value={view.endBy ?? ''}
             onChange={(e) => editView(db, view.id, { endBy: e.target.value || undefined })}
-            className="rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-xs outline-none"
+            className="rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-xs outline-none"
           >
             <option value="">{t('Ends on…')}</option>
             {schema.fields.filter((f) => f.type === 'date' && f.id !== view.dateBy).map((f) => (

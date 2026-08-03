@@ -208,10 +208,15 @@ export const LINE_COLORS = [
 
 export const FONT_SIZES = [8, 10, 11, 12, 14, 18, 24, 29, 36, 48, 59, 72, 98, 144, 190, 288]
 
+export const INK = {
+  light: '#1F1D1A',
+  dark: '#FFFFFF',
+}
+
 export const DEFAULT_TEXT_STYLE: TextStyle = {
   fontSize: 24,
   fontFamily: FONT.family,
-  textColor: '#1F1D1A',
+  textColor: INK.light,
   align: 'center',
   valign: 'middle',
   bold: false,

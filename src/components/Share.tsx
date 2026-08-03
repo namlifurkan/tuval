@@ -69,7 +69,7 @@ export function Share() {
       <button
         type="button"
         onClick={copyLink}
-        className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:bg-[#EAE6DD]"
+        className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:bg-shade"
       >
         {copied ? t('Copied') : t('Copy link')}
       </button>
@@ -97,7 +97,7 @@ export function Share() {
       <button
         type="button"
         onClick={pop.toggle}
-        className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-[#141310] transition-colors hover:bg-[#EAE6DD]"
+        className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:bg-shade"
       >
         {t('Share')}
       </button>
@@ -106,22 +106,22 @@ export function Share() {
         <button
           type="button"
           onClick={copyLink}
-          className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+          className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
         >
           {copied ? <Check size={15} className="text-[#5E9A8A]" /> : <Link2 size={15} />}
           {copied ? t('Copied') : t('Copy link')}
         </button>
 
         {!user && (
-          <p className="px-2.5 pb-1 pt-1 text-[11px] leading-snug text-[#8A867C]">
+          <p className="px-2.5 pb-1 pt-1 text-[11px] leading-snug text-muted">
             {t('Sign in to invite people. Right now this board only exists in your browser.')}
           </p>
         )}
 
         {user && owner && (
           <>
-            <div className="my-1 h-px bg-[#EAE6DD]" />
-            <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Invite')}</div>
+            <div className="my-1 h-px bg-shade" />
+            <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-muted">{t('Invite')}</div>
             <div className="flex gap-1 px-1">
               <input
                 value={email}
@@ -130,12 +130,12 @@ export function Share() {
                 type="email"
                 placeholder="teammate@company.com"
                 spellCheck={false}
-                className="min-w-0 flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+                className="min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm outline-none focus:border-pigment"
               />
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as Role)}
-                className="shrink-0 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-1 py-1.5 text-xs outline-none"
+                className="shrink-0 rounded-lg border border-hairline bg-surface px-1 py-1.5 text-xs outline-none"
               >
                 {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
               </select>
@@ -144,13 +144,13 @@ export function Share() {
               type="button"
               onClick={() => void send()}
               disabled={!email.trim()}
-              className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg bg-[#C8452D] px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
+              className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
             >
               {t('Send invite')}
             </button>
             {note && (
               <p className={`px-2.5 pt-1.5 text-[11px] leading-snug ${
-                /failed|error|rate/i.test(note) ? 'text-[#A83621]' : 'text-[#8A867C]'
+                /failed|error|rate/i.test(note) ? 'text-[#943321]' : 'text-muted'
               }`}>{note}</p>
             )}
           </>
@@ -158,9 +158,9 @@ export function Share() {
 
         {user && owner && (
           <>
-            <div className="my-1 h-px bg-[#EAE6DD]" />
+            <div className="my-1 h-px bg-shade" />
             <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
-              <span className="min-w-0 flex-1 text-xs font-semibold text-[#8A867C]">
+              <span className="min-w-0 flex-1 text-xs font-semibold text-muted">
                 {t('Everyone at {domain}', { domain: myDomain() || '—' })}
               </span>
               {domain.domain && (
@@ -171,7 +171,7 @@ export function Share() {
                     setDomain(next)
                     void setDomainAccess(room, next).then((p) => p && setNote(p))
                   }}
-                  className="shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0.5 text-xs outline-none"
+                  className="shrink-0 rounded-md border border-hairline bg-surface px-1 py-0.5 text-xs outline-none"
                 >
                   {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
                 </select>
@@ -192,7 +192,7 @@ export function Share() {
                   })
                 }}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-                  ${domain.domain ? 'bg-[#C8452D]' : 'bg-[#D8D5CD]'}`}
+                  ${domain.domain ? 'bg-pigment' : 'bg-[#D8D5CD]'}`}
               >
                 <span
                   className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
@@ -200,7 +200,7 @@ export function Share() {
                 />
               </button>
             </div>
-            <p className="px-2.5 pb-1 text-[11px] leading-snug text-[#8A867C]">
+            <p className="px-2.5 pb-1 text-[11px] leading-snug text-muted">
               {domain.domain
                 ? t('Anyone signing in with that domain can open this board, no invite needed.')
                 : t('Off: only the people listed below can open this board.')}
@@ -209,9 +209,9 @@ export function Share() {
             {/* Its own switch, not a role on the list above. Sharing answers who else may work
                 on this; this answers whether a stranger may read it, and running the two through
                 one setting is how somebody publishes a board they meant to send to a colleague. */}
-            <div className="my-1 h-px bg-[#EAE6DD]" />
+            <div className="my-1 h-px bg-shade" />
             <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
-              <span className="min-w-0 flex-1 text-xs font-semibold text-[#8A867C]">
+              <span className="min-w-0 flex-1 text-xs font-semibold text-muted">
                 {t('Anybody with the link')}
               </span>
               <button
@@ -224,7 +224,7 @@ export function Share() {
                   void openBoardToWorld(room, next)
                 }}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-                  ${open ? 'bg-[#C8452D]' : 'bg-[#D8D5CD]'}`}
+                  ${open ? 'bg-pigment' : 'bg-[#D8D5CD]'}`}
               >
                 <span
                   className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
@@ -232,7 +232,7 @@ export function Share() {
                 />
               </button>
             </div>
-            <p className="px-2.5 pb-1 text-[11px] leading-snug text-[#8A867C]">
+            <p className="px-2.5 pb-1 text-[11px] leading-snug text-muted">
               {open
                 ? t('Open to the world, read only, no account needed. It shows on your page and the brief can be copied off it.')
                 : t('Off: opening this needs an account and a place on the list.')}
@@ -242,15 +242,15 @@ export function Share() {
 
         {user && (members.length > 0 || invites.length > 0) && (
           <>
-            <div className="my-1 h-px bg-[#EAE6DD]" />
-            <div className="px-2.5 pb-1 pt-1 text-xs font-semibold text-[#8A867C]">{t('People')}</div>
+            <div className="my-1 h-px bg-shade" />
+            <div className="px-2.5 pb-1 pt-1 text-xs font-semibold text-muted">{t('People')}</div>
             {members.map((m) => (
               <div key={m.userId} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5">
-                <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+                <span className="min-w-0 flex-1 truncate text-sm text-ink">
                   {m.email || t('Member')}
                 </span>
                 {m.owner ? (
-                  <span className="shrink-0 text-xs text-[#8A867C]">{t('owner')}</span>
+                  <span className="shrink-0 text-xs text-muted">{t('owner')}</span>
                 ) : owner ? (
                   <>
                     <select
@@ -258,7 +258,7 @@ export function Share() {
                       onChange={(e) => {
                         void setMemberRole(room, m.userId, e.target.value as Role).then(refresh)
                       }}
-                      className="shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0.5 text-xs outline-none"
+                      className="shrink-0 rounded-md border border-hairline bg-surface px-1 py-0.5 text-xs outline-none"
                     >
                       {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
                     </select>
@@ -266,35 +266,35 @@ export function Share() {
                       type="button"
                       title={t('Remove')}
                       onClick={() => void removeMember(room, m.userId).then(refresh)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
                     >
                       <Trash2 size={13} />
                     </button>
                   </>
                 ) : (
-                  <span className="shrink-0 text-xs text-[#8A867C]">{t(m.role)}</span>
+                  <span className="shrink-0 text-xs text-muted">{t(m.role)}</span>
                 )}
               </div>
             ))}
             {invites.map((i) => (
               <div key={i.email} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5">
-                <span className="min-w-0 flex-1 truncate text-sm text-[#8A867C]">{i.email}</span>
+                <span className="min-w-0 flex-1 truncate text-sm text-muted">{i.email}</span>
                 {owner && (
                   <button
                     type="button"
                     onClick={() => { void mailInvite(i.email, boardLink()); draft(i.email) }}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-pigment hover:bg-[#F7E9E4]"
                   >
                     {t('Email again')}
                   </button>
                 )}
-                <span className="shrink-0 text-xs text-[#8A867C]">{t('pending')}</span>
+                <span className="shrink-0 text-xs text-muted">{t('pending')}</span>
                 {owner && (
                   <button
                     type="button"
                     title={t('Remove')}
                     onClick={() => void revokeInvite(room, i.email).then(refresh)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -305,7 +305,7 @@ export function Share() {
         )}
 
         {user && owner && (
-          <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
+          <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-muted">
             {t('The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.')}
           </p>
         )}

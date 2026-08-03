@@ -24,13 +24,15 @@ export const GUIDE = {
 export const COLOR = {
   ink: '#141310',
   inkSoft: '#4A463E',
-  muted: '#8A867C',
+  muted: '#69665E',
   paper: '#F2EFE9',
   surface: '#FCFBF8',
   hairline: '#E2DED5',
+  tint: '#EFEBE2',
+  shade: '#EAE6DD',
   wash: '#EBE7DE',
-  pigment: '#C8452D',
-  pigmentHover: '#A83621',
+  pigment: '#B43E28',
+  pigmentHover: '#943321',
   pigmentWash: '#F7E9E4',
 }
 

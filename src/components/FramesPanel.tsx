@@ -17,7 +17,7 @@ function Thumb({ frame }: { frame: FrameItem }) {
   const inside = items.filter((i) => i.id === frame.id || contains(frame, aabb(i)))
   const canvas = renderToCanvas(inside, 0.12, 0)
   return (
-    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-[#E2DED5] bg-[#FCFBF8]">
+    <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-hairline bg-surface">
       {canvas && (
         <img
           src={canvas.toDataURL()}
@@ -61,9 +61,9 @@ export function FramesPanel() {
   }
 
   return (
-    <div className="absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
-      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
-        <span className="text-xs font-semibold text-[#141310]">Frame'ler ({frames.length})</span>
+    <div className="absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <div className="flex items-center justify-between border-b border-shade px-3 py-2">
+        <span className="text-xs font-semibold text-ink">Frame'ler ({frames.length})</span>
         <div className="flex items-center gap-0.5">
           <IconButton
             title={t('Start presentation')}
@@ -85,7 +85,7 @@ export function FramesPanel() {
 
       <div className="flex-1 overflow-y-auto p-1.5">
         {frames.length === 0 && (
-          <p className="px-2 py-4 text-center text-xs text-[#8A867C]">
+          <p className="px-2 py-4 text-center text-xs text-muted">
             {t('No frames yet. Use the frame tool in the dock.')}
           </p>
         )}
@@ -100,10 +100,10 @@ export function FramesPanel() {
               setDragging(null)
             }}
             onDragEnd={() => setDragging(null)}
-            className={`group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-[#F2EFE9]
+            className={`group mb-1 flex items-center gap-2 rounded-lg p-1.5 hover:bg-paper
               ${dragging === frame.id ? 'opacity-40' : ''}`}
           >
-            <span className="w-4 shrink-0 text-center text-[11px] font-semibold text-[#8A867C]">{i + 1}</span>
+            <span className="w-4 shrink-0 text-center text-[11px] font-semibold text-muted">{i + 1}</span>
             <button type="button" onClick={() => jump(frame)} className="shrink-0">
               <Thumb frame={frame} />
             </button>
@@ -118,14 +118,14 @@ export function FramesPanel() {
                     if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                     if (e.key === 'Escape') setRenaming(null)
                   }}
-                  className="w-full rounded border border-[#C8452D] px-1 py-0.5 text-xs outline-none"
+                  className="w-full rounded border border-pigment px-1 py-0.5 text-xs outline-none"
                 />
               ) : (
                 <button
                   type="button"
                   onDoubleClick={() => setRenaming(frame.id)}
                   onClick={() => jump(frame)}
-                  className="block w-full truncate text-left text-xs font-medium text-[#141310]"
+                  className="block w-full truncate text-left text-xs font-medium text-ink"
                   title={t('Double click to rename')}
                 >
                   {frame.title}
@@ -138,7 +138,7 @@ export function FramesPanel() {
                 title={t('Move up')}
                 onClick={() => move(i, i - 1)}
                 disabled={i === 0}
-                className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"
+                className="grid h-4 w-5 place-items-center rounded text-ink-soft hover:bg-shade disabled:opacity-30"
               >
                 <ChevronUp size={12} strokeWidth={2.5} />
               </button>
@@ -147,7 +147,7 @@ export function FramesPanel() {
                 title={t('Move down')}
                 onClick={() => move(i, i + 1)}
                 disabled={i === frames.length - 1}
-                className="grid h-4 w-5 place-items-center rounded text-[#4A463E] hover:bg-[#EAE6DD] disabled:opacity-30"
+                className="grid h-4 w-5 place-items-center rounded text-ink-soft hover:bg-shade disabled:opacity-30"
               >
                 <ChevronDown size={12} strokeWidth={2.5} />
               </button>
@@ -156,7 +156,7 @@ export function FramesPanel() {
               type="button"
               title={t('Delete')}
               onClick={() => { removeItems([frame.id]); requestRender() }}
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#A83621] opacity-0 hover:bg-[#F7E9E4] group-hover:opacity-100"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#943321] opacity-0 hover:bg-[#F7E9E4] group-hover:opacity-100"
             >
               <Trash2 size={13} strokeWidth={2} />
             </button>

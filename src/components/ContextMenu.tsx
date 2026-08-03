@@ -100,20 +100,20 @@ export function ContextMenu() {
     <>
       <div className="fixed inset-0 z-[60]" onPointerDown={close} onContextMenu={(e) => { e.preventDefault(); close() }} />
       <div
-        className="absolute z-[61] min-w-[212px] rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+        className="absolute z-[61] min-w-[212px] rounded-xl border border-black/5 bg-surface p-1.5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
         style={{ left: menu.x, top: menu.y }}
       >
         {entries.map((e) => (
           <div key={e.label}>
-            {e.divider && <div className="my-1 h-px bg-[#EAE6DD]" />}
+            {e.divider && <div className="my-1 h-px bg-shade" />}
             <button
               type="button"
               onClick={() => { e.run(); close() }}
               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm
-                ${e.danger ? 'text-[#A83621] hover:bg-[#F7E9E4]' : 'text-[#141310] hover:bg-[#EFEBE2]'}`}
+                ${e.danger ? 'text-[#943321] hover:bg-[#F7E9E4]' : 'text-ink hover:bg-tint'}`}
             >
               <span>{e.label}</span>
-              {e.shortcut && <span className="ml-6 text-xs text-[#8A867C]">{e.shortcut}</span>}
+              {e.shortcut && <span className="ml-6 text-xs text-muted">{e.shortcut}</span>}
             </button>
           </div>
         ))}

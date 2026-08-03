@@ -55,17 +55,17 @@ export function Cover({ id, path }: { id: string; path: string }) {
           type="button"
           disabled={busy}
           onClick={() => file.current?.click()}
-          className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-40"
+          className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink disabled:opacity-40"
         >
           {busy ? t('Uploading…') : t('Add a cover')}
         </button>
-        {trouble && <p className="mt-1 text-[12px] text-[#A83621]">{trouble}</p>}
+        {trouble && <p className="mt-1 text-[12px] text-[#943321]">{trouble}</p>}
       </>
     )
   }
 
   return (
-    <div className="group relative -mx-6 -mt-7 mb-4 h-[180px] overflow-hidden bg-[#EAE6DD]">
+    <div className="group relative -mx-6 -mt-7 mb-4 h-[180px] overflow-hidden bg-shade">
       {input}
       {url && <img src={url} alt="" className="h-full w-full object-cover" />}
       <div className="absolute bottom-2 right-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -73,14 +73,14 @@ export function Cover({ id, path }: { id: string; path: string }) {
           type="button"
           disabled={busy}
           onClick={() => file.current?.click()}
-          className="rounded-md border border-[#E2DED5] bg-[#FCFBF8]/92 px-2 py-1 text-[11px] font-semibold text-[#141310] backdrop-blur-[2px] hover:border-[#C8452D] disabled:opacity-40"
+          className="rounded-md border border-hairline bg-surface/92 px-2 py-1 text-[11px] font-semibold text-ink backdrop-blur-[2px] hover:border-pigment disabled:opacity-40"
         >
           {busy ? t('Uploading…') : t('Change')}
         </button>
         <button
           type="button"
           onClick={() => { void removeCover(path); patchRecord(id, { cover: '' }) }}
-          className="rounded-md border border-[#E2DED5] bg-[#FCFBF8]/92 px-2 py-1 text-[11px] font-semibold text-[#8A867C] backdrop-blur-[2px] hover:text-[#A83621]"
+          className="rounded-md border border-hairline bg-surface/92 px-2 py-1 text-[11px] font-semibold text-muted backdrop-blur-[2px] hover:text-[#943321]"
         >
           {t('Remove cover')}
         </button>

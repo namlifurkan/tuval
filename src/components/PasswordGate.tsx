@@ -29,7 +29,7 @@ export function PasswordGate() {
   }
 
   return (
-    <div className="pointer-events-auto border-b border-[#A83621] bg-[#C8452D] px-5 py-3 text-white sm:px-8">
+    <div className="pointer-events-auto border-b border-[#943321] bg-pigment px-5 py-3 text-white sm:px-8">
       <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center gap-x-4 gap-y-2">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{t('Finish setting up your account')}</p>
@@ -60,7 +60,7 @@ export function PasswordGate() {
             type="button"
             disabled={saving || !value || !again}
             onClick={() => void save()}
-            className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-[#C8452D] disabled:opacity-50"
+            className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-pigment disabled:opacity-50"
           >
             {saving ? t('Saving…') : t('Save password')}
           </button>

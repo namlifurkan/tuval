@@ -27,9 +27,9 @@ const PROVIDERS: { id: Provider; name: string; path: string }[] = [
   },
 ]
 
-const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
-const primary = 'w-full rounded-lg bg-[#C8452D] px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:opacity-40'
-const quiet = 'text-[13px] font-semibold text-[#C8452D] hover:underline'
+const field = 'w-full rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment'
+const primary = 'w-full rounded-lg bg-pigment px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40'
+const quiet = 'text-[13px] font-semibold text-pigment hover:underline'
 
 const COPY: Record<Page, { title: string; blurb: string }> = {
   login: {
@@ -93,17 +93,17 @@ export function AuthPage() {
   const copy = COPY[page]
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-[#F2EFE9] px-5 py-12">
+    <div className="grid min-h-dvh place-items-center bg-paper px-5 py-12">
       <div className="w-full max-w-[380px]">
         <a href="/" className="inline-block"><Wordmark height={20} /></a>
 
-        <h1 className="mt-7 text-[26px] font-bold leading-tight tracking-[-0.015em] text-[#141310]">
+        <h1 className="mt-7 text-[26px] font-bold leading-tight tracking-[-0.015em] text-ink">
           {t(copy.title)}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-[#4A463E]">{t(copy.blurb)}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{t(copy.blurb)}</p>
 
         {authError && (
-          <p className="mt-4 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-3 py-2 text-[12px] leading-snug text-[#141310]">
+          <p className="mt-4 rounded-lg border border-hairline bg-[#F7E9E4] px-3 py-2 text-[12px] leading-snug text-ink">
             {isStaleLink
               ? t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })
               : t('Signing in did not go through: {reason}', { reason: authError })}
@@ -111,7 +111,7 @@ export function AuthPage() {
         )}
 
         {state === 'sent' ? (
-          <p className="mt-6 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-3 text-sm leading-relaxed text-[#141310]">
+          <p className="mt-6 rounded-lg border border-hairline bg-surface px-3 py-3 text-sm leading-relaxed text-ink">
             {t('Check {email} for a link. It works once and expires.', { email })}
           </p>
         ) : (
@@ -160,13 +160,13 @@ export function AuthPage() {
         )}
 
         {state === 'error' && (
-          <p className="mt-3 text-[12px] leading-snug text-[#A83621]">{reason}</p>
+          <p className="mt-3 text-[12px] leading-snug text-[#943321]">{reason}</p>
         )}
 
         {(page === 'login' || page === 'register') && (
           <>
             <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-[0.13em] text-[#B6B1A6]">
-              <span className="h-px flex-1 bg-[#E2DED5]" />{t('or')}<span className="h-px flex-1 bg-[#E2DED5]" />
+              <span className="h-px flex-1 bg-hairline" />{t('or')}<span className="h-px flex-1 bg-hairline" />
             </div>
             <div className="grid grid-cols-3 gap-2">
               {PROVIDERS.map(({ id, name, path }) => (
@@ -174,7 +174,7 @@ export function AuthPage() {
                   key={id}
                   type="button"
                   onClick={() => { void signInWith(id).catch((e: Error) => { setReason(t(authMessage(e))); setState('error') }) }}
-                  className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-2.5 text-[13px] font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+                  className="flex items-center justify-center gap-1.5 rounded-lg border border-hairline bg-surface px-2 py-2.5 text-[13px] font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                     <path d={path} />
@@ -186,7 +186,7 @@ export function AuthPage() {
           </>
         )}
 
-        <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-[#8A867C]">
+        <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted">
           {page === 'login' && (
             <>
               <button type="button" onClick={() => go('/register')} className={quiet}>{t('Create an account')}</button>
@@ -201,7 +201,7 @@ export function AuthPage() {
           )}
         </div>
 
-        <p className="mt-8 max-w-[46ch] text-[11px] leading-relaxed text-[#8A867C]">
+        <p className="mt-8 max-w-[46ch] text-[11px] leading-relaxed text-muted">
           {t('Without an account Tuval still works: boards live in this browser and nothing leaves it.')}
         </p>
       </div>

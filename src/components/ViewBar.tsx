@@ -7,7 +7,7 @@ import type { Record as Row } from '../board/records'
 import { t } from '../i18n'
 import { Popover } from './Popover'
 
-const pill = 'rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-0.5 text-[11px] outline-none'
+const pill = 'rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-[11px] outline-none'
 
 function Rule({ db, view, filter, fields }: {
   db: Row
@@ -20,7 +20,7 @@ function Rule({ db, view, filter, fields }: {
   const needsValue = !NO_VALUE.includes(filter.op)
 
   return (
-    <span className="flex items-center gap-1 rounded-lg bg-[#EFEBE2] py-0.5 pl-1 pr-0.5">
+    <span className="flex items-center gap-1 rounded-lg bg-tint py-0.5 pl-1 pr-0.5">
       <select
         value={filter.field}
         onChange={(e) => {
@@ -70,7 +70,7 @@ function Rule({ db, view, filter, fields }: {
         type="button"
         aria-label={t('Remove filter')}
         onClick={() => removeFilter(db, view.id, filter.id)}
-        className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:text-[#A83621]"
+        className="grid h-5 w-5 place-items-center rounded text-muted hover:text-[#943321]"
       >
         <X size={11} />
       </button>
@@ -101,7 +101,7 @@ export function ViewBar({ db, view, fields, hidden }: {
           <button
             type="button"
             onClick={toggle}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted hover:bg-shade hover:text-ink"
           >
             <FilterIcon size={12} /> {t('Filter')}
           </button>
@@ -112,14 +112,14 @@ export function ViewBar({ db, view, fields, hidden }: {
             <button
               type="button"
               onClick={() => { addFilter(db, view.id, TITLE, 'title'); close() }}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
             >{t('Name')}</button>
             {fields.map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => { addFilter(db, view.id, f.id, f.type); close() }}
-                className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
               >{f.name}</button>
             ))}
           </>
@@ -132,8 +132,8 @@ export function ViewBar({ db, view, fields, hidden }: {
           <button
             type="button"
             onClick={toggle}
-            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold hover:bg-[#EAE6DD]
-              ${sort ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold hover:bg-shade
+              ${sort ? 'text-pigment' : 'text-muted hover:text-ink'}`}
           >
             <ArrowDownUp size={12} />
             {sort ? `${named(sort.field)} ${sort.dir === 'asc' ? '↑' : '↓'}` : t('Sort')}
@@ -146,7 +146,7 @@ export function ViewBar({ db, view, fields, hidden }: {
               <button
                 type="button"
                 onClick={() => { setSort(db, view.id, null); close() }}
-                className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD]"
+                className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-shade"
               >{t('No sort')}</button>
             )}
             {[{ id: TITLE, name: t('Name') }, ...fields].map((f) => (
@@ -154,13 +154,13 @@ export function ViewBar({ db, view, fields, hidden }: {
                 <button
                   type="button"
                   onClick={() => { setSort(db, view.id, f.id, 'asc'); close() }}
-                  className="min-w-0 flex-1 truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                  className="min-w-0 flex-1 truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
                 >{f.name}</button>
                 <button
                   type="button"
                   aria-label={`${f.name} ${t('descending')}`}
                   onClick={() => { setSort(db, view.id, f.id, 'desc'); close() }}
-                  className="rounded-md px-1.5 py-1 text-[11px] text-[#8A867C] hover:bg-[#EAE6DD]"
+                  className="rounded-md px-1.5 py-1 text-[11px] text-muted hover:bg-shade"
                 >↓</button>
               </span>
             ))}

@@ -33,7 +33,7 @@ const NAV = ['/', '/pricing']
 function Header() {
   const path = routePath().replace(/\/+$/, '') || '/'
   return (
-    <header className="sticky top-0 z-40 border-b border-[#141310]/8 bg-[#F2EFE9]/92 backdrop-blur-[6px]">
+    <header className="sticky top-0 z-40 border-b border-ink/8 bg-paper/92 backdrop-blur-[6px]">
       <div className="mx-auto flex max-w-[80rem] items-center gap-6 px-6 py-3.5">
         <a href="/" onClick={(e) => { e.preventDefault(); go('/') }} className="shrink-0">
           <Wordmark height={20} />
@@ -46,7 +46,7 @@ function Header() {
               onClick={(e) => { e.preventDefault(); go(to) }}
               aria-current={path === to ? 'page' : undefined}
               className={`rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold transition-colors
-                ${path === to ? 'text-[#C8452D]' : 'text-[#141310] hover:bg-[#141310]/6'}`}
+                ${path === to ? 'text-pigment' : 'text-ink hover:bg-ink/6'}`}
             >{LINK_NAMES[to]}</a>
           ))}
         </nav>
@@ -56,19 +56,19 @@ function Header() {
               href={PRODUCT.repo}
               target="_blank"
               rel="noreferrer"
-              className="hidden rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold text-[#141310] hover:bg-[#141310]/6 sm:block"
+              className="hidden rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold text-ink hover:bg-ink/6 sm:block"
             >GitHub</a>
           ) : (
             <a
               href="/self-hosting"
               onClick={(e) => { e.preventDefault(); go('/self-hosting') }}
-              className="hidden rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold text-[#141310] hover:bg-[#141310]/6 sm:block"
+              className="hidden rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold text-ink hover:bg-ink/6 sm:block"
             >{LINK_NAMES['/self-hosting']}</a>
           )}
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="rounded-lg bg-[#141310] px-3.5 py-2 text-[13.5px] font-semibold text-[#F2EFE9] transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_3px_0_rgba(20,19,16,0.35)] active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
+            className="rounded-lg bg-ink px-3.5 py-2 text-[13.5px] font-semibold text-paper transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_3px_0_rgba(20,19,16,0.35)] active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >Open {PRODUCT.name}</a>
           <Account />
         </div>
@@ -84,7 +84,7 @@ function Hero({ page }: { page: Page }) {
   const home = page.path === '/'
   return (
     <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-9">
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-pigment">
         {home
           ? 'AGPL-3.0 licensed · runs on your own machine · the source is on GitHub'
           : LINK_NAMES[page.path]}
@@ -94,14 +94,14 @@ function Hero({ page }: { page: Page }) {
           className="text-[clamp(2.6rem,5.8vw,5rem)] leading-[0.94] tracking-[-0.015em]"
           style={DISPLAY}
         >{page.claim}</h1>
-        <p className="text-[16.5px] leading-[1.5] text-[#4A463E]" style={READING}>{page.lede}</p>
+        <p className="text-[16.5px] leading-[1.5] text-ink-soft" style={READING}>{page.lede}</p>
       </div>
       {!home && (
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] transition-[transform,box-shadow,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#A83621] hover:shadow-[3px_4px_0_#9E2F1B] active:translate-y-0 active:shadow-[1px_1px_0_#9E2F1B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
+            className="rounded-xl bg-pigment px-5 py-3 text-[15px] font-semibold text-paper shadow-[2px_2px_0_#9E2F1B] transition-[transform,box-shadow,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#943321] hover:shadow-[3px_4px_0_#9E2F1B] active:translate-y-0 active:shadow-[1px_1px_0_#9E2F1B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >Start a board</a>
           <Second />
         </div>
@@ -115,7 +115,7 @@ function Hero({ page }: { page: Page }) {
 // yourself.
 function Second({ big }: { big?: boolean }) {
   const size = big ? 'px-5 py-3 text-[14px]' : 'px-5 py-3 text-[15px]'
-  const look = `rounded-xl border border-[#141310]/20 font-semibold transition-colors duration-150 hover:border-[#141310] hover:bg-[#EBE7DE] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310] ${size}`
+  const look = `rounded-xl border border-ink/20 font-semibold transition-colors duration-150 hover:border-ink hover:bg-[#EBE7DE] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${size}`
   return PRODUCT.published
     ? <a href={PRODUCT.repo} target="_blank" rel="noreferrer" className={look}>Read the source</a>
     : (
@@ -132,8 +132,8 @@ function Caption({ title, body }: { title: string; body?: string }) {
   return (
     <div className="mx-auto max-w-[80rem] px-6 py-5">
       <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-[13.5px] font-bold tracking-[-0.01em] text-[#141310]">{title}</span>
-        {body && <span className="text-[13.5px] text-[#8A867C]">{body}</span>}
+        <span className="text-[13.5px] font-bold tracking-[-0.01em] text-ink">{title}</span>
+        {body && <span className="text-[13.5px] text-muted">{body}</span>}
       </p>
     </div>
   )
@@ -148,10 +148,10 @@ function Index({ points, label }: { points: { title: string; body: string }[]; l
       <dl className="grid gap-x-12 gap-y-10 md:grid-cols-3">
         {points.map((point, at) => (
           <div key={point.title} data-reveal style={{ '--step': at } as React.CSSProperties}>
-            <dt className="border-b border-[#141310]/20 pb-2 text-[26px] leading-[1.1]" style={DISPLAY}>
+            <dt className="border-b border-ink/20 pb-2 text-[26px] leading-[1.1]" style={DISPLAY}>
               {point.title}
             </dt>
-            <dd className="mt-3 text-[14px] leading-[1.6] text-[#4A463E]" style={READING}>
+            <dd className="mt-3 text-[14px] leading-[1.6] text-ink-soft" style={READING}>
               {say(point.body)}
             </dd>
           </div>
@@ -213,35 +213,35 @@ function Compare({ compare }: { compare: NonNullable<Page['compare']> }) {
   return (
     <div className="mx-auto max-w-[80rem] px-6 pt-6 pb-20">
       <Rule label={`Side by side with ${compare.against}`} />
-      <div className="overflow-x-auto rounded-2xl border border-[#141310]/12 bg-[#FCFBF8] shadow-[5px_5px_0_rgba(20,19,16,0.07)]">
+      <div className="overflow-x-auto rounded-2xl border border-ink/12 bg-surface shadow-[5px_5px_0_rgba(20,19,16,0.07)]">
         <table className="w-full min-w-[46rem] border-collapse text-left">
           <thead>
             <tr>
-              <th scope="col" className="w-[34%] border-b border-[#141310] px-5 py-3.5 text-[12px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+              <th scope="col" className="w-[34%] border-b border-ink px-5 py-3.5 text-[12px] font-bold uppercase tracking-[0.14em] text-muted">
                 Feature
               </th>
-              <th scope="col" className="w-[33%] border-b border-[#141310] px-5 py-3.5 text-[13px] font-bold text-[#C8452D]">
+              <th scope="col" className="w-[33%] border-b border-ink px-5 py-3.5 text-[13px] font-bold text-pigment">
                 {PRODUCT.name}
               </th>
-              <th scope="col" className="w-[33%] border-b border-[#141310] px-5 py-3.5 text-[13px] font-bold text-[#141310]">
+              <th scope="col" className="w-[33%] border-b border-ink px-5 py-3.5 text-[13px] font-bold text-ink">
                 {compare.against}
               </th>
             </tr>
           </thead>
           <tbody>
             {compare.rows.map((row) => (
-              <tr key={row.feature} className="border-b border-[#141310]/8 last:border-0">
+              <tr key={row.feature} className="border-b border-ink/8 last:border-0">
                 <th scope="row" className="px-5 py-3.5 align-top text-[14px] font-semibold">
                   {row.feature}
                 </th>
-                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{say(row.tuval)}</td>
-                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-[#4A463E]">{row.them}</td>
+                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-ink-soft">{say(row.tuval)}</td>
+                <td className="px-5 py-3.5 align-top text-[14px] leading-snug text-ink-soft">{row.them}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-4 max-w-[70ch] text-[12.5px] leading-relaxed text-[#8A867C]">
+      <p className="mt-4 max-w-[70ch] text-[12.5px] leading-relaxed text-muted">
         {compare.note ?? `Checked ${compare.checked}. ${compare.against} is a trademark of its owner;`
           + ` ${PRODUCT.name} is not affiliated with, endorsed by or sponsored by them.`
           + ' Their product changes; if a row here has gone stale, tell us and it will be corrected.'}
@@ -260,18 +260,18 @@ function Week({ points, label }: { points: { title: string; body: string }[]; la
           <li key={point.title} className="relative md:pt-10">
             <span
               aria-hidden
-              className="absolute left-0 top-0 hidden h-px w-full bg-[#141310]/15 md:block"
+              className="absolute left-0 top-0 hidden h-px w-full bg-ink/15 md:block"
             />
             <span
               aria-hidden
-              className="absolute -top-[5px] left-0 hidden h-2.5 w-2.5 rounded-full bg-[#C8452D] md:block"
+              className="absolute -top-[5px] left-0 hidden h-2.5 w-2.5 rounded-full bg-pigment md:block"
             />
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8452D]">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-pigment">
               Step {at + 1}
             </span>
             <h3 className="mt-3 text-[28px] leading-[1.1]" style={DISPLAY}>{point.title}</h3>
             <p
-              className="mt-2.5 max-w-[38ch] text-[14px] leading-[1.6] text-[#4A463E]"
+              className="mt-2.5 max-w-[38ch] text-[14px] leading-[1.6] text-ink-soft"
               style={READING}
             >{say(point.body)}</p>
           </li>
@@ -286,25 +286,25 @@ function Onward({ page }: { page: Page }) {
   if (!near.length) return null
   return (
     <section className="mx-auto max-w-[80rem] px-6 py-20">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8A867C]">Keep reading</h2>
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Keep reading</h2>
       <ul className="mt-5">
         {near.map((one) => (
-          <li key={one.path} className="border-t border-[#141310]/10 last:border-b">
+          <li key={one.path} className="border-t border-ink/10 last:border-b">
             <a
               href={one.path}
               onClick={(e) => { e.preventDefault(); go(one.path) }}
               className="group grid items-baseline gap-x-8 gap-y-1 py-5 sm:grid-cols-[11rem_minmax(0,1fr)_auto]"
             >
-              <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#C8452D]">
+              <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-pigment">
                 {LINK_NAMES[one.path]}
               </span>
               <span
-                className="min-w-0 text-[clamp(1.2rem,2vw,1.6rem)] leading-[1.15] transition-colors group-hover:text-[#C8452D]"
+                className="min-w-0 text-[clamp(1.2rem,2vw,1.6rem)] leading-[1.15] transition-colors group-hover:text-pigment"
                 style={DISPLAY}
               >{one.claim}</span>
               <ArrowRight
                 size={19}
-                className="hidden shrink-0 text-[#C6C2B6] transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-[#C8452D] sm:block"
+                className="hidden shrink-0 text-[#C6C2B6] transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-pigment sm:block"
               />
             </a>
           </li>
@@ -324,7 +324,7 @@ function Footer() {
               className="max-w-[16ch] leading-[1.04]"
               style={{ ...DISPLAY, fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)' }}
             >The board, the page and the work.</p>
-            <p className="mt-4 max-w-[34ch] text-[14px] leading-relaxed text-[#F2EFE9]/60">
+            <p className="mt-4 max-w-[34ch] text-[14px] leading-relaxed text-paper/60">
               One record, three ways to look at it. AGPL-3.0, and yours to run.
             </p>
           </div>
@@ -336,7 +336,7 @@ function Footer() {
                     <a
                       href={one.path}
                       onClick={(e) => { e.preventDefault(); go(one.path) }}
-                      className="text-[14px] text-[#F2EFE9]/70 hover:text-[#F2EFE9]"
+                      className="text-[14px] text-paper/70 hover:text-paper"
                     >{LINK_NAMES[one.path]}</a>
                   </li>
                 ))}
@@ -344,11 +344,11 @@ function Footer() {
             ))}
           </nav>
         </div>
-        <div className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#F2EFE9]/12 pt-6">
+        <div className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-paper/12 pt-6">
           <Wordmark height={16} />
-          <span className="text-[12.5px] text-[#F2EFE9]/45">AGPL-3.0</span>
+          <span className="text-[12.5px] text-paper/45">AGPL-3.0</span>
           {PRODUCT.published && (
-            <a href={PRODUCT.repo} className="text-[12.5px] text-[#F2EFE9]/45 hover:text-[#F2EFE9]">
+            <a href={PRODUCT.repo} className="text-[12.5px] text-paper/45 hover:text-paper">
               Source on GitHub
             </a>
           )}
@@ -414,11 +414,11 @@ function PricingLayout({ page }: { page: Page }) {
 
   const price = (label: string, amount: string, unit: string) => (
     <>
-      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8A867C]">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">{label}</p>
       <p className="mt-2 leading-none" style={{ ...DISPLAY, fontSize: 'clamp(3rem,6vw,4.4rem)' }}>
         {amount}
       </p>
-      <p className="mt-2 text-[13px] text-[#8A867C]">{unit}</p>
+      <p className="mt-2 text-[13px] text-muted">{unit}</p>
     </>
   )
 
@@ -428,38 +428,38 @@ function PricingLayout({ page }: { page: Page }) {
       <div className="mx-auto max-w-[80rem] px-6 pb-20">
         <Rule label="What it costs" />
         <div className="grid gap-x-12 gap-y-12 md:grid-cols-2">
-          <div className="border-t border-[#141310]/20 pt-6">
+          <div className="border-t border-ink/20 pt-6">
             {price('Free', '0', 'for up to three people, forever')}
             <dl className="mt-8">
               {free?.points?.map((point) => (
-                <div key={point.title} className="flex gap-3 border-t border-[#141310]/12 py-3 text-[14px] leading-snug">
+                <div key={point.title} className="flex gap-3 border-t border-ink/12 py-3 text-[14px] leading-snug">
                   <dt className="w-[9.5rem] shrink-0 font-semibold">{point.title}</dt>
-                  <dd className="min-w-0 flex-1 text-[#4A463E]" style={READING}>{say(point.body)}</dd>
+                  <dd className="min-w-0 flex-1 text-ink-soft" style={READING}>{say(point.body)}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
-          <div className="border-t-2 border-[#C8452D] pt-6">
+          <div className="border-t-2 border-pigment pt-6">
             {price('Team', '—', 'not on sale yet')}
-            <p className="mt-8 max-w-[46ch] text-[15px] leading-[1.65] text-[#4A463E]" style={READING}>
+            <p className="mt-8 max-w-[46ch] text-[15px] leading-[1.65] text-ink-soft" style={READING}>
               {say(team?.body ?? '')}
             </p>
             <a
               href="/dashboard"
               onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-              className="mt-8 inline-block rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
+              className="mt-8 inline-block rounded-xl bg-pigment px-5 py-3 text-[15px] font-semibold text-paper shadow-[2px_2px_0_#9E2F1B] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >Start free</a>
-            <p className="mt-6 max-w-[46ch] border-t border-[#141310]/12 pt-3 text-[12px] leading-[1.6] text-[#8A867C]">
+            <p className="mt-6 max-w-[46ch] border-t border-ink/12 pt-3 text-[12px] leading-[1.6] text-muted">
               {say('There is no price here because there is nothing to pay it with yet. When there is, it will be written down with the date it took effect and the notice before it changes.')}
             </p>
           </div>
         </div>
 
         {pay && (
-          <div className="mt-16 border-t border-[#141310]/20 pt-6">
+          <div className="mt-16 border-t border-ink/20 pt-6">
             <h2 className="text-[26px] leading-[1.1]" style={DISPLAY}>{pay.heading}</h2>
-            <p className="mt-3 max-w-[62ch] text-[15px] leading-[1.65] text-[#4A463E]" style={READING}>
+            <p className="mt-3 max-w-[62ch] text-[15px] leading-[1.65] text-ink-soft" style={READING}>
               {say(pay.body ?? '')}
             </p>
           </div>
@@ -482,10 +482,10 @@ function CompareLayout({ page }: { page: Page }) {
         <dl className="grid gap-x-14 gap-y-12 md:grid-cols-3">
           {prose.map((one, at) => (
             <div key={one.heading} data-reveal style={{ '--step': at } as React.CSSProperties}>
-              <dt className="border-b border-[#141310]/20 pb-2 text-[26px] leading-[1.1]" style={DISPLAY}>
+              <dt className="border-b border-ink/20 pb-2 text-[26px] leading-[1.1]" style={DISPLAY}>
                 {one.heading}
               </dt>
-              <dd className="mt-3 text-[14px] leading-[1.6] text-[#4A463E]" style={READING}>
+              <dd className="mt-3 text-[14px] leading-[1.6] text-ink-soft" style={READING}>
                 {say(one.body ?? '')}
               </dd>
             </div>
@@ -502,15 +502,15 @@ function CompareLayout({ page }: { page: Page }) {
 // anybody decides whether to install it; the four lines they will actually type are.
 function Commands({ band }: { band: Band }) {
   return (
-    <div className="mt-4 mb-12 border-t border-[#141310]/12 pt-8">
+    <div className="mt-4 mb-12 border-t border-ink/12 pt-8">
       <h3 className="text-[26px] leading-[1.12]" style={DISPLAY}>{band.heading}</h3>
-      <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-[#4A463E]" style={READING}>
+      <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-ink-soft" style={READING}>
         {band.body}
       </p>
-      <ol className="mt-6 overflow-x-auto rounded-xl border border-[#141310]/12 bg-[#141310] py-4 text-[#EBE7DE]">
+      <ol className="mt-6 overflow-x-auto rounded-xl border border-ink/12 bg-ink py-4 text-[#EBE7DE]">
         {band.lines?.map((line) => (
           <li key={line} className="flex gap-3 whitespace-pre px-5 py-1.5 font-mono text-[12.5px] leading-[1.6]">
-            <span aria-hidden className="select-none text-[#C8452D]">$</span>
+            <span aria-hidden className="select-none text-pigment">$</span>
             {say(line)}
           </li>
         ))}
@@ -529,17 +529,17 @@ function SpecLayout({ page }: { page: Page }) {
     <>
       <Hero page={page} />
       <div className="mx-auto max-w-[80rem] px-6 pb-20">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8A867C]">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
           {needs?.heading}
         </h2>
         <dl className="mt-4">
           {needs?.points?.map((point, at) => (
-            <div key={point.title} className="grid items-baseline gap-x-8 gap-y-1 border-t border-[#141310]/12 py-6 sm:grid-cols-[3rem_12rem_minmax(0,1fr)]">
-              <dt className="font-mono text-[12px] tabular-nums text-[#C8452D]">
+            <div key={point.title} className="grid items-baseline gap-x-8 gap-y-1 border-t border-ink/12 py-6 sm:grid-cols-[3rem_12rem_minmax(0,1fr)]">
+              <dt className="font-mono text-[12px] tabular-nums text-pigment">
                 {String(at + 1).padStart(2, '0')}
               </dt>
               <dt className="text-[22px] leading-[1.15]" style={DISPLAY}>{point.title}</dt>
-              <dd className="text-[14px] leading-[1.6] text-[#4A463E]" style={READING}>
+              <dd className="text-[14px] leading-[1.6] text-ink-soft" style={READING}>
                 {say(point.body)}
               </dd>
             </div>
@@ -547,9 +547,9 @@ function SpecLayout({ page }: { page: Page }) {
         </dl>
         {commands && <Commands band={commands} />}
         {note.map((one) => (
-          <div key={one.heading} className="border-t border-[#141310]/12 py-8">
+          <div key={one.heading} className="border-t border-ink/12 py-8">
             <h3 className="text-[26px] leading-[1.12]" style={DISPLAY}>{one.heading}</h3>
-            <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-[#4A463E]" style={READING}>
+            <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-ink-soft" style={READING}>
               {say(one.body ?? '')}
             </p>
           </div>
@@ -571,15 +571,15 @@ function SpecLayout({ page }: { page: Page }) {
 // A rule with a label on it, the way a wall text is set off from the work.
 const Rule = ({ label }: { label: string }) => (
   <div className="flex items-center gap-4 pb-9">
-    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8A867C]">{label}</span>
-    <span className="h-px flex-1 bg-[#141310]/12" />
+    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">{label}</span>
+    <span className="h-px flex-1 bg-ink/12" />
   </div>
 )
 
 function HomeHero({ page }: { page: Page }) {
   return (
     <section className="mx-auto max-w-[80rem] px-6 pt-14 pb-9">
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-pigment">
         AGPL-3.0 licensed · runs on your own machine · the source is on GitHub
       </p>
       <div className="mt-6 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
@@ -587,7 +587,7 @@ function HomeHero({ page }: { page: Page }) {
           className="text-[clamp(2.9rem,6.4vw,4rem)] leading-[0.92] tracking-[-0.015em]"
           style={DISPLAY}
         >{page.claim}</h1>
-        <p className="text-[16.5px] leading-[1.5] text-[#4A463E]" style={READING}>{page.lede}</p>
+        <p className="text-[16.5px] leading-[1.5] text-ink-soft" style={READING}>{page.lede}</p>
       </div>
     </section>
   )
@@ -601,12 +601,12 @@ function Columns({ bands }: { bands: Band[] }) {
       {bands.map((band, at) => (
         <div key={band.heading} data-reveal style={{ '--step': at } as React.CSSProperties}>
           <h2 className="text-[28px] leading-[1.1]" style={DISPLAY}>{band.heading}</h2>
-          <p className="mt-1 text-[14px] text-[#8A867C]" style={READING}>{band.body}</p>
+          <p className="mt-1 text-[14px] text-muted" style={READING}>{band.body}</p>
           <ul className="mt-5">
             {band.lines?.map((line) => (
               <li
                 key={line}
-                className="border-t border-[#141310]/12 py-2.5 text-[13.5px] leading-[1.45] text-[#4A463E]"
+                className="border-t border-ink/12 py-2.5 text-[13.5px] leading-[1.45] text-ink-soft"
                 style={READING}
               >{say(line)}</li>
             ))}
@@ -628,7 +628,7 @@ function Ledger({ band, label }: { band: Band; label: string }) {
           <h2 className="text-[clamp(1.9rem,3.2vw,2.9rem)] leading-[1.02]" style={DISPLAY}>
             {band.heading}
           </h2>
-          <p className="mt-4 max-w-[34ch] text-[14px] leading-[1.6] text-[#4A463E]" style={READING}>
+          <p className="mt-4 max-w-[34ch] text-[14px] leading-[1.6] text-ink-soft" style={READING}>
             {say(band.body ?? '')}
           </p>
         </div>
@@ -636,14 +636,14 @@ function Ledger({ band, label }: { band: Band; label: string }) {
           (band.points?.length ?? 0) % 3 === 0 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}
         >
           {band.points?.map((point, at) => (
-            <div key={point.title} className="border-t border-[#141310]/20 pt-3">
+            <div key={point.title} className="border-t border-ink/20 pt-3">
               <dt className="flex items-baseline gap-2 text-[15px] font-bold tracking-[-0.015em]">
-                <span className="font-mono text-[11px] tabular-nums text-[#C8452D]">
+                <span className="font-mono text-[11px] tabular-nums text-pigment">
                   {String(at + 1).padStart(2, '0')}
                 </span>
                 {point.title}
               </dt>
-              <dd className="mt-2 text-[13.5px] leading-[1.55] text-[#4A463E]" style={READING}>
+              <dd className="mt-2 text-[13.5px] leading-[1.55] text-ink-soft" style={READING}>
                 {say(point.body)}
               </dd>
             </div>
@@ -667,7 +667,7 @@ function HomeLayout({ page }: { page: Page }) {
       <HomeHero page={page} />
       <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-6 lg:hidden">
         <h2 className="text-[19px] font-bold tracking-[-0.02em]">{demo?.heading}</h2>
-        <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-[#4A463E]" style={READING}>
+        <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-ink-soft" style={READING}>
           {demo?.body}
         </p>
       </section>
@@ -675,7 +675,7 @@ function HomeLayout({ page }: { page: Page }) {
       <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-16">
         <div className="hidden lg:block">
           <h2 className="text-[19px] font-bold tracking-[-0.02em]">{demo?.heading}</h2>
-          <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-[#4A463E]" style={READING}>
+          <p className="mt-3 max-w-[74ch] text-[14.5px] leading-[1.6] text-ink-soft" style={READING}>
             {demo?.body}
           </p>
         </div>
@@ -683,10 +683,10 @@ function HomeLayout({ page }: { page: Page }) {
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="rounded-xl bg-[#141310] px-5 py-3 text-[14px] font-semibold text-[#F2EFE9] shadow-[3px_3px_0_rgba(20,19,16,0.22)] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
+            className="rounded-xl bg-ink px-5 py-3 text-[14px] font-semibold text-paper shadow-[3px_3px_0_rgba(20,19,16,0.22)] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >Start a board — free for three people</a>
           <Second big />
-          <span className="text-[12.5px] text-[#8A867C]">No card, no trial clock.</span>
+          <span className="text-[12.5px] text-muted">No card, no trial clock.</span>
         </div>
       </section>
 
@@ -703,7 +703,7 @@ function HomeLayout({ page }: { page: Page }) {
         <Ledger band={bandOf(page, 'migrate')!} label="Coming from something else" />
       )}
 
-      <section className="border-t border-[#141310]/12 bg-[#EBE7DE]">
+      <section className="border-t border-ink/12 bg-[#EBE7DE]">
         {bandOf(page, 'price') && <Ledger band={bandOf(page, 'price')!} label="What it costs" />}
       </section>
 
@@ -737,7 +737,7 @@ export function SitePage() {
           : <SurfaceLayout page={page} />
 
   return (
-    <div className="min-h-dvh bg-[#F2EFE9] text-[#141310]">
+    <div className="min-h-dvh bg-paper text-ink">
       <Header />
       {body}
       <Onward page={page} />

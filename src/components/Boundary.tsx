@@ -25,19 +25,19 @@ export class Boundary extends Component<{ children: ReactNode }, State> {
     return (
       // Fixed rather than in flow: inside the board this sits under an absolutely positioned
       // canvas, which paints over anything that is not positioned itself.
-      <div className="fixed inset-0 z-[100] grid place-items-center overflow-auto bg-[#F2EFE9] px-5 py-12">
+      <div className="fixed inset-0 z-[100] grid place-items-center overflow-auto bg-paper px-5 py-12">
         <div className="w-full max-w-[440px]">
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#C8452D]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-pigment">
             {t('Something broke')}
           </span>
-          <h1 className="mt-2 text-[24px] font-bold leading-tight tracking-[-0.015em] text-[#141310]">
+          <h1 className="mt-2 text-[24px] font-bold leading-tight tracking-[-0.015em] text-ink">
             {t('This part of the page stopped working.')}
           </h1>
-          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-[#4A463E]">
+          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink-soft">
             {t('Your board is not affected. It is kept in this browser and, when you are signed in, on the server as well.')}
           </p>
 
-          <pre className="mt-5 max-h-40 overflow-auto rounded-lg border border-[#E2DED5] bg-[#FCFBF8] p-3 font-mono text-[11px] leading-relaxed text-[#4A463E]">
+          <pre className="mt-5 max-h-40 overflow-auto rounded-lg border border-hairline bg-surface p-3 font-mono text-[11px] leading-relaxed text-ink-soft">
             {error.message || String(error)}
           </pre>
 
@@ -45,14 +45,14 @@ export class Boundary extends Component<{ children: ReactNode }, State> {
             <button
               type="button"
               onClick={() => location.reload()}
-              className="rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+              className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
             >
               {t('Reload')}
             </button>
             <button
               type="button"
               onClick={() => { location.href = '/dashboard' }}
-              className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+              className="rounded-lg border border-hairline bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment"
             >
               {t('Your boards')}
             </button>

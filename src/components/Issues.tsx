@@ -36,7 +36,7 @@ const GROUPS: GroupBy[] = ['status', 'assignee', 'priority', 'cycle', 'project',
 // The state, as a dot you can also press. It used to be a dot beside a full select box on every
 // line, which said the same thing twice and left the title about a hundred pixels to be read in:
 // half the list showed "Pricing p" where it meant "Pricing page".
-const pill = 'shrink-0 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-xs outline-none'
+const pill = 'shrink-0 rounded-md border border-hairline bg-surface px-1.5 py-1 text-xs outline-none'
 
 function Dot({ status, onPick }: { status: Status | null; onPick?: (next: Status) => void }) {
   const tone = status ? STATUS_TONE[status] : '#D6D1C6'
@@ -211,7 +211,7 @@ export function Issues() {
             type="button"
             onClick={() => setView(v)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-              ${view === v ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+              ${view === v ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >{t(v)}</button>
         ))}
 
@@ -219,7 +219,7 @@ export function Issues() {
           <select
             value={group}
             onChange={(e) => setGroup(e.target.value as GroupBy)}
-            className="ml-auto rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-xs outline-none"
+            className="ml-auto rounded-md border border-hairline bg-surface px-1.5 py-1 text-xs outline-none"
           >
             {GROUPS.map((g) => (
               <option key={g} value={g}>{t('Group by {what}', { what: t(g) })}</option>
@@ -235,7 +235,7 @@ export function Issues() {
             type="button"
             onClick={() => setFilter(s)}
             className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-              ${filter === s ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}`}
+              ${filter === s ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >
             {t(CHIP[s as keyof typeof CHIP] ?? s)}
             {s !== 'all' && (
@@ -252,8 +252,8 @@ export function Issues() {
           <button
             type="button"
             onClick={() => void markSeen()}
-            className="ml-auto rounded-lg px-2.5 py-1 text-xs font-semibold text-[#4A463E]
-              transition-colors hover:bg-[#EAE6DD]"
+            className="ml-auto rounded-lg px-2.5 py-1 text-xs font-semibold text-ink-soft
+              transition-colors hover:bg-shade"
           >
             {t('Mark all as seen')}
           </button>
@@ -266,7 +266,7 @@ export function Issues() {
         onKeyDown={(e) => { if (e.key === 'Enter') void add() }}
         ref={box}
         placeholder={t('Write an issue and press enter — or press c')}
-        className="mt-5 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]"
+        className="mt-5 w-full rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment"
       />
 
       {view === 'board' && (
@@ -277,20 +277,20 @@ export function Issues() {
         {bands.map((band) => (
           <section key={band.key} className="mb-5">
             {group !== 'none' && (
-              <h2 className="flex items-center gap-2 pb-1 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+              <h2 className="flex items-center gap-2 pb-1 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
                 {group === 'status' && <Dot status={band.key as Status} />}
                 {t(band.label)}
                 <span className="text-[#B6B1A6]">{band.rows.length}</span>
               </h2>
             )}
 
-            <div className="divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+            <div className="divide-y divide-shade border-y border-shade">
               {band.rows.map((issue) => (
                 <div
                   key={issue.id}
                   onMouseEnter={() => setAt(walk.indexOf(issue))}
                   className={`group flex items-center gap-2.5 py-2.5
-                    ${picked.includes(issue.id) ? 'bg-[#F7E9E4]' : walk[at]?.id === issue.id ? 'bg-[#EFEBE2]' : ''}`}
+                    ${picked.includes(issue.id) ? 'bg-[#F7E9E4]' : walk[at]?.id === issue.id ? 'bg-tint' : ''}`}
                 >
                   <button
                     type="button"
@@ -300,7 +300,7 @@ export function Issues() {
                       was.includes(issue.id) ? was.filter((x) => x !== issue.id) : [...was, issue.id])}
                     className={`grid h-4 w-4 shrink-0 place-items-center rounded-[3px] border text-[9px] transition-opacity
                       ${picked.includes(issue.id)
-                        ? 'border-[#C8452D] bg-[#C8452D] text-white opacity-100'
+                        ? 'border-pigment bg-pigment text-white opacity-100'
                         : 'border-[#D8D5CD] opacity-0 group-hover:opacity-100'}`}
                   >{picked.includes(issue.id) ? '✓' : ''}</button>
 
@@ -318,7 +318,7 @@ export function Issues() {
                       : undefined}
                     className={`h-1.5 w-1.5 shrink-0 rounded-full
                       ${!changedSince(issue.updated_at, looked) ? 'bg-transparent'
-                        : writtenByAgent(issue.updated_via) ? 'bg-[#C8452D]' : 'bg-[#141310]'}`}
+                        : writtenByAgent(issue.updated_via) ? 'bg-pigment' : 'bg-ink'}`}
                   />
 
                   <span className="w-[62px] shrink-0 font-mono text-[11px] tabular-nums text-[#B6B1A6]">
@@ -328,7 +328,7 @@ export function Issues() {
                   <input
                     value={issue.title}
                     onChange={(e) => void patchRecord(issue.id, { title: e.target.value })}
-                    className="min-w-0 flex-[1_1_18rem] bg-transparent text-[14.5px] font-medium text-[#141310] outline-none focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
+                    className="min-w-0 flex-[1_1_18rem] bg-transparent text-[14.5px] font-medium text-ink outline-none focus:underline focus:decoration-pigment focus:underline-offset-4"
                   />
 
                   <LabelChips known={known} worn={labelsOn(issue.id)} />
@@ -343,7 +343,7 @@ export function Issues() {
                   })()}
 
                   {issue.estimate !== null && (
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-[#EFEBE2] text-[10px] font-bold text-[#4A463E]">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-tint text-[10px] font-bold text-ink-soft">
                       {issue.estimate}
                     </span>
                   )}
@@ -361,7 +361,7 @@ export function Issues() {
                     type="button"
                     title={t('Open')}
                     onClick={() => setOpenId(issue.id)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#EFEBE2] hover:text-[#141310] group-hover:opacity-100"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-tint hover:text-ink group-hover:opacity-100"
                   >
                     <PanelRight size={13} />
                   </button>
@@ -370,7 +370,7 @@ export function Issues() {
                     type="button"
                     title={t('Archive')}
                     onClick={() => void archiveRecord(issue.id)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#A83621] group-hover:opacity-100"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -392,8 +392,8 @@ export function Issues() {
       )}
 
       {!!picked.length && (
-        <div className="fixed inset-x-0 bottom-0 z-40 flex flex-wrap items-center gap-2 border-t border-[#E2DED5] bg-[#FCFBF8] px-6 py-2.5 shadow-[0_-3px_0_rgba(20,19,16,0.06)]">
-          <span className="text-[12px] font-semibold text-[#141310]">
+        <div className="fixed inset-x-0 bottom-0 z-40 flex flex-wrap items-center gap-2 border-t border-hairline bg-surface px-6 py-2.5 shadow-[0_-3px_0_rgba(20,19,16,0.06)]">
+          <span className="text-[12px] font-semibold text-ink">
             {t('{n} chosen', { n: picked.length })}
           </span>
           <select
@@ -436,12 +436,12 @@ export function Issues() {
           <button
             type="button"
             onClick={() => { picked.forEach((id) => void archiveRecord(id)); setPicked([]) }}
-            className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+            className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
           >{t('Archive')}</button>
           <button
             type="button"
             onClick={() => setPicked([])}
-            className="ml-auto rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD]"
+            className="ml-auto rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade"
           >{t('Clear')}</button>
         </div>
       )}
@@ -453,7 +453,7 @@ export function Issues() {
       )}
 
       {view === 'list' && !shown.length && (
-        <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+        <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
           {records.length
             ? t('Nothing with that status.')
             : t('No issues yet. They live in the workspace, not on a board, so they are here whichever board you were last in.')}

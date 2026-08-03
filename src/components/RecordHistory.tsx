@@ -51,20 +51,20 @@ export function RecordHistory({ record, nameOf }: {
 
   return (
     <div className="mt-4">
-      <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+      <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
         {t('Changes')}
       </span>
       <div className="mt-1">
         {rows.map((revision) => (
           <div
             key={revision.id}
-            className="group/rev flex items-center gap-2 rounded-md px-1 py-0.5 text-[12px] hover:bg-[#EFEBE2]"
+            className="group/rev flex items-center gap-2 rounded-md px-1 py-0.5 text-[12px] hover:bg-tint"
           >
             <span className="w-[64px] shrink-0 text-[11px] text-[#B6B1A6]">{when(revision.at)}</span>
-            <span className={`shrink-0 truncate text-[11px] ${revision.via ? 'text-[#C8452D]' : 'text-[#8A867C]'}`}>
+            <span className={`shrink-0 truncate text-[11px] ${revision.via ? 'text-pigment' : 'text-muted'}`}>
               {revision.via ? `${revision.via} · ${t('agent')}` : nameOf(revision.actor) || t('Somebody')}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[#141310]">
+            <span className="min-w-0 flex-1 truncate text-ink">
               {revision.changed.length
                 ? revision.changed.map((column) => t(FIELD[column] ?? column)).join(', ')
                 : t('made it')}
@@ -74,7 +74,7 @@ export function RecordHistory({ record, nameOf }: {
                 type="button"
                 title={t('Put it back')}
                 onClick={() => undoRevision(record.id, revision)}
-                className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#C8452D] group-hover/rev:opacity-100"
+                className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted opacity-0 hover:text-pigment group-hover/rev:opacity-100"
               >
                 <Undo2 size={11} />
               </button>

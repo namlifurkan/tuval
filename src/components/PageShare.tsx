@@ -49,8 +49,8 @@ export function PageShare({ record }: { record: Row }) {
         <button
           type="button"
           onClick={toggle}
-          className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold hover:bg-[#EAE6DD]
-            ${open || restricted ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+          className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold hover:bg-shade
+            ${open || restricted ? 'text-pigment' : 'text-muted hover:text-ink'}`}
         >
           <Icon size={13} /> {t('Share')}
         </button>
@@ -58,13 +58,13 @@ export function PageShare({ record }: { record: Row }) {
     >
       {() => (
         <>
-          <p className="px-1 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8A867C]">
+          <p className="px-1 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
             {t('On the web')}
           </p>
           <button
             type="button"
             onClick={() => void (open ? unpublish(record) : publish(record))}
-            className="w-full rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-[#EAE6DD]"
+            className="w-full rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-shade"
           >
             {open ? t('Stop publishing') : t('Publish to the web')}
           </button>
@@ -72,16 +72,16 @@ export function PageShare({ record }: { record: Row }) {
             <button
               type="button"
               onClick={copy}
-              className="w-full truncate rounded-md px-2 py-1 text-left text-[11px] text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+              className="w-full truncate rounded-md px-2 py-1 text-left text-[11px] text-muted hover:bg-shade hover:text-pigment"
             >
               {copied ? t('Copied') : publicUrl(record)}
             </button>
           )}
 
-          <p className="mt-2 px-1 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8A867C]">
+          <p className="mt-2 px-1 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
             {t('In the workspace')}
           </p>
-          <p className="mb-1 px-1 text-[11px] leading-snug text-[#8A867C]">
+          <p className="mb-1 px-1 text-[11px] leading-snug text-muted">
             {restricted
               ? t('Only the people named here, and whatever is inside this page.')
               : t('Everybody in the workspace. Name somebody to narrow it to a list.')}
@@ -90,14 +90,14 @@ export function PageShare({ record }: { record: Row }) {
           {team.filter((mate) => mate.userId !== mine).map((mate) => {
             const held = named.find((m) => m.userId === mate.userId)
             return (
-              <div key={mate.userId} className="flex items-center gap-1 rounded-md px-1 hover:bg-[#EAE6DD]">
-                <span className="min-w-0 flex-1 truncate py-1 text-[12px] text-[#141310]">
+              <div key={mate.userId} className="flex items-center gap-1 rounded-md px-1 hover:bg-shade">
+                <span className="min-w-0 flex-1 truncate py-1 text-[12px] text-ink">
                   {displayName(mate.email) || mate.email}
                 </span>
                 <select
                   value={held?.role ?? ''}
                   onChange={(e) => void change(mate, e.target.value as PageRole | '')}
-                  className="shrink-0 rounded border border-[#E2DED5] bg-[#FCFBF8] px-1 py-0.5 text-[11px] outline-none"
+                  className="shrink-0 rounded border border-hairline bg-surface px-1 py-0.5 text-[11px] outline-none"
                 >
                   <option value="">{t('Not named')}</option>
                   {ROLES.map((role) => <option key={role} value={role}>{t(role)}</option>)}
@@ -107,7 +107,7 @@ export function PageShare({ record }: { record: Row }) {
           })}
 
           {team.length < 2 && (
-            <p className="px-1 py-1 text-[11px] text-[#8A867C]">
+            <p className="px-1 py-1 text-[11px] text-muted">
               {t('Nobody else is in this workspace yet.')}
             </p>
           )}

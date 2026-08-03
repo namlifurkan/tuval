@@ -37,7 +37,7 @@ export function Minimap() {
         item.type === 'shape' ? (item.fill === 'transparent' ? '#C9C9D4' : item.fill) : '#C9C9D4'
       ctx.fillRect(ox + r.x * scale, oy + r.y * scale, Math.max(1.5, r.w * scale), Math.max(1.5, r.h * scale))
     }
-    ctx.strokeStyle = '#C8452D'
+    ctx.strokeStyle = '#B43E28'
     ctx.lineWidth = 1.5
     ctx.strokeRect(ox + view.x * scale, oy + view.y * scale, view.w * scale, view.h * scale)
 
@@ -56,7 +56,7 @@ export function Minimap() {
     <canvas
       ref={ref}
       style={{ width: W, height: H }}
-      className="cursor-pointer rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[2px_2px_0_rgba(20,19,16,0.07)]"
+      className="cursor-pointer rounded-xl border border-black/5 bg-surface shadow-[2px_2px_0_rgba(20,19,16,0.07)]"
     />
   )
 }

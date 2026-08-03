@@ -39,11 +39,11 @@ export function IssueBoard({ issues, nameOf, onOpen }: {
           onDragLeave={() => setOver((s) => (s === status ? null : s))}
           onDrop={() => drop(status)}
           className={`min-h-[120px] rounded-xl border p-2 transition-colors
-            ${over === status ? 'border-[#C8452D] bg-[#F7E9E4]' : 'border-[#E2DED5] bg-[#F2EFE9]'}`}
+            ${over === status ? 'border-pigment bg-[#F7E9E4]' : 'border-hairline bg-paper'}`}
         >
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span aria-hidden className="h-2.5 w-2.5 rounded-[3px]" style={{ background: TONE[status] }} />
-            <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+            <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
               {t(status)}
             </span>
             <span className="ml-auto text-[11px] text-[#B6B1A6]">{column(status).length}</span>
@@ -56,10 +56,10 @@ export function IssueBoard({ issues, nameOf, onOpen }: {
               onDragStart={() => setDragging(issue.id)}
               onDragEnd={() => { setDragging(null); setOver(null) }}
               onClick={() => onOpen(issue)}
-              className={`mb-1.5 cursor-pointer rounded-lg border border-[#E2DED5] bg-[#FCFBF8] p-2.5 transition-shadow hover:shadow-[2px_2px_0_rgba(20,19,16,0.07)]
+              className={`mb-1.5 cursor-pointer rounded-lg border border-hairline bg-surface p-2.5 transition-shadow hover:shadow-[2px_2px_0_rgba(20,19,16,0.07)]
                 ${dragging === issue.id ? 'opacity-40' : ''}`}
             >
-              <p className="text-[13px] leading-snug text-[#141310]">{issue.title || t('Untitled')}</p>
+              <p className="text-[13px] leading-snug text-ink">{issue.title || t('Untitled')}</p>
               {issue.assignee && (
                 <span
                   title={nameOf(issue.assignee)}

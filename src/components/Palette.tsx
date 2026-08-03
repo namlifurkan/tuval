@@ -172,12 +172,12 @@ export function Palette() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-start justify-center bg-[#141310]/20 px-5 pt-[14vh]"
+      className="fixed inset-0 z-[90] flex items-start justify-center bg-ink/20 px-5 pt-[14vh]"
       onPointerDown={() => setOpen(false)}
     >
       <div
         onPointerDown={(e) => e.stopPropagation()}
-        className="w-full max-w-[520px] overflow-hidden rounded-xl border border-[#E2DED5] bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+        className="w-full max-w-[520px] overflow-hidden rounded-xl border border-hairline bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
       >
         <input
           ref={field}
@@ -196,10 +196,10 @@ export function Palette() {
             if (e.key === 'Enter') { e.preventDefault(); choose(shown[at]) }
           }}
           placeholder={t('Find a page, an issue, or write one')}
-          className="w-full bg-transparent px-4 py-3 text-sm outline-none placeholder:text-[#8A867C]"
+          className="w-full bg-transparent px-4 py-3 text-sm outline-none placeholder:text-muted"
         />
 
-        <div className="flex flex-wrap gap-1 border-b border-[#EAE6DD] px-3 pb-2">
+        <div className="flex flex-wrap gap-1 border-b border-shade px-3 pb-2">
           {SCOPES.map((scope) => (
             <button
               key={scope.id}
@@ -207,7 +207,7 @@ export function Palette() {
               aria-pressed={only === scope.id}
               onClick={() => { setOnly(scope.id); setAt(0); field.current?.focus() }}
               className={`rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors
-                ${only === scope.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#8A867C] hover:bg-[#EAE6DD]'}`}
+                ${only === scope.id ? 'bg-[#F7E9E4] text-pigment' : 'text-muted hover:bg-shade'}`}
             >{t(scope.label)}</button>
           ))}
           <span className="ml-auto self-center text-[10px] text-[#C6C2B6]">{t('tab')}</span>
@@ -221,15 +221,15 @@ export function Palette() {
               onMouseEnter={() => setAt(i)}
               onClick={() => choose(action)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm
-                ${i === at ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310]'}`}
+                ${i === at ? 'bg-[#F7E9E4] text-pigment' : 'text-ink'}`}
             >
               <span className="min-w-0 flex-1">
                 <span className="block truncate">{action.label}</span>
                 {action.note && (
-                  <span className="mt-0.5 block truncate text-[11px] text-[#8A867C]">{action.note}</span>
+                  <span className="mt-0.5 block truncate text-[11px] text-muted">{action.note}</span>
                 )}
               </span>
-              {action.hint && <span className="shrink-0 text-[11px] text-[#8A867C]">{action.hint}</span>}
+              {action.hint && <span className="shrink-0 text-[11px] text-muted">{action.hint}</span>}
             </button>
           ))}
         </div>

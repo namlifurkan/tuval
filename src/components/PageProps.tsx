@@ -33,8 +33,8 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
   const worn = labelsOn(row.id)
   const set = (changes: Parameters<typeof patchRecord>[1]) => patchRecord(row.id, changes)
 
-  const field = 'rounded-md border border-transparent bg-transparent px-1.5 py-1 text-[13px] text-[#141310] outline-none hover:bg-[#EAE6DD] focus:border-[#C8452D] focus:bg-[#FCFBF8] disabled:hover:bg-transparent'
-  const label = 'w-[76px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]'
+  const field = 'rounded-md border border-transparent bg-transparent px-1.5 py-1 text-[13px] text-ink outline-none hover:bg-shade focus:border-pigment focus:bg-surface disabled:hover:bg-transparent'
+  const label = 'w-[76px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-muted'
 
   return (
     <dl className="mt-3 space-y-0.5">
@@ -102,7 +102,7 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
               type="button"
               disabled={locked}
               onClick={() => void toggleLabel(row.id, l.id)}
-              className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-[#141310]"
+              className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-ink"
               style={{ background: l.tone }}
             >{l.name}</button>
           ))}
@@ -113,7 +113,7 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
                 <button
                   type="button"
                   onClick={toggle}
-                  className="grid h-5 w-5 place-items-center rounded text-[#B6B1A6] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                  className="grid h-5 w-5 place-items-center rounded text-[#B6B1A6] hover:bg-shade hover:text-ink"
                   title={t('Add a tag')}
                 ><Plus size={13} /></button>
               )}
@@ -131,7 +131,7 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
                       close()
                     }}
                     placeholder={t('Find or make one')}
-                    className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-[12px] outline-none focus:border-[#C8452D]"
+                    className="mb-1 w-full rounded-md border border-hairline bg-surface px-2 py-1 text-[12px] outline-none focus:border-pigment"
                   />
                   {known
                     .filter((l) => l.name.toLowerCase().includes(typed.trim().toLowerCase()))
@@ -140,11 +140,11 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
                         key={l.id}
                         type="button"
                         onClick={() => { void toggleLabel(row.id, l.id); close() }}
-                        className="flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                        className="flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-[12px] hover:bg-shade"
                       >
                         <span className="h-2.5 w-2.5 rounded-sm" style={{ background: l.tone }} />
                         <span className="min-w-0 flex-1 truncate">{l.name}</span>
-                        {worn.includes(l.id) && <span className="text-[#8A867C]">✓</span>}
+                        {worn.includes(l.id) && <span className="text-muted">✓</span>}
                       </button>
                     ))}
                 </>

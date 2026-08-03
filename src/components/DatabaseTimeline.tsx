@@ -35,7 +35,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
   const starting = fields.find((f) => f.id === view.dateBy)
   if (!starting) {
     return (
-      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
         {t('A timeline lays rows out by a date column. Add one, then choose it above.')}
       </p>
     )
@@ -82,7 +82,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
   return (
     <div className="mt-4">
       {!view.endBy && (
-        <p className="mb-2 text-[11px] text-[#8A867C]">
+        <p className="mb-2 text-[11px] text-muted">
           {t('Every bar is one day wide until a second date column says where it ends.')}
         </p>
       )}
@@ -91,12 +91,12 @@ export function DatabaseTimeline({ rows, view, fields }: {
         onPointerMove={move}
         onPointerUp={release}
         onPointerLeave={release}
-        className="overflow-x-auto rounded-xl border border-[#E2DED5] bg-[#FCFBF8]"
+        className="overflow-x-auto rounded-xl border border-hairline bg-surface"
       >
         <div style={{ width: NAMES + days * DAY }}>
-          <div className="sticky top-0 flex border-b border-[#E2DED5] bg-[#F7F5F0]">
+          <div className="sticky top-0 flex border-b border-hairline bg-[#F7F5F0]">
             <div
-              className="shrink-0 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#8A867C]"
+              className="shrink-0 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted"
               style={{ width: NAMES }}
             >{starting.name}</div>
             <div className="flex">
@@ -108,7 +108,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                     key={iso}
                     style={{ width: DAY }}
                     className={`shrink-0 py-1.5 text-center text-[10px] leading-tight
-                      ${first ? 'border-l border-[#D8D5CD] font-bold text-[#141310]' : 'text-[#B6B1A6]'}`}
+                      ${first ? 'border-l border-[#D8D5CD] font-bold text-ink' : 'text-[#B6B1A6]'}`}
                   >
                     {first && (
                       <span className="block truncate">
@@ -116,7 +116,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                           .toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}
                       </span>
                     )}
-                    <span className={now ? 'rounded-full bg-[#C8452D] px-1 font-bold text-white' : ''}>
+                    <span className={now ? 'rounded-full bg-pigment px-1 font-bold text-white' : ''}>
                       {Number(iso.slice(8))}
                     </span>
                   </div>
@@ -130,12 +130,12 @@ export function DatabaseTimeline({ rows, view, fields }: {
             const left = daysApart(from, at.start) * DAY
             const width = (daysApart(at.start, at.end) + 1) * DAY
             return (
-              <div key={row.id} className="flex items-center border-b border-[#EAE6DD] last:border-0">
+              <div key={row.id} className="flex items-center border-b border-shade last:border-0">
                 <button
                   type="button"
                   onClick={() => go(`/d/${row.id}`)}
                   style={{ width: NAMES }}
-                  className="shrink-0 truncate px-2.5 py-2 text-left text-[13px] text-[#141310] hover:text-[#C8452D]"
+                  className="shrink-0 truncate px-2.5 py-2 text-left text-[13px] text-ink hover:text-pigment"
                 >
                   {row.icon && <span className="mr-1.5">{row.icon}</span>}
                   {row.title || t('Untitled')}
@@ -148,7 +148,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                       setGrab({ id: row.id, edge: 'move', from: e.clientX, span })
                     }}
                     style={{ left, width }}
-                    className="absolute top-1 flex h-6 cursor-grab items-center rounded-md bg-[#C8452D] pl-2 pr-1 text-[11px] font-semibold text-white select-none hover:bg-[#A83621]"
+                    className="absolute top-1 flex h-6 cursor-grab items-center rounded-md bg-pigment pl-2 pr-1 text-[11px] font-semibold text-white select-none hover:bg-[#943321]"
                   >
                     <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled')}</span>
                     {!!view.endBy && (
@@ -169,7 +169,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
           })}
 
           {!placed.length && (
-            <p className="px-2.5 py-4 text-[13px] text-[#8A867C]">
+            <p className="px-2.5 py-4 text-[13px] text-muted">
               {t('No row has a date in that column yet.')}
             </p>
           )}

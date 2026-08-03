@@ -52,7 +52,7 @@ export function BackupPanel() {
       .finally(() => setBusy(''))
   }
 
-  const button = 'flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40'
+  const button = 'flex items-center gap-1.5 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment disabled:opacity-40'
 
   return (
     <div>
@@ -81,9 +81,9 @@ export function BackupPanel() {
         />
       </div>
 
-      {said && <p className="mt-2 text-[12px] text-[#4A463E]">{said}</p>}
+      {said && <p className="mt-2 text-[12px] text-ink-soft">{said}</p>}
 
-      <p className="mt-3 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+      <p className="mt-3 max-w-[62ch] text-[12px] leading-relaxed text-muted">
         {t('Restoring writes over anything with the same id, which is what makes it a restore rather than a second copy. Uploaded files are not in the file — they live in storage and can run to gigabytes.')}
       </p>
     </div>

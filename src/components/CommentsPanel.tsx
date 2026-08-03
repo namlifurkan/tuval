@@ -36,16 +36,16 @@ export function CommentsPanel() {
   }
 
   return (
-    <div className="absolute right-4 top-[76px] z-40 flex max-h-[calc(100dvh-160px)] w-[292px] flex-col rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
-      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2">
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-[#141310]">
+    <div className="absolute right-4 top-[76px] z-40 flex max-h-[calc(100dvh-160px)] w-[292px] flex-col rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <div className="flex items-center justify-between border-b border-shade px-3 py-2">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-ink">
           <MessageSquare size={14} strokeWidth={2} />
           Yorumlar ({shown.length})
         </span>
         <button
           type="button"
           onClick={() => update({ commentsPanel: false })}
-          className="grid h-7 w-7 place-items-center rounded-md hover:bg-[#EFEBE2]"
+          className="grid h-7 w-7 place-items-center rounded-md hover:bg-tint"
         >
           <X size={15} strokeWidth={2} />
         </button>
@@ -55,7 +55,7 @@ export function CommentsPanel() {
         <button
           type="button"
           onClick={() => setShowResolved((v) => !v)}
-          className="flex items-center gap-1.5 border-b border-[#EAE6DD] px-3 py-1.5 text-left text-[11px] font-medium text-[#8A867C] hover:bg-[#EFEBE2]"
+          className="flex items-center gap-1.5 border-b border-shade px-3 py-1.5 text-left text-[11px] font-medium text-muted hover:bg-tint"
         >
           <Check size={12} strokeWidth={2.5} />
           {showResolved ? t('Hide resolved') : t('Show resolved ({n})', { n: resolvedCount })}
@@ -64,33 +64,33 @@ export function CommentsPanel() {
 
       <div className="flex-1 overflow-y-auto p-1.5">
         {shown.length === 0 && (
-          <p className="px-2 py-6 text-center text-xs text-[#8A867C]">
+          <p className="px-2 py-6 text-center text-xs text-muted">
             {t(all.length ? 'No open comments.' : 'No comments yet. Drop a pin with the comment tool.')}
           </p>
         )}
         {shown.map((comment) => {
           const first = comment.replies[0]
           return (
-            <div key={comment.id} className="mb-1 rounded-lg p-2 hover:bg-[#EFEBE2]">
+            <div key={comment.id} className="mb-1 rounded-lg p-2 hover:bg-tint">
               <button type="button" onClick={() => jump(comment)} className="w-full text-left">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span
                     className="grid h-5 w-5 shrink-0 place-items-center rounded-[2px] text-[9px] font-bold text-white"
-                    style={{ background: first?.color ?? '#8A867C' }}
+                    style={{ background: first?.color ?? '#69665E' }}
                   >
                     {initials(first?.author ?? '?')}
                   </span>
-                  <span className="text-[11px] font-semibold text-[#141310]">{first?.author ?? 'Bilinmeyen'}</span>
-                  <span className="text-[10px] text-[#8A867C]">{first ? timeAgo(first.at) : ''}</span>
+                  <span className="text-[11px] font-semibold text-ink">{first?.author ?? 'Bilinmeyen'}</span>
+                  <span className="text-[10px] text-muted">{first ? timeAgo(first.at) : ''}</span>
                   {comment.resolved && (
-                    <span className="ml-auto rounded bg-[#EAE6DD] px-1.5 py-0.5 text-[9px] font-semibold text-[#4A463E]">
+                    <span className="ml-auto rounded bg-shade px-1.5 py-0.5 text-[9px] font-semibold text-ink-soft">
                       {t('resolved')}
                     </span>
                   )}
                 </div>
                 <p className="line-clamp-3 text-xs text-[#2E2B26]">{first?.text ?? t('(empty)')}</p>
                 {comment.replies.length > 1 && (
-                  <span className="mt-1 block text-[10px] text-[#8A867C]">
+                  <span className="mt-1 block text-[10px] text-muted">
                     +{comment.replies.length - 1} {t('replies')}
                   </span>
                 )}
@@ -98,7 +98,7 @@ export function CommentsPanel() {
               <button
                 type="button"
                 onClick={() => { patchItem(comment.id, { resolved: !comment.resolved }); requestRender() }}
-                className="mt-1.5 text-[10px] font-semibold text-[#8A867C] hover:text-[#C8452D]"
+                className="mt-1.5 text-[10px] font-semibold text-muted hover:text-pigment"
               >
                 {t(comment.resolved ? 'Reopen' : 'Mark resolved')}
               </button>

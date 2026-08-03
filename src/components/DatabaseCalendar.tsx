@@ -23,7 +23,7 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
 
   if (!placing) {
     return (
-      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+      <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
         {t('A calendar places rows by a date column. Add one, then choose it above.')}
       </p>
     )
@@ -53,7 +53,7 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
           type="button"
           aria-label={t('Previous month')}
           onClick={() => setMonth((was) => shiftMonth(was, -1))}
-          className="grid h-6 w-6 place-items-center rounded-md text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          className="grid h-6 w-6 place-items-center rounded-md text-muted hover:bg-shade hover:text-ink"
         >
           <ChevronLeft size={14} />
         </button>
@@ -61,23 +61,23 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
           type="button"
           aria-label={t('Next month')}
           onClick={() => setMonth((was) => shiftMonth(was, 1))}
-          className="grid h-6 w-6 place-items-center rounded-md text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          className="grid h-6 w-6 place-items-center rounded-md text-muted hover:bg-shade hover:text-ink"
         >
           <ChevronRight size={14} />
         </button>
-        <span className="ml-1 text-sm font-semibold capitalize text-[#141310]">{heading}</span>
+        <span className="ml-1 text-sm font-semibold capitalize text-ink">{heading}</span>
         <button
           type="button"
           onClick={() => setMonth(monthKey(today()))}
-          className="ml-2 rounded-md px-2 py-0.5 text-[11px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD]"
+          className="ml-2 rounded-md px-2 py-0.5 text-[11px] font-semibold text-muted hover:bg-shade"
         >{t('Today')}</button>
       </div>
 
-      <div className="grid grid-cols-7 border-l border-t border-[#E2DED5]">
+      <div className="grid grid-cols-7 border-l border-t border-hairline">
         {weekdays.map((name) => (
           <div
             key={name}
-            className="border-b border-r border-[#E2DED5] px-2 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-[#8A867C]"
+            className="border-b border-r border-hairline px-2 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-muted"
           >{name}</div>
         ))}
 
@@ -90,13 +90,13 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
               onDragOver={(e) => { e.preventDefault(); setOver(iso) }}
               onDragLeave={() => setOver((was) => (was === iso ? '' : was))}
               onDrop={drop(iso)}
-              className={`group min-h-[92px] border-b border-r border-[#E2DED5] p-1
-                ${outside ? 'bg-[#F7F5F0]' : ''} ${over === iso ? 'ring-1 ring-inset ring-[#C8452D]' : ''}`}
+              className={`group min-h-[92px] border-b border-r border-hairline p-1
+                ${outside ? 'bg-[#F7F5F0]' : ''} ${over === iso ? 'ring-1 ring-inset ring-pigment' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={`grid h-5 w-5 place-items-center rounded-full text-[11px]
-                    ${now ? 'bg-[#C8452D] font-bold text-white' : outside ? 'text-[#C6C2B6]' : 'text-[#8A867C]'}`}
+                    ${now ? 'bg-pigment font-bold text-white' : outside ? 'text-[#C6C2B6]' : 'text-muted'}`}
                 >{dayNumber(iso)}</span>
                 <button
                   type="button"
@@ -105,7 +105,7 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
                     const made = getPages().find((r) => r.id === id)
                     if (made) setCell(made, placing.id, iso)
                   })}
-                  className="rounded px-1 text-[13px] leading-none text-[#8A867C] opacity-0 hover:bg-[#EAE6DD] hover:text-[#C8452D] focus-visible:opacity-100 group-hover:opacity-100"
+                  className="rounded px-1 text-[13px] leading-none text-muted opacity-0 hover:bg-shade hover:text-pigment focus-visible:opacity-100 group-hover:opacity-100"
                 >+</button>
               </div>
 
@@ -116,7 +116,7 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData('text/plain', row.id)}
                   onClick={() => go(`/d/${row.id}`)}
-                  className="mt-1 block w-full truncate rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-left text-[12px] text-[#141310] hover:border-[#C8452D]"
+                  className="mt-1 block w-full truncate rounded-md border border-hairline bg-surface px-1.5 py-1 text-left text-[12px] text-ink hover:border-pigment"
                 >
                   {row.icon && <span className="mr-1">{row.icon}</span>}
                   {row.title || t('Untitled')}

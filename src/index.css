@@ -3,7 +3,14 @@
 @theme {
   --font-sans: 'Instrument Sans', system-ui, sans-serif;
   --color-ink: #141310;
-  --color-pigment: #c8452d;
+  --color-ink-soft: #4a463e;
+  --color-muted: #69665e;
+  --color-hairline: #e2ded5;
+  --color-shade: #eae6dd;
+  --color-tint: #efebe2;
+  --color-paper: #f2efe9;
+  --color-surface: #fcfbf8;
+  --color-pigment: #b43e28;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
@@ -72,7 +79,7 @@ svg.lucide {
 /* The pigment bands are the only contrast event on the site, and they used to simply be there.
    Arriving is what makes an event of one. Colour is safe to animate; layout is not. */
 [data-arrive] {
-  background-color: #F2EFE9;
+  background-color: var(--color-paper);
   transition: background-color 620ms var(--ease);
 }
 

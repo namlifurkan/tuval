@@ -64,63 +64,63 @@ export function BoardsPanel() {
   }
 
   return (
-    <aside className="pointer-events-auto absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-190px)] w-[320px] flex-col overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
-      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2.5">
+    <aside className="pointer-events-auto absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-190px)] w-[320px] flex-col overflow-hidden rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <div className="flex items-center justify-between border-b border-shade px-3 py-2.5">
         <Wordmark height={17} />
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={create}
             title={t('New board')}
-            className="grid h-7 w-7 place-items-center rounded-md text-[#C8452D] hover:bg-[#F7E9E4]"
+            className="grid h-7 w-7 place-items-center rounded-md text-pigment hover:bg-[#F7E9E4]"
           >
             <Plus size={16} />
           </button>
           <button
             type="button"
             onClick={() => update({ boardsPanel: false })}
-            className="grid h-7 w-7 place-items-center rounded-md hover:bg-[#EFEBE2]"
+            className="grid h-7 w-7 place-items-center rounded-md hover:bg-tint"
           >
             <X size={15} />
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-[#EAE6DD] px-3 py-2">
-        <Search size={14} className="shrink-0 text-[#8A867C]" />
+      <div className="flex items-center gap-2 border-b border-shade px-3 py-2">
+        <Search size={14} className="shrink-0 text-muted" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}
           placeholder={t('Filter boards')}
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#8A867C]"
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
         />
       </div>
 
       <div className="flex-1 overflow-y-auto p-1">
         {cloudProblem && (
-          <p className="px-3 py-3 text-center text-sm text-[#C8452D]">
+          <p className="px-3 py-3 text-center text-sm text-pigment">
             {t('Could not reach the cloud. Your boards are still there.')}
           </p>
         )}
         {shown.length === 0 && (
-          !cloudProblem && <p className="px-3 py-4 text-center text-sm text-[#8A867C]">{t('No boards yet')}</p>
+          !cloudProblem && <p className="px-3 py-4 text-center text-sm text-muted">{t('No boards yet')}</p>
         )}
         {shown.map((b) => (
           <div
             key={b.room}
             className={`group flex items-center gap-2 rounded-lg px-2.5 py-2
-              ${b.room === here ? 'bg-[#F7E9E4]' : 'hover:bg-[#EFEBE2]'}`}
+              ${b.room === here ? 'bg-[#F7E9E4]' : 'hover:bg-tint'}`}
           >
             <button
               type="button"
               onClick={() => { openBoard(b.room); requestRender() }}
               className="min-w-0 flex-1 text-left"
             >
-              <div className={`truncate text-sm ${b.room === here ? 'font-semibold text-[#C8452D]' : 'text-[#141310]'}`}>
+              <div className={`truncate text-sm ${b.room === here ? 'font-semibold text-pigment' : 'text-ink'}`}>
                 {b.name || t('Untitled board')}
               </div>
-              <div className="mt-0.5 truncate text-[11px] text-[#8A867C]">
+              <div className="mt-0.5 truncate text-[11px] text-muted">
                 {b.items} {t(b.items === 1 ? 'item' : 'items')}
                 {b.frames ? ` · ${b.frames} ${t(b.frames === 1 ? 'frame' : 'frames')}` : ''}
                 {' · '}{when(b.opened)}
@@ -144,7 +144,7 @@ export function BoardsPanel() {
                   }
                 }
               }}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#A83621] group-hover:opacity-100"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
             >
               <Trash2 size={14} />
             </button>
@@ -152,7 +152,7 @@ export function BoardsPanel() {
         ))}
       </div>
 
-      <p className="border-t border-[#EAE6DD] px-3 py-2 text-[11px] leading-snug text-[#8A867C]">
+      <p className="border-t border-shade px-3 py-2 text-[11px] leading-snug text-muted">
         {user
           ? t('Signed in: boards are saved to the cloud. Share the link to invite someone.')
           : t('Boards live in this browser. Share the link to let someone else open one.')}

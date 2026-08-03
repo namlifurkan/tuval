@@ -30,7 +30,7 @@ export function ViewOnly() {
   return (
     <span
       title={t('The owner shared this board with you as a viewer. Ask them for edit access.')}
-      className="flex items-center gap-1 rounded-md bg-[#EBE7DE] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.13em] text-[#4A463E]"
+      className="flex items-center gap-1 rounded-md bg-[#EBE7DE] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.13em] text-ink-soft"
     >
       <Eye size={11} strokeWidth={2.2} />
       {t('View only')}

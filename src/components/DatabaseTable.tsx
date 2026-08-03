@@ -16,7 +16,7 @@ import { displayName } from '../board/supabase'
 import { t } from '../i18n'
 import { Popover } from './Popover'
 
-const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-[#141310] outline-none focus:bg-[#F7E9E4]'
+const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-ink outline-none focus:bg-[#F7E9E4]'
 
 const UNGROUPED = '__none__'
 
@@ -25,7 +25,7 @@ function Chip({ children, onClick }: { children: React.ReactNode; onClick?: () =
     <span
       role={onClick ? 'button' : undefined}
       onClick={onClick}
-      className="max-w-[130px] truncate rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-1.5 py-0.5 text-[12px] text-[#141310] hover:border-[#C8452D]"
+      className="max-w-[130px] truncate rounded-md border border-hairline bg-paper px-1.5 py-0.5 text-[12px] text-ink hover:border-pigment"
     >{children}</span>
   )
 }
@@ -50,7 +50,7 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
         <button
           type="button"
           onClick={toggle}
-          className="flex w-full flex-wrap items-center gap-1 px-2.5 py-1.5 text-left hover:bg-[#F2EFE9]"
+          className="flex w-full flex-wrap items-center gap-1 px-2.5 py-1.5 text-left hover:bg-paper"
         >
           {linked.length
             ? linked.map((id) => <Chip key={id}>{named(id)}</Chip>)
@@ -65,7 +65,7 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
             placeholder={t('Find a row')}
-            className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+            className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none focus:border-pigment"
           />
           {target
             .filter((r) => (r.title || t('Untitled')).toLowerCase().includes(typed.trim().toLowerCase()))
@@ -75,16 +75,16 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
                 key={r.id}
                 type="button"
                 onClick={() => toggleLink(row, field.id, r.id)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
               >
                 <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                  ${linked.includes(r.id) ? 'border-[#C8452D] bg-[#C8452D] text-white' : 'border-[#D8D5CD]'}`}
+                  ${linked.includes(r.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
                 >{linked.includes(r.id) ? '✓' : ''}</span>
                 <span className="min-w-0 flex-1 truncate">{r.title || t('Untitled')}</span>
               </button>
             ))}
           {!target.length && (
-            <p className="px-2 py-1 text-[12px] text-[#8A867C]">{t('That database has no rows yet.')}</p>
+            <p className="px-2 py-1 text-[12px] text-muted">{t('That database has no rows yet.')}</p>
           )}
         </>
       )}
@@ -123,7 +123,7 @@ function Cell({ db, row, field, fields, team }: {
   if (COMPUTED.includes(field.type)) {
     const shown = cellText(row, field, fields)
     return (
-      <span className={`block truncate px-2.5 py-1.5 text-sm ${shown === ERROR ? 'text-[#A83621]' : 'text-[#4A463E]'}`}>
+      <span className={`block truncate px-2.5 py-1.5 text-sm ${shown === ERROR ? 'text-[#943321]' : 'text-ink-soft'}`}>
         {shown || <span className="text-[#C6C2B6]">—</span>}
       </span>
     )
@@ -136,7 +136,7 @@ function Cell({ db, row, field, fields, team }: {
           type="checkbox"
           checked={held === true}
           onChange={(e) => setCell(row, field.id, e.target.checked || '')}
-          className="h-4 w-4 accent-[#C8452D]"
+          className="h-4 w-4 accent-pigment"
         />
       </div>
     )
@@ -167,7 +167,7 @@ function Cell({ db, row, field, fields, team }: {
   )
 }
 
-const pick = 'mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none'
+const pick = 'mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none'
 
 // Three questions in the order they can be answered: which relation, which column on the far
 // side, what to do with the values. The second is unanswerable until the first has an answer.
@@ -215,7 +215,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
     <th
       scope="col"
       style={field.width ? { width: field.width } : undefined}
-      className="min-w-[120px] border-b border-[#E2DED5] p-0 text-left font-normal"
+      className="min-w-[120px] border-b border-hairline p-0 text-left font-normal"
     >
       <Popover
         width={190}
@@ -223,7 +223,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
           <button
             type="button"
             onClick={toggle}
-            className="flex w-full items-center gap-1 px-2.5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-[#8A867C] hover:bg-[#EAE6DD]"
+            className="flex w-full items-center gap-1 px-2.5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-muted hover:bg-shade"
           >
             <span className="min-w-0 flex-1 truncate text-left">{field.name}</span>
             <ChevronDown size={12} className="shrink-0" />
@@ -235,7 +235,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
             <input
               value={field.name}
               onChange={(e) => editField(db, field.id, { name: e.target.value })}
-              className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+              className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none focus:border-pigment"
             />
             <select
               value={field.type}
@@ -243,7 +243,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
                 type: e.target.value as FieldType,
                 choices: e.target.value === 'select' ? field.choices ?? [] : undefined,
               })}
-              className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none"
+              className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none"
             >
               {FIELD_TYPES.map((type) => <option key={type} value={type}>{t(type)}</option>)}
             </select>
@@ -251,7 +251,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
               <select
                 value={field.db ?? ''}
                 onChange={(e) => editField(db, field.id, { db: e.target.value || undefined })}
-                className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none"
+                className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none"
               >
                 <option value="">{t('Pick a database')}</option>
                 {getRecords('database').filter((d) => d.id !== db.id).map((d) => (
@@ -275,15 +275,15 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
                   onChange={(e) => editField(db, field.id, { formula: e.target.value })}
                   placeholder='prop("Price") * 1.2'
                   spellCheck={false}
-                  className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 font-mono text-[12px] outline-none focus:border-[#C8452D]"
+                  className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 font-mono text-[12px] outline-none focus:border-pigment"
                 />
-                <p className="mb-1 px-0.5 text-[11px] leading-snug text-[#8A867C]">
+                <p className="mb-1 px-0.5 text-[11px] leading-snug text-muted">
                   {t('prop("Name") reads a column. || joins text, ? : chooses. Also empty, text, number, today, days, round, abs, min, max.')}
                 </p>
               </>
             )}
             {field.type === 'rollup' && <Rollup db={db} field={field} fields={fields} />}
-            <label className="mb-1 flex items-center gap-2 px-0.5 text-[12px] text-[#4A463E]">
+            <label className="mb-1 flex items-center gap-2 px-0.5 text-[12px] text-ink-soft">
               <span className="flex-1">{t('Width')}</span>
               <input
                 type="range"
@@ -292,18 +292,18 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
                 step={10}
                 value={field.width ?? 160}
                 onChange={(e) => editField(db, field.id, { width: Number(e.target.value) })}
-                className="w-[110px] accent-[#C8452D]"
+                className="w-[110px] accent-pigment"
               />
             </label>
             <button
               type="button"
               onClick={() => { editField(db, field.id, { hidden: true }); close() }}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-shade hover:text-ink"
             >{t('Hide column')}</button>
             <button
               type="button"
               onClick={() => { removeField(db, field.id); close() }}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
             >{t('Delete column')}</button>
           </>
         )}
@@ -316,7 +316,7 @@ function Line({ db, row, fields, shown, team }: {
   db: Row; row: Row; fields: Field[]; shown: Field[]; team: Teammate[]
 }) {
   return (
-    <tr className="group border-b border-[#EAE6DD]">
+    <tr className="group border-b border-shade">
       <th scope="row" className="p-0 text-left font-normal">
         <div className="flex items-center">
           <input
@@ -332,7 +332,7 @@ function Line({ db, row, fields, shown, team }: {
             aria-label={t('Open')}
             title={t('Open')}
             onClick={() => go(`/d/${row.id}`)}
-            className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:text-[#C8452D] group-hover:opacity-100"
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:text-pigment group-hover:opacity-100"
           >
             <ArrowUpRight size={13} />
           </button>
@@ -342,7 +342,7 @@ function Line({ db, row, fields, shown, team }: {
             title={isTemplate(row) ? t('A template') : t('Make a template')}
             onClick={() => setTemplate(row, !isTemplate(row))}
             className={`grid h-6 w-6 shrink-0 place-items-center rounded-md transition-opacity
-              ${isTemplate(row) ? 'text-[#C8452D] opacity-100' : 'text-[#8A867C] opacity-0 hover:text-[#141310] group-hover:opacity-100'}`}
+              ${isTemplate(row) ? 'text-pigment opacity-100' : 'text-muted opacity-0 hover:text-ink group-hover:opacity-100'}`}
           >
             <Bookmark size={13} fill={isTemplate(row) ? 'currentColor' : 'none'} />
           </button>
@@ -351,7 +351,7 @@ function Line({ db, row, fields, shown, team }: {
             aria-label={t('Archive')}
             title={t('Archive')}
             onClick={() => void archiveRecord(row.id)}
-            className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#A83621] group-hover:opacity-100"
+            className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
           >
             <Trash2 size={12} />
           </button>
@@ -398,17 +398,17 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
         <caption className="sr-only">{db.title || t('Untitled database')}</caption>
         <thead>
           <tr>
-            <th scope="col" className="w-[36%] min-w-[220px] border-b border-[#E2DED5] px-2.5 py-2 text-left text-[12px] font-bold uppercase tracking-[0.1em] text-[#8A867C]">
+            <th scope="col" className="w-[36%] min-w-[220px] border-b border-hairline px-2.5 py-2 text-left text-[12px] font-bold uppercase tracking-[0.1em] text-muted">
               {t('Name')}
             </th>
             {shown.map((field) => <Head key={field.id} db={db} field={field} fields={fields} />)}
-            <th scope="col" className="w-16 border-b border-[#E2DED5] p-0">
+            <th scope="col" className="w-16 border-b border-hairline p-0">
               <span className="flex items-center">
                 <button
                   type="button"
                   aria-label={t('Add a column')}
                   onClick={onAddField}
-                  className="grid h-full w-9 place-items-center text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                  className="grid h-full w-9 place-items-center text-muted hover:bg-shade hover:text-ink"
                 >
                   <Plus size={14} />
                 </button>
@@ -420,7 +420,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                         type="button"
                         onClick={toggle}
                         title={t('Hidden columns')}
-                        className="grid h-full w-7 place-items-center text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                        className="grid h-full w-7 place-items-center text-muted hover:bg-shade hover:text-ink"
                       >
                         <EyeOff size={13} />
                       </button>
@@ -433,7 +433,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                             key={f.id}
                             type="button"
                             onClick={() => editField(db, f.id, { hidden: false })}
-                            className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                            className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
                           >{f.name}</button>
                         ))}
                       </>
@@ -446,7 +446,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
         </thead>
 
         <tfoot>
-          <tr className="border-t border-[#E2DED5]">
+          <tr className="border-t border-hairline">
             <th scope="row" className="px-2.5 py-1.5 text-left text-[11px] font-normal text-[#B6B1A6]">
               {rows.length} {t(rows.length === 1 ? 'row' : 'rows')}
             </th>
@@ -458,7 +458,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                     <button
                       type="button"
                       onClick={toggle}
-                      className="w-full px-2.5 py-1.5 text-right text-[12px] text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                      className="w-full px-2.5 py-1.5 text-right text-[12px] text-muted hover:bg-shade hover:text-ink"
                     >
                       {field.summary
                         ? `${t(field.summary)} ${String(aggregate(rows.map((r) => valueOf(r, field, fields)), field.summary))}`
@@ -471,14 +471,14 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                       <button
                         type="button"
                         onClick={() => { editField(db, field.id, { summary: undefined }); close() }}
-                        className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD]"
+                        className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-shade"
                       >{t('Nothing')}</button>
                       {ROLLS.map((roll) => (
                         <button
                           key={roll}
                           type="button"
                           onClick={() => { editField(db, field.id, { summary: roll }); close() }}
-                          className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                          className="w-full rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
                         >{t(roll)}</button>
                       ))}
                     </>
@@ -506,7 +506,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
           const open = !shut.includes(key)
           return (
             <tbody key={key}>
-              <tr className="border-b border-[#EAE6DD] bg-[#F7F5F0]">
+              <tr className="border-b border-shade bg-[#F7F5F0]">
                 <th scope="colgroup" colSpan={span} className="p-0 text-left font-normal">
                   <div className="flex items-center">
                     <button
@@ -514,20 +514,20 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                       aria-expanded={open}
                       onClick={() => setShut((was) =>
                         was.includes(key) ? was.filter((k) => k !== key) : [...was, key])}
-                      className="flex flex-1 items-center gap-1.5 px-2 py-1.5 text-left hover:bg-[#EAE6DD]"
+                      className="flex flex-1 items-center gap-1.5 px-2 py-1.5 text-left hover:bg-shade"
                     >
-                      {open ? <ChevronDown size={12} className="text-[#8A867C]" />
-                        : <ChevronRight size={12} className="text-[#8A867C]" />}
+                      {open ? <ChevronDown size={12} className="text-muted" />
+                        : <ChevronRight size={12} className="text-muted" />}
                       {choice
                         ? <Tag choice={choice} />
-                        : <span className="text-[12px] font-semibold text-[#8A867C]">{t('No value')}</span>}
+                        : <span className="text-[12px] font-semibold text-muted">{t('No value')}</span>}
                       <span className="text-[11px] text-[#B6B1A6]">{held.length}</span>
                     </button>
                     <button
                       type="button"
                       aria-label={t('New row')}
                       onClick={() => void newRow(choice)}
-                      className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+                      className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-shade hover:text-pigment"
                     >
                       <Plus size={13} />
                     </button>
@@ -542,11 +542,11 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
         })}
       </table>
 
-      <div className="flex items-center border-b border-[#EAE6DD]">
+      <div className="flex items-center border-b border-shade">
         <button
           type="button"
           onClick={() => void createRecord('', 'doc', db.id)}
-          className="flex flex-1 items-center gap-2 px-2.5 py-2 text-left text-sm font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+          className="flex flex-1 items-center gap-2 px-2.5 py-2 text-left text-sm font-semibold text-muted hover:bg-shade hover:text-pigment"
         >
           <Plus size={14} /> {t('New row')}
         </button>
@@ -558,7 +558,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
               <button
                 type="button"
                 onClick={toggle}
-                className="px-2.5 py-2 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+                className="px-2.5 py-2 text-[12px] font-semibold text-muted hover:bg-shade hover:text-pigment"
               >{t('From a template')}</button>
             )}
           >
@@ -569,7 +569,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                     key={tpl.id}
                     type="button"
                     onClick={() => { close(); void fromTemplate(tpl.id, db.id) }}
-                    className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                    className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
                   >{tpl.title || t('Untitled')}</button>
                 ))}
               </>

@@ -76,7 +76,7 @@ export function Docs() {
           type="button"
           disabled={busy}
           onClick={() => void add()}
-          className="flex items-center gap-1.5 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40"
         >
           <Plus size={15} strokeWidth={2.4} /> {t('New page')}
         </button>
@@ -85,29 +85,29 @@ export function Docs() {
       </div>
 
       <div className="mt-10 flex items-baseline justify-between gap-4">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
           {t('Recently edited')}
         </h2>
         <button
           type="button"
           onClick={() => void sweep()}
-          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
         >
           <Trash2 size={12} /> {t('Clear out empty pages')}
         </button>
       </div>
 
-      <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+      <div className="mt-2 divide-y divide-shade border-y border-shade">
         {recent.map((page) => {
           const trail = ancestors(records, page.id)
           return (
-            <div key={page.id} className="group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[#EAE6DD]/60">
+            <div key={page.id} className="group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-shade/60">
               <button
                 type="button"
                 onClick={() => go(`/d/${page.id}`)}
                 className="min-w-0 flex-1 text-left"
               >
-                <span className="block truncate text-[14.5px] font-medium text-[#141310] group-hover:text-[#C8452D]">
+                <span className="block truncate text-[14.5px] font-medium text-ink group-hover:text-pigment">
                   {page.icon
                     ? <span className="mr-2">{page.icon}</span>
                     : <FileText size={13} className="mr-2 inline-block -translate-y-px text-[#C6C2B6]" />}
@@ -123,7 +123,7 @@ export function Docs() {
               <button
                 type="button"
                 onClick={() => void archiveRecord(page.id).then(loadTrash)}
-                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#A83621] group-hover:opacity-100"
+                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 transition-opacity hover:text-[#943321] group-hover:opacity-100"
               >
                 {t('Archive')}
               </button>
@@ -134,28 +134,28 @@ export function Docs() {
 
       {!!binned.length && (
         <>
-          <h2 className="mt-9 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+          <h2 className="mt-9 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
             {t('Trash')}
           </h2>
-          <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">
+          <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-muted">
             {t('Emptied automatically after {n} days. Until then a page here can be brought back exactly as it was.', { n: TRASH_DAYS })}
           </p>
           <button
             type="button"
             onClick={() => void burn()}
-            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
           >{t('Empty it now')}</button>
-          <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+          <div className="mt-2 divide-y divide-shade border-y border-shade">
             {binned.map((page: Row) => (
               <div key={page.id} className="flex items-center gap-3 py-2.5">
-                <span className="min-w-0 flex-1 truncate text-sm text-[#8A867C]">
+                <span className="min-w-0 flex-1 truncate text-sm text-muted">
                   {page.icon && <span className="mr-1.5">{page.icon}</span>}
                   {page.title || t(page.kind === 'database' ? 'Untitled database' : 'Untitled page')}
                 </span>
                 <button
                   type="button"
                   onClick={() => void restoreRecord(page)}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-[#F7E9E4]"
                 >{t('Restore')}</button>
                 <button
                   type="button"
@@ -165,7 +165,7 @@ export function Docs() {
                       void deleteRecord(page, removeCover)
                     }
                   }}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
                 >{t('Delete for good')}</button>
               </div>
             ))}
@@ -174,7 +174,7 @@ export function Docs() {
       )}
 
       {!records.length && (
-        <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+        <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
           {t('No pages yet. A page is a record like anything else: it has a title you can search for, and a body two people can write at once.')}
         </p>
       )}

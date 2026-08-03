@@ -45,7 +45,7 @@ export function PageHistory({ editor }: { editor: { document: unknown[]; replace
           type="button"
           onClick={toggle}
           title={t('Version history')}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
         >
           <History size={13} /> {t('History')}
         </button>
@@ -56,20 +56,20 @@ export function PageHistory({ editor }: { editor: { document: unknown[]; replace
           <button
             type="button"
             onClick={() => { saveVersion(t('Checkpoint'), editor.document); close() }}
-            className="mb-1 w-full rounded-md bg-[#C8452D] px-2 py-1.5 text-[12px] font-semibold text-white hover:bg-[#A83621]"
+            className="mb-1 w-full rounded-md bg-pigment px-2 py-1.5 text-[12px] font-semibold text-white hover:bg-[#943321]"
           >{t('Save this version')}</button>
 
           {versions.map((v) => (
-            <div key={v.id} className="group flex items-center gap-1 rounded-md px-1 hover:bg-[#EAE6DD]">
+            <div key={v.id} className="group flex items-center gap-1 rounded-md px-1 hover:bg-shade">
               <button
                 type="button"
                 onClick={() => { restore(v.id); close() }}
                 className="min-w-0 flex-1 py-1 text-left"
               >
-                <span className="block truncate text-[12px] text-[#141310]">
+                <span className="block truncate text-[12px] text-ink">
                   {v.label || t('Saved version')}
                 </span>
-                <span className="block truncate text-[11px] text-[#8A867C]">
+                <span className="block truncate text-[11px] text-muted">
                   {when(v.at)} · {v.by} · {v.blocks} {t(v.blocks === 1 ? 'block' : 'blocks')}
                 </span>
               </button>
@@ -77,7 +77,7 @@ export function PageHistory({ editor }: { editor: { document: unknown[]; replace
                 type="button"
                 aria-label={t('Delete')}
                 onClick={() => deleteVersion(v.id)}
-                className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
+                className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
               >
                 <Trash2 size={11} />
               </button>
@@ -85,7 +85,7 @@ export function PageHistory({ editor }: { editor: { document: unknown[]; replace
           ))}
 
           {!versions.length && (
-            <p className="px-2 py-1.5 text-[12px] leading-snug text-[#8A867C]">
+            <p className="px-2 py-1.5 text-[12px] leading-snug text-muted">
               {t('No versions yet. One is kept whenever you come back to a page you have written in.')}
             </p>
           )}

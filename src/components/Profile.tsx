@@ -32,8 +32,8 @@ export function Profile() {
   if (!person) {
     return (
       <main className="mx-auto max-w-[46rem] px-6 py-24">
-        <h1 className="text-[22px] font-bold text-[#141310]">{t('Nobody here')}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-[#4A463E]">
+        <h1 className="text-[22px] font-bold text-ink">{t('Nobody here')}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {t('There is no page at this address.')}
         </p>
       </main>
@@ -46,17 +46,17 @@ export function Profile() {
         {person.avatar
           ? <img src={person.avatar} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
           : (
-            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-[#EBE7DE] text-[22px] font-bold text-[#8A867C]">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-[#EBE7DE] text-[22px] font-bold text-muted">
               {(person.name || person.handle).slice(0, 1).toUpperCase()}
             </span>
           )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-[#141310]">
+          <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-ink">
             {person.name || person.handle}
           </h1>
-          <p className="mt-0.5 text-[13px] text-[#8A867C]">@{person.handle}</p>
+          <p className="mt-0.5 text-[13px] text-muted">@{person.handle}</p>
           {person.bio && (
-            <p className="mt-2 max-w-[54ch] text-[14px] leading-relaxed text-[#4A463E]">{person.bio}</p>
+            <p className="mt-2 max-w-[54ch] text-[14px] leading-relaxed text-ink-soft">{person.bio}</p>
           )}
         </div>
       </header>
@@ -69,7 +69,7 @@ export function Profile() {
               href={link.url}
               target="_blank"
               rel="noopener nofollow ugc"
-              className="flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-[13px] font-semibold text-[#4A463E] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+              className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-[13px] font-semibold text-ink-soft transition-colors hover:border-pigment hover:text-pigment"
             >
               {link.label || new URL(link.url).hostname.replace(/^www\./, '')}
               <ExternalLink size={12} />
@@ -78,17 +78,17 @@ export function Profile() {
         </div>
       )}
 
-      <h2 className="mt-10 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <h2 className="mt-10 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
         {t('Out in the open')}
       </h2>
 
       {!shown.length && (
-        <p className="mt-2 max-w-[54ch] text-sm leading-relaxed text-[#8A867C]">
+        <p className="mt-2 max-w-[54ch] text-sm leading-relaxed text-muted">
           {t('Nothing opened yet.')}
         </p>
       )}
 
-      <ul className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+      <ul className="mt-2 divide-y divide-shade border-y border-shade">
         {shown.map((one) => (
           <li key={`${one.kind}:${one.id}`}>
             <a
@@ -99,9 +99,9 @@ export function Profile() {
               {one.icon
                 ? <span className="w-4 shrink-0 text-center leading-none">{one.icon}</span>
                 : one.kind === 'board'
-                  ? <LayoutGrid size={15} className="shrink-0 text-[#8A867C]" />
-                  : <FileText size={15} className="shrink-0 text-[#8A867C]" />}
-              <span className="min-w-0 flex-1 truncate text-[15px] text-[#141310] group-hover:text-[#C8452D]">
+                  ? <LayoutGrid size={15} className="shrink-0 text-muted" />
+                  : <FileText size={15} className="shrink-0 text-muted" />}
+              <span className="min-w-0 flex-1 truncate text-[15px] text-ink group-hover:text-pigment">
                 {one.title || t(one.kind === 'board' ? 'Untitled board' : 'Untitled page')}
               </span>
               <span className="shrink-0 text-[11px] uppercase tracking-[0.12em] text-[#B6B1A6]">
@@ -112,7 +112,7 @@ export function Profile() {
         ))}
       </ul>
 
-      <footer className="mt-16 flex items-center gap-2 border-t border-[#E2DED5] pt-4">
+      <footer className="mt-16 flex items-center gap-2 border-t border-hairline pt-4">
         <a href="/" className="opacity-60 transition-opacity hover:opacity-100">
           <Wordmark height={14} />
         </a>

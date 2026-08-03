@@ -12,7 +12,7 @@ import { Popover } from './Popover'
 
 function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop: () => void }) {
   return (
-    <div className="group/line flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-[#EFEBE2]">
+    <div className="group/line flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-tint">
       <span
         aria-hidden
         className="h-2 w-2 shrink-0 rounded-[2px]"
@@ -20,8 +20,8 @@ function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop:
       />
       <a
         href={`/i/${issue.id}`}
-        className={`min-w-0 flex-1 truncate text-[12px] hover:text-[#C8452D]
-          ${isClosed(issue) ? 'text-[#B6B1A6] line-through' : 'text-[#141310]'}`}
+        className={`min-w-0 flex-1 truncate text-[12px] hover:text-pigment
+          ${isClosed(issue) ? 'text-[#B6B1A6] line-through' : 'text-ink'}`}
       >
         <span className="mr-1.5 font-mono text-[10px] text-[#B6B1A6]">
           {issueKey(issue, prefix)}
@@ -32,7 +32,7 @@ function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop:
         type="button"
         aria-label={t('Remove')}
         onClick={onDrop}
-        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#A83621] group-hover/line:opacity-100"
+        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#943321] group-hover/line:opacity-100"
       >
         <X size={11} />
       </button>
@@ -54,7 +54,7 @@ function Pick({ issue, onPick, label }: {
         <button
           type="button"
           onClick={toggle}
-          className="flex items-center gap-1 rounded-md px-1 py-0.5 text-[11px] font-semibold text-[#8A867C] hover:text-[#C8452D]"
+          className="flex items-center gap-1 rounded-md px-1 py-0.5 text-[11px] font-semibold text-muted hover:text-pigment"
         >
           <Plus size={11} /> {label}
         </button>
@@ -67,7 +67,7 @@ function Pick({ issue, onPick, label }: {
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
             placeholder={t('Find an issue')}
-            className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+            className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none focus:border-pigment"
           />
           {getRecords('issue')
             .filter((r) => r.id !== issue.id
@@ -78,7 +78,7 @@ function Pick({ issue, onPick, label }: {
                 key={r.id}
                 type="button"
                 onClick={() => { onPick(r); close() }}
-                className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
               >{r.title || t('Untitled')}</button>
             ))}
         </>
@@ -90,7 +90,7 @@ function Pick({ issue, onPick, label }: {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-4">
-      <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+      <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
         {title}
       </span>
       <div className="mt-1">{children}</div>
@@ -135,7 +135,7 @@ export function IssueLinks({ issue, prefix }: { issue: Issue; prefix: string }) 
           onChange={(e) => setAdding(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') void addChild() }}
           placeholder={t('Write one and press enter')}
-          className="mt-1 w-full rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-[12px] outline-none focus:border-[#C8452D]"
+          className="mt-1 w-full rounded-md border border-hairline bg-surface px-2 py-1 text-[12px] outline-none focus:border-pigment"
         />
       </Section>
 

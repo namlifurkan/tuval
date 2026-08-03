@@ -60,14 +60,14 @@ export function HandoffMenu() {
         title={t('Hand off to AI')}
         active={pop.open}
         onClick={pop.toggle}
-        className={pop.open ? '' : 'text-[#C8452D] hover:bg-[#F7E9E4] hover:ring-[#C8452D]/25'}
+        className={pop.open ? '' : 'text-pigment hover:bg-[#F7E9E4] hover:ring-pigment/25'}
       >
         <Spark size={18} />
       </IconButton>
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[270px]">
         <div className="flex items-center justify-between px-2.5 pb-1.5 pt-1">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#C8452D]"><Spark size={13} /> {t('Hand off to AI')}</span>
-          <span className="text-xs text-[#8A867C]">{scope}</span>
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-pigment"><Spark size={13} /> {t('Hand off to AI')}</span>
+          <span className="text-xs text-muted">{scope}</span>
         </div>
 
         {CHAT.map((c) => (
@@ -75,29 +75,29 @@ export function HandoffMenu() {
             key={c.id}
             type="button"
             onClick={() => { openChat(c.href); pop.close() }}
-            className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+            className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
           >
             <span>{t('Open in {app}', { app: c.name })}</span>
-            <span className="text-xs text-[#8A867C]">↗</span>
+            <span className="text-xs text-muted">↗</span>
           </button>
         ))}
 
-        <div className="my-1 h-px bg-[#EAE6DD]" />
+        <div className="my-1 h-px bg-shade" />
 
         <button
           type="button"
           onClick={() => { useBoardStore.getState().update({ briefOpen: true }); pop.close() }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold hover:bg-[#EFEBE2]"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold hover:bg-tint"
         >
           {t('Build a board from a brief')}
         </button>
 
-        <div className="my-1 h-px bg-[#EAE6DD]" />
+        <div className="my-1 h-px bg-shade" />
 
         <button
           type="button"
           onClick={() => { copyPrompt(); pop.close() }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
         >
           {t('Copy prompt')}
         </button>
@@ -108,7 +108,7 @@ export function HandoffMenu() {
             download(`${slug(name)}.md`, graphToPrompt(graph), 'text/markdown')
             pop.close()
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
         >
           {t('Download Markdown')}
         </button>
@@ -119,18 +119,18 @@ export function HandoffMenu() {
             download(`${slug(name)}.json`, JSON.stringify(graph, null, 2), 'application/json')
             pop.close()
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
         >
           {t('Download JSON')}
         </button>
 
-        <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
+        <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-muted">
           {t('Frames become sections, arrows become a mermaid flow, code blocks become fenced code. Reading order is top to bottom, left to right.')}
         </p>
       </Popover>
 
       {note && (
-        <div className="fixed bottom-24 left-1/2 z-[80] max-w-[420px] -translate-x-1/2 rounded-lg border border-black/5 bg-[#C8452D] px-3 py-2 text-sm text-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+        <div className="fixed bottom-24 left-1/2 z-[80] max-w-[420px] -translate-x-1/2 rounded-lg border border-black/5 bg-pigment px-3 py-2 text-sm text-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
           {note}
         </div>
       )}

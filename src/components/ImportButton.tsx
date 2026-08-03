@@ -40,19 +40,19 @@ export function ImportButton({ parent = null }: { parent?: string | null }) {
         type="button"
         disabled={busy}
         onClick={() => picker.current?.click()}
-        className="flex items-center gap-1.5 rounded-lg border border-[#E2DED5] px-3 py-2 text-sm font-semibold text-[#4A463E] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40"
+        className="flex items-center gap-1.5 rounded-lg border border-hairline px-3 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-pigment hover:text-pigment disabled:opacity-40"
       >
         <Upload size={15} /> {busy ? t('Reading…') : t('Import')}
       </button>
 
       {!!haul && (
-        <span className="text-[12px] text-[#8A867C]">
+        <span className="text-[12px] text-muted">
           {t('{pages} pages, {databases} databases, {rows} rows.',
             { pages: haul.pages, databases: haul.databases, rows: haul.rows })}
           {haul.skipped > 0 && ` ${t('{n} files were left out of this pass.', { n: haul.skipped })}`}
         </span>
       )}
-      {!!failed && <span className="text-[12px] text-[#A83621]">{failed}</span>}
+      {!!failed && <span className="text-[12px] text-[#943321]">{failed}</span>}
     </>
   )
 }

@@ -19,7 +19,7 @@ const labels = getLabels
 // The editor is a third of the bundle, and a list of issues does not need it until one is open.
 const PageEditor = lazy(() => import('./PageEditor').then((m) => ({ default: m.PageEditor })))
 
-const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]'
+const field = 'w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm outline-none focus:border-pigment'
 
 // A card you cannot open is half a feature. This is the panel, not a page: the list stays where
 // it was, so closing it puts you back exactly where you were looking.
@@ -50,7 +50,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
   }, [issue.id])
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[560px] overflow-y-auto border-l border-[#E2DED5] bg-[#FCFBF8] p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
+    <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[560px] overflow-y-auto border-l border-hairline bg-surface p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
       <div className="mb-1 flex items-center gap-2">
         <span className="font-mono text-[11px] text-[#B6B1A6]">{issueKey(issue, prefix)}</span>
       </div>
@@ -60,12 +60,12 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           value={issue.title}
           onChange={(e) => set({ title: e.target.value })}
           rows={2}
-          className="min-w-0 flex-1 resize-none bg-transparent text-[17px] font-semibold leading-snug text-[#141310] outline-none"
+          className="min-w-0 flex-1 resize-none bg-transparent text-[17px] font-semibold leading-snug text-ink outline-none"
         />
         <button
           type="button"
           onClick={onClose}
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-[#EFEBE2]"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-tint"
         >
           <X size={15} />
         </button>
@@ -80,14 +80,14 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
       </div>
 
       <dl className="mt-2 grid grid-cols-[5.5rem_1fr] items-center gap-x-3 gap-y-2.5">
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Status')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Status')}</dt>
         <dd>
           <select value={issue.status ?? 'todo'} onChange={(e) => set({ status: e.target.value as Status })} className={field}>
             {STATUSES.map((s) => <option key={s} value={s}>{t(s)}</option>)}
           </select>
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Assignee')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Assignee')}</dt>
         <dd>
           <select value={issue.assignee ?? ''} onChange={(e) => set({ assignee: e.target.value || null })} className={field}>
             <option value="">{t('Nobody')}</option>
@@ -97,7 +97,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           </select>
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Priority')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Priority')}</dt>
         <dd>
           <select
             value={issue.priority ?? 0}
@@ -108,7 +108,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           </select>
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Due')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Due')}</dt>
         <dd>
           <input
             type="date"
@@ -118,7 +118,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           />
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Estimate')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Estimate')}</dt>
         <dd>
           <input
             type="number"
@@ -130,7 +130,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           />
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Cycle')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Cycle')}</dt>
         <dd>
           <select
             value={issue.cycle_id ?? ''}
@@ -144,7 +144,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
           </select>
         </dd>
 
-        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">{t('Project')}</dt>
+        <dt className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">{t('Project')}</dt>
         <dd>
           <select
             value={issue.project_id ?? ''}
@@ -160,7 +160,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
       </dl>
 
       <div className="mt-4">
-        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
           {t('Labels')}
         </span>
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
@@ -170,7 +170,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
               type="button"
               onClick={() => void toggleLabel(issue.id, label.id)}
               title={t('Remove')}
-              className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-[#141310]"
+              className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-ink"
               style={{ background: label.tone }}
             >{label.name}</button>
           ))}
@@ -181,7 +181,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
               <button
                 type="button"
                 onClick={toggle}
-                className="rounded-md border border-dashed border-[#D8D5CD] px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] hover:border-[#C8452D] hover:text-[#C8452D]"
+                className="rounded-md border border-dashed border-[#D8D5CD] px-1.5 py-0.5 text-[11px] font-semibold text-muted hover:border-pigment hover:text-pigment"
               >+ {t('Label')}</button>
             )}
           >
@@ -199,7 +199,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
                     })
                   }}
                   placeholder={t('Find or create')}
-                  className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+                  className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none focus:border-pigment"
                 />
                 {known
                   .filter((l) => l.name.toLowerCase().includes(typed.trim().toLowerCase()))
@@ -208,13 +208,13 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
                       key={label.id}
                       type="button"
                       onClick={() => void toggleLabel(issue.id, label.id)}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-[#EAE6DD]"
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-shade"
                     >
                       <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                        ${worn.includes(label.id) ? 'border-[#C8452D] bg-[#C8452D] text-white' : 'border-[#D8D5CD]'}`}
+                        ${worn.includes(label.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
                       >{worn.includes(label.id) ? '✓' : ''}</span>
                       <span
-                        className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-[#141310]"
+                        className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-ink"
                         style={{ background: label.tone }}
                       >{label.name}</span>
                     </button>
@@ -235,14 +235,14 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
         <button
           type="button"
           onClick={() => { void navigator.clipboard.writeText(`${location.origin}/i/${issue.id}`); setCopied(true) }}
-          className="flex-1 rounded-lg border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:border-[#C8452D] hover:text-[#C8452D]"
+          className="flex-1 rounded-lg border border-hairline bg-paper px-2 py-1.5 text-sm font-semibold text-ink hover:border-pigment hover:text-pigment"
         >
           {copied ? t('Copied') : t('Copy link')}
         </button>
         <button
           type="button"
           onClick={() => { void archiveRecord(issue.id); onClose() }}
-          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
         >
           {t('Archive')}
         </button>

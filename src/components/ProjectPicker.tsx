@@ -23,7 +23,7 @@ export function ProjectPicker({ value, onPick, className }: {
     <select
       value={value ?? ''}
       onChange={(e) => onPick(e.target.value || null)}
-      className={className ?? 'rounded-md border border-transparent bg-transparent px-1.5 py-1 text-[13px] text-[#141310] outline-none hover:bg-[#EAE6DD] focus:border-[#C8452D] focus:bg-[#FCFBF8]'}
+      className={className ?? 'rounded-md border border-transparent bg-transparent px-1.5 py-1 text-[13px] text-ink outline-none hover:bg-shade focus:border-pigment focus:bg-surface'}
     >
       <option value="">{t('No project')}</option>
       {rows.map((row) => (

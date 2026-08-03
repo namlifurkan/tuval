@@ -57,7 +57,7 @@ function Tile({ board, mine, onForget, onCopy }: {
       <button
         type="button"
         onClick={() => openBoard(board.room)}
-        className="block w-full overflow-hidden rounded-xl border border-[#E2DED5] bg-[#F2EFE9] transition-shadow hover:shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+        className="block w-full overflow-hidden rounded-xl border border-hairline bg-paper transition-shadow hover:shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
       >
         {board.thumb
           ? <img src={board.thumb} alt="" className="aspect-[8/5] w-full object-cover" />
@@ -73,19 +73,19 @@ function Tile({ board, mine, onForget, onCopy }: {
           <span
             title={t('Since you looked')}
             aria-label={t('Since you looked')}
-            className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-[#141310]"
+            className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-ink"
           />
         )}
-        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#141310]">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
           {board.name || t('Untitled board')}
         </span>
         {!mine && board.role && (
-          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.13em] text-muted">
             {t(board.role)}
           </span>
         )}
       </div>
-      <div className="mt-0.5 truncate px-0.5 text-[11px] text-[#8A867C]">
+      <div className="mt-0.5 truncate px-0.5 text-[11px] text-muted">
         {board.items} {t(board.items === 1 ? 'item' : 'items')}
         {board.frames ? ` · ${board.frames} ${t(board.frames === 1 ? 'frame' : 'frames')}` : ''}
         {' · '}{when(board.opened)}
@@ -97,7 +97,7 @@ function Tile({ board, mine, onForget, onCopy }: {
             type="button"
             title={t('Duplicate')}
             onClick={onCopy}
-            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#C8452D]"
+            className="grid h-7 w-7 place-items-center rounded-md border border-hairline bg-surface text-muted hover:text-pigment"
           >
             <Copy size={13} />
           </button>
@@ -107,7 +107,7 @@ function Tile({ board, mine, onForget, onCopy }: {
             type="button"
             title={t('Move to trash')}
             onClick={onForget}
-            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#A83621]"
+            className="grid h-7 w-7 place-items-center rounded-md border border-hairline bg-surface text-muted hover:text-[#943321]"
           >
             <Trash2 size={13} />
           </button>
@@ -123,8 +123,8 @@ const Band = ({ title, note, children }: {
   children: React.ReactNode
 }) => (
   <section className="mt-10">
-    <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">{title}</h2>
-    {note && <p className="mt-1.5 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">{note}</p>}
+    <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{title}</h2>
+    {note && <p className="mt-1.5 max-w-[62ch] text-[12px] leading-relaxed text-muted">{note}</p>}
     <div className="mt-3 grid gap-x-5 gap-y-7 [grid-template-columns:repeat(auto-fill,minmax(232px,1fr))]">
       {children}
     </div>
@@ -245,30 +245,30 @@ export function Dashboard() {
       <PasswordGate />
       <div>
         {copying && (
-          <p className="mb-4 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm text-[#4A463E]">
+          <p className="mb-4 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink-soft">
             {t('Copying the board and its images…')}
           </p>
         )}
 
         {cloudProblem && (
-          <div className="mb-4 flex items-center gap-3 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-3 py-2 text-sm text-[#4A463E]">
+          <div className="mb-4 flex items-center gap-3 rounded-lg border border-hairline bg-[#F7E9E4] px-3 py-2 text-sm text-ink-soft">
             <span className="min-w-0 flex-1">{t('Could not reach the cloud. Your boards are still there.')}</span>
             <button
               type="button"
               onClick={() => setRetry((value) => value + 1)}
-              className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-[#C8452D] hover:bg-[#FCFBF8]"
+              className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-pigment hover:bg-surface"
             >{t('Try again')}</button>
           </div>
         )}
 
         <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
-          <h1 className="font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-[#141310]">
+          <h1 className="font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-ink">
             {user ? t('Good to see you, {name}', { name: (user.email ?? '').split('@')[0] }) : t('Your boards')}
           </h1>
           <button
             type="button"
             onClick={() => start(undefined, scope || undefined)}
-            className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+            className="ml-auto flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
           >
             <Plus size={15} strokeWidth={2.4} /> {t('New board')}
           </button>
@@ -278,7 +278,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={sweep}
-            className="mt-4 flex items-center gap-1.5 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-xs font-semibold text-[#8A867C] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+            className="mt-4 flex items-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-xs font-semibold text-muted transition-colors hover:border-pigment hover:text-pigment"
           >
             <Trash2 size={13} /> {t('Delete {n} empty boards', { n: bare.length })}
           </button>
@@ -291,7 +291,7 @@ export function Dashboard() {
               type="button"
               title={t(tpl.description)}
               onClick={() => start(tpl.id, scope || undefined)}
-              className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-xs font-semibold text-[#4A463E] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+              className="rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-xs font-semibold text-ink-soft transition-colors hover:border-pigment hover:text-pigment"
             >
               {t(tpl.name)}
             </button>
@@ -302,8 +302,8 @@ export function Dashboard() {
           <Band title={t('Your boards')}>
             {[0, 1, 2, 3].map((i) => (
               <div key={i}>
-                <div className="aspect-[8/5] w-full animate-pulse rounded-xl bg-[#EAE6DD]" />
-                <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-[#EAE6DD]" />
+                <div className="aspect-[8/5] w-full animate-pulse rounded-xl bg-shade" />
+                <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-shade" />
               </div>
             ))}
           </Band>
@@ -316,7 +316,7 @@ export function Dashboard() {
         )}
 
         {!loading && !mine.length && !here.length && (
-          <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+          <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
             {t('Nothing here yet. A board is an endless sheet: drop a sticky, connect two of them, and hand the result to an agent when it is ready.')}
           </p>
         )}
@@ -343,7 +343,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={burn}
-            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
           >{t('Empty the trash ({n})', { n: trash.length })}</button>
           <Band
             title={t('Trash')}
@@ -351,22 +351,22 @@ export function Dashboard() {
           >
             {trash.map((b) => (
               <div key={b.room} className="opacity-70 transition-opacity hover:opacity-100">
-                <div className="aspect-[8/5] w-full overflow-hidden rounded-xl border border-[#E2DED5] bg-[#F2EFE9]">
+                <div className="aspect-[8/5] w-full overflow-hidden rounded-xl border border-hairline bg-paper">
                   {b.thumb && <img src={b.thumb} alt="" className="h-full w-full object-cover grayscale" />}
                 </div>
-                <div className="mt-2 truncate px-0.5 text-sm font-semibold text-[#141310]">
+                <div className="mt-2 truncate px-0.5 text-sm font-semibold text-ink">
                   {b.name || t('Untitled board')}
                 </div>
                 <div className="mt-1 flex gap-1.5 px-0.5">
                   <button
                     type="button"
                     onClick={restore(b, cloudRooms.has(b.room))}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-[#F7E9E4]"
                   >{t('Restore')}</button>
                   <button
                     type="button"
                     onClick={erase(b, cloudRooms.has(b.room))}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
                   >{t('Delete for good')}</button>
                 </div>
               </div>

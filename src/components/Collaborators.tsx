@@ -60,21 +60,21 @@ export function Collaborators() {
         type="button"
         title={live ? `${all.length} ${t('people on this board')}` : t('Live connection unavailable')}
         onClick={pop.toggle}
-        className={`flex items-center rounded-lg p-0.5 transition-[background-color,opacity] hover:bg-[#EAE6DD] ${
+        className={`flex items-center rounded-lg p-0.5 transition-[background-color,opacity] hover:bg-shade ${
           live ? '' : 'opacity-45'}`}
       >
         {shown.map((p, i) => (
           <span
             key={p.id}
             className={`relative grid h-8 w-8 place-items-center overflow-hidden rounded-md border-2 text-[11px] font-bold text-white
-              ${following === p.id ? 'border-[#C8452D]' : 'border-[#FCFBF8]'}`}
+              ${following === p.id ? 'border-pigment' : 'border-surface'}`}
             style={{ background: p.color, marginLeft: i ? -8 : 0, zIndex: 10 - i }}
           >
             {p.avatar
               ? <img src={p.avatar} alt="" className="h-full w-full rounded-[4px] object-cover" />
               : initials(p.name)}
             {following === p.id && (
-              <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-md bg-[#C8452D]">
+              <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-md bg-pigment">
                 <Eye size={9} strokeWidth={3} className="text-white" />
               </span>
             )}
@@ -82,7 +82,7 @@ export function Collaborators() {
         ))}
         {extra > 0 && (
           <span
-            className="grid h-8 w-8 place-items-center rounded-md border-2 border-[#FCFBF8] bg-[#EAE6DD] text-[11px] font-bold text-[#4A463E]"
+            className="grid h-8 w-8 place-items-center rounded-md border-2 border-surface bg-shade text-[11px] font-bold text-ink-soft"
             style={{ marginLeft: -8 }}
           >
             +{extra}
@@ -91,14 +91,14 @@ export function Collaborators() {
       </button>
 
       <Popover open={pop.open} onClose={pop.close} anchor="bottomRight" className="w-[248px]">
-        <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">
+        <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-muted">
           {t('On the board')} {all.length} {t('people')}
         </div>
         <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5">
           {chip(guide, 26)}
-          <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+          <span className="min-w-0 flex-1 truncate text-sm text-ink">
             {guide.name}
-            <span className="ml-1 text-xs text-[#8A867C]">{t('(guide)')}</span>
+            <span className="ml-1 text-xs text-muted">{t('(guide)')}</span>
           </span>
           <button
             type="button"
@@ -107,7 +107,7 @@ export function Collaborators() {
             title={t('Guidance')}
             onClick={() => setAdaOff(!ada.off)}
             className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-              ${ada.off ? 'bg-[#D8D5CD]' : 'bg-[#C8452D]'}`}
+              ${ada.off ? 'bg-[#D8D5CD]' : 'bg-pigment'}`}
           >
             <span
               className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
@@ -127,15 +127,15 @@ export function Collaborators() {
               pop.close()
             }}
             className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left
-              ${p.id === -1 ? 'cursor-default' : 'hover:bg-[#EFEBE2]'}`}
+              ${p.id === -1 ? 'cursor-default' : 'hover:bg-tint'}`}
           >
             {chip(p, 26)}
-            <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+            <span className="min-w-0 flex-1 truncate text-sm text-ink">
               {p.name}
-              {p.id === -1 && <span className="ml-1 text-xs text-[#8A867C]">{t('(you)')}</span>}
+              {p.id === -1 && <span className="ml-1 text-xs text-muted">{t('(you)')}</span>}
             </span>
             {p.id !== -1 && (
-              <span className={`shrink-0 text-xs ${following === p.id ? 'font-semibold text-[#C8452D]' : 'text-[#8A867C]'}`}>
+              <span className={`shrink-0 text-xs ${following === p.id ? 'font-semibold text-pigment' : 'text-muted'}`}>
                 {t(following === p.id ? 'following' : 'follow')}
               </span>
             )}

@@ -16,7 +16,7 @@ export function PageExport({ editor, title }: { editor: Editor; title: string })
     void work().catch(() => undefined).then(() => { setBusy(''); close() })
   }
 
-  const item = 'w-full rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-[#EAE6DD] disabled:opacity-40'
+  const item = 'w-full rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-shade disabled:opacity-40'
 
   return (
     <Popover
@@ -26,7 +26,7 @@ export function PageExport({ editor, title }: { editor: Editor; title: string })
           type="button"
           onClick={toggle}
           title={t('Export')}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
         >
           <Download size={13} /> {t('Export')}
         </button>

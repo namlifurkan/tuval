@@ -58,14 +58,14 @@ const Mention = createReactInlineContentSpec(
   {
     render: ({ inlineContent }) => (
       inlineContent.props.userId ? (
-        <span className="rounded bg-[#F7E9E4] px-1 font-medium text-[#C8452D]">
+        <span className="rounded bg-[#F7E9E4] px-1 font-medium text-pigment">
           @{inlineContent.props.label || 'Member'}
         </span>
       ) : (
         <a
           href={`/d/${inlineContent.props.pageId}`}
           onClick={(e) => { e.preventDefault(); go(`/d/${inlineContent.props.pageId}`) }}
-          className="rounded px-0.5 font-medium text-[#C8452D] underline decoration-[#E6BDB2] underline-offset-2 hover:decoration-[#C8452D]"
+          className="rounded px-0.5 font-medium text-pigment underline decoration-[#E6BDB2] underline-offset-2 hover:decoration-pigment"
         >
           {inlineContent.props.label || 'Untitled page'}
         </a>

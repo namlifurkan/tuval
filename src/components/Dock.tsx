@@ -180,8 +180,8 @@ export function Dock() {
       style={{ width: unit, height: unit }}
       className={`tap-target grid place-items-center rounded-xl transition-[background-color,box-shadow] duration-150
         ${active
-          ? 'bg-[#F7E9E4] text-[#C8452D] shadow-[1px_1px_0_rgba(20,19,16,0.10)] ring-1 ring-[#C8452D]/25'
-          : 'text-[#141310] hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]'}`}
+          ? 'bg-[#F7E9E4] text-pigment shadow-[1px_1px_0_rgba(20,19,16,0.10)] ring-1 ring-pigment/25'
+          : 'text-ink hover:bg-shade hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]'}`}
     >
       {icon}
     </button>
@@ -215,7 +215,7 @@ export function Dock() {
                 <span className="absolute -bottom-1.5 -right-1.5 h-2 w-2 rounded-[2px] border border-black/10" style={{ background: stickyFill }} />
               </span>)}
             <Popover open={stickyPop.open} onClose={stickyPop.close} anchor={popSide} className="w-[228px]">
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Sticky colour')}</div>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-ink">{t('Sticky colour')}</div>
               <ColorGrid colors={STICKY_COLORS} value={stickyFill} onPick={(c) => { update({ stickyFill: c }); stickyPop.close() }} />
             </Popover>
           </div>
@@ -228,7 +228,7 @@ export function Dock() {
             <Popover open={shapePop.open} onClose={shapePop.close} anchor={popSide} className="w-[268px]">
               {SHAPE_GROUPS.map((group) => (
                 <div key={group.name} className="mb-2 last:mb-0">
-                  <div className="px-1 pb-1.5 pt-1 text-xs font-semibold text-[#141310]">{group.name}</div>
+                  <div className="px-1 pb-1.5 pt-1 text-xs font-semibold text-ink">{group.name}</div>
                   <div className="grid grid-cols-6 gap-1">
                     {group.kinds.map((k) => (
                       <button
@@ -236,8 +236,8 @@ export function Dock() {
                         type="button"
                         title={k}
                         onClick={() => { update({ shape: { ...shape, kind: k } }); setTool('shape'); shapePop.close() }}
-                        className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]
-                          ${shape.kind === k ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310]'}`}
+                        className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-tint
+                          ${shape.kind === k ? 'bg-[#F7E9E4] text-pigment' : 'text-ink'}`}
                       >
                         <ShapeGlyph kind={k} size={22} />
                       </button>
@@ -261,17 +261,17 @@ export function Dock() {
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: false, eraser: false } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                 >{t('Pen')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: true, eraser: false, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                 >{t('Highlighter')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, eraser: true } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                 >{t('Eraser')}</button>
               </div>
               <div className="mb-2 flex items-center gap-2 px-1">
@@ -279,9 +279,9 @@ export function Dock() {
                 <input
                   type="range" min={1} max={40} value={pen.strokeWidth}
                   onChange={(e) => update({ pen: { ...pen, strokeWidth: +e.target.value } })}
-                  className="flex-1 accent-[#C8452D]"
+                  className="flex-1 accent-pigment"
                 />
-                <span className="w-6 text-right text-xs tabular-nums text-[#4A463E]">{pen.strokeWidth}</span>
+                <span className="w-6 text-right text-xs tabular-nums text-ink-soft">{pen.strokeWidth}</span>
               </div>
               <ColorGrid colors={LINE_COLORS} value={pen.stroke} onPick={(c) => update({ pen: { ...pen, stroke: c } })} columns={6} />
             </Popover>
@@ -296,9 +296,9 @@ export function Dock() {
               <button
                 type="button"
                 onClick={() => { update({ framesPanel: true }); framePop.close() }}
-                className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
+                className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-pigment hover:bg-tint"
               >{t('Open frame panel')}</button>
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Frame size')}</div>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-ink">{t('Frame size')}</div>
               {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(([label, w, h]) => (
                 <button
                   key={label}
@@ -309,10 +309,10 @@ export function Dock() {
                     insert([makeFrame(c.x - w / 2, c.y - h / 2, w, h, `Frame ${n}`)], true)
                     framePop.close()
                   }}
-                  className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                  className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
                 >
-                  <span className="font-medium text-[#141310]">{label}</span>
-                  <span className="text-xs text-[#8A867C]">{w}×{h}</span>
+                  <span className="font-medium text-ink">{label}</span>
+                  <span className="text-xs text-muted">{w}×{h}</span>
                 </button>
               ))}
             </Popover>
@@ -325,16 +325,16 @@ export function Dock() {
           <div className="relative">
             {button(t('Templates'), templatePop.open, templatePop.toggle, <Templates size={glyph} />)}
             <Popover open={templatePop.open} onClose={templatePop.close} anchor={popSide} className="w-[268px]">
-              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-[#141310]">{t('Templates')}</div>
+              <div className="px-1 pb-2 pt-1 text-xs font-semibold text-ink">{t('Templates')}</div>
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => { insert(t.build(viewportCenter()), true); templatePop.close() }}
-                  className="w-full rounded-lg px-2.5 py-2 text-left hover:bg-[#EFEBE2]"
+                  className="w-full rounded-lg px-2.5 py-2 text-left hover:bg-tint"
                 >
-                  <div className="text-sm font-semibold text-[#141310]">{t.name}</div>
-                  <div className="text-xs text-[#8A867C]">{t.description}</div>
+                  <div className="text-sm font-semibold text-ink">{t.name}</div>
+                  <div className="text-xs text-muted">{t.description}</div>
                 </button>
               ))}
             </Popover>
@@ -369,9 +369,9 @@ export function Dock() {
                   if (url?.trim()) { const c = viewportCenter(); insert([makeEmbed(c.x, c.y, url.trim())]) }
                   morePop.close()
                 }}
-                className="mb-2 w-full rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#C8452D] hover:bg-[#EFEBE2]"
+                className="mb-2 w-full rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-pigment hover:bg-tint"
               >{t('Embed a link')}</button>
-              <div className="px-1 pb-1.5 text-xs font-semibold text-[#141310]">{t('Emoji')}</div>
+              <div className="px-1 pb-1.5 text-xs font-semibold text-ink">{t('Emoji')}</div>
               <div className="grid grid-cols-8 gap-1">
                 {EMOJI.map((g) => (
                   <button
@@ -386,7 +386,7 @@ export function Dock() {
                       insert([item])
                       morePop.close()
                     }}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-xl hover:bg-[#EFEBE2]"
+                    className="grid h-8 w-8 place-items-center rounded-lg text-xl hover:bg-tint"
                   >{g}</button>
                 ))}
               </div>
@@ -402,7 +402,7 @@ export function Dock() {
               type="button"
               onClick={zoomPop.toggle}
               style={vertical ? { width: unit } : { height: unit }}
-              className={`rounded-lg px-1 font-semibold tabular-nums text-[#141310] transition-[background-color,box-shadow] duration-150 hover:bg-[#EAE6DD] hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07] ${vertical ? 'py-1 text-[11px]' : 'min-w-[50px] text-sm'}`}
+              className={`rounded-lg px-1 font-semibold tabular-nums text-ink transition-[background-color,box-shadow] duration-150 hover:bg-shade hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07] ${vertical ? 'py-1 text-[11px]' : 'min-w-[50px] text-sm'}`}
             >
               {Math.round(camera.z * 100)}%
             </button>
@@ -418,10 +418,10 @@ export function Dock() {
                     requestRender()
                     zoomPop.close()
                   }}
-                  className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                  className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
                 >
                   <span>{z * 100}%</span>
-                  {z === 1 && <span className="text-xs text-[#8A867C]">⇧3</span>}
+                  {z === 1 && <span className="text-xs text-muted">⇧3</span>}
                 </button>
               ))}
             </Popover>
@@ -463,7 +463,7 @@ export function Dock() {
       <div
         aria-hidden
         style={plateSize}
-        className={`${plateClass} rounded-2xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]`}
+        className={`${plateClass} rounded-2xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]`}
       />
       <div
         ref={barRef}
@@ -494,8 +494,8 @@ export function Dock() {
 
         <div
           className={vertical
-            ? 'mt-0.5 flex shrink-0 justify-center self-stretch border-t border-[#E2DED5] pt-1'
-            : 'ml-0.5 flex shrink-0 items-center self-stretch border-l border-[#E2DED5] pl-1'}
+            ? 'mt-0.5 flex shrink-0 justify-center self-stretch border-t border-hairline pt-1'
+            : 'ml-0.5 flex shrink-0 items-center self-stretch border-l border-hairline pl-1'}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => { if (dragId) moveDockItem(dragId, null); setDragId(null) }}
         >
@@ -504,7 +504,7 @@ export function Dock() {
               <Settings2 size={17} strokeWidth={1.8} />
             </IconButton>
             <Popover open={settingsPop.open} onClose={settingsPop.close} anchor={popSide} className="w-[248px]">
-              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">{t('Position')}</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-ink">{t('Position')}</div>
               <div className="mb-2 grid grid-cols-4 gap-1">
                 {DOCK_SIDES.map((o) => (
                   <button
@@ -512,11 +512,11 @@ export function Dock() {
                     type="button"
                     onClick={() => setDockSide(o.id)}
                     className={`rounded-lg px-1 py-1.5 text-xs font-semibold
-                      ${side === o.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                      ${side === o.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                   >{t(o.name)}</button>
                 ))}
               </div>
-              <div className="mb-1 px-1 text-xs font-semibold text-[#141310]">{t('Size')}</div>
+              <div className="mb-1 px-1 text-xs font-semibold text-ink">{t('Size')}</div>
               <div className="mb-2 flex gap-1">
                 {(['sm', 'md', 'lg'] as DockSize[]).map((s) => (
                   <button
@@ -524,30 +524,30 @@ export function Dock() {
                     type="button"
                     onClick={() => setDockSize(s)}
                     className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold uppercase
-                      ${prefs.size === s ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                      ${prefs.size === s ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                   >{s}</button>
                 ))}
               </div>
               <button
                 type="button"
                 onClick={() => setMagnify(!prefs.magnify)}
-                className="mb-2 flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="mb-2 flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <span>{t('Magnifier')}</span>
-                <span className="text-xs text-[#8A867C]">{t(prefs.magnify ? 'On' : 'Off')}</span>
+                <span className="text-xs text-muted">{t(prefs.magnify ? 'On' : 'Off')}</span>
               </button>
 
-              <div className="mb-1 border-t border-[#EAE6DD] px-1 pt-2 text-xs font-semibold text-[#141310]">
+              <div className="mb-1 border-t border-shade px-1 pt-2 text-xs font-semibold text-ink">
                 {t('Visible tools')}
               </div>
               <div className="max-h-[220px] overflow-y-auto">
                 {DEFAULT_ORDER.map((id) => (
-                  <label key={id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-[#EFEBE2]">
+                  <label key={id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-tint">
                     <input
                       type="checkbox"
                       checked={!prefs.hidden.includes(id)}
                       onChange={() => toggleDockItem(id)}
-                      className="accent-[#C8452D]"
+                      className="accent-pigment"
                     />
                     {t(DOCK_LABELS[id])}
                   </label>
@@ -556,11 +556,11 @@ export function Dock() {
               <button
                 type="button"
                 onClick={() => resetDock()}
-                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#E2DED5] px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-hairline px-2 py-1.5 text-xs font-semibold hover:bg-tint"
               >
                 <RotateCcw size={12} /> {t('Reset to default')}
               </button>
-              <p className="mt-2 px-1 text-[11px] leading-snug text-[#8A867C]">
+              <p className="mt-2 px-1 text-[11px] leading-snug text-muted">
                 {t('Drag tools to reorder them.')}
               </p>
             </Popover>

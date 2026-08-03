@@ -95,7 +95,7 @@ export default function Board() {
   }, [])
 
   return (
-    <div className="relative h-dvh w-dvw select-none overflow-hidden bg-[#F2EFE9] text-[#141310]">
+    <div className="relative h-dvh w-dvw select-none overflow-hidden bg-paper text-ink">
       <Canvas />
       <EmbedLayer />
       <TextEditor />

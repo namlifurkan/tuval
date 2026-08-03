@@ -19,10 +19,10 @@ export function IconButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-[#141310] transition-[background-color,box-shadow] duration-150
+      className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-ink transition-[background-color,box-shadow] duration-150
         ${active
-          ? 'bg-[#F7E9E4] text-[#C8452D] ring-1 ring-[#C8452D]/25'
-          : 'hover:bg-[#EAE6DD] hover:ring-1 hover:ring-black/[0.07]'}
+          ? 'bg-[#F7E9E4] text-pigment ring-1 ring-pigment/25'
+          : 'hover:bg-shade hover:ring-1 hover:ring-black/[0.07]'}
         ${disabled ? 'cursor-not-allowed opacity-35' : ''} ${className}`}
     >
       {children}
@@ -137,7 +137,7 @@ export function Popover({
           ref={ref}
           onPointerDown={(e) => e.stopPropagation()}
           style={style()}
-          className={`fixed z-[70] max-h-[calc(100vh-16px)] overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] p-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)] ${className}`}
+          className={`fixed z-[70] max-h-[calc(100vh-16px)] overflow-y-auto rounded-xl border border-black/5 bg-surface p-2 shadow-[3px_3px_0_rgba(20,19,16,0.09)] ${className}`}
         >
           {children}
         </div>,
@@ -164,7 +164,7 @@ export function ColorGrid({
           onClick={() => onPick(c)}
           title={c}
           className={`h-6 w-6 rounded-md border transition-transform hover:scale-110
-            ${value === c ? 'ring-2 ring-[#C8452D] ring-offset-1' : ''}
+            ${value === c ? 'ring-2 ring-pigment ring-offset-1' : ''}
             ${c === 'transparent' ? 'border-dashed border-[#C6C2B6]' : 'border-black/10'}`}
           style={{
             background: c === 'transparent'
@@ -180,8 +180,8 @@ export function ColorGrid({
 export function HexInput({ value, onPick }: { value?: string; onPick: (c: string) => void }) {
   const [hex, setHex] = useState(value && value.startsWith('#') ? value : '#')
   return (
-    <div className="mt-2 flex items-center gap-1.5 border-t border-[#EAE6DD] pt-2">
-      <span className="text-xs font-semibold text-[#8A867C]">{t('Hex')}</span>
+    <div className="mt-2 flex items-center gap-1.5 border-t border-shade pt-2">
+      <span className="text-xs font-semibold text-muted">{t('Hex')}</span>
       <input
         value={hex}
         onChange={(e) => {
@@ -190,13 +190,13 @@ export function HexInput({ value, onPick }: { value?: string; onPick: (c: string
           if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) onPick(v)
         }}
         spellCheck={false}
-        className="w-full rounded-lg border border-[#E2DED5] px-2 py-1 font-mono text-xs outline-none focus:border-[#C8452D]"
+        className="w-full rounded-lg border border-hairline px-2 py-1 font-mono text-xs outline-none focus:border-pigment"
       />
       <input
         type="color"
         value={/^#([0-9a-f]{6})$/i.test(hex) ? hex : '#ffffff'}
         onChange={(e) => { setHex(e.target.value); onPick(e.target.value) }}
-        className="h-7 w-8 cursor-pointer rounded-md border border-[#E2DED5] bg-[#FCFBF8] p-0.5"
+        className="h-7 w-8 cursor-pointer rounded-md border border-hairline bg-surface p-0.5"
       />
     </div>
   )
@@ -207,4 +207,4 @@ export function usePopover() {
   return { open, setOpen, toggle: () => setOpen((o) => !o), close: () => setOpen(false) }
 }
 
-export const Divider = () => <div className="mx-1 h-6 w-px shrink-0 bg-[#E2DED5]" />
+export const Divider = () => <div className="mx-1 h-6 w-px shrink-0 bg-hairline" />

@@ -13,7 +13,7 @@ export function LabelChips({ known, worn }: { known: Label[]; worn: string[] }) 
       {held.slice(0, MOST).map((label) => (
         <span
           key={label.id}
-          className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-[#141310]"
+          className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-ink"
           style={{ background: label.tone }}
         >{label.name}</span>
       ))}

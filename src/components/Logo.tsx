@@ -20,7 +20,7 @@ export function Wordmark({ height = 20 }: { height?: number }) {
     <span className="inline-flex items-center" style={{ gap: height * 0.36 }}>
       <Logo size={height} />
       <span
-        className="font-semibold tracking-[-0.02em] text-[#141310]"
+        className="font-semibold tracking-[-0.02em] text-ink"
         style={{ fontSize: height, lineHeight: 1 }}
       >
         Tuval

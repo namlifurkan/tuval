@@ -1,5 +1,5 @@
 import getStroke from 'perfect-freehand'
-import { FONT } from './brand'
+import { COLOR, FONT, isDarkSurface } from './brand'
 import type { Camera } from './camera'
 import { toScreen, viewportRect } from './camera'
 import {
@@ -58,8 +58,34 @@ export interface Scene {
   dpr: number
 }
 
+const CHROME = {
+  light: {
+    ink: BRAND.selection,
+    halo: 'rgba(255, 255, 255, 0.85)',
+    handleHalo: 'rgba(252, 251, 248, 0.9)',
+    label: '#8A867C',
+    ghost: 'rgba(20, 19, 16, 0.30)',
+    ghostSoft: 'rgba(20, 19, 16, 0.45)',
+    stub: 'rgba(20, 19, 16, 0.35)',
+    guide: BRAND.guide,
+  },
+  dark: {
+    ink: COLOR.paper,
+    halo: 'rgba(20, 19, 16, 0.75)',
+    handleHalo: 'rgba(20, 19, 16, 0.8)',
+    label: '#A8A49A',
+    ghost: 'rgba(242, 239, 233, 0.38)',
+    ghostSoft: 'rgba(242, 239, 233, 0.55)',
+    stub: 'rgba(242, 239, 233, 0.45)',
+    guide: '#E4694F',
+  },
+}
+
+let chrome = CHROME.light
+
 export function render(s: Scene) {
   const { ctx, cam, width, height, dpr } = s
+  chrome = isDarkSurface(s.surface) ? CHROME.dark : CHROME.light
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   drawPaper(ctx, cam, width, height, s.surface, s.texture)
 
@@ -129,7 +155,7 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
   ctx.setLineDash([])
   ctx.strokeRect(item.x, item.y, item.w, item.h)
   const size = 11 / cam.z
-  ctx.fillStyle = s.selection.has(item.id) ? BRAND.selection : '#8A867C'
+  ctx.fillStyle = s.selection.has(item.id) ? chrome.ink : chrome.label
   ctx.font = fontString({ bold: true, italic: false, fontFamily: FONT.family }, size)
   ctx.letterSpacing = `${1.4 / cam.z}px`
   ctx.textAlign = 'left'
@@ -699,7 +725,7 @@ function drawQuickArrows(s: Scene, item: Item) {
     const dx = (a.x - c.x) / len, dy = (a.y - c.y) / len
     ctx.save()
     ctx.lineCap = 'butt'
-    ctx.strokeStyle = 'rgba(20,19,16,0.35)'
+    ctx.strokeStyle = chrome.stub
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(a.x - dx * (QUICK_R + 9), a.y - dy * (QUICK_R + 9))
@@ -759,7 +785,7 @@ function drawOverlay(s: Scene) {
     const frame = s.items.find((i) => i.id === session.dropFrame)
     if (frame) {
       const p = toScreen(cam, frame.x, frame.y)
-      ctx.strokeStyle = BRAND.selection
+      ctx.strokeStyle = chrome.ink
       ctx.lineWidth = 2
       ctx.setLineDash([])
       ctx.strokeRect(p.x, p.y, frame.w * cam.z, frame.h * cam.z)
@@ -768,13 +794,13 @@ function drawOverlay(s: Scene) {
 
   for (const mark of session.spacing) {
     const p = toScreen(cam, mark.x, mark.y)
-    ctx.fillStyle = BRAND.guide
+    ctx.fillStyle = chrome.guide
     ctx.fillRect(p.x, p.y, Math.max(2, mark.w * cam.z), Math.max(2, mark.h * cam.z))
   }
 
   for (const [a, b] of session.guides) {
     const p = toScreen(cam, a.x, a.y), q = toScreen(cam, b.x, b.y)
-    ctx.strokeStyle = BRAND.guide
+    ctx.strokeStyle = chrome.guide
     ctx.lineWidth = 1
     ctx.setLineDash([4, 4])
     ctx.beginPath()
@@ -793,7 +819,7 @@ function drawOverlay(s: Scene) {
   if (s.hover && !s.selection.has(s.hover)) {
     const item = s.items.find((i) => i.id === s.hover)
     if (item && item.type !== 'connector' && item.type !== 'comment') {
-      outline(ctx, cam, item, 'rgba(20, 19, 16, 0.30)', 1.5)
+      outline(ctx, cam, item, chrome.ghost, 1.5)
     }
   }
 
@@ -818,7 +844,7 @@ function drawOverlay(s: Scene) {
         dot(ctx, sp.x, sp.y, 4.5)
       }
     } else {
-      outline(ctx, cam, item, BRAND.selection, 2)
+      outline(ctx, cam, item, chrome.ink, 2)
       if (item.locked) drawLockBadge(ctx, cam, item)
       else {
         drawHandles(ctx, cam, item)
@@ -828,11 +854,11 @@ function drawOverlay(s: Scene) {
   } else if (selected.length > 1) {
     for (const item of selected) {
       if (item.type === 'connector') continue
-      outline(ctx, cam, item, 'rgba(20, 19, 16, 0.45)', 1.5)
+      outline(ctx, cam, item, chrome.ghostSoft, 1.5)
     }
     const box = boxOf(selected)
     const p = toScreen(cam, box.x, box.y)
-    ctx.strokeStyle = BRAND.selection
+    ctx.strokeStyle = chrome.ink
     ctx.lineWidth = 2
     ctx.strokeRect(p.x, p.y, box.w * cam.z, box.h * cam.z)
     drawHandles(ctx, cam, { ...box, rotation: 0 })
@@ -851,7 +877,7 @@ function drawOverlay(s: Scene) {
   if (session.connectorDraft) {
     const a = toScreen(cam, session.connectorDraft.from.x, session.connectorDraft.from.y)
     const b = toScreen(cam, session.connectorDraft.to.x, session.connectorDraft.to.y)
-    ctx.strokeStyle = BRAND.selection
+    ctx.strokeStyle = chrome.ink
     ctx.lineWidth = 2
     ctx.setLineDash([6, 4])
     ctx.beginPath()
@@ -866,7 +892,7 @@ function drawOverlay(s: Scene) {
     const m = session.marquee
     const p = toScreen(cam, m.x, m.y)
     ctx.fillStyle = 'rgba(200, 69, 45, 0.06)'
-    ctx.strokeStyle = BRAND.guide
+    ctx.strokeStyle = chrome.guide
     ctx.lineWidth = 1
     ctx.fillRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
     ctx.strokeRect(p.x, p.y, m.w * cam.z, m.h * cam.z)
@@ -916,7 +942,7 @@ function outline(ctx: CanvasRenderingContext2D, cam: Camera, item: Item, color: 
   ctx.beginPath()
   pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)))
   ctx.closePath()
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'
+  ctx.strokeStyle = chrome.halo
   ctx.lineWidth = width + 2
   ctx.stroke()
   ctx.strokeStyle = color
@@ -948,10 +974,10 @@ function drawHandles(ctx: CanvasRenderingContext2D, cam: Camera, box: Rect & { r
       path.lineTo(0, edge)
     }
 
-    ctx.strokeStyle = 'rgba(252, 251, 248, 0.9)'
+    ctx.strokeStyle = chrome.handleHalo
     ctx.lineWidth = 4
     ctx.stroke(path)
-    ctx.strokeStyle = BRAND.selection
+    ctx.strokeStyle = chrome.ink
     ctx.lineWidth = h.handle.length === 2 ? 2 : 1.5
     ctx.stroke(path)
     ctx.restore()

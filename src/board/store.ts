@@ -1,10 +1,14 @@
 import { create } from 'zustand'
-import { room } from './doc'
+import { isDarkSurface, surfaceColor } from './brand'
+import { getMeta, room, subscribeMeta } from './doc'
 import { loadCamera } from './viewport'
 import { animateCamera, fitRect } from './camera'
 import type { Camera } from './camera'
 import type { Cap, ConnectorShape, Id, Rect, ShapeKind, StrokeStyle, TextStyle, Vec } from './types'
-import { DEFAULT_TEXT_STYLE } from './types'
+import { DEFAULT_TEXT_STYLE, INK } from './types'
+
+const boardInk = () =>
+  isDarkSurface(surfaceColor(String(getMeta().surface ?? 'paper'))) ? INK.dark : INK.light
 
 export type Tool =
   | 'select' | 'hand' | 'sticky' | 'text' | 'shape' | 'connector' | 'pen' | 'frame' | 'comment'
@@ -59,9 +63,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   tool: 'select',
   stickyFill: '#F0E3B0',
   shape: { kind: 'rect', fill: '#FCFBF8', stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' },
-  pen: { stroke: '#1F1D1A', strokeWidth: 4, highlighter: false, eraser: false },
+  pen: { stroke: boardInk(), strokeWidth: 4, highlighter: false, eraser: false },
   connector: {
-    shape: 'curved', stroke: '#1F1D1A', strokeWidth: 2,
+    shape: 'curved', stroke: boardInk(), strokeWidth: 2,
     strokeStyle: 'solid', capStart: 'none', capEnd: 'arrow',
   },
   textStyle: { ...DEFAULT_TEXT_STYLE },
@@ -99,6 +103,14 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   patchStyle: (p) => set((s) => ({ textStyle: { ...s.textStyle, ...p } })),
   update: (p) => set(p as BoardState),
 }))
+
+subscribeMeta(() => {
+  const ink = boardInk()
+  const stale = ink === INK.dark ? INK.light : INK.dark
+  const s = useBoardStore.getState()
+  if (s.pen.stroke === stale) s.update({ pen: { ...s.pen, stroke: ink } })
+  if (s.connector.stroke === stale) s.update({ connector: { ...s.connector, stroke: ink } })
+})
 
 export interface RemoteUser {
   id: number

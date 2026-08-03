@@ -60,8 +60,8 @@ export function IconPicker({ value, onPick }: { value: string; onPick: (emoji: s
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((was) => !was)}
-        className={`grid place-items-center rounded-lg transition-colors hover:bg-[#EAE6DD]
-          ${value ? 'h-14 w-14 text-[44px] leading-none' : 'h-7 px-2 text-[12px] font-semibold text-[#8A867C]'}`}
+        className={`grid place-items-center rounded-lg transition-colors hover:bg-shade
+          ${value ? 'h-14 w-14 text-[44px] leading-none' : 'h-7 px-2 text-[12px] font-semibold text-muted'}`}
       >
         {value || t('Add an icon')}
       </button>
@@ -74,7 +74,7 @@ export function IconPicker({ value, onPick }: { value: string; onPick: (emoji: s
               <button
                 type="button"
                 onClick={() => { onPick(''); setOpen(false) }}
-                className="mb-1 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-left text-[12px] font-semibold text-[#8A867C] hover:text-[#A83621]"
+                className="mb-1 w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-left text-[12px] font-semibold text-muted hover:text-[#943321]"
               >
                 {t('Remove icon')}
               </button>
@@ -82,7 +82,7 @@ export function IconPicker({ value, onPick }: { value: string; onPick: (emoji: s
             <div
               ref={host}
               style={{ colorScheme: 'light' }}
-              className="overflow-hidden rounded-xl border border-[#E2DED5] shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
+              className="overflow-hidden rounded-xl border border-hairline shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
             />
           </div>
         </>

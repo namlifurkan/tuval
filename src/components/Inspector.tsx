@@ -51,8 +51,8 @@ const has = (items: Item[], type: Item['type']) => items.some((i) => i.type === 
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-b border-[#EAE6DD] px-3 py-3 last:border-b-0">
-      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#8A867C]">{title}</h3>
+    <section className="border-b border-shade px-3 py-3 last:border-b-0">
+      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted">{title}</h3>
       {children}
     </section>
   )
@@ -67,7 +67,7 @@ function Chip({
       title={title}
       onClick={onClick}
       className={`tap-target grid h-8 w-8 place-items-center rounded-lg transition-colors
-        ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310] hover:bg-[#EFEBE2]'}`}
+        ${active ? 'bg-[#F7E9E4] text-pigment' : 'text-ink hover:bg-tint'}`}
     >
       {children}
     </button>
@@ -114,12 +114,12 @@ export function Inspector() {
         right: dockSide === 'right' ? SIZE_PX[getDockPrefs().size] + 44 : 16,
         maxHeight: `calc(100dvh - ${76 + (showMinimap && dockSide !== 'right' ? 232 : 114)}px)`,
       }}
-      className="pointer-events-auto absolute top-[76px] z-30 flex w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
-      <header className="flex items-baseline justify-between border-b border-[#EAE6DD] px-3 py-2.5">
-        <span className="text-sm font-semibold text-[#141310]">
+      className="pointer-events-auto absolute top-[76px] z-30 flex w-[264px] flex-col overflow-y-auto rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <header className="flex items-baseline justify-between border-b border-shade px-3 py-2.5">
+        <span className="text-sm font-semibold text-ink">
           {selected.length === 1 ? t(TYPE_LABEL[selected[0].type] ?? selected[0].type) : `${selected.length} ${t(selected.length === 1 ? 'item' : 'items')}`}
         </span>
-        <span className="text-[11px] text-[#8A867C]">
+        <span className="text-[11px] text-muted">
           {Math.round(first.w as number)} × {Math.round(first.h as number)}
         </span>
       </header>
@@ -135,13 +135,13 @@ export function Inspector() {
             value={first.fill as string}
             onPick={(c) => patch({ fill: c }, (i) => i.type !== 'draw' && i.type !== 'connector' && i.type !== 'image')}
           />
-          <label className="mt-2 flex items-center gap-2 text-xs text-[#4A463E]">
+          <label className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
             {t('Opacity')}
             <input
               type="range" min={10} max={100}
               value={Math.round(((first.opacity as number) ?? 1) * 100)}
               onChange={(e) => patch({ opacity: +e.target.value / 100 })}
-              className="flex-1 accent-[#C8452D]"
+              className="flex-1 accent-pigment"
             />
           </label>
         </Section>
@@ -150,13 +150,13 @@ export function Inspector() {
       {(has(selected, 'shape') || has(selected, 'connector') || has(selected, 'draw')) && (
         <Section title={t('Line')}>
           <ColorGrid colors={LINE_COLORS} value={first.stroke as string} onPick={(c) => patch({ stroke: c })} columns={6} />
-          <label className="mt-2 flex items-center gap-2 text-xs text-[#4A463E]">
+          <label className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
             {t('Thickness')}
             <input
               type="range" min={1} max={24}
               value={(first.strokeWidth as number) ?? 2}
               onChange={(e) => patch({ strokeWidth: +e.target.value })}
-              className="flex-1 accent-[#C8452D]"
+              className="flex-1 accent-pigment"
             />
           </label>
           <div className="mt-2 flex gap-1">
@@ -166,7 +166,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ strokeStyle: st })}
                 className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                  ${first.strokeStyle === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  ${first.strokeStyle === st ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
               >{st}</button>
             ))}
           </div>
@@ -182,7 +182,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ shape: sh }, (i) => i.type === 'connector')}
                 className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                  ${first.shape === sh ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  ${first.shape === sh ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
               >{sh}</button>
             ))}
           </div>
@@ -193,7 +193,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ capEnd: c }, (i) => i.type === 'connector')}
                 className={`flex-1 rounded-lg px-1 py-1.5 text-[10px] font-semibold capitalize
-                  ${first.capEnd === c ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                  ${first.capEnd === c ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
               >{c}</button>
             ))}
           </div>
@@ -208,13 +208,13 @@ export function Inspector() {
               onChange={(e) => patchItem(wire.id, { text: e.target.value })}
               onKeyDown={(e) => e.stopPropagation()}
               placeholder={t('Main label')}
-              className="min-w-0 flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-xs outline-none focus:border-[#C8452D]"
+              className="min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-2 py-1.5 text-xs outline-none focus:border-pigment"
             />
             <input
               type="range" min={0} max={1} step={0.05}
               value={wire.labelT ?? 0.5}
               onChange={(e) => patchItem(wire.id, { labelT: Number(e.target.value) })}
-              className="w-16 shrink-0 accent-[#C8452D]"
+              className="w-16 shrink-0 accent-pigment"
             />
           </div>
           {(wire.labels ?? []).map((label, i) => (
@@ -226,7 +226,7 @@ export function Inspector() {
                 })}
                 onKeyDown={(e) => e.stopPropagation()}
                 placeholder={t('Label')}
-                className="min-w-0 flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-xs outline-none focus:border-[#C8452D]"
+                className="min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-2 py-1.5 text-xs outline-none focus:border-pigment"
               />
               <input
                 type="range" min={0} max={1} step={0.05}
@@ -234,13 +234,13 @@ export function Inspector() {
                 onChange={(e) => patchItem(wire.id, {
                   labels: (wire.labels ?? []).map((l, j) => (j === i ? { ...l, t: Number(e.target.value) } : l)),
                 })}
-                className="w-16 shrink-0 accent-[#C8452D]"
+                className="w-16 shrink-0 accent-pigment"
               />
               <button
                 type="button"
                 title={t('Remove')}
                 onClick={() => patchItem(wire.id, { labels: (wire.labels ?? []).filter((_, j) => j !== i) })}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
               >
                 <Trash2 size={12} />
               </button>
@@ -251,7 +251,7 @@ export function Inspector() {
             onClick={() => patchItem(wire.id, {
               labels: [...(wire.labels ?? []), { t: (wire.labels ?? []).length % 2 ? 0.85 : 0.15, text: '' }],
             })}
-            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
           >{t('Add label')}</button>
         </Section>
       )}
@@ -262,14 +262,14 @@ export function Inspector() {
             <button
               type="button"
               onClick={() => { quickCreateFromSelection('right'); requestRender() }}
-              className="flex-1 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-xs font-semibold text-[#C8452D]"
+              className="flex-1 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-xs font-semibold text-pigment"
             >
               {t('Add child')} <span className="opacity-60">Tab</span>
             </button>
             <button
               type="button"
               onClick={() => { mindmapBranch(true); requestRender() }}
-              className="flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+              className="flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
             >
               {t('Add sibling')} <span className="opacity-60">↵</span>
             </button>
@@ -277,7 +277,7 @@ export function Inspector() {
           <button
             type="button"
             onClick={() => { layoutMindmap(rootOf(mind.id)); requestRender() }}
-            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
           >
             {t('Tidy layout')}
           </button>
@@ -291,9 +291,9 @@ export function Inspector() {
             onChange={(e) => { patchItem(frame.id, { title: e.target.value }); requestRender() }}
             spellCheck={false}
             placeholder={t('Frame name')}
-            className="w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+            className="w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm outline-none focus:border-pigment"
           />
-          <div className="mt-2 text-xs text-[#8A867C]">{t('Assigned to')}</div>
+          <div className="mt-2 text-xs text-muted">{t('Assigned to')}</div>
           <div className="mt-1 flex flex-wrap gap-1">
             {boardPeople().map((person) => {
               const on = isAssigned(frame.assignees, person.id)
@@ -307,7 +307,7 @@ export function Inspector() {
                     requestRender()
                   }}
                   className={`flex items-center gap-1.5 rounded-md py-1 pl-1 pr-2 text-xs font-semibold transition-colors
-                    ${on ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EFEBE2]'}`}
+                    ${on ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-tint'}`}
                 >
                   <span
                     className="grid h-5 w-5 place-items-center rounded-md text-[9px] font-bold text-white"
@@ -343,21 +343,21 @@ export function Inspector() {
             <button
               type="button"
               onClick={() => patch({ label: undefined }, (i) => i.type === 'sticky')}
-              className="rounded-md px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+              className="rounded-md px-2 py-1 text-xs font-semibold text-muted hover:bg-tint"
             >
               {t('None')}
             </button>
           </div>
           {stickies.some((i) => i.type === 'sticky' && i.label) && (
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-[#8A867C]">{t('Label size')}</span>
+              <span className="text-xs text-muted">{t('Label size')}</span>
               <select
                 value={(stickies[0] as { labelSize?: number }).labelSize ?? ''}
                 onChange={(e) => patch(
                   { labelSize: e.target.value ? Number(e.target.value) : undefined },
                   (i) => i.type === 'sticky',
                 )}
-                className="flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+                className="flex-1 rounded-lg border border-hairline bg-surface px-2 py-1 text-sm outline-none focus:border-pigment"
               >
                 <option value="">{t('Auto')}</option>
                 {LABEL_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -373,7 +373,7 @@ export function Inspector() {
             <select
               value={code.lang}
               onChange={(e) => patch({ lang: e.target.value })}
-              className="flex-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+              className="flex-1 rounded-lg border border-hairline bg-surface px-2 py-1 text-sm outline-none focus:border-pigment"
             >
               {LANGS.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -383,7 +383,7 @@ export function Inspector() {
                 const fontSize = Number(e.target.value)
                 patch({ fontSize, h: codeHeight({ text: code.text, fontSize }) })
               }}
-              className="w-[70px] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-sm outline-none focus:border-[#C8452D]"
+              className="w-[70px] rounded-lg border border-hairline bg-surface px-2 py-1 text-sm outline-none focus:border-pigment"
             >
               {[11, 13, 15, 18, 22, 28].map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
@@ -408,7 +408,7 @@ export function Inspector() {
             <select
               value={(first.fontSize as number) ?? 24}
               onChange={(e) => patch({ fontSize: +e.target.value, autoFit: false })}
-              className="w-20 rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm"
+              className="w-20 rounded-lg border border-hairline px-2 py-1.5 text-sm"
             >
               {FONT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -438,13 +438,13 @@ export function Inspector() {
                 key={t(label)}
                 type="button"
                 onClick={() => patch({ w: size, h: size }, (i) => i.type === 'sticky')}
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-tint"
               >{t(label)}</button>
             ))}
             <button
               type="button"
               onClick={() => fitStickyToText()}
-              className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+              className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
             >
               <Maximize size={13} /> {t('Fit to text')}
             </button>
@@ -455,7 +455,7 @@ export function Inspector() {
       {card && (
         <Section title={t(CARD_TITLES[card.kind] ?? 'Issue')}>
           {card.missing && (
-            <p className="mb-2 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-relaxed text-[#C8452D]">
+            <p className="mb-2 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-relaxed text-pigment">
               {t('The record behind this card was deleted or is no longer reachable.')}
             </p>
           )}
@@ -471,7 +471,7 @@ export function Inspector() {
                     requestRender()
                   }}
                   className={`rounded-lg px-1 py-1.5 text-[11px] font-semibold capitalize
-                    ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                    ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                 >{t(st)}</button>
               ))}
             </div>
@@ -480,7 +480,7 @@ export function Inspector() {
             type="button"
             disabled={card.missing}
             onClick={() => go(recordHref(card))}
-            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2] disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-xs font-semibold text-muted hover:bg-tint disabled:cursor-not-allowed disabled:opacity-40"
           >{t('Open it')}</button>
         </Section>
       )}
@@ -490,13 +490,13 @@ export function Inspector() {
           <button
             type="button"
             onClick={() => void promoteToIssue(promotable.map((i) => i.id))}
-            className="w-full rounded-lg bg-[#C8452D] px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#A83621]"
+            className="w-full rounded-lg bg-pigment px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#943321]"
           >
             {promotable.length > 1
               ? t('Turn {n} into issues', { n: promotable.length })
               : t('Turn into an issue')}
           </button>
-          <p className="mt-1.5 text-[11px] leading-snug text-[#8A867C]">
+          <p className="mt-1.5 text-[11px] leading-snug text-muted">
             {t('It keeps its place on the board and turns up in the issue list, because it is the same thing in two views.')}
           </p>
         </Section>
@@ -508,18 +508,18 @@ export function Inspector() {
             <button
               type="button"
               onClick={() => { const p = growMerge(table, cell[0], cell[1], 'col'); if (p) { patchItem(table.id, p); requestRender() } }}
-              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
             >{t('Merge right')}</button>
             <button
               type="button"
               onClick={() => { const p = growMerge(table, cell[0], cell[1], 'row'); if (p) { patchItem(table.id, p); requestRender() } }}
-              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]"
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint"
             >{t('Merge down')}</button>
             <button
               type="button"
               disabled={!mergeAt(table, ...anchorOf(table, cell[0], cell[1]))}
               onClick={() => { const p = splitMerge(table, cell[0], cell[1]); if (p) { patchItem(table.id, p); requestRender() } }}
-              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2] disabled:opacity-40"
+              className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint disabled:opacity-40"
             >{t('Split')}</button>
           </div>
         </Section>
@@ -528,18 +528,18 @@ export function Inspector() {
       {table && (
         <Section title={t('Table')}>
           <div className="grid grid-cols-2 gap-1">
-            <button type="button" onClick={() => { patchItem(table.id, addRow(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Add row')}</button>
-            <button type="button" onClick={() => { patchItem(table.id, addCol(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Add column')}</button>
-            <button type="button" onClick={() => { const c = dropRow(table, table.rows - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Remove row')}</button>
-            <button type="button" onClick={() => { const c = dropCol(table, table.cols - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-[#EFEBE2]">{t('Remove column')}</button>
+            <button type="button" onClick={() => { patchItem(table.id, addRow(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint">{t('Add row')}</button>
+            <button type="button" onClick={() => { patchItem(table.id, addCol(table)); requestRender() }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint">{t('Add column')}</button>
+            <button type="button" onClick={() => { const c = dropRow(table, table.rows - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint">{t('Remove row')}</button>
+            <button type="button" onClick={() => { const c = dropCol(table, table.cols - 1); if (c) { patchItem(table.id, c); requestRender() } }} className="rounded-lg px-2 py-1.5 text-xs font-semibold hover:bg-tint">{t('Remove column')}</button>
           </div>
           <button
             type="button"
             onClick={() => patch({ headerRow: !table.headerRow }, (i) => i.type === 'table')}
-            className="mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs hover:bg-[#EFEBE2]"
+            className="mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs hover:bg-tint"
           >
             <span>{t('Header row')}</span>
-            <span className="text-[#8A867C]">{t(table.headerRow ? 'On' : 'Off')}</span>
+            <span className="text-muted">{t(table.headerRow ? 'On' : 'Off')}</span>
           </button>
         </Section>
       )}
@@ -579,7 +579,7 @@ export function Inspector() {
             type="button"
             title={`${t('Delete')} — Del`}
             onClick={() => deleteSelection()}
-            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#A83621] hover:bg-[#F7E9E4]"
+            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#943321] hover:bg-[#F7E9E4]"
           >
             <Trash2 size={15} strokeWidth={1.9} />
           </button>

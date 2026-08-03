@@ -76,17 +76,17 @@ export function Runs() {
         <button
           type="button"
           onClick={() => void markSeen()}
-          className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+          className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
         >{t('Mark all as seen')}</button>
       )}
     >
       {!runs.length && (
-        <p className="max-w-[62ch] text-sm leading-relaxed text-[#4A463E]">
+        <p className="max-w-[62ch] text-sm leading-relaxed text-ink-soft">
           {t('Nothing has been written here by a key yet. When an agent writes through the API or the MCP server, everything it does in one session lands here as one run, with what each record was before it touched it.')}
         </p>
       )}
 
-      <ul className="divide-y divide-[#E2DED5]">
+      <ul className="divide-y divide-hairline">
         {runs.map((run) => {
           const fresh = !!looked && run.ended > looked
           const showing = open === run.run
@@ -101,17 +101,17 @@ export function Runs() {
                 <span
                   aria-hidden
                   className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full
-                    ${fresh ? 'bg-[#C8452D]' : 'bg-transparent'}`}
+                    ${fresh ? 'bg-pigment' : 'bg-transparent'}`}
                 />
-                <Bot size={14} className="mt-0.5 shrink-0 text-[#8A867C]" />
+                <Bot size={14} className="mt-0.5 shrink-0 text-muted" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14.5px] font-medium text-[#141310]">
+                  <span className="block truncate text-[14.5px] font-medium text-ink">
                     {run.via || t('A key')}
                     <span className="ml-2 font-mono text-[11px] font-normal text-[#B6B1A6]">
                       {run.run}
                     </span>
                   </span>
-                  <span className="mt-0.5 block text-[12px] text-[#8A867C]">
+                  <span className="mt-0.5 block text-[12px] text-muted">
                     {t('{records} records · {writes} writes · {span} · {when}', {
                       records: run.records,
                       writes: run.writes,
@@ -129,13 +129,13 @@ export function Runs() {
                       type="button"
                       disabled={busy}
                       onClick={() => void putBackAll()}
-                      className="mb-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-50"
+                      className="mb-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink disabled:opacity-50"
                     >
                       <RotateCcw size={12} />
                       {t('Put the whole run back')}
                     </button>
                   )}
-                  <ul className="divide-y divide-[#EFEBE2]">
+                  <ul className="divide-y divide-tint">
                     {touches.map((touch) => (
                       <li key={touch.id} className="flex items-baseline gap-3 py-2">
                         <button
@@ -143,10 +143,10 @@ export function Runs() {
                           onClick={() => wentTo(touch.record_id)}
                           className="min-w-0 flex-1 text-left"
                         >
-                          <span className="block truncate text-[13.5px] text-[#141310] hover:underline">
+                          <span className="block truncate text-[13.5px] text-ink hover:underline">
                             {touch.title}
                           </span>
-                          <span className="mt-0.5 block text-[12px] leading-relaxed text-[#8A867C]">
+                          <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">
                             {touch.changed.length
                               ? touch.changed.map((field) => (
                                 <span key={field} className="mr-3 inline-block">
@@ -164,7 +164,7 @@ export function Runs() {
                             onClick={() => void putBack(touch)}
                             title={t('Put this back')}
                             aria-label={t('Put this back')}
-                            className="shrink-0 rounded-md p-1 text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-50"
+                            className="shrink-0 rounded-md p-1 text-muted hover:bg-shade hover:text-ink disabled:opacity-50"
                           >
                             <RotateCcw size={13} />
                           </button>

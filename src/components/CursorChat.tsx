@@ -34,7 +34,7 @@ export function CursorChat() {
 
   return (
     <div
-      className="absolute z-50 flex items-center gap-2 rounded-[2px] border-2 bg-[#FCFBF8] px-3 py-1.5 shadow-[2px_2px_0_rgba(20,19,16,0.07)]"
+      className="absolute z-50 flex items-center gap-2 rounded-[2px] border-2 bg-surface px-3 py-1.5 shadow-[2px_2px_0_rgba(20,19,16,0.07)]"
       style={{ left: at.x + 12, top: at.y + 36, borderColor: me.color }}
     >
       <input
@@ -54,9 +54,9 @@ export function CursorChat() {
           }
         }}
         onBlur={close}
-        className="w-[220px] bg-transparent text-sm outline-none placeholder:text-[#8A867C]"
+        className="w-[220px] bg-transparent text-sm outline-none placeholder:text-muted"
       />
-      <kbd className="rounded bg-[#EFEBE2] px-1.5 py-0.5 text-[10px] font-semibold text-[#8A867C]">esc</kbd>
+      <kbd className="rounded bg-tint px-1.5 py-0.5 text-[10px] font-semibold text-muted">esc</kbd>
     </div>
   )
 }

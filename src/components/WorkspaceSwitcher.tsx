@@ -29,7 +29,7 @@ export function WorkspaceSwitcher() {
   // Nothing to switch to is not a menu. One workspace stays the label it has always been.
   if (all.length < 2) {
     return (
-      <span className="mb-2 flex items-center gap-1.5 px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <span className="mb-2 flex items-center gap-1.5 px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
         <span className="min-w-0 truncate">{name}</span>
       </span>
     )
@@ -54,7 +54,7 @@ export function WorkspaceSwitcher() {
           onClick={toggle}
           aria-expanded={open}
           aria-label={t('Switch workspace: {name}', { name })}
-          className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C] transition-colors hover:bg-[#EAE6DD] hover:text-[#141310] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
+          className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:bg-shade hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
           <Building2 size={12} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate">{name}</span>
@@ -70,11 +70,11 @@ export function WorkspaceSwitcher() {
               type="button"
               onClick={() => { close(); goTo(one.id) }}
               aria-current={one.id === workspace.id ? 'true' : undefined}
-              className="flex min-h-11 w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-[#EAE6DD] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#141310]"
+              className="flex min-h-11 w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-shade focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ink"
             >
-              <Building2 size={13} className="shrink-0 text-[#8A867C]" />
+              <Building2 size={13} className="shrink-0 text-muted" />
               <span className="min-w-0 flex-1 truncate">{one.name || one.slug}</span>
-              {one.id === workspace.id && <Check size={13} className="shrink-0 text-[#C8452D]" />}
+              {one.id === workspace.id && <Check size={13} className="shrink-0 text-pigment" />}
             </button>
           ))}
         </>

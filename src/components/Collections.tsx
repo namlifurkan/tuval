@@ -20,7 +20,7 @@ export function Collections() {
 
   return (
     <div className="mt-5">
-      <span className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <span className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
         <Filter size={11} /> {t('Collections')}
       </span>
       {rows.map((row) => (
@@ -28,7 +28,7 @@ export function Collections() {
           key={row.id}
           type="button"
           onClick={() => go(`/c/${row.id}`)}
-          className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm text-[#4A463E] hover:bg-[#EAE6DD]"
+          className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm text-ink-soft hover:bg-shade"
         >
           <span className="w-4 shrink-0 text-center">{row.icon || '·'}</span>
           <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled collection')}</span>
@@ -37,7 +37,7 @@ export function Collections() {
       <button
         type="button"
         onClick={() => void addCollection('').then((made) => made && go(`/c/${made}`))}
-        className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+        className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm font-semibold text-muted hover:bg-shade hover:text-pigment"
       >
         <Plus size={14} className="shrink-0" /> {t('New collection')}
       </button>

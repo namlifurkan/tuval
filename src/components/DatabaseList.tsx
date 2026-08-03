@@ -27,7 +27,7 @@ export function DatabaseList({ rows, fields }: { rows: Row[]; fields: Field[] })
   const shown = fields.filter((f) => !f.hidden).slice(0, SHOWN)
 
   return (
-    <div className="mt-4 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
+    <div className="mt-4 divide-y divide-shade border-y border-shade">
       {rows.map((row) => (
         <button
           key={row.id}
@@ -36,7 +36,7 @@ export function DatabaseList({ rows, fields }: { rows: Row[]; fields: Field[] })
           className="group flex w-full items-center gap-3 py-2 text-left"
         >
           <span className="w-4 shrink-0 text-center text-[13px]">{row.icon || '·'}</span>
-          <span className="min-w-0 flex-1 truncate text-sm text-[#141310] group-hover:text-[#C8452D]">
+          <span className="min-w-0 flex-1 truncate text-sm text-ink group-hover:text-pigment">
             {row.title || t('Untitled')}
           </span>
           {shown.map((field) => {
@@ -46,7 +46,7 @@ export function DatabaseList({ rows, fields }: { rows: Row[]; fields: Field[] })
             return (
               <span
                 key={field.id}
-                className="hidden max-w-[160px] shrink-0 truncate rounded-md px-1.5 py-0.5 text-[11px] text-[#4A463E] sm:block"
+                className="hidden max-w-[160px] shrink-0 truncate rounded-md px-1.5 py-0.5 text-[11px] text-ink-soft sm:block"
                 style={choice ? { background: choice.tone } : undefined}
               >{text}</span>
             )
@@ -55,7 +55,7 @@ export function DatabaseList({ rows, fields }: { rows: Row[]; fields: Field[] })
       ))}
 
       {!rows.length && (
-        <p className="py-4 text-sm text-[#8A867C]">{t('Nothing here yet.')}</p>
+        <p className="py-4 text-sm text-muted">{t('Nothing here yet.')}</p>
       )}
     </div>
   )

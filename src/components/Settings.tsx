@@ -18,8 +18,8 @@ import { Team } from './Team'
 import { Shell } from './Shell'
 import { getWorkspace } from '../board/workspace'
 
-const field = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2.5 text-sm outline-none focus:border-[#C8452D]'
-const button = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D] disabled:opacity-40'
+const field = 'w-full rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment'
+const button = 'rounded-lg border border-hairline bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment disabled:opacity-40'
 
 function Row({ title, note, children }: {
   title: string
@@ -27,9 +27,9 @@ function Row({ title, note, children }: {
   children: React.ReactNode
 }) {
   return (
-    <section className="border-t border-[#E2DED5] py-7 first:border-t-0 first:pt-0">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">{title}</h2>
-      {note && <p className="mt-1.5 max-w-[62ch] text-[12px] leading-relaxed text-[#8A867C]">{note}</p>}
+    <section className="border-t border-hairline py-7 first:border-t-0 first:pt-0">
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{title}</h2>
+      {note && <p className="mt-1.5 max-w-[62ch] text-[12px] leading-relaxed text-muted">{note}</p>}
       <div className="mt-4 max-w-[420px]">{children}</div>
     </section>
   )
@@ -98,7 +98,7 @@ export function Settings() {
   return (
     <Shell title={t('Settings')}>
       <div className="max-w-[720px]">
-        <h1 className="mb-8 font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-[#141310]">
+        <h1 className="mb-8 font-[600] text-[clamp(1.5rem,3vw,2rem)] leading-none tracking-[-0.015em] text-ink">
           {t('Account')}
         </h1>
 
@@ -107,12 +107,12 @@ export function Settings() {
             <button
               type="button"
               onClick={() => file.current?.click()}
-              className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-[#E2DED5] bg-[#3E5C93] text-lg font-bold text-white"
+              className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-hairline bg-[#3E5C93] text-lg font-bold text-white"
             >
               {face
                 ? <img src={face} alt="" className="h-full w-full object-cover" />
                 : initials(name || displayName(user.email))}
-              <span className="absolute inset-0 grid place-items-center bg-[#141310]/60 text-[10px] font-semibold uppercase tracking-[0.13em] text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="absolute inset-0 grid place-items-center bg-ink/60 text-[10px] font-semibold uppercase tracking-[0.13em] text-white opacity-0 transition-opacity group-hover:opacity-100">
                 {t('Change')}
               </span>
             </button>
@@ -134,14 +134,14 @@ export function Settings() {
                 placeholder={t('Your name')}
                 className={field}
               />
-              <p className="mt-1.5 truncate text-[12px] text-[#8A867C]">{user.email}</p>
+              <p className="mt-1.5 truncate text-[12px] text-muted">{user.email}</p>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-3">
             <button type="button" disabled={busy} onClick={() => void saveProfile()} className={button}>
               {busy ? t('Saving…') : t('Save')}
             </button>
-            {saved && <span className="text-[12px] text-[#8A867C]">{saved}</span>}
+            {saved && <span className="text-[12px] text-muted">{saved}</span>}
           </div>
         </Row>
 
@@ -172,7 +172,7 @@ export function Settings() {
             <button type="button" disabled={!fresh || !again} onClick={() => void savePassword()} className={button}>
               {t('Save password')}
             </button>
-            {note && <span className="text-[12px] text-[#8A867C]">{note}</span>}
+            {note && <span className="text-[12px] text-muted">{note}</span>}
           </div>
         </Row>
 
@@ -235,7 +235,7 @@ export function Settings() {
         </Row>
 
         <Row title={t('Sign-in methods')} note={t('Connect a provider here rather than signing in with it: an account is chosen, not guessed.')}>
-          <div className="rounded-xl border border-[#E2DED5] bg-[#FCFBF8] py-2">
+          <div className="rounded-xl border border-hairline bg-surface py-2">
             <Identities />
           </div>
         </Row>
@@ -248,7 +248,7 @@ export function Settings() {
                 type="button"
                 onClick={() => setLang(l.id)}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors
-                  ${lang === l.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EAE6DD]'}`}
+                  ${lang === l.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-shade'}`}
               >{l.name}</button>
             ))}
           </div>

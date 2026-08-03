@@ -234,7 +234,7 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
           return {
             id,
             name: st.user?.name ?? 'Guest',
-            color: st.user?.color ?? '#8A867C',
+            color: st.user?.color ?? '#69665E',
             cursor: st.cursor ?? null,
             selection: st.selection ?? [],
             chat: st.chat ?? null,

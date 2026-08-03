@@ -44,12 +44,12 @@ function Caption({ children }: { children: ReactNode }) {
           onChange={(e) => setMeta('name', e.target.value)}
           spellCheck={false}
           aria-label={t('Board name')}
-          className="w-auto min-w-[8ch] max-w-[min(40vw,380px)] truncate bg-transparent field-sizing-content text-[19px] font-semibold leading-tight tracking-[-0.01em] text-[#141310] outline-none placeholder:text-[#8A867C] focus:underline focus:decoration-[#C8452D] focus:underline-offset-4"
+          className="w-auto min-w-[8ch] max-w-[min(40vw,380px)] truncate bg-transparent field-sizing-content text-[19px] font-semibold leading-tight tracking-[-0.01em] text-ink outline-none placeholder:text-muted focus:underline focus:decoration-pigment focus:underline-offset-4"
         />
         {children}
       </div>
-      <p className="mt-0.5 flex items-center gap-1.5 whitespace-nowrap text-[11px] leading-none text-[#8A867C]">
-        <span className="font-semibold uppercase tracking-[0.14em] text-[#C8452D]">{PRODUCT.name}</span>
+      <p className="mt-0.5 flex items-center gap-1.5 whitespace-nowrap text-[11px] leading-none text-muted">
+        <span className="font-semibold uppercase tracking-[0.14em] text-pigment">{PRODUCT.name}</span>
         <span aria-hidden>·</span>
         {parts.join(' · ')}
         <ViewOnly />
@@ -107,21 +107,21 @@ export function TopBar() {
               <button
                 type="button"
                 onClick={() => { update({ framesPanel: true }); menu.close() }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Layers size={15} /> {t('Frame panel')}
               </button>
               <button
                 type="button"
                 onClick={() => { update({ historyPanel: true }); menu.close() }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Clock size={15} /> {t('Version history')}
               </button>
               <button
                 type="button"
                 onClick={() => { exportPng(getItems(), readName() || 'board'); menu.close() }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Download size={15} /> {t('Download PNG')}
               </button>
@@ -131,12 +131,12 @@ export function TopBar() {
                   if (!printFrames(getItems())) alert(t('At least one frame is needed for PDF.'))
                   menu.close()
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Printer size={15} /> {t('Print frames as PDF')}
               </button>
-              <div className="my-1 h-px bg-[#EAE6DD]" />
-              <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Surface')}</div>
+              <div className="my-1 h-px bg-shade" />
+              <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-muted">{t('Surface')}</div>
               <div className="grid grid-cols-5 gap-1.5 px-2 pb-1">
                 {SURFACES.map((s) => (
                   <button
@@ -146,11 +146,11 @@ export function TopBar() {
                     onClick={() => { setMeta('surface', s.id); requestRender() }}
                     style={{ background: s.color }}
                     className={`h-7 rounded-md border transition-transform hover:scale-105
-                      ${surface === s.id ? 'border-[#C8452D] ring-1 ring-[#C8452D]' : 'border-black/10'}`}
+                      ${surface === s.id ? 'border-pigment ring-1 ring-pigment' : 'border-black/10'}`}
                   />
                 ))}
               </div>
-              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">{t('Texture')}</div>
+              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-muted">{t('Texture')}</div>
               <div className="flex flex-wrap gap-1 px-2 pb-1">
                 {TEXTURES.map((tex) => (
                   <button
@@ -158,11 +158,11 @@ export function TopBar() {
                     type="button"
                     onClick={() => { setMeta('texture', tex.id); requestRender() }}
                     className={`rounded-lg px-2 py-1 text-xs font-semibold
-                      ${texture === tex.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                      ${texture === tex.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                   >{t(tex.name)}</button>
                 ))}
               </div>
-              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-[#8A867C]">{t('Language')}</div>
+              <div className="px-2.5 pb-1.5 pt-2 text-xs font-semibold text-muted">{t('Language')}</div>
               <div className="flex gap-1 px-2 pb-1">
                 {LANGS.map((l) => (
                   <button
@@ -170,21 +170,21 @@ export function TopBar() {
                     type="button"
                     onClick={() => setLang(l.id)}
                     className={`flex-1 rounded-lg px-2 py-1 text-xs font-semibold
-                      ${lang === l.id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'hover:bg-[#EFEBE2]'}`}
+                      ${lang === l.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
                   >{l.name}</button>
                 ))}
               </div>
-              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <div className="my-1 h-px bg-shade" />
               <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
-                <span className="shrink-0 text-xs font-semibold text-[#8A867C]">{t('Project')}</span>
+                <span className="shrink-0 text-xs font-semibold text-muted">{t('Project')}</span>
                 <ProjectPicker
                   value={project}
                   onPick={(next) => { setProject(next); void setBoardProject(room, next) }}
-                  className="min-w-0 flex-1 rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1 text-[12px] outline-none focus:border-[#C8452D]"
+                  className="min-w-0 flex-1 rounded-md border border-hairline bg-surface px-1.5 py-1 text-[12px] outline-none focus:border-pigment"
                 />
               </div>
 
-              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <div className="my-1 h-px bg-shade" />
               <button
                 type="button"
                 onClick={() => {
@@ -194,14 +194,14 @@ export function TopBar() {
                   menu.close()
                   if (!strays.length) alert(t('Nothing left over — the board is tidy.'))
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-[#EFEBE2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Wand2 size={15} /> {t('Select leftovers')}
               </button>
-              <p className="px-2.5 pb-1 text-[11px] leading-snug text-[#8A867C]">
+              <p className="px-2.5 pb-1 text-[11px] leading-snug text-muted">
                 {t('Empty text and stickies, pen specks, connectors joined to nothing, unnamed empty frames. Selected rather than deleted, so you see what is going.')}
               </p>
-              <div className="my-1 h-px bg-[#EAE6DD]" />
+              <div className="my-1 h-px bg-shade" />
               <button
                 type="button"
                 onClick={() => {
@@ -211,7 +211,7 @@ export function TopBar() {
                   }
                   menu.close()
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#A83621] hover:bg-[#F7E9E4]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#943321] hover:bg-[#F7E9E4]"
               >
                 <Trash2 size={15} /> {t('Clear board')}
               </button>
@@ -225,7 +225,7 @@ export function TopBar() {
             <span
               role="status"
               title={saveProblem}
-              className="rounded-lg border border-[#C8452D]/30 bg-[#F7E9E4] px-2 py-1 text-[11px] font-semibold text-[#A83621]"
+              className="rounded-lg border border-pigment/30 bg-[#F7E9E4] px-2 py-1 text-[11px] font-semibold text-[#943321]"
             >{t('Not saved to the cloud')}</span>
           )}
           <IconButton title={t('Search — ⌘F')} onClick={() => update({ searchOpen: true })}>
@@ -233,7 +233,7 @@ export function TopBar() {
           </IconButton>
           <HandoffMenu />
 
-          <span className="mx-1 h-6 w-px bg-[#E2DED5]" aria-hidden />
+          <span className="mx-1 h-6 w-px bg-hairline" aria-hidden />
 
           <Collaborators />
           <Account />
@@ -246,7 +246,7 @@ export function TopBar() {
               if (frames.length) update({ presenting: 0, selection: [] })
               else alert(t('At least one frame is needed to present.'))
             }}
-            className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621]"
+            className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
           >
             {t('Present')}
           </button>

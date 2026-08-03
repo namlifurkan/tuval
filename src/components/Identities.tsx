@@ -29,17 +29,17 @@ export function Identities() {
 
   return (
     <>
-      <div className="px-2.5 pb-1.5 text-xs font-semibold text-[#8A867C]">{t('Sign-in methods')}</div>
+      <div className="px-2.5 pb-1.5 text-xs font-semibold text-muted">{t('Sign-in methods')}</div>
 
       {identities.map((identity) => (
         <div key={identity.identity_id} className="flex items-center gap-2 px-2.5 py-1">
-          <span className="min-w-0 flex-1 truncate text-sm text-[#141310]">
+          <span className="min-w-0 flex-1 truncate text-sm text-ink">
             {NAMES[identity.provider as Provider] ?? t('Email')}
           </span>
           <button
             type="button"
             onClick={() => drop(identity)}
-            className="shrink-0 rounded-md px-1.5 py-0.5 text-xs text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+            className="shrink-0 rounded-md px-1.5 py-0.5 text-xs text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
           >
             {t('Disconnect')}
           </button>
@@ -51,13 +51,13 @@ export function Identities() {
           key={provider}
           type="button"
           onClick={() => { void linkProvider(provider).catch((e: Error) => setNote(e.message)) }}
-          className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] px-2 py-1.5 text-sm font-semibold text-[#141310] hover:border-[#C8452D] hover:text-[#C8452D]"
+          className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg border border-hairline px-2 py-1.5 text-sm font-semibold text-ink hover:border-pigment hover:text-pigment"
         >
           {t('Connect {name}', { name: NAMES[provider] })}
         </button>
       ))}
 
-      {note && <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#A83621]">{note}</p>}
+      {note && <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#943321]">{note}</p>}
     </>
   )
 }

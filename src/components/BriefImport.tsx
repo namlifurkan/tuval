@@ -78,13 +78,13 @@ export function BriefImport() {
   }
 
   return (
-    <div className="absolute left-1/2 top-20 z-50 flex w-[min(92vw,720px)] -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
-      <div className="flex items-center justify-between border-b border-[#EAE6DD] px-3 py-2.5">
-        <span className="text-sm font-semibold text-[#141310]">{t('Build a board from a brief')}</span>
+    <div className="absolute left-1/2 top-20 z-50 flex w-[min(92vw,720px)] -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <div className="flex items-center justify-between border-b border-shade px-3 py-2.5">
+        <span className="text-sm font-semibold text-ink">{t('Build a board from a brief')}</span>
         <button
           type="button"
           onClick={() => update({ briefOpen: false })}
-          className="grid h-7 w-7 place-items-center rounded-md hover:bg-[#EFEBE2]"
+          className="grid h-7 w-7 place-items-center rounded-md hover:bg-tint"
         >
           <X size={15} />
         </button>
@@ -101,21 +101,21 @@ export function BriefImport() {
         }}
         spellCheck={false}
         placeholder={t('Paste Markdown or JSON here. Headings become frames, bullets become stickies, fenced code becomes code blocks, a mermaid flow becomes connectors.')}
-        className="h-[300px] w-full resize-none bg-transparent p-3 font-mono text-xs leading-relaxed outline-none placeholder:text-[#8A867C]"
+        className="h-[300px] w-full resize-none bg-transparent p-3 font-mono text-xs leading-relaxed outline-none placeholder:text-muted"
       />
 
-      <div className="flex items-center gap-2 border-t border-[#EAE6DD] px-3 py-2">
+      <div className="flex items-center gap-2 border-t border-shade px-3 py-2">
         <button
           type="button"
           onClick={() => setText(SAMPLE)}
-          className="rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+          className="rounded-lg px-2 py-1 text-xs font-semibold text-muted hover:bg-tint"
         >
           {t('Paste an example')}
         </button>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#8A867C] hover:bg-[#EFEBE2]"
+          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-muted hover:bg-tint"
         >
           <Upload size={12} /> {t('Open a file')}
         </button>
@@ -130,7 +130,7 @@ export function BriefImport() {
             if (file) void file.text().then(setText)
           }}
         />
-        <span className="ml-auto text-xs text-[#8A867C]">
+        <span className="ml-auto text-xs text-muted">
           {miro
             ? [
               `${miro.items.filter((i) => i.type === 'frame').length} ${t('frames')}`,
@@ -146,7 +146,7 @@ export function BriefImport() {
           type="button"
           disabled={!nodeCount}
           onClick={create}
-          className="rounded-lg bg-[#C8452D] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t('Create')} ⌘↵
         </button>

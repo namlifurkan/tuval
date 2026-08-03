@@ -49,9 +49,9 @@ export function SearchPanel() {
   }
 
   return (
-    <div className="absolute left-1/2 top-4 z-50 w-[420px] -translate-x-1/2 overflow-hidden rounded-xl border border-black/5 bg-[#FCFBF8] shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+    <div className="absolute left-1/2 top-4 z-50 w-[420px] -translate-x-1/2 overflow-hidden rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center gap-2 px-3 py-2.5">
-        <Search size={17} className="shrink-0 text-[#8A867C]" />
+        <Search size={17} className="shrink-0 text-muted" />
         <input
           ref={ref}
           value={query}
@@ -75,21 +75,21 @@ export function SearchPanel() {
             }
           }}
           placeholder={t('Search the board…')}
-          className="flex-1 text-sm outline-none placeholder:text-[#8A867C]"
+          className="flex-1 text-sm outline-none placeholder:text-muted"
         />
         <button
           type="button"
           onClick={() => update({ searchOpen: false })}
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-[#EFEBE2]"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-tint"
         >
           <X size={15} />
         </button>
       </div>
 
       {q && (
-        <div ref={listRef} className="max-h-[320px] overflow-y-auto border-t border-[#EAE6DD] p-1">
+        <div ref={listRef} className="max-h-[320px] overflow-y-auto border-t border-shade p-1">
           {hits.length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-[#8A867C]">{t('No results')}</div>
+            <div className="px-3 py-4 text-center text-sm text-muted">{t('No results')}</div>
           )}
           {hits.map((i, n) => (
             <button
@@ -98,19 +98,19 @@ export function SearchPanel() {
               onClick={() => { jump(i); update({ searchOpen: false }) }}
               onPointerEnter={() => setCursor(n)}
               className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left
-                ${n === active ? 'bg-[#F7E9E4] ring-1 ring-[#C8452D]/25' : 'hover:bg-[#EFEBE2]'}`}
+                ${n === active ? 'bg-[#F7E9E4] ring-1 ring-pigment/25' : 'hover:bg-tint'}`}
             >
-              <span className="shrink-0 rounded-md bg-[#EAE6DD] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A463E]">
+              <span className="shrink-0 rounded-md bg-shade px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft">
                 {t(TYPE_LABEL[i.type] ?? i.type)}
               </span>
-              <span className="truncate text-sm text-[#141310]">{textOf(i)}</span>
+              <span className="truncate text-sm text-ink">{textOf(i)}</span>
             </button>
           ))}
         </div>
       )}
 
       {q && hits.length > 0 && (
-        <div className="flex items-center gap-3 border-t border-[#EAE6DD] px-3 py-1.5 text-[11px] text-[#8A867C]">
+        <div className="flex items-center gap-3 border-t border-shade px-3 py-1.5 text-[11px] text-muted">
           <span><kbd className="font-semibold">↑↓</kbd> {t('navigate')}</span>
           <span><kbd className="font-semibold">↵</kbd> {t('go')}</span>
           <span><kbd className="font-semibold">⇧↵</kbd> {t('go, keep open')}</span>

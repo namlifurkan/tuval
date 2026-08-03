@@ -86,11 +86,29 @@ const FIELDS = {
   parent_id: { type: 'string', description: 'The page or issue this sits under' },
   project_id: { type: 'string' },
   cycle_id: { type: 'string' },
+  data: {
+    type: 'object',
+    description: 'Whatever this record needs that has no column of its own, as keys and values '
+      + '— an area, a seat, a source. Sending it replaces what is there rather than merging, so '
+      + 'read the record first if you mean to keep the keys already on it.',
+  },
+}
+
+const asObject = (value) => {
+  let held = value
+  if (typeof held === 'string') {
+    try { held = JSON.parse(held) } catch { held = null }
+  }
+  if (!held || typeof held !== 'object' || Array.isArray(held)) {
+    throw new Error('data must be an object of keys and values, like {"area": "agents"}.')
+  }
+  return held
 }
 
 const changes = (args) => {
   const out = {}
   for (const key of Object.keys(FIELDS)) if (args[key] !== undefined) out[key] = args[key]
+  if (out.data !== undefined) out.data = asObject(out.data)
   return out
 }
 
@@ -159,7 +177,8 @@ const TOOLS = [
     description:
       'File a new record: an issue, a page, a project, a person, a company, an event. '
       + 'Needs a key with write access. Text given here becomes the body of the page — see '
-      + 'append_to_page for where it waits until somebody opens it.',
+      + 'append_to_page for where it waits until somebody opens it. Anything the workspace keeps '
+      + 'no column for goes in data, rather than into the first line of the text.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -185,8 +204,9 @@ const TOOLS = [
   {
     name: 'update_record',
     description:
-      'Change a record: its title, status, assignee, priority, due date, parent, project or '
-      + 'cycle. Only what you send is changed. Needs a key with write access. This does not '
+      'Change a record: its title, status, assignee, priority, due date, parent, project, '
+      + 'cycle, or the data kept beside it. Only what you send is changed, though data is '
+      + 'replaced whole rather than merged. Needs a key with write access. This does not '
       + 'touch the text of the page — append_to_page does that.',
     inputSchema: {
       type: 'object',

@@ -130,7 +130,7 @@ export function Page() {
               <a
                 href={`/d/${up.id}`}
                 onClick={(e) => { e.preventDefault(); go(`/d/${up.id}`) }}
-                className="max-w-[22ch] truncate text-[12px] font-medium text-[#8A867C] hover:text-[#C8452D]"
+                className="max-w-[22ch] truncate text-[12px] font-medium text-muted hover:text-pigment"
               >
                 {up.icon && <span className="mr-1">{up.icon}</span>}
                 {up.title || t('Untitled page')}
@@ -148,8 +148,8 @@ export function Page() {
           <button
             type="button"
             onClick={() => setTemplate(here, !isTemplate(here))}
-            className={`rounded-md px-2 py-1 text-[12px] font-semibold hover:bg-[#EAE6DD]
-              ${isTemplate(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+            className={`rounded-md px-2 py-1 text-[12px] font-semibold hover:bg-shade
+              ${isTemplate(here) ? 'text-pigment' : 'text-muted hover:text-ink'}`}
           >
             {isTemplate(here) ? t('A template') : t('Make a template')}
           </button>
@@ -163,7 +163,7 @@ export function Page() {
               .then((made) => { if (made) go(`/d/${made}`); else setCopying(false) })
               .catch(() => setCopying(false))
           }}
-          className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-40"
+          className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink disabled:opacity-40"
         >
           {copying ? t('Copying…') : t('Duplicate')}
         </button>
@@ -175,8 +175,8 @@ export function Page() {
               aria-pressed={starred.has(id)}
               title={starred.has(id) ? t('Remove from favourites') : t('Add to favourites')}
               onClick={() => void toggleFavourite(id)}
-              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
-                ${starred.has(id) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-shade
+                ${starred.has(id) ? 'text-pigment' : 'text-muted hover:text-ink'}`}
             >
               <Star size={13} fill={starred.has(id) ? 'currentColor' : 'none'} />
             </button>
@@ -185,8 +185,8 @@ export function Page() {
               aria-pressed={isLocked(here)}
               title={isLocked(here) ? t('Unlock this page') : t('Lock this page')}
               onClick={() => setLocked(here, !isLocked(here))}
-              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
-                ${isLocked(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-shade
+                ${isLocked(here) ? 'text-pigment' : 'text-muted hover:text-ink'}`}
             >
               {isLocked(here) ? <Lock size={13} /> : <Unlock size={13} />}
             </button>
@@ -195,8 +195,8 @@ export function Page() {
               aria-pressed={isWide(here)}
               title={t('Full width')}
               onClick={() => setWide(here, !isWide(here))}
-              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-[#EAE6DD]
-                ${isWide(here) ? 'text-[#C8452D]' : 'text-[#8A867C] hover:text-[#141310]'}`}
+              className={`grid h-7 w-7 place-items-center rounded-md hover:bg-shade
+                ${isWide(here) ? 'text-pigment' : 'text-muted hover:text-ink'}`}
             >
               <StretchHorizontal size={13} />
             </button>
@@ -210,7 +210,7 @@ export function Page() {
                 if (!confirm(t('Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.', { name: shown, days: TRASH_DAYS }))) return
                 void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/pages'))
               }}
-              className="grid h-7 w-7 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
+              className="grid h-7 w-7 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
             >
               <Trash2 size={13} />
             </button>
@@ -224,7 +224,7 @@ export function Page() {
         readOnly={isLocked(here)}
         onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
         placeholder={t(database ? 'Untitled database' : 'Untitled page')}
-        className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
+        className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
       />
 
       {here && !database && <PageProps row={here} locked={isLocked(here)} />}
@@ -234,15 +234,15 @@ export function Page() {
         : (
           <div className="mt-5 -ml-[54px]">
             {openProblem ? (
-              <div role="alert" className="ml-[54px] rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-4">
-                <p className="text-sm font-semibold text-[#141310]">{t(openProblem)}</p>
-                <p className="mt-1 text-[12px] text-[#8A867C]">
+              <div role="alert" className="ml-[54px] rounded-xl border border-hairline bg-surface p-4">
+                <p className="text-sm font-semibold text-ink">{t(openProblem)}</p>
+                <p className="mt-1 text-[12px] text-muted">
                   {t('Nothing was overwritten. You can try loading the stored page again.')}
                 </p>
                 <button
                   type="button"
                   onClick={retryOpen}
-                  className="mt-3 rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                  className="mt-3 rounded-lg border border-hairline px-3 py-1.5 text-sm font-semibold text-ink-soft hover:border-pigment hover:text-pigment"
                 >
                   {t('Retry')}
                 </button>
@@ -250,25 +250,25 @@ export function Page() {
             ) : ready && (
               <>
                 {!!damaged && (
-                  <div role="alert" className="mb-4 ml-[54px] rounded-xl border border-[#C8452D] bg-[#FCF4F2] p-4">
-                    <p className="text-sm font-semibold text-[#141310]">
+                  <div role="alert" className="mb-4 ml-[54px] rounded-xl border border-pigment bg-[#FCF4F2] p-4">
+                    <p className="text-sm font-semibold text-ink">
                       {t('Part of this page could not be read.')}
                     </p>
-                    <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-[#4A463E]">
+                    <p className="mt-1 max-w-[62ch] text-[12px] leading-relaxed text-ink-soft">
                       {t('What did come back is below. The stored copy is damaged and is being left exactly as it is, so saving is off — otherwise the first thing typed here would replace it. Keep a copy of the damaged file before replacing it.')}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={keepDamaged}
-                        className="rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                        className="rounded-lg border border-hairline px-3 py-1.5 text-sm font-semibold text-ink-soft hover:border-pigment hover:text-pigment"
                       >
                         {t('Download the damaged copy')}
                       </button>
                       <button
                         type="button"
                         onClick={replaceDamaged}
-                        className="rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
+                        className="rounded-lg border border-hairline px-3 py-1.5 text-sm font-semibold text-ink-soft hover:border-pigment hover:text-pigment"
                       >
                         {t('Save over it from here on')}
                       </button>
@@ -284,8 +284,8 @@ export function Page() {
         )}
 
       {!!related.length && (
-        <section className="mt-10 border-t border-[#EAE6DD] pt-4">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+        <section className="mt-10 border-t border-shade pt-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
             {t('Related to this')}
           </h2>
           <ul className="mt-2">
@@ -294,11 +294,11 @@ export function Page() {
                 <a
                   href={`/d/${row.id}`}
                   onClick={(e) => { e.preventDefault(); go(`/d/${row.id}`) }}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-shade"
                 >
-                  <Table2 size={14} className="shrink-0 text-[#8A867C]" />
+                  <Table2 size={14} className="shrink-0 text-muted" />
                   <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled')}</span>
-                  <span className="shrink-0 text-[11px] text-[#8A867C]">
+                  <span className="shrink-0 text-[11px] text-muted">
                     {db.title || t('Untitled database')} · {field.name}
                   </span>
                 </a>
@@ -309,8 +309,8 @@ export function Page() {
       )}
 
       {!!links.length && (
-        <section className="mt-10 border-t border-[#EAE6DD] pt-4">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+        <section className="mt-10 border-t border-shade pt-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
             {t('Linked from')}
           </h2>
           <ul className="mt-2">
@@ -319,9 +319,9 @@ export function Page() {
                 <a
                   href={`/d/${from.id}`}
                   onClick={(e) => { e.preventDefault(); go(`/d/${from.id}`) }}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-shade"
                 >
-                  <CornerUpLeft size={14} className="shrink-0 text-[#8A867C]" />
+                  <CornerUpLeft size={14} className="shrink-0 text-muted" />
                   {from.title || t('Untitled page')}
                 </a>
               </li>
@@ -331,8 +331,8 @@ export function Page() {
       )}
 
       {!database && (
-      <section className="mt-10 border-t border-[#EAE6DD] pt-4">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <section className="mt-10 border-t border-shade pt-4">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
           {t('Inside this page')}
         </h2>
         <ul className="mt-2">
@@ -341,11 +341,11 @@ export function Page() {
               <a
                 href={`/d/${kid.id}`}
                 onClick={(e) => { e.preventDefault(); go(`/d/${kid.id}`) }}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-shade"
               >
                 {kid.icon
                   ? <span className="w-[14px] shrink-0 text-center leading-none">{kid.icon}</span>
-                  : <FileText size={14} className="shrink-0 text-[#8A867C]" />}
+                  : <FileText size={14} className="shrink-0 text-muted" />}
                 {kid.title || t('Untitled page')}
               </a>
             </li>
@@ -354,7 +354,7 @@ export function Page() {
         <button
           type="button"
           onClick={() => void createRecord('', 'doc', id).then((made) => made && go(`/d/${made}`))}
-          className="mt-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]"
+          className="mt-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-muted hover:bg-shade hover:text-pigment"
         >
           <Plus size={14} /> {t('Add a page inside')}
         </button>

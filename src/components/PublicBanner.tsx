@@ -42,32 +42,32 @@ export function PublicBanner() {
 
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center pb-1">
-      <div className="flex items-center gap-2 rounded-t-xl border border-b-0 border-[#E2DED5] bg-[#FCFBF8]/95 px-3 py-1.5 shadow-[0_-2px_12px_rgba(20,19,16,0.06)] backdrop-blur-[2px]">
+      <div className="flex items-center gap-2 rounded-t-xl border border-b-0 border-hairline bg-surface/95 px-3 py-1.5 shadow-[0_-2px_12px_rgba(20,19,16,0.06)] backdrop-blur-[2px]">
         {author && (
           <>
             <a
               href={`/u/${author.handle}`}
-              className="flex items-center gap-1.5 text-[12px] font-semibold text-[#141310] hover:text-[#C8452D]"
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-ink hover:text-pigment"
             >
               {author.avatar && (
                 <img src={author.avatar} alt="" className="h-5 w-5 rounded-md object-cover" />
               )}
               {author.name || `@${author.handle}`}
             </a>
-            <span className="h-3 w-px bg-[#E2DED5]" />
+            <span className="h-3 w-px bg-hairline" />
           </>
         )}
 
         <button
           type="button"
           onClick={copy}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#C8452D] hover:bg-[#F7E9E4]"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-pigment hover:bg-[#F7E9E4]"
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? t('Copied') : t('Copy the brief')}
         </button>
 
-        <span className="h-3 w-px bg-[#E2DED5]" />
+        <span className="h-3 w-px bg-hairline" />
         <a href="/" title={PRODUCT.name} className="opacity-50 transition-opacity hover:opacity-100">
           <Wordmark height={11} />
         </a>

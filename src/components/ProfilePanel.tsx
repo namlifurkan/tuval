@@ -52,15 +52,15 @@ export function ProfilePanel() {
 
   // No width in the shared class: a w-full here beat every w-[…] set beside it, which is how the
   // label field came to take the whole row and leave the address a sliver.
-  const field = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm text-[#141310] outline-none placeholder:text-[#B6B1A6] focus:border-[#C8452D]'
-  const label = 'text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]'
+  const field = 'rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment'
+  const label = 'text-[11px] font-bold uppercase tracking-[0.13em] text-muted'
 
   return (
     <div className="space-y-3">
       <div>
         <span className={label}>{t('Address')}</span>
         <div className="mt-1 flex items-center gap-1.5">
-          <span className="shrink-0 text-sm text-[#8A867C]">{location.host}/u/</span>
+          <span className="shrink-0 text-sm text-muted">{location.host}/u/</span>
           <input
             value={draft.handle}
             onChange={(e) => setDraft({ ...draft, handle: e.target.value.toLowerCase().trim() })}
@@ -70,7 +70,7 @@ export function ProfilePanel() {
           />
         </div>
         {draft.handle && bad && (
-          <p className="mt-1 text-[11px] text-[#C8452D]">
+          <p className="mt-1 text-[11px] text-pigment">
             {t('Lower case letters, numbers, dashes and underscores, two to thirty of them.')}
           </p>
         )}
@@ -111,12 +111,12 @@ export function ProfilePanel() {
                 onChange={(e) => setLink(at, { url: e.target.value.trim() })}
                 placeholder="https://buymeacoffee.com/…"
                 spellCheck={false}
-                className={`min-w-0 flex-1 ${field} ${link.url && !linkable(link.url) ? 'border-[#C8452D]' : ''}`}
+                className={`min-w-0 flex-1 ${field} ${link.url && !linkable(link.url) ? 'border-pigment' : ''}`}
               />
               <button
                 type="button"
                 onClick={() => setDraft({ ...draft, links: links.filter((_, i) => i !== at) })}
-                className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#EFEBE2] hover:text-[#C8452D]"
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted hover:bg-tint hover:text-pigment"
               ><X size={14} /></button>
             </div>
           ))}
@@ -124,11 +124,11 @@ export function ProfilePanel() {
             <button
               type="button"
               onClick={() => setDraft({ ...draft, links: [...links, { label: '', url: '' }] })}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EFEBE2] hover:text-[#C8452D]"
+              className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-tint hover:text-pigment"
             ><Plus size={13} /> {t('Add a link')}</button>
           )}
         </div>
-        <p className="mt-1.5 max-w-[62ch] text-[11px] leading-relaxed text-[#8A867C]">
+        <p className="mt-1.5 max-w-[62ch] text-[11px] leading-relaxed text-muted">
           {t('Over https, and only to: {hosts}. An allow-list rather than a warning — a page that takes any address is a place to host the link in somebody else\'s scam.', { hosts: LINKABLE.join(', ') })}
         </p>
       </div>
@@ -138,14 +138,14 @@ export function ProfilePanel() {
           type="button"
           disabled={bad}
           onClick={save}
-          className="rounded-lg bg-[#C8452D] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#A83621] disabled:opacity-40"
+          className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40"
         >{t('Save')}</button>
 
         {held?.handle && (
           <>
             <a
               href={`/u/${held.handle}`}
-              className="rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+              className="rounded-lg border border-hairline bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment"
             >{t('See it')}</a>
             <button
               type="button"
@@ -154,13 +154,13 @@ export function ProfilePanel() {
                 setCopied(true)
                 setTimeout(() => setCopied(false), 1600)
               }}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold text-[#8A867C] hover:text-[#141310]"
+              className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold text-muted hover:text-ink"
             >
               {copied ? <Check size={14} /> : <Copy size={14} />} {t('Copy link')}
             </button>
           </>
         )}
-        {said && <span className="text-[12px] text-[#4A463E]">{said}</span>}
+        {said && <span className="text-[12px] text-ink-soft">{said}</span>}
       </div>
     </div>
   )

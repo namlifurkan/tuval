@@ -31,7 +31,7 @@ type Card = Item & { type: 'record' }
 const READING = { fontFamily: FONT.stack }
 
 const FLOW = ['todo', 'doing', 'done'] as const
-const TONE: { [k: string]: string } = { todo: '#8A867C', doing: '#DE9A4E', done: '#5E9A8A' }
+const TONE: { [k: string]: string } = { todo: '#69665E', doing: '#DE9A4E', done: '#5E9A8A' }
 const LABEL: { [k: string]: string } = { todo: 'To do', doing: 'In progress', done: 'Done' }
 
 // Laid out from the sticky's own size rather than from numbers typed by eye.
@@ -101,10 +101,10 @@ const Pane = ({ name, note, children }: {
   note: string
   children: React.ReactNode
 }) => (
-  <div className="flex h-[26rem] flex-col overflow-hidden rounded-xl border border-[#141310]/12 bg-[#FCFBF8] shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]">
-    <header className="flex shrink-0 items-baseline gap-3 border-b border-[#141310]/10 px-4 py-3">
+  <div className="flex h-[26rem] flex-col overflow-hidden rounded-xl border border-ink/12 bg-surface shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]">
+    <header className="flex shrink-0 items-baseline gap-3 border-b border-ink/10 px-4 py-3">
       <span className="text-[10px] font-bold uppercase tracking-[0.16em]">{name}</span>
-      <span className="min-w-0 flex-1 truncate text-[11.5px] text-[#8A867C]">{note}</span>
+      <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted">{note}</span>
     </header>
     {children}
   </div>
@@ -123,7 +123,7 @@ const Dot = ({ status, onClick }: { status: string; onClick: () => void }) => (
 
 const BUTTON = 'inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13.5px] font-semibold '
   + 'transition-[transform,background-color,box-shadow] duration-150 focus-visible:outline-2 '
-  + 'focus-visible:outline-offset-2 focus-visible:outline-[#141310]'
+  + 'focus-visible:outline-offset-2 focus-visible:outline-ink'
 
 export function ThreeViews() {
   const shell = useRef<HTMLDivElement>(null)
@@ -266,32 +266,32 @@ export function ThreeViews() {
     : ''
 
   const tab = (on: boolean) => `rounded-[5px] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
-    on ? 'bg-[#141310] text-[#F2EFE9]' : 'text-[#8A867C] hover:bg-[#EBE7DE]'}`
+    on ? 'bg-ink text-paper' : 'text-muted hover:bg-[#EBE7DE]'}`
 
   return (
     <div className="mx-auto max-w-[80rem] px-6">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,0.95fr)]">
         <div
-          className="flex h-[30rem] flex-col overflow-hidden rounded-xl border border-[#141310]/12 bg-[#FCFBF8] shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]"
+          className="flex h-[30rem] flex-col overflow-hidden rounded-xl border border-ink/12 bg-surface shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]"
           onPointerEnter={() => { hot.current = true }}
           onPointerLeave={() => { hot.current = false }}
         >
-          <header className="flex shrink-0 items-baseline gap-3 border-b border-[#141310]/10 px-4 py-3">
+          <header className="flex shrink-0 items-baseline gap-3 border-b border-ink/10 px-4 py-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.16em]">Canvas</span>
-            <span className="min-w-0 flex-1 truncate text-[11.5px] text-[#8A867C]">
+            <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted">
               {FRAME_TITLE} · {notes.length + cards.length} items
             </span>
           </header>
-          <div ref={shell} className="relative min-h-0 flex-1 bg-[#F2EFE9]">
+          <div ref={shell} className="relative min-h-0 flex-1 bg-paper">
             <Canvas embedded />
             <TextEditor />
           </div>
-          <footer className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#141310]/10 px-3 py-2.5">
+          <footer className="flex shrink-0 flex-wrap items-center gap-2 border-t border-ink/10 px-3 py-2.5">
             {!!notes.length && (
               <button
                 type="button"
                 onClick={promote}
-                className={`${BUTTON} bg-[#C8452D] text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] hover:bg-[#A83621]`}
+                className={`${BUTTON} bg-pigment text-paper shadow-[2px_2px_0_#9E2F1B] hover:bg-[#943321]`}
               >
                 {chosen.size && notes.some((n) => chosen.has(n.id))
                   ? `Turn ${said(notes.filter((n) => chosen.has(n.id)).length)} into work`
@@ -303,19 +303,19 @@ export function ThreeViews() {
               type="button"
               onClick={reset}
               className={`${BUTTON} ${notes.length
-                ? 'border border-[#141310]/16 text-[#4A463E] hover:border-[#141310] hover:bg-[#F2EFE9]'
-                : 'bg-[#141310] text-[#F2EFE9] shadow-[2px_2px_0_rgba(20,19,16,0.25)]'}`}
+                ? 'border border-ink/16 text-ink-soft hover:border-ink hover:bg-paper'
+                : 'bg-ink text-paper shadow-[2px_2px_0_rgba(20,19,16,0.25)]'}`}
             >
               <RotateCcw size={14} /> {notes.length ? 'Reset' : 'Put the notes back'}
             </button>
-            <span className="ml-auto pr-1 text-[11.5px] text-[#8A867C]">
+            <span className="ml-auto pr-1 text-[11.5px] text-muted">
               Drag anything. Nothing here is saved.
             </span>
           </footer>
         </div>
 
         <Pane name="Database" note="Type here — the board changes as you type">
-          <div className="grid shrink-0 grid-cols-[1fr_auto] gap-3 border-b border-[#141310]/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+          <div className="grid shrink-0 grid-cols-[1fr_auto] gap-3 border-b border-ink/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
             <span>Title</span>
             <span>Status</span>
           </div>
@@ -324,8 +324,8 @@ export function ThreeViews() {
               <div
                 key={card.id}
                 onPointerDown={() => pick(card.id)}
-                className={`grid grid-cols-[1fr_auto] items-center gap-2 border-b border-[#141310]/8 px-2 py-2 last:border-0 ${
-                  chosen.has(card.id) ? 'bg-[#F7E9E4]' : 'hover:bg-[#F2EFE9]'}`}
+                className={`grid grid-cols-[1fr_auto] items-center gap-2 border-b border-ink/8 px-2 py-2 last:border-0 ${
+                  chosen.has(card.id) ? 'bg-[#F7E9E4]' : 'hover:bg-paper'}`}
               >
                 <div className="min-w-0">
                   <input
@@ -334,7 +334,7 @@ export function ThreeViews() {
                     onFocus={() => pick(card.id)}
                     spellCheck={false}
                     aria-label="Record title"
-                    className="w-full truncate rounded-[5px] bg-transparent px-2 py-1 text-[13.5px] outline-none focus:bg-[#F2EFE9] focus:ring-1 focus:ring-[#141310]/25"
+                    className="w-full truncate rounded-[5px] bg-transparent px-2 py-1 text-[13.5px] outline-none focus:bg-paper focus:ring-1 focus:ring-ink/25"
                     style={READING}
                   />
                   <span className="block px-2 pt-0.5 text-[11px] text-[#B6B1A6]">
@@ -343,7 +343,7 @@ export function ThreeViews() {
                 </div>
                 <div className="flex items-center gap-1.5 pr-2">
                   <Dot status={card.snapshot.status ?? 'todo'} onClick={() => onwards(card)} />
-                  <span className="w-[72px] text-[11.5px] text-[#8A867C]">
+                  <span className="w-[72px] text-[11.5px] text-muted">
                     {LABEL[card.snapshot.status ?? 'todo']}
                   </span>
                 </div>
@@ -352,8 +352,8 @@ export function ThreeViews() {
           </div>
         </Pane>
 
-        <div className="flex h-[26rem] flex-col overflow-hidden rounded-xl border border-[#141310]/12 bg-[#FCFBF8] shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]">
-          <header className="flex shrink-0 items-center gap-1 border-b border-[#141310]/10 px-3 py-2">
+        <div className="flex h-[26rem] flex-col overflow-hidden rounded-xl border border-ink/12 bg-surface shadow-[5px_5px_0_rgba(20,19,16,0.07)] lg:h-[34rem]">
+          <header className="flex shrink-0 items-center gap-1 border-b border-ink/10 px-3 py-2">
             <button type="button" onClick={() => setAsBrief(false)} className={tab(!asBrief)}>
               Tracker
             </button>
@@ -368,7 +368,7 @@ export function ThreeViews() {
                   setCopied(true)
                   window.setTimeout(() => setCopied(false), 1600)
                 }}
-                className="ml-auto flex items-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] font-semibold text-[#8A867C] hover:bg-[#EBE7DE] hover:text-[#141310]"
+                className="ml-auto flex items-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] font-semibold text-muted hover:bg-[#EBE7DE] hover:text-ink"
               >
                 {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
               </button>
@@ -399,8 +399,8 @@ export function ThreeViews() {
                         onClick={() => onwards(card)}
                         className={`mb-1.5 block w-full rounded-lg border px-3 py-2 text-left last:mb-0 ${
                           chosen.has(card.id)
-                            ? 'border-[#141310] bg-[#F7E9E4]'
-                            : 'border-[#141310]/12 hover:border-[#141310]/40'}`}
+                            ? 'border-ink bg-[#F7E9E4]'
+                            : 'border-ink/12 hover:border-ink/40'}`}
                       >
                         <span className="block font-mono text-[10.5px] text-[#B6B1A6]">
                           {card.recordId}
@@ -411,7 +411,7 @@ export function ThreeViews() {
                       </button>
                     ))}
                     {!here.length && (
-                      <div className="rounded-lg border border-dashed border-[#141310]/12 px-3 py-2 text-[11.5px] text-[#B6B1A6]">
+                      <div className="rounded-lg border border-dashed border-ink/12 px-3 py-2 text-[11.5px] text-[#B6B1A6]">
                         Nothing here
                       </div>
                     )}

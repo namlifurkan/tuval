@@ -40,32 +40,32 @@ export function Presentation() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50">
-      <div className="pointer-events-auto absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-black/5 bg-[#FCFBF8] p-1.5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
+      <div className="pointer-events-auto absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-black/5 bg-surface p-1.5 shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
         <button
           type="button"
           disabled={presenting === 0}
           onClick={() => update({ presenting: presenting - 1 })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2] disabled:opacity-30"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-tint disabled:opacity-30"
         >
           <ChevronLeft size={19} />
         </button>
-        <span className="min-w-[132px] px-2 text-center text-sm font-semibold text-[#141310]">
+        <span className="min-w-[132px] px-2 text-center text-sm font-semibold text-ink">
           {frame ? frame.title : 'Frame yok'}
-          <span className="ml-2 text-[#8A867C]">{presenting + 1}/{frames.length}</span>
+          <span className="ml-2 text-muted">{presenting + 1}/{frames.length}</span>
         </span>
         <button
           type="button"
           disabled={presenting >= frames.length - 1}
           onClick={() => update({ presenting: presenting + 1 })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2] disabled:opacity-30"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-tint disabled:opacity-30"
         >
           <ChevronRight size={19} />
         </button>
-        <div className="mx-1 h-6 w-px bg-[#E2DED5]" />
+        <div className="mx-1 h-6 w-px bg-hairline" />
         <button
           type="button"
           onClick={() => update({ presenting: null })}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#EFEBE2]"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-tint"
           title={`${t('Exit')} — Esc`}
         >
           <X size={19} />

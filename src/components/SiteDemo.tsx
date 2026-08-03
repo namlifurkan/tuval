@@ -88,13 +88,13 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
   return (
     <div
       ref={shell}
-      className={`relative mx-auto w-[min(100%-2rem,80rem)] overflow-hidden rounded-2xl border border-[#141310]/12 bg-[#F2EFE9] shadow-[5px_5px_0_rgba(20,19,16,0.07)] ${
+      className={`relative mx-auto w-[min(100%-2rem,80rem)] overflow-hidden rounded-2xl border border-ink/12 bg-paper shadow-[5px_5px_0_rgba(20,19,16,0.07)] ${
         tall ? 'h-[clamp(24rem,62vh,40rem)]' : 'h-[clamp(20rem,46vh,30rem)]'}`}
     >
       <Canvas embedded />
       <TextEditor />
       <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-1 shadow-[2px_2px_0_rgba(20,19,16,0.07)]">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-hairline bg-surface p-1 shadow-[2px_2px_0_rgba(20,19,16,0.07)]">
           {TOOLS.map(({ id, icon: Icon, key }) => (
             <button
               key={id}
@@ -102,7 +102,7 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
               title={`${id} — ${key}`}
               onClick={() => { setTool(id); requestRender() }}
               className={`grid h-9 w-9 place-items-center rounded-lg transition-colors
-                ${tool === id ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#141310] hover:bg-[#EAE6DD]'}`}
+                ${tool === id ? 'bg-[#F7E9E4] text-pigment' : 'text-ink hover:bg-shade'}`}
             >
               <Icon size={19} />
             </button>
@@ -168,16 +168,16 @@ function DatabaseDemo() {
   const group = FIELDS.find((f) => f.id === by)
 
   return (
-    <div className="rounded-2xl border border-[#E2DED5] bg-[#FCFBF8] p-3 shadow-[4px_4px_0_rgba(20,19,16,0.06)]">
+    <div className="rounded-2xl border border-hairline bg-surface p-3 shadow-[4px_4px_0_rgba(20,19,16,0.06)]">
       <div className="mb-2 flex flex-wrap items-center gap-1.5 px-1">
-        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">Group by</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">Group by</span>
         {[{ id: '', name: 'nothing' }, ...FIELDS.filter((f) => f.type === 'status' || f.type === 'checkbox')].map((f) => (
           <button
             key={f.id || 'none'}
             type="button"
             onClick={() => setBy(f.id)}
             className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors
-              ${by === f.id ? 'bg-[#C8452D] text-white' : 'bg-[#EFEBE2] text-[#4A463E] hover:bg-[#E2DED5]'}`}
+              ${by === f.id ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
           >{f.name}</button>
         ))}
       </div>
@@ -221,16 +221,16 @@ function IssuesDemo() {
   )
 
   return (
-    <div className="rounded-2xl border border-[#E2DED5] bg-[#FCFBF8] p-4 shadow-[4px_4px_0_rgba(20,19,16,0.06)]">
+    <div className="rounded-2xl border border-hairline bg-surface p-4 shadow-[4px_4px_0_rgba(20,19,16,0.06)]">
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">Group by</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">Group by</span>
         {(['status', 'priority', 'none'] as const).map((one) => (
           <button
             key={one}
             type="button"
             onClick={() => setGroup(one)}
             className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors
-              ${group === one ? 'bg-[#C8452D] text-white' : 'bg-[#EFEBE2] text-[#4A463E] hover:bg-[#E2DED5]'}`}
+              ${group === one ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
           >{one}</button>
         ))}
       </div>
@@ -238,12 +238,12 @@ function IssuesDemo() {
       {bands.map((band) => (
         <div key={band.key} className="mb-4 last:mb-0">
           <div className="flex items-center gap-2 px-1 pb-1">
-            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#4A463E]">
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-soft">
               {band.label || 'Everything'}
             </span>
             <span className="text-[11px] tabular-nums text-[#B6B1A6]">{band.rows.length}</span>
           </div>
-          <ul className="divide-y divide-[#EFEBE2] border-t border-[#EFEBE2]">
+          <ul className="divide-y divide-tint border-t border-tint">
             {band.rows.map((row) => (
               <li key={row.id} className="flex items-center gap-2.5 py-2">
                 <span
@@ -251,11 +251,11 @@ function IssuesDemo() {
                   className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
                   style={{ background: row.status ? STATUS_TONE[row.status] ?? '#C6C2B6' : '#C6C2B6' }}
                 />
-                <span className="min-w-0 flex-1 truncate text-[14px] text-[#141310]">{row.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{row.title}</span>
                 <span className="shrink-0 text-[11px] tabular-nums text-[#B6B1A6]">
                   {row.estimate ? `${row.estimate} pt` : ''}
                 </span>
-                <span className="w-[4.5rem] shrink-0 text-right text-[11px] font-semibold tabular-nums text-[#8A867C]">
+                <span className="w-[4.5rem] shrink-0 text-right text-[11px] font-semibold tabular-nums text-muted">
                   TUV-{row.seq}
                 </span>
               </li>

@@ -102,15 +102,15 @@ export function Account() {
                 {face ? <img src={face} alt="" className="h-full w-full object-cover" /> : initial}
               </span>
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold text-[#141310]">{displayName(user.email)}</div>
-                <div className="truncate text-xs text-[#8A867C]">{user.email}</div>
+                <div className="truncate text-sm font-semibold text-ink">{displayName(user.email)}</div>
+                <div className="truncate text-xs text-muted">{user.email}</div>
               </div>
             </div>
-            <div className="my-1 h-px bg-[#EAE6DD]" />
+            <div className="my-1 h-px bg-shade" />
             {mine && (
               <a
                 href={`/u/${mine}`}
-                className="block w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+                className="block w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-tint"
               >
                 {t('Your page')}
               </a>
@@ -118,28 +118,28 @@ export function Account() {
             <button
               type="button"
               onClick={() => go('/settings')}
-              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-tint"
             >
               {t('Account settings')}
             </button>
             <button
               type="button"
               onClick={() => { void signOut(); pop.close() }}
-              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-[#EFEBE2]"
+              className="w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-tint"
             >
               {t('Sign out')}
             </button>
           </>
         ) : (
           <>
-            <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-[#8A867C]">{t('Sign in')}</div>
+            <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-muted">{t('Sign in')}</div>
             <div className="mx-1 mb-2 grid grid-cols-3 gap-1">
               {PROVIDERS.map(({ id, name, path }) => (
                 <button
                   key={id}
                   type="button"
                   onClick={() => { void signInWith(id).catch((e: Error) => { setReason(t(authMessage(e))); setState('error') }) }}
-                  className="flex items-center justify-center gap-1 rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-1.5 py-1.5 text-[13px] font-semibold text-[#141310] transition-colors hover:border-[#C8452D] hover:text-[#C8452D]"
+                  className="flex items-center justify-center gap-1 rounded-lg border border-hairline bg-surface px-1.5 py-1.5 text-[13px] font-semibold text-ink transition-colors hover:border-pigment hover:text-pigment"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                     <path d={path} />
@@ -149,17 +149,17 @@ export function Account() {
               ))}
             </div>
             <div className="mx-2.5 mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.13em] text-[#B6B1A6]">
-              <span className="h-px flex-1 bg-[#EAE6DD]" />{t('or')}<span className="h-px flex-1 bg-[#EAE6DD]" />
+              <span className="h-px flex-1 bg-shade" />{t('or')}<span className="h-px flex-1 bg-shade" />
             </div>
             {authError && state === 'idle' && (
-              <p className="mx-1 mb-2 rounded-lg border border-[#E2DED5] bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-[#141310]">
+              <p className="mx-1 mb-2 rounded-lg border border-hairline bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-ink">
                 {isStaleLink
                   ? t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })
                   : t('Signing in did not go through: {reason}', { reason: authError })}
               </p>
             )}
             {state === 'sent' ? (
-              <p className="px-2.5 pb-2 text-sm leading-snug text-[#141310]">
+              <p className="px-2.5 pb-2 text-sm leading-snug text-ink">
                 {t('Check {email} for a sign-in link.', { email })}
               </p>
             ) : (
@@ -171,7 +171,7 @@ export function Account() {
                   type="email"
                   placeholder="you@company.com"
                   spellCheck={false}
-                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm outline-none focus:border-pigment"
                 />
                 <input
                   value={password}
@@ -180,27 +180,27 @@ export function Account() {
                   type="password"
                   autoComplete="current-password"
                   placeholder={t('Password (leave empty for a link)')}
-                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-sm outline-none focus:border-[#C8452D]"
+                  className="mx-1 mb-2 w-[calc(100%-8px)] rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm outline-none focus:border-pigment"
                 />
                 <button
                   type="button"
                   disabled={state === 'sending' || !email.trim()}
                   onClick={() => void send()}
-                  className="mx-1 w-[calc(100%-8px)] rounded-lg bg-[#C8452D] px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
+                  className="mx-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
                 >
                   {state === 'sending' ? t('Sending…') : password ? t('Sign in') : t('Send link')}
                 </button>
               </>
             )}
             {state === 'error' && (
-              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#A83621]">{reason}</p>
+              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#943321]">{reason}</p>
             )}
             {authTrouble() === 'expired' && (
-              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#A83621]">
+              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#943321]">
                 {t('Your session expired and could not be renewed. Sign in again.')}
               </p>
             )}
-            <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#8A867C]">
+            <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-muted">
               {t('First time with an address: leave the password empty, confirm the link we email you, then pick a password. Without signing in Tuval keeps working, but boards stay in this browser only.')}
             </p>
           </>

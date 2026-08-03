@@ -61,7 +61,7 @@ export function Collection() {
   if (!here) {
     return (
       <Shell title={t('Collection')} bare>
-        <p className="text-sm text-[#8A867C]">{t('Reading…')}</p>
+        <p className="text-sm text-muted">{t('Reading…')}</p>
       </Shell>
     )
   }
@@ -75,32 +75,32 @@ export function Collection() {
 
   const chip = (on: boolean) =>
     `rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors ${
-      on ? 'bg-[#C8452D] text-white' : 'bg-[#EFEBE2] text-[#4A463E] hover:bg-[#E2DED5]'}`
+      on ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`
 
-  const field = 'rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-[13px] outline-none focus:border-[#C8452D]'
+  const field = 'rounded-lg border border-hairline bg-surface px-2 py-1.5 text-[13px] outline-none focus:border-pigment'
 
   return (
     <Shell title={title || t('Untitled collection')} bare>
       <div className="flex items-start gap-2">
-        <Filter size={20} className="mt-1.5 shrink-0 text-[#C8452D]" />
+        <Filter size={20} className="mt-1.5 shrink-0 text-pigment" />
         <input
           value={title}
           onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
           placeholder={t('Untitled collection')}
-          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
+          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
         />
         <button
           type="button"
           onClick={() => { void archiveRecord(id); go('/pages') }}
           title={t('Delete')}
-          className="mt-1.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[#8A867C] hover:bg-[#EFEBE2] hover:text-[#C8452D]"
+          className="mt-1.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-tint hover:text-pigment"
         ><Trash2 size={15} /></button>
       </div>
 
-      <section className="mt-4 rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-3">
+      <section className="mt-4 rounded-xl border border-hairline bg-surface p-3">
         <div className="space-y-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
               {t('Of')}
             </span>
             {ASKABLE.map((kind) => (
@@ -114,7 +114,7 @@ export function Collection() {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
               {t('Status')}
             </span>
             {STATUSES.map((s) => (
@@ -129,7 +129,7 @@ export function Collection() {
 
           {!!known.length && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+              <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
                 {t('Tags')}
               </span>
               {known.map((l) => (
@@ -137,7 +137,7 @@ export function Collection() {
                   key={l.id}
                   type="button"
                   onClick={() => save({ labels: toggle(rules.labels, l.id) })}
-                  className={`rounded-full px-2.5 py-1 text-[12px] font-semibold text-[#141310] transition-opacity ${
+                  className={`rounded-full px-2.5 py-1 text-[12px] font-semibold text-ink transition-opacity ${
                     rules.labels.includes(l.id) ? '' : 'opacity-40 hover:opacity-70'}`}
                   style={{ background: l.tone }}
                 >{l.name}</button>
@@ -146,7 +146,7 @@ export function Collection() {
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-[#8A867C]">
+            <span className="w-[68px] shrink-0 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
               {t('And')}
             </span>
             <select
@@ -173,20 +173,20 @@ export function Collection() {
             <button
               type="button"
               onClick={() => save(NO_RULES)}
-              className="rounded-lg px-2 py-1.5 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EFEBE2] hover:text-[#141310]"
+              className="rounded-lg px-2 py-1.5 text-[12px] font-semibold text-muted hover:bg-tint hover:text-ink"
             >{t('Clear')}</button>
           </div>
         </div>
       </section>
 
-      <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
         {isEmptyQuestion(rules)
           ? t('Ask something')
           : t('{n} found', { n: found.length })}
       </p>
 
       {isEmptyQuestion(rules) && (
-        <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-[#8A867C]">
+        <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-muted">
           {t('Nothing is filed into a collection. Set a rule above and it answers itself from then on, including things made after today.')}
         </p>
       )}
@@ -199,14 +199,14 @@ export function Collection() {
               <a
                 href={hrefOf(row.kind, row.id)}
                 onClick={(e) => { e.preventDefault(); go(hrefOf(row.kind, row.id)) }}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-ink hover:bg-shade"
               >
                 {row.icon
                   ? <span className="w-[15px] shrink-0 text-center leading-none">{row.icon}</span>
-                  : <Icon size={15} className="shrink-0 text-[#8A867C]" />}
+                  : <Icon size={15} className="shrink-0 text-muted" />}
                 <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled')}</span>
                 {row.status && (
-                  <span className="shrink-0 text-[11px] uppercase tracking-wide text-[#8A867C]">
+                  <span className="shrink-0 text-[11px] uppercase tracking-wide text-muted">
                     {t(row.status)}
                   </span>
                 )}

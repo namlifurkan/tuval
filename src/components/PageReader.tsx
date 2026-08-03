@@ -13,7 +13,7 @@ export function PageReader() {
     collaboration: {
       fragment: pageFragment(),
       provider: { awareness: pageAwareness() },
-      user: { name: 'Reader', color: '#8A867C' },
+      user: { name: 'Reader', color: '#69665E' },
     },
   }))
 

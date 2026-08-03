@@ -41,7 +41,7 @@ export function RecordPicker({ onPick }: { onPick: (rows: Row[]) => void }) {
 
   if (!workspace) {
     return (
-      <p className="px-1 py-2 text-[12px] leading-snug text-[#8A867C]">
+      <p className="px-1 py-2 text-[12px] leading-snug text-muted">
         {t('Sign in to put work on a board.')}
       </p>
     )
@@ -54,11 +54,11 @@ export function RecordPicker({ onPick }: { onPick: (rows: Row[]) => void }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('Search issues, pages and projects')}
-        className="mb-1.5 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2.5 py-1.5 text-sm text-[#141310] outline-none placeholder:text-[#B6B1A6] focus:border-[#C8452D]"
+        className="mb-1.5 w-full rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment"
       />
       <div className="max-h-[280px] overflow-y-auto">
         {!found.length && (
-          <p className="px-1 py-2 text-[12px] text-[#8A867C]">{t('Nothing to show.')}</p>
+          <p className="px-1 py-2 text-[12px] text-muted">{t('Nothing to show.')}</p>
         )}
         {found.map((row) => {
           const key = row.kind === 'issue' ? issueKey(row, prefix) : ''
@@ -67,13 +67,13 @@ export function RecordPicker({ onPick }: { onPick: (rows: Row[]) => void }) {
               key={row.id}
               type="button"
               onClick={() => onPick([row])}
-              className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#EFEBE2]"
+              className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-tint"
             >
               <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#B6B1A6]">
                 {t(KIND_NAMES[row.kind] ?? row.kind)}
               </span>
-              <span className="truncate text-sm text-[#141310]">{row.title || t('Untitled')}</span>
-              {key && <span className="ml-auto shrink-0 text-[11px] tabular-nums text-[#8A867C]">{key}</span>}
+              <span className="truncate text-sm text-ink">{row.title || t('Untitled')}</span>
+              {key && <span className="ml-auto shrink-0 text-[11px] tabular-nums text-muted">{key}</span>}
             </button>
           )
         })}

@@ -23,7 +23,7 @@ export function Favourites() {
 
   return (
     <div className="mt-5">
-      <span className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+      <span className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
         <Star size={11} /> {t('Favourites')}
       </span>
       {held.map((row) => (
@@ -31,7 +31,7 @@ export function Favourites() {
           key={row.id}
           type="button"
           onClick={() => go(`/d/${row.id}`)}
-          className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm text-[#4A463E] hover:bg-[#EAE6DD]"
+          className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left text-sm text-ink-soft hover:bg-shade"
         >
           <span className="w-4 shrink-0 text-center">{row.icon || '·'}</span>
           <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled page')}</span>

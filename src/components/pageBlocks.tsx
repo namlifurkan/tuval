@@ -76,7 +76,7 @@ export const Equation = createReactBlockSpec(
                 setOpen(false)
               }}
               onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
-              className="w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 font-mono text-[13px] outline-none focus:border-[#C8452D]"
+              className="w-full rounded-md border border-hairline bg-paper px-2 py-1.5 font-mono text-[13px] outline-none focus:border-pigment"
             />
           </div>
         )
@@ -84,7 +84,7 @@ export const Equation = createReactBlockSpec(
 
       return (
         <div
-          className="w-full cursor-text rounded-md px-1 py-1 text-center hover:bg-[#F2EFE9]"
+          className="w-full cursor-text rounded-md px-1 py-1 text-center hover:bg-paper"
           contentEditable={false}
           onClick={() => setOpen(true)}
           dangerouslySetInnerHTML={{
@@ -126,9 +126,9 @@ export const Diagram = createReactBlockSpec(
                 editor.updateBlock(block, { props: { code: e.target.value } })
                 setOpen(false)
               }}
-              className="w-full resize-y rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 font-mono text-[13px] leading-relaxed outline-none focus:border-[#C8452D]"
+              className="w-full resize-y rounded-md border border-hairline bg-paper px-2 py-1.5 font-mono text-[13px] leading-relaxed outline-none focus:border-pigment"
             />
-            <p className="mt-1 text-[11px] text-[#8A867C]">
+            <p className="mt-1 text-[11px] text-muted">
               {t('Mermaid. Click away to draw it.')}
             </p>
           </div>
@@ -137,12 +137,12 @@ export const Diagram = createReactBlockSpec(
 
       return (
         <div
-          className="w-full cursor-text rounded-md px-1 py-2 hover:bg-[#F2EFE9]"
+          className="w-full cursor-text rounded-md px-1 py-2 hover:bg-paper"
           contentEditable={false}
           onClick={() => setOpen(true)}
         >
           {drawn.fault ? (
-            <p className="rounded-md bg-[#F7E9E4] px-2 py-1.5 font-mono text-[12px] text-[#C8452D]">
+            <p className="rounded-md bg-[#F7E9E4] px-2 py-1.5 font-mono text-[12px] text-pigment">
               {drawn.fault}
             </p>
           ) : (
@@ -165,9 +165,9 @@ export const Contents = createReactBlockSpec(
       const headings = (editor.document as unknown as Line[]).filter((b) => b.type === 'heading')
 
       return (
-        <div className="w-full border-l-2 border-[#E2DED5] py-1 pl-3" contentEditable={false}>
+        <div className="w-full border-l-2 border-hairline py-1 pl-3" contentEditable={false}>
           {!headings.length && (
-            <p className="text-[13px] text-[#8A867C]">{t('Headings in this page will be listed here.')}</p>
+            <p className="text-[13px] text-muted">{t('Headings in this page will be listed here.')}</p>
           )}
           {headings.map((block) => {
             const level = Number(block.props?.level ?? 1)
@@ -180,7 +180,7 @@ export const Contents = createReactBlockSpec(
                   document.querySelector(`[data-id="${block.id}"]`)
                     ?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
                 style={{ paddingLeft: (level - 1) * 14 }}
-                className="block w-full truncate py-0.5 text-left text-[13px] text-[#4A463E] hover:text-[#C8452D]"
+                className="block w-full truncate py-0.5 text-left text-[13px] text-ink-soft hover:text-pigment"
               >
                 {text || t('Untitled')}
               </button>
@@ -211,7 +211,7 @@ export const Bookmark = createReactBlockSpec(
             contentEditable={false}
             onBlur={(e) => editor.updateBlock(block, { props: { url: e.target.value.trim() } })}
             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
-            className="w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 text-[13px] outline-none focus:border-[#C8452D]"
+            className="w-full rounded-md border border-hairline bg-paper px-2 py-1.5 text-[13px] outline-none focus:border-pigment"
           />
         )
       }
@@ -221,12 +221,12 @@ export const Bookmark = createReactBlockSpec(
           target="_blank"
           rel="noreferrer"
           contentEditable={false}
-          className="block w-full rounded-lg border border-[#E2DED5] px-3 py-2 hover:border-[#C8452D]"
+          className="block w-full rounded-lg border border-hairline px-3 py-2 hover:border-pigment"
         >
-          <span className="block truncate text-[13px] font-semibold text-[#141310]">
+          <span className="block truncate text-[13px] font-semibold text-ink">
             {label || hostOf(url) || url}
           </span>
-          <span className="block truncate text-[11px] text-[#8A867C]">{url}</span>
+          <span className="block truncate text-[11px] text-muted">{url}</span>
         </a>
       )
     },
@@ -248,12 +248,12 @@ export const Frame = createReactBlockSpec(
             contentEditable={false}
             onBlur={(e) => editor.updateBlock(block, { props: { url: e.target.value.trim() } })}
             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
-            className="w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1.5 text-[13px] outline-none focus:border-[#C8452D]"
+            className="w-full rounded-md border border-hairline bg-paper px-2 py-1.5 text-[13px] outline-none focus:border-pigment"
           />
         )
       }
       return (
-        <div className="w-full overflow-hidden rounded-lg border border-[#E2DED5]" contentEditable={false}>
+        <div className="w-full overflow-hidden rounded-lg border border-hairline" contentEditable={false}>
           <iframe
             src={url}
             title={url}

@@ -71,8 +71,8 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
     setAt(every ? 0 : here)
   }
 
-  const box = 'rounded-md border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1 text-[12px] text-[#141310] outline-none placeholder:text-[#B6B1A6] focus:border-[#C8452D]'
-  const tap = 'grid h-6 w-6 place-items-center rounded-md text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-30'
+  const box = 'rounded-md border border-hairline bg-surface px-2 py-1 text-[12px] text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment'
+  const tap = 'grid h-6 w-6 place-items-center rounded-md text-muted hover:bg-shade hover:text-ink disabled:opacity-30'
 
   return (
     <div className="relative">
@@ -80,13 +80,13 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
         type="button"
         onClick={() => setOpen((o) => !o)}
         title={t('Find and replace — ⌘F')}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink"
       >
         <Search size={13} /> {t('Find')}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-1 w-[300px] rounded-xl border border-[#E2DED5] bg-[#F7F5F0] p-2 shadow-[0_8px_24px_rgba(20,19,16,0.12)]">
+        <div className="absolute right-0 top-full z-20 mt-1 w-[300px] rounded-xl border border-hairline bg-[#F7F5F0] p-2 shadow-[0_8px_24px_rgba(20,19,16,0.12)]">
           <div className="flex items-center gap-1">
             <input
               ref={field}
@@ -100,7 +100,7 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
               placeholder={t('Find in this page')}
               className={`min-w-0 flex-1 ${box}`}
             />
-            <span className="w-[52px] shrink-0 text-right text-[11px] tabular-nums text-[#8A867C]">
+            <span className="w-[52px] shrink-0 text-right text-[11px] tabular-nums text-muted">
               {query && (hits.length ? `${here + 1}/${hits.length}` : t('none'))}
             </span>
             <button type="button" disabled={!hits.length} onClick={() => jump(-1)} className={tap}>
@@ -126,23 +126,23 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
                 type="button"
                 disabled={!hits.length}
                 onClick={() => change(false)}
-                className="shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310] disabled:opacity-30"
+                className="shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-shade hover:text-ink disabled:opacity-30"
               >{t('Replace')}</button>
               <button
                 type="button"
                 disabled={!hits.length}
                 onClick={() => change(true)}
-                className="shrink-0 rounded-md bg-[#C8452D] px-2 py-1 text-[12px] font-semibold text-white hover:bg-[#A83621] disabled:opacity-30"
+                className="shrink-0 rounded-md bg-pigment px-2 py-1 text-[12px] font-semibold text-white hover:bg-[#943321] disabled:opacity-30"
               >{t('All')}</button>
             </div>
           )}
 
-          <label className="mt-1.5 flex select-none items-center gap-1.5 px-0.5 text-[11px] text-[#8A867C]">
+          <label className="mt-1.5 flex select-none items-center gap-1.5 px-0.5 text-[11px] text-muted">
             <input
               type="checkbox"
               checked={matchCase}
               onChange={(e) => { setMatchCase(e.target.checked); setAt(0) }}
-              className="accent-[#C8452D]"
+              className="accent-pigment"
             />
             {t('Match case')}
           </label>

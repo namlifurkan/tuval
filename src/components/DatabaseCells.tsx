@@ -15,7 +15,7 @@ import { Popover } from './Popover'
 export function Tag({ choice }: { choice: Choice }) {
   return (
     <span
-      className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-[#141310]"
+      className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink"
       style={{ background: choice.tone }}
     >
       {choice.name}
@@ -55,7 +55,7 @@ export function ChoiceCell({ db, row, field, many }: {
         <button
           type="button"
           onClick={open}
-          className="flex w-full flex-wrap items-center gap-1 px-2.5 py-1.5 text-left text-sm hover:bg-[#F2EFE9]"
+          className="flex w-full flex-wrap items-center gap-1 px-2.5 py-1.5 text-left text-sm hover:bg-paper"
         >
           {held.length
             ? held.map((c) => <Tag key={c.id} choice={c} />)
@@ -78,14 +78,14 @@ export function ChoiceCell({ db, row, field, many }: {
                 toggle(match ?? addChoice(db, field.id, typed.trim()), close)
               }}
               placeholder={t('Find or create')}
-              className="mb-1 w-full rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-2 py-1 text-[13px] outline-none focus:border-[#C8452D]"
+              className="mb-1 w-full rounded-md border border-hairline bg-paper px-2 py-1 text-[13px] outline-none focus:border-pigment"
             />
           )}
           {!!held.length && (
             <button
               type="button"
               onClick={() => { setCell(row, field.id, ''); close() }}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#EAE6DD]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-shade"
             >{t('Clear')}</button>
           )}
           {choices
@@ -95,11 +95,11 @@ export function ChoiceCell({ db, row, field, many }: {
                 key={c.id}
                 type="button"
                 onClick={() => toggle(c, close)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-[#EAE6DD]"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-shade"
               >
                 {many && (
                   <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                    ${picked.includes(c.id) ? 'border-[#C8452D] bg-[#C8452D] text-white' : 'border-[#D8D5CD]'}`}
+                    ${picked.includes(c.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
                   >{picked.includes(c.id) ? '✓' : ''}</span>
                 )}
                 <Tag choice={c} />
@@ -111,7 +111,7 @@ export function ChoiceCell({ db, row, field, many }: {
   )
 }
 
-const link = 'shrink-0 rounded px-1 text-[11px] font-semibold text-[#8A867C] hover:text-[#C8452D]'
+const link = 'shrink-0 rounded px-1 text-[11px] font-semibold text-muted hover:text-pigment'
 
 // An address is text until it is filled in, and then it is somewhere to go. The link only shows
 // once there is something to open, so an empty cell is a cell and not a button.
@@ -126,7 +126,7 @@ export function AddressCell({ row, field }: { row: Row; field: Field }) {
         type={field.type === 'email' ? 'email' : field.type === 'phone' ? 'tel' : 'url'}
         value={value}
         onChange={(e) => setCell(row, field.id, e.target.value)}
-        className="w-full bg-transparent px-2.5 py-1.5 text-sm text-[#141310] outline-none focus:bg-[#F7E9E4]"
+        className="w-full bg-transparent px-2.5 py-1.5 text-sm text-ink outline-none focus:bg-[#F7E9E4]"
       />
       {!!value && (
         <a href={href} target="_blank" rel="noreferrer" className={link}>{t('Open')}</a>
@@ -139,15 +139,15 @@ function Chip({ file, onOpen, onDrop }: {
   file: Attachment; onOpen: () => void; onDrop: () => void
 }) {
   return (
-    <span className="group/chip flex max-w-[160px] items-center gap-1 rounded-md border border-[#E2DED5] bg-[#F2EFE9] px-1.5 py-0.5 text-[12px]">
-      <button type="button" onClick={onOpen} className="min-w-0 flex-1 truncate text-left hover:text-[#C8452D]">
+    <span className="group/chip flex max-w-[160px] items-center gap-1 rounded-md border border-hairline bg-paper px-1.5 py-0.5 text-[12px]">
+      <button type="button" onClick={onOpen} className="min-w-0 flex-1 truncate text-left hover:text-pigment">
         {file.name}
       </button>
       <button
         type="button"
         aria-label={t('Remove')}
         onClick={onDrop}
-        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#A83621] group-hover/chip:opacity-100"
+        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#943321] group-hover/chip:opacity-100"
       >
         <X size={10} />
       </button>
@@ -208,8 +208,8 @@ export function FilesCell({ row, field }: { row: Row; field: Field }) {
         aria-label={t('Attach a file')}
         title={failed || t('Attach a file')}
         onClick={() => picker.current?.click()}
-        className={`grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D] disabled:opacity-40
-          ${failed ? 'text-[#A83621]' : ''}`}
+        className={`grid h-5 w-5 shrink-0 place-items-center rounded text-muted hover:bg-shade hover:text-pigment disabled:opacity-40
+          ${failed ? 'text-[#943321]' : ''}`}
       >
         <Paperclip size={12} />
       </button>
@@ -234,7 +234,7 @@ export function StampCell({ value, kind, team }: {
   })()
 
   return (
-    <span className="block truncate px-2.5 py-1.5 text-sm text-[#4A463E]">
+    <span className="block truncate px-2.5 py-1.5 text-sm text-ink-soft">
       {shown || <span className="text-[#C6C2B6]">—</span>}
     </span>
   )
@@ -251,16 +251,16 @@ export function NumberCell({ row, field }: { row: Row; field: Field }) {
   return (
     <div className="flex items-center px-2.5 py-1.5">
       {field.format === 'currency' && !!mark && (
-        <span className="shrink-0 pr-0.5 text-sm text-[#8A867C]">{mark}</span>
+        <span className="shrink-0 pr-0.5 text-sm text-muted">{mark}</span>
       )}
       <input
         type="number"
         value={held === undefined || held === null ? '' : String(held)}
         onChange={(e) => setCell(row, field.id, e.target.value === '' ? '' : Number(e.target.value))}
-        className="w-full bg-transparent text-sm text-[#141310] outline-none"
+        className="w-full bg-transparent text-sm text-ink outline-none"
       />
       {field.format === 'percent' && (
-        <span className="shrink-0 pl-0.5 text-sm text-[#8A867C]">{mark}</span>
+        <span className="shrink-0 pl-0.5 text-sm text-muted">{mark}</span>
       )}
     </div>
   )

@@ -65,10 +65,10 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
           if (id && id !== page.id) move(id, page, zone(e))
         }}
         className={`group flex items-center rounded-md pr-1 transition-colors
-          ${active ? 'bg-[#F7E9E4] text-[#C8452D]' : 'text-[#4A463E] hover:bg-[#EAE6DD]'}
-          ${over === 'inside' ? 'ring-1 ring-[#C8452D]' : ''}
-          ${over === 'above' ? 'border-t border-[#C8452D]' : ''}
-          ${over === 'below' ? 'border-b border-[#C8452D]' : ''}`}
+          ${active ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}
+          ${over === 'inside' ? 'ring-1 ring-pigment' : ''}
+          ${over === 'above' ? 'border-t border-pigment' : ''}
+          ${over === 'below' ? 'border-b border-pigment' : ''}`}
         style={{ paddingLeft: `${depth * 12}px` }}
       >
         <button
@@ -76,7 +76,7 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
           aria-label={expanded ? t('Collapse') : t('Expand')}
           aria-expanded={expanded}
           onClick={() => toggle(page.id)}
-          className={`grid h-5 w-5 shrink-0 place-items-center rounded transition-transform hover:bg-[#E2DED5]
+          className={`grid h-5 w-5 shrink-0 place-items-center rounded transition-transform hover:bg-hairline
             ${expanded ? 'rotate-90' : ''} ${children.length ? '' : 'invisible'}`}
         >
           <ChevronRight size={13} />
@@ -92,7 +92,7 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
         >
           {page.icon
             ? <span className="mr-1.5">{page.icon}</span>
-            : page.kind === 'database' && <Table2 size={12} className="mr-1.5 inline text-[#8A867C]" />}
+            : page.kind === 'database' && <Table2 size={12} className="mr-1.5 inline text-muted" />}
           {page.title || t(page.kind === 'database' ? 'Untitled database' : 'Untitled page')}
         </a>
 
@@ -100,7 +100,7 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
           type="button"
           aria-label={t('Add a page inside')}
           onClick={() => add(page.id)}
-          className="grid h-5 w-5 shrink-0 place-items-center rounded opacity-0 hover:bg-[#E2DED5] focus-visible:opacity-100 group-hover:opacity-100"
+          className="grid h-5 w-5 shrink-0 place-items-center rounded opacity-0 hover:bg-hairline focus-visible:opacity-100 group-hover:opacity-100"
         >
           <Plus size={13} />
         </button>
@@ -216,7 +216,7 @@ export function PageTree() {
   return (
     <div className="mt-1 mb-3">
       <div className="flex items-center justify-between pl-2 pr-1">
-        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]">
+        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
           {t('Pages')}
         </span>
         <span className="flex items-center gap-0.5">
@@ -225,7 +225,7 @@ export function PageTree() {
             aria-label={t('New database')}
             title={t('New database')}
             onClick={() => void createRecord('', 'database', null).then((id) => id && go(`/d/${id}`))}
-            className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            className="grid h-5 w-5 place-items-center rounded text-muted hover:bg-shade hover:text-ink"
           >
             <Table2 size={13} />
           </button>
@@ -238,7 +238,7 @@ export function PageTree() {
                   aria-label={t('New page from a template')}
                   title={t('New page from a template')}
                   onClick={toggle}
-                  className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+                  className="grid h-5 w-5 place-items-center rounded text-muted hover:bg-shade hover:text-ink"
                 >
                   <Copy size={12} />
                 </button>
@@ -258,7 +258,7 @@ export function PageTree() {
                           // here left a page in the tree and the person on the old screen.
                           .catch((e: Error) => alert(e.message))
                       }}
-                      className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-[#EAE6DD]"
+                      className="w-full truncate rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
                     >
                       {tpl.icon && <span className="mr-1.5">{tpl.icon}</span>}
                       {tpl.title || t('Untitled page')}
@@ -272,7 +272,7 @@ export function PageTree() {
             type="button"
             aria-label={t('New page')}
             onClick={() => add(null)}
-            className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#141310]"
+            className="grid h-5 w-5 place-items-center rounded text-muted hover:bg-shade hover:text-ink"
           >
             <Plus size={13} />
           </button>

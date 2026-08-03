@@ -41,7 +41,7 @@ export function Project() {
 
   if (!id) return null
   if (!here) {
-    return <Shell title={t('Project')} bare><p className="text-sm text-[#8A867C]">{t('Reading…')}</p></Shell>
+    return <Shell title={t('Project')} bare><p className="text-sm text-muted">{t('Reading…')}</p></Shell>
   }
 
   const issues = getRecords('issue').filter((r) => r.project_id === id)
@@ -57,9 +57,9 @@ export function Project() {
     void setBoardProject(room, id).then(() => openBoard(room))
   }
 
-  const line = 'flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[#141310] hover:bg-[#EAE6DD]'
-  const head = 'mt-8 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A867C]'
-  const add = 'flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-semibold text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D]'
+  const line = 'flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-ink hover:bg-shade'
+  const head = 'mt-8 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted'
+  const add = 'flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-semibold text-muted hover:bg-shade hover:text-pigment'
 
   return (
     <Shell title={title || t('Untitled project')} bare>
@@ -69,17 +69,17 @@ export function Project() {
           value={title}
           onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
           placeholder={t('Untitled project')}
-          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#141310] outline-none placeholder:text-[#C6C2B6]"
+          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
         />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
         <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#141310]"
+          className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-ink"
           style={{ background: PHASE_TONE[phase] }}
         >{t(phase)}</span>
         {isLate(here) && (
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#C8452D]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-pigment">
             {t('Late')}
           </span>
         )}
@@ -87,24 +87,24 @@ export function Project() {
           type="date"
           value={startOf(here)}
           onChange={(e) => setSpan(here, e.target.value, targetOf(here))}
-          className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-[#4A463E] outline-none hover:bg-[#EAE6DD] focus:border-[#C8452D]"
+          className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-ink-soft outline-none hover:bg-shade focus:border-pigment"
         />
         <span className="text-[#B6B1A6]">→</span>
         <input
           type="date"
           value={targetOf(here)}
           onChange={(e) => setSpan(here, startOf(here), e.target.value)}
-          className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-[#4A463E] outline-none hover:bg-[#EAE6DD] focus:border-[#C8452D]"
+          className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-ink-soft outline-none hover:bg-shade focus:border-pigment"
         />
       </div>
 
       {!!held.total && (
         <div className="mt-3 max-w-[420px]">
-          <div className="flex items-baseline justify-between text-[11px] text-[#8A867C]">
+          <div className="flex items-baseline justify-between text-[11px] text-muted">
             <span>{t('{done} of {total} done', { done: held.done, total: held.total })}</span>
             <span>{share}%</span>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#EFEBE2]">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-tint">
             <div
               className="h-full rounded-full transition-[width]"
               style={{ width: `${share}%`, background: PHASE_TONE[phase] }}
@@ -126,7 +126,7 @@ export function Project() {
                 {row.title || t('Untitled')}
               </span>
               {row.status && (
-                <span className="shrink-0 text-[11px] uppercase tracking-wide text-[#8A867C]">
+                <span className="shrink-0 text-[11px] uppercase tracking-wide text-muted">
                   {t(row.status)}
                 </span>
               )}
@@ -150,8 +150,8 @@ export function Project() {
               {row.icon
                 ? <span className="w-4 shrink-0 text-center leading-none">{row.icon}</span>
                 : row.kind === 'database'
-                  ? <Table2 size={14} className="shrink-0 text-[#8A867C]" />
-                  : <FileText size={14} className="shrink-0 text-[#8A867C]" />}
+                  ? <Table2 size={14} className="shrink-0 text-muted" />
+                  : <FileText size={14} className="shrink-0 text-muted" />}
               <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled page')}</span>
             </a>
           </li>
@@ -170,7 +170,7 @@ export function Project() {
         {boards.map((board) => (
           <li key={board.id}>
             <button type="button" onClick={() => openBoard(board.id)} className={`w-full text-left ${line}`}>
-              <LayoutGrid size={14} className="shrink-0 text-[#8A867C]" />
+              <LayoutGrid size={14} className="shrink-0 text-muted" />
               <span className="min-w-0 flex-1 truncate">{board.name || t('Untitled board')}</span>
             </button>
           </li>

@@ -7,7 +7,7 @@ import { readForm, sendForm } from '../board/forms'
 import type { Form } from '../board/forms'
 import { t } from '../i18n'
 
-const box = 'w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-3 py-2 text-sm outline-none focus:border-[#C8452D]'
+const box = 'w-full rounded-lg border border-hairline bg-surface px-3 py-2 text-sm outline-none focus:border-pigment'
 
 const inputType = (field: Field) =>
   field.type === 'number' ? 'number'
@@ -44,8 +44,8 @@ export function PublicForm() {
   if (!held) {
     return (
       <main className="mx-auto max-w-[34rem] px-6 py-24">
-        <h1 className="text-[22px] font-bold text-[#141310]">{t('Nothing here')}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-[#4A463E]">
+        <h1 className="text-[22px] font-bold text-ink">{t('Nothing here')}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {t('This form is closed, or it never existed.')}
         </p>
       </main>
@@ -71,8 +71,8 @@ export function PublicForm() {
   if (done) {
     return (
       <main className="mx-auto max-w-[34rem] px-6 py-24">
-        <h1 className="text-[22px] font-bold text-[#141310]">{t('Thank you')}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-[#4A463E]">
+        <h1 className="text-[22px] font-bold text-ink">{t('Thank you')}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {form.thanks || t('That has been recorded.')}
         </p>
       </main>
@@ -81,11 +81,11 @@ export function PublicForm() {
 
   return (
     <main className="mx-auto max-w-[34rem] px-6 pb-24 pt-16">
-      <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-[#141310]">
+      <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-ink">
         {form.title || t('Untitled')}
       </h1>
       {!!form.intro && (
-        <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-[#4A463E]">{form.intro}</p>
+        <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-ink-soft">{form.intro}</p>
       )}
 
       <form
@@ -94,7 +94,7 @@ export function PublicForm() {
       >
         {asked.map((field) => (
           <label key={field.id} className="block">
-            <span className="mb-1 block text-[12px] font-semibold text-[#4A463E]">{field.name}</span>
+            <span className="mb-1 block text-[12px] font-semibold text-ink-soft">{field.name}</span>
 
             {field.type === 'select' ? (
               <select
@@ -112,7 +112,7 @@ export function PublicForm() {
                 type="checkbox"
                 checked={answers[field.id] === 'true'}
                 onChange={(e) => setAnswers((was) => ({ ...was, [field.id]: String(e.target.checked) }))}
-                className="h-4 w-4 accent-[#C8452D]"
+                className="h-4 w-4 accent-pigment"
               />
             ) : (
               <input
@@ -138,15 +138,15 @@ export function PublicForm() {
         <button
           type="submit"
           disabled={sending}
-          className="rounded-lg bg-[#C8452D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#A83621] disabled:opacity-40"
+          className="rounded-lg bg-pigment px-4 py-2 text-sm font-semibold text-white hover:bg-[#943321] disabled:opacity-40"
         >{sending ? t('Sending…') : t('Send')}</button>
 
         {failed && (
-          <p className="text-[12px] text-[#A83621]">{t('That did not go through. Try again.')}</p>
+          <p className="text-[12px] text-[#943321]">{t('That did not go through. Try again.')}</p>
         )}
       </form>
 
-      <p className="mt-16 border-t border-[#E2DED5] pt-4 text-[11px] text-[#B6B1A6]">
+      <p className="mt-16 border-t border-hairline pt-4 text-[11px] text-[#B6B1A6]">
         {t('Published with {product}', { product: PRODUCT.name })}
       </p>
     </main>
