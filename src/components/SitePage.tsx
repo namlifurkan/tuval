@@ -86,7 +86,7 @@ function Hero({ page }: { page: Page }) {
     <section className="mx-auto max-w-[80rem] px-6 pt-8 pb-9">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
         {home
-          ? 'AGPL-3.0 licensed · runs on your own machine · the source publishes shortly'
+          ? 'AGPL-3.0 licensed · runs on your own machine · the source is on GitHub'
           : LINK_NAMES[page.path]}
       </p>
       <div className="mt-6 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
@@ -511,7 +511,7 @@ function Commands({ band }: { band: Band }) {
         {band.lines?.map((line) => (
           <li key={line} className="flex gap-3 whitespace-pre px-5 py-1.5 font-mono text-[12.5px] leading-[1.6]">
             <span aria-hidden className="select-none text-[#C8452D]">$</span>
-            {line}
+            {say(line)}
           </li>
         ))}
       </ol>
@@ -580,7 +580,7 @@ function HomeHero({ page }: { page: Page }) {
   return (
     <section className="mx-auto max-w-[80rem] px-6 pt-14 pb-9">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C8452D]">
-        AGPL-3.0 licensed · runs on your own machine · the source publishes shortly
+        AGPL-3.0 licensed · runs on your own machine · the source is on GitHub
       </p>
       <div className="mt-6 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
         <h1
@@ -608,7 +608,7 @@ function Columns({ bands }: { bands: Band[] }) {
                 key={line}
                 className="border-t border-[#141310]/12 py-2.5 text-[13.5px] leading-[1.45] text-[#4A463E]"
                 style={READING}
-              >{line}</li>
+              >{say(line)}</li>
             ))}
           </ul>
         </div>

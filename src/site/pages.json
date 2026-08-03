@@ -394,7 +394,7 @@
           "id": "commands",
           "tone": "paper",
           "heading": "Five commands",
-          "body": "The source repository publishes shortly. Once it does, point Tuval at your Supabase project, apply the migrations, lift the hosted-service limits, and build the folder of static files.",
+          "body": "Point Tuval at a Postgres it can reach, apply the migrations, lift the hosted-service limits, and build the folder of static files. Read every one of them first if you like; they are in the repository.",
           "lines": [
             "git clone {repo} && cd tuval",
             "cp .env.example .env.local   # add your Supabase URL and anon key",
@@ -814,7 +814,7 @@
         "rows": [
           {
             "feature": "Licence",
-            "tuval": "AGPL-3.0 licensed. The source repository publishes shortly; there is no separate edition and no feature flags.",
+            "tuval": "AGPL-3.0 licensed, and the repository is public. There is no separate edition and no feature flags.",
             "them": "Proprietary, delivered as a hosted service."
           },
           {
