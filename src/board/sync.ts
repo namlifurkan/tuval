@@ -23,6 +23,14 @@ let restored = false
 let restoring = false
 let revision = 0
 let stamp: string | null = null
+// An update belongs to a board, and the policy on the log asks whether you may write that board —
+// which is answered from the boards row. Until that row exists there is no board to be allowed to
+// write, so an append made first is refused, and a board that cannot log cannot be claimed either.
+let claimed = false
+
+// Opening a board is not creating one: until something is on it or it has been named there is
+// nothing to keep, and a row would turn every glance into a board in the list.
+const untouched = () => !stamp && !getItems().length && !getMeta().name
 
 const counts = () => {
   const all = getItems()
@@ -72,6 +80,9 @@ export function compactableSeq(
 
 async function appendLog() {
   if (logging || !logPending.length || !room || !getUser() || readOnly()) return
+  // Nothing has been put on this board, so there is nothing to write about it yet. The updates
+  // wait in the queue for whatever makes it a board.
+  if (untouched()) return
   logging = true
   const batch = logPending
   logPending = []
@@ -80,6 +91,11 @@ async function appendLog() {
     // An update too big for a log row still has somewhere to go: the row holds the whole
     // document and has no such limit, so the snapshot carries this one on its own.
     if (update.length > LOG_MAX) { schedule(); return }
+    if (!claimed) {
+      const claim = await claimBoard(room, (getMeta().name as string) ?? '')
+      claimed = !claim
+      if (claim) throw new Error(claim)
+    }
     const seq = await appendUpdate(room, update)
     if (seq) mark(seq, Date.now())
     setCloudError(null)
@@ -126,15 +142,18 @@ async function merge() {
 async function save() {
   timer = 0
   if (!room || !dirty || !restored || !getUser() || readOnly()) return
-  const untouched = !stamp && !getItems().length && !getMeta().name
-  if (untouched) return
+  if (untouched()) return
   const saving = revision
+  const name = (getMeta().name as string) ?? ''
+  // The board is claimed before anything is written about it, because everything written about it
+  // is checked against the row the claim creates.
+  const claim = await claimBoard(room, name)
+  claimed = !claim
   await appendLog()
   const conflict = await merge()
   const { items, frames } = counts()
-  const name = (getMeta().name as string) ?? ''
-  const error = conflict
-    ?? await claimBoard(room, name)
+  const error = claim
+    ?? conflict
     ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems()))
   if (error) {
     setCloudError(error)

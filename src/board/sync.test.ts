@@ -142,7 +142,11 @@ describe('cloud sync', () => {
     for (const handler of mocked.handlers) handler(new Uint8Array([7]), 'local')
     await vi.advanceTimersByTimeAsync(2_500)
     await settle()
-    expect(mocked.claimBoard).toHaveBeenCalledOnce()
+    // Claimed once by the log, which cannot write until the row exists, and once by the save,
+    // which is what keeps the name and the date on it current. What matters is that neither
+    // happened before the board had a name.
+    expect(mocked.claimBoard).toHaveBeenCalled()
+    expect(mocked.claimBoard.mock.calls.every(([, name]) => name === 'Quarter plan')).toBe(true)
   })
 
   it('saves an edit that arrives while an earlier save is in flight', async () => {
@@ -178,5 +182,41 @@ describe('what the log no longer has to keep', () => {
     expect(compactableSeq(seen, 500, 9)).toBe(0)
     // Old enough, but the row this tab just wrote does not contain it.
     expect(compactableSeq(seen, 20_000, 1)).toBe(1)
+  })
+
+  it('claims the board before writing anything about it', async () => {
+    // The policy on the log asks whether you may write the board, and that is answered from the
+    // boards row. Appending first is refused, and a board that cannot log never gets claimed —
+    // so it never reaches the cloud and the dashboard files it under this browser.
+    const order: string[] = []
+    mocked.claimBoard.mockReset().mockImplementation(async () => { order.push('claim'); return null })
+    mocked.appendUpdate.mockReset().mockImplementation(async () => { order.push('append'); return 1 })
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    // Typed before the first save finishes, which is when a board is new and the row does not
+    // exist yet — the only moment the order matters.
+    mocked.handlers.forEach((handler) => handler(new Uint8Array([7])))
+    await vi.advanceTimersByTimeAsync(3_000)
+    await settle()
+
+    expect(order[0]).toBe('claim')
+    expect(order).toContain('append')
+    expect(sync.cloudError()).toBe(null)
+  })
+
+  it('holds the log while the claim is refused rather than writing what will bounce', async () => {
+    mocked.claimBoard.mockReset()
+      .mockResolvedValue('new row violates row-level security policy for table "boards"')
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    await settle()
+    mocked.handlers.forEach((handler) => handler(new Uint8Array([7])))
+    await vi.advanceTimersByTimeAsync(3_000)
+    await settle()
+
+    expect(mocked.appendUpdate).not.toHaveBeenCalled()
+    expect(sync.cloudError()).toContain('row-level security')
   })
 })
