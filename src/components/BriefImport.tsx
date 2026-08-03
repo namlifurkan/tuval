@@ -32,6 +32,7 @@ flowchart TD
 
 export function BriefImport() {
   const open = useBoardStore((s) => s.briefOpen)
+  const seed = useBoardStore((s) => s.briefSeed)
   const update = useBoardStore((s) => s.update)
   const setSelection = useBoardStore((s) => s.setSelection)
   const camera = useBoardStore((s) => s.camera)
@@ -40,6 +41,12 @@ export function BriefImport() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   useLayoutEffect(() => { if (open) ref.current?.focus() }, [open])
+
+  useLayoutEffect(() => {
+    if (!open || !seed) return
+    setText(seed)
+    update({ briefSeed: '' })
+  }, [open, seed, update])
 
   // A Miro export is JSON, a brief is Markdown. The first non-space character decides.
   const miro = useMemo(() => {
@@ -80,7 +87,7 @@ export function BriefImport() {
   return (
     <div className="absolute left-1/2 top-20 z-50 flex w-[min(92vw,720px)] -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center justify-between border-b border-shade px-3 py-2.5">
-        <span className="text-sm font-semibold text-ink">{t('Build a board from a brief')}</span>
+        <span className="text-sm font-semibold text-ink">{t('Build a board from a brief or a Miro export')}</span>
         <button
           type="button"
           onClick={() => update({ briefOpen: false })}
@@ -100,7 +107,7 @@ export function BriefImport() {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) create()
         }}
         spellCheck={false}
-        placeholder={t('Paste Markdown or JSON here. Headings become frames, bullets become stickies, fenced code becomes code blocks, a mermaid flow becomes connectors.')}
+        placeholder={t('Paste Markdown here, or open the JSON that scripts/miro-export.mjs pulled out of a Miro board. Headings become frames, bullets become stickies, fenced code becomes code blocks, a mermaid flow becomes connectors.')}
         className="h-[300px] w-full resize-none bg-transparent p-3 font-mono text-xs leading-relaxed outline-none placeholder:text-muted"
       />
 

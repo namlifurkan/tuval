@@ -37,6 +37,9 @@ interface BoardState {
   presenting: number | null
   searchOpen: boolean
   briefOpen: boolean
+  // A file dropped on the canvas opens the import panel with its text already in it, so what a
+  // Miro export turns into is counted and shown before a single item is written.
+  briefSeed: string
   boardsPanel: boolean
   framesPanel: boolean
   commentsPanel: boolean
@@ -79,6 +82,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   presenting: null,
   searchOpen: false,
   briefOpen: false,
+  briefSeed: '',
   boardsPanel: false,
   framesPanel: false,
   commentsPanel: false,

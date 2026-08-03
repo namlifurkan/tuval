@@ -428,6 +428,11 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
         if (skipped) alert(t('Only the first {n} pages were placed; {skipped} more are in the file.', { n: MAX_PAGES, skipped }))
       })
       else if (file.type.startsWith('image/')) readImage(file, p)
+      // A Miro export and a written brief are both whole boards rather than something to put at
+      // a point. Dropping one used to do nothing at all, or leave two thousand characters of
+      // JSON in a text box; it opens the import panel now, which counts what is in there first.
+      else if (/\.(json|md|markdown)$/i.test(file.name)) void file.text().then((seed) =>
+        useBoardStore.getState().update({ briefOpen: true, briefSeed: seed }))
       else if (file.type.startsWith('text/')) file.text().then((t) => {
         const item = makeText(p.x, p.y, 400, useBoardStore.getState().textStyle)
         item.text = t.slice(0, 2000)

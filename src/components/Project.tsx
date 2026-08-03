@@ -96,6 +96,13 @@ export function Project() {
           onChange={(e) => setSpan(here, startOf(here), e.target.value)}
           className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-ink-soft outline-none hover:bg-shade focus:border-pigment"
         />
+        {/* Clearing the date is the way to say the end is not decided, so the screen says what an
+            empty field means rather than leaving it looking unfilled. */}
+        {!targetOf(here) && (
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            {t('No target date')}
+          </span>
+        )}
       </div>
 
       {!!held.total && (

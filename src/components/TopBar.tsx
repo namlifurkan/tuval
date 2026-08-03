@@ -1,5 +1,6 @@
 import {
-  Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2, Wand2,
+  Clock, Download, House, Layers, LayoutGrid, MoreHorizontal, Printer, Search, Trash2, Upload,
+  Wand2,
 } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { getLang, LANGS, setLang, subscribeLang, t } from '../i18n'
@@ -140,6 +141,13 @@ export function TopBar() {
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
               >
                 <Printer size={15} /> {t('Print frames as PDF')}
+              </button>
+              <button
+                type="button"
+                onClick={() => { update({ briefOpen: true }); menu.close() }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
+              >
+                <Upload size={15} /> {t('Import from Miro')}
               </button>
               <div className="my-1 h-px bg-shade" />
               <div className="px-2.5 pb-1.5 pt-1 text-xs font-semibold text-muted">{t('Surface')}</div>

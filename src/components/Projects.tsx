@@ -20,20 +20,29 @@ const NAMES = 240
 const MARGIN = 7
 const LEAST = 60
 
-function Bar({ project, from }: { project: Row; from: string }) {
+function Bar({ project, from, days }: { project: Row; from: string; days: number }) {
   const starts = startOf(project) || today()
-  const ends = targetOf(project) || addDays(starts, 1)
+  const target = targetOf(project)
   const left = daysApart(from, starts) * DAY
-  const width = Math.max(DAY, (daysApart(starts, ends) + 1) * DAY)
   const phase = phaseOf(project.id)
   const held = progressOf(project.id)
   const share = held.total ? held.done / held.total : 0
 
+  // Work with no date to hit is not work that ends tomorrow. An open end runs to the edge of the
+  // chart and fades out there, so the bar says "still going" rather than drawing a one-day stub.
+  const width = target
+    ? Math.max(DAY, (daysApart(starts, target) + 1) * DAY)
+    : Math.max(DAY, days * DAY - left)
+
   return (
     <div
-      style={{ left, width }}
-      className="absolute top-1 h-6 overflow-hidden rounded-md"
-      title={`${held.done}/${held.total}`}
+      style={{
+        left,
+        width,
+        ...(target ? {} : { maskImage: 'linear-gradient(to right, #000 70%, transparent)' }),
+      }}
+      className={`absolute top-1 h-6 overflow-hidden ${target ? 'rounded-md' : 'rounded-l-md'}`}
+      title={target ? `${held.done}/${held.total}` : `${held.done}/${held.total} · ${t('No target date')}`}
     >
       <div className="h-full w-full" style={{ background: PHASE_TONE[phase], opacity: 0.35 }} />
       {/* The filled part is what is finished, so a bar reads as progress rather than as a plan. */}
@@ -95,7 +104,7 @@ function Roadmap({ rows }: { rows: Row[] }) {
               {project.title || t('Untitled')}
             </button>
             <div className="relative h-8 flex-1">
-              <Bar project={project} from={from} />
+              <Bar project={project} from={from} days={days} />
             </div>
           </div>
         ))}

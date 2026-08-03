@@ -553,6 +553,11 @@ const tr: Record<string, string> = {
   'A calendar places rows by a date column. Add one, then choose it above.':
     'Takvim, satırları bir tarih sütununa göre yerleştirir. Bir tane ekle, sonra yukarıdan seç.',
   'Go to calendar': 'Takvime git',
+  'Import from Miro': "Miro'dan içeri aktar",
+  'No target date': 'Bitiş tarihi yok',
+  'Build a board from a brief or a Miro export': "Bir brief'ten ya da Miro dışa aktarımından board kur",
+  'Paste Markdown here, or open the JSON that scripts/miro-export.mjs pulled out of a Miro board. Headings become frames, bullets become stickies, fenced code becomes code blocks, a mermaid flow becomes connectors.':
+    "Buraya Markdown yapıştır ya da scripts/miro-export.mjs'in bir Miro board'undan çektiği JSON'u aç. Başlıklar frame, maddeler sticky, kod blokları kod bloğu, mermaid akışı da konektör olur.",
   'Go to databases': 'Veritabanlarına git',
   'No databases yet. A database is a page with columns: rows you can filter, group, and read back as a table, a board, a gallery or a calendar.':
     'Henüz veritabanı yok. Veritabanı, sütunları olan bir sayfadır: süzebildiğin, gruplayabildiğin ve tablo, pano, galeri ya da takvim olarak okuyabildiğin satırlar.',
