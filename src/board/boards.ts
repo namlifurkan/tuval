@@ -158,6 +158,7 @@ export type Route =
   | { kind: 'calendar' }
   | { kind: 'projects' }
   | { kind: 'docs' }
+  | { kind: 'databases' }
   | { kind: 'inbox' }
   | { kind: 'runs' }
   | { kind: 'team' }
@@ -182,6 +183,7 @@ export function readRoute(): Route {
   if (path === '/calendar') return { kind: 'calendar' }
   if (path === '/projects') return { kind: 'projects' }
   if (path === '/pages') return { kind: 'docs' }
+  if (path === '/databases') return { kind: 'databases' }
   if (path === '/inbox') return { kind: 'inbox' }
   if (path === '/runs') return { kind: 'runs' }
   if (path === '/team') return { kind: 'team' }

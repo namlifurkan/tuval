@@ -6,6 +6,7 @@ import { AuthPage } from './AuthPage'
 import { Calendar } from './Calendar'
 import { Collection } from './Collection'
 import { Dashboard } from './Dashboard'
+import { Databases } from './Databases'
 import { Docs } from './Docs'
 import { Inbox } from './Inbox'
 import { Runs } from './Runs'
@@ -34,6 +35,7 @@ export function Home() {
   if (route.kind === 'projects') return <Projects />
   if (route.kind === 'calendar') return <Calendar />
   if (route.kind === 'docs') return <Docs />
+  if (route.kind === 'databases') return <Databases />
   if (route.kind === 'inbox') return <Inbox />
   if (route.kind === 'runs') return <Runs />
   if (route.kind === 'team') return <Team />

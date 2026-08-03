@@ -553,6 +553,9 @@ const tr: Record<string, string> = {
   'A calendar places rows by a date column. Add one, then choose it above.':
     'Takvim, satırları bir tarih sütununa göre yerleştirir. Bir tane ekle, sonra yukarıdan seç.',
   'Go to calendar': 'Takvime git',
+  'Go to databases': 'Veritabanlarına git',
+  'No databases yet. A database is a page with columns: rows you can filter, group, and read back as a table, a board, a gallery or a calendar.':
+    'Henüz veritabanı yok. Veritabanı, sütunları olan bir sayfadır: süzebildiğin, gruplayabildiğin ve tablo, pano, galeri ya da takvim olarak okuyabildiğin satırlar.',
   'New issue': 'Yeni iş',
   'Repeats': 'Tekrar',
   'Every date the workspace already holds, on one month. Nothing is stored here twice: move a card and the record it came from is what changes.':
