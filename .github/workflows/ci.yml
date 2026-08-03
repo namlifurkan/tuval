@@ -1,9 +1,11 @@
 name: CI
 
-# Runs only when asked. Actions minutes on a private repository are billed, and every check
-# here is one that has to pass locally before a push anyway. Make the repository public and
-# this can go back to running on every push for nothing.
+# The repository is public, so this is free to run and there is somebody to run it for: a pull
+# request from a stranger is the one change nobody here has already checked locally.
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
