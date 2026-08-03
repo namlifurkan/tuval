@@ -598,6 +598,65 @@ select pg_temp.check('the owner of the workspace is never shut out', true,
 select pg_temp.check('the owner can recover a legacy unscoped file', true,
   exists(select 1 from storage.objects where name like '%/legacy.txt'));
 
+-- A project is a gate too, and hours do not go round the back --------------------------------------
+-- An issue does not sit under its project in the tree; it points at it. Restricting the project
+-- has to reach the issue anyway, or "restricted project" is a word for something that is not
+-- happening. And an hour logged against a record nobody may read said, until now, that the
+-- record was there and who spent the afternoon on it.
+
+set local role postgres;
+delete from public.record_members;
+insert into public.records (id, workspace_id, kind, title, created_by)
+values
+  ('1c1c1c1c-0000-4000-8000-0000000000c1', 'cccccccc-0000-4000-8000-000000000003',
+   'project', 'Quiet project', 'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('1c1c1c1c-0000-4000-8000-0000000000c2', 'cccccccc-0000-4000-8000-000000000003',
+   'issue', 'Work inside it', 'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('1c1c1c1c-0000-4000-8000-0000000000c3', 'cccccccc-0000-4000-8000-000000000003',
+   'issue', 'Work in the open', 'aaaaaaaa-0000-4000-8000-000000000001');
+update public.records set project_id = '1c1c1c1c-0000-4000-8000-0000000000c1'
+where id = '1c1c1c1c-0000-4000-8000-0000000000c2';
+insert into public.time_entries (workspace_id, record_id, user_id, minutes)
+values
+  ('cccccccc-0000-4000-8000-000000000003', '1c1c1c1c-0000-4000-8000-0000000000c2',
+   'aaaaaaaa-0000-4000-8000-000000000001', 90),
+  ('cccccccc-0000-4000-8000-000000000003', '1c1c1c1c-0000-4000-8000-0000000000c3',
+   'aaaaaaaa-0000-4000-8000-000000000001', 30);
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('an issue in an unrestricted project is read by the workspace', true,
+  public.can_read_record('1c1c1c1c-0000-4000-8000-0000000000c2'));
+
+set local role postgres;
+insert into public.record_members (record_id, user_id, role, email)
+values ('1c1c1c1c-0000-4000-8000-0000000000c1', 'aaaaaaaa-0000-4000-8000-000000000001', 'editor', 'ann@rls.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('naming people on a project shuts the rest out of the project', false,
+  public.can_read_record('1c1c1c1c-0000-4000-8000-0000000000c1'));
+select pg_temp.check('and out of the issues that point at it', false,
+  public.can_read_record('1c1c1c1c-0000-4000-8000-0000000000c2'));
+select pg_temp.check('the issue row itself disappears', false,
+  exists(select 1 from public.records where id = '1c1c1c1c-0000-4000-8000-0000000000c2'));
+select pg_temp.check('an issue outside it is untouched', true,
+  public.can_read_record('1c1c1c1c-0000-4000-8000-0000000000c3'));
+select pg_temp.check('nor can the rest write it', false,
+  public.can_write_record('1c1c1c1c-0000-4000-8000-0000000000c2'));
+select pg_temp.check('the hours logged against it are gone as well', false,
+  exists(select 1 from public.time_entries where record_id = '1c1c1c1c-0000-4000-8000-0000000000c2'));
+select pg_temp.check('hours against an open record are still everybody''s to read', true,
+  exists(select 1 from public.time_entries where record_id = '1c1c1c1c-0000-4000-8000-0000000000c3'));
+
+set local role postgres;
+insert into public.record_members (record_id, user_id, role, email)
+values ('1c1c1c1c-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000002', 'viewer', 'bob@other.test');
+
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
+select pg_temp.check('being named on the project reaches its issues', true,
+  public.can_read_record('1c1c1c1c-0000-4000-8000-0000000000c2'));
+select pg_temp.check('and their hours', true,
+  exists(select 1 from public.time_entries where record_id = '1c1c1c1c-0000-4000-8000-0000000000c2'));
+
 -- Publishing is a hole in the wall, and only where it was made --------------------------------------
 
 set local role postgres;

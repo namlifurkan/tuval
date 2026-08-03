@@ -479,7 +479,7 @@
             },
             {
               "title": "create_record",
-              "body": "File an issue, a page, a project, a person, a company or an event, with its status, assignee, priority, parent and opening text. Wants a key made to write; a read key is told so in words."
+              "body": "File an issue, a page, a project, a person, a company or an event, with its status, assignee, priority, parent and opening text. The first three have a screen; a person, a company and an event are rows the API keeps and nothing in the product draws yet. Wants a key made to write; a read key is told so in words."
             },
             {
               "title": "update_record",
@@ -504,7 +504,7 @@
         {
           "tone": "paper",
           "heading": "What is not behind this door",
-          "body": "Boards are not records, so no tool here opens one. A canvas reaches a model the other way and on purpose: the board turns its frames, connectors and comments into a Markdown brief you hand over. What this server reads is the rows — pages, databases, issues, projects, people, companies, events and files — and it stops there."
+          "body": "Boards are not records, so no tool here opens one. A canvas reaches a model the other way and on purpose: the board turns its frames, connectors and comments into a Markdown brief you hand over. What this server reads is the rows — pages, databases, issues, projects, people, companies, events and files — and it stops there. The first four have screens; the rest are rows kept and not yet drawn anywhere."
         },
         {
           "tone": "paper",

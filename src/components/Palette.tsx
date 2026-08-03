@@ -85,6 +85,7 @@ export function Palette() {
     { id: 'boards', label: t('Go to boards'), hint: '/dashboard', run: () => go('/dashboard') },
     { id: 'issues', label: t('Go to issues'), hint: '/issues', run: () => go('/issues') },
     { id: 'docs', label: t('Go to docs'), hint: '/pages', run: () => go('/pages') },
+    { id: 'calendar', label: t('Go to calendar'), hint: '/calendar', run: () => go('/calendar') },
     { id: 'settings', label: t('Go to settings'), hint: '/settings', run: () => go('/settings') },
     { id: 'journal', label: t("Today's journal"), hint: 'g j', run: () => void openJournal() },
     {

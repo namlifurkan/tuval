@@ -155,6 +155,7 @@ export type Route =
   | { kind: 'settings' }
   | { kind: 'issues' }
   | { kind: 'issue'; id: string }
+  | { kind: 'calendar' }
   | { kind: 'projects' }
   | { kind: 'docs' }
   | { kind: 'inbox' }
@@ -178,6 +179,7 @@ export function readRoute(): Route {
   if (path === '/dashboard') return { kind: 'dashboard' }
   if (path === '/settings') return { kind: 'settings' }
   if (path === '/issues') return { kind: 'issues' }
+  if (path === '/calendar') return { kind: 'calendar' }
   if (path === '/projects') return { kind: 'projects' }
   if (path === '/pages') return { kind: 'docs' }
   if (path === '/inbox') return { kind: 'inbox' }

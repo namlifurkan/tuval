@@ -3,6 +3,7 @@ import { arrive } from '../board/arrive'
 import { readRoute, routePath, subscribeRoute } from '../board/boards'
 import { lazy, Suspense, useSyncExternalStore } from 'react'
 import { AuthPage } from './AuthPage'
+import { Calendar } from './Calendar'
 import { Collection } from './Collection'
 import { Dashboard } from './Dashboard'
 import { Docs } from './Docs'
@@ -31,6 +32,7 @@ export function Home() {
   if (route.kind === 'settings') return <Settings />
   if (route.kind === 'issues' || route.kind === 'issue') return <Issues />
   if (route.kind === 'projects') return <Projects />
+  if (route.kind === 'calendar') return <Calendar />
   if (route.kind === 'docs') return <Docs />
   if (route.kind === 'inbox') return <Inbox />
   if (route.kind === 'runs') return <Runs />

@@ -552,6 +552,11 @@ const tr: Record<string, string> = {
   'Today': 'Bugün',
   'A calendar places rows by a date column. Add one, then choose it above.':
     'Takvim, satırları bir tarih sütununa göre yerleştirir. Bir tane ekle, sonra yukarıdan seç.',
+  'Go to calendar': 'Takvime git',
+  'New issue': 'Yeni iş',
+  'Repeats': 'Tekrar',
+  'Every date the workspace already holds, on one month. Nothing is stored here twice: move a card and the record it came from is what changes.':
+    'Çalışma alanının zaten bildiği bütün tarihler, tek bir ayda. Burada hiçbir şey ikinci kez saklanmaz: bir kartı taşırsan değişen şey, geldiği kaydın kendisidir.',
   'Filter': 'Filtre',
   'Sort': 'Sırala',
   'No sort': 'Sıralama yok',
@@ -600,9 +605,6 @@ const tr: Record<string, string> = {
   'Forms': 'Formlar',
   'A database with one side turned outwards. An answer becomes a row — in the table, on the board, on the calendar, the moment it arrives.':
     'Bir yüzü dışa dönmüş veritabanı. Gelen cevap anında bir satır olur — tabloda, panoda, takvimde.',
-  'Booking': 'Randevu',
-  'Your hours on a page anybody can open. A booking becomes an event in the workspace like any other record.':
-    'Çalışma saatlerin, herkesin açabileceği bir sayfada. Alınan randevu, diğer kayıtlar gibi bir etkinliğe dönüşür.',
   'Hours logged against issues, and a week read back from them. Nothing is typed twice.':
     'İşlere girilen süreler ve onlardan okunan bir hafta. Hiçbir şey iki kez yazılmaz.',
   'The standup note, the invoice, the backup check. Made on a schedule, caught up if a night is missed.':
@@ -645,7 +647,6 @@ const tr: Record<string, string> = {
   'Up to {seats} people': 'En fazla {seats} kişi',
   '{bytes} of files': '{bytes} dosya',
   'Every board, page, database and issue': 'Bütün board, sayfa, veritabanı ve işler',
-  'Publishing, forms and booking links': 'Yayınlama, formlar ve randevu bağlantıları',
   'Publishing and forms': 'Yayınlama ve formlar',
   'That page could not be loaded.': 'Bu sayfa yüklenemedi.',
   'The stored page is damaged.': 'Kayıtlı sayfa hasarlı.',
@@ -665,9 +666,6 @@ const tr: Record<string, string> = {
   'Everything on the free plan': 'Ücretsiz plandaki her şey',
   'The code is AGPL. Run it on your own machine and every limit here is yours to set — this price is for somebody else keeping the disks spinning.':
     'Kod AGPL. Kendi makinende çalıştır, buradaki bütün sınırlar senin belirlediğin olur — bu fiyat, diskleri başkasının döndürmesi için.',
-  'Booking link': 'Randevu bağlantısı',
-  'Your hours, on a page anybody can open. A booking becomes an event in the workspace like any other record.':
-    'Çalışma saatlerin, herkesin açabileceği bir sayfada. Alınan randevu, çalışma alanında diğer kayıtlar gibi bir etkinliğe dönüşür.',
   'Make a booking link': 'Randevu bağlantısı oluştur',
   'A conversation': 'Görüşme',
   'What is being booked?': 'Ne için randevu?',
