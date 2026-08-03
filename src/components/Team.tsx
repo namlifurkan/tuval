@@ -133,7 +133,7 @@ export function Team() {
             <p className="mt-1 text-[12px] leading-snug text-faint">
               {joined
                 ? t('{n} joined this way so far.', { n: joined })
-                : t('Nobody has arrived through it yet: somebody joins the next time they open the app.')}
+                : t('Nobody at that address has an account yet. Whoever signs up joins on their first visit.')}
             </p>
           )}
         </div>

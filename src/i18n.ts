@@ -984,8 +984,8 @@ const tr: Record<string, string> = {
   '{domain} is a mailbox provider, not a company. Sign in with your work address to open this workspace to it.':
     '{domain} bir posta sağlayıcısı, şirket değil. Bu çalışma alanını şirketine açmak için iş adresinle giriş yap.',
   '{n} joined this way so far.': 'Şimdiye kadar {n} kişi böyle katıldı.',
-  'Nobody has arrived through it yet: somebody joins the next time they open the app.':
-    'Henüz kimse bu yoldan gelmedi: kişi uygulamayı bir sonraki açışında katılır.',
+  'Nobody at that address has an account yet. Whoever signs up joins on their first visit.':
+    'O adreste henüz hesabı olan yok. Kaydolan ilk gelişinde katılır.',
   'Invited {email}. They join when they sign in with that address.':
     '{email} davet edildi. O adresle giriş yapınca katılır.',
   'admin': 'yönetici',

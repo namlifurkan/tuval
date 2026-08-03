@@ -162,9 +162,9 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('blocked in workspace cannot read', false, public.can_read_board('rls-team-board'));
 
 -- The domain rule --------------------------------------------------------------------------------
--- It belongs to the workspace, and it hands over everything a workspace holds. Nobody is let in
--- by the rule alone: a membership row is written when they sign in, which is what a removal can
--- then stand against.
+-- It belongs to the workspace, and it hands over everything a workspace holds. It writes a
+-- membership row rather than answering from the address every time, which is what a removal can
+-- then stand against: the rows go in when the rule is set, and again for whoever arrives later.
 
 set local role postgres;
 delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
@@ -199,17 +199,53 @@ select pg_temp.check('and is opened to the one you are at', true,
                         set allowed_domain = 'rls.test', domain_role = 'guest'
                         where id = 'cccccccc-0000-4000-8000-000000000003'$q$));
 
+-- Nobody signs in for this: cara had an account before the switch was flipped, and the whole
+-- complaint about the first version was that she stayed invisible until she next opened the app.
 select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
-select pg_temp.check('the rule alone lets nobody in', false, public.can_read_board('rls-team-board'));
-select public.claim_invites();
-select pg_temp.check('the right domain joins on sign-in', true, public.can_read_board('rls-team-board'));
-select pg_temp.check('and joins as a guest, who cannot write', false, public.can_write_board('rls-team-board'));
+select pg_temp.check('the rule reaches somebody who was already here', true,
+  public.can_read_board('rls-team-board'));
+select pg_temp.check('and it is a guest, who cannot write', false, public.can_write_board('rls-team-board'));
 select pg_temp.check('a guest of the rule takes no seat', true,
   public.workspace_seats('cccccccc-0000-4000-8000-000000000003') = 1);
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('and the admin sees her on the list', true,
+  exists(select 1 from public.workspace_members m
+         where m.workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+           and m.user_id = 'dddddddd-0000-4000-8000-000000000004' and m.via_domain));
+
+-- An account made after the switch was flipped has no row yet, and claims it on arrival.
+set local role postgres;
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
+                        email_confirmed_at, created_at, updated_at,
+                        raw_app_meta_data, raw_user_meta_data)
+values
+  ('11111111-0000-4000-8000-000000000007', '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'dan@rls.test', '', now(), now(), now(),
+   '{"provider":"email","providers":["email"]}', '{}');
+
+select pg_temp.becomes('11111111-0000-4000-8000-000000000007', 'dan@rls.test');
+select pg_temp.check('somebody who signs up later is not in yet', false,
+  public.can_read_board('rls-team-board'));
+select public.claim_invites();
+select pg_temp.check('and joins the first time they arrive', true, public.can_read_board('rls-team-board'));
 
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select public.claim_invites();
 select pg_temp.check('another domain stays out', false, public.can_read_board('rls-team-board'));
+
+-- Switching it off takes back what it gave, and only that.
+set local role postgres;
+update public.workspaces set allowed_domain = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('11111111-0000-4000-8000-000000000007', 'dan@rls.test');
+select pg_temp.check('turning the rule off puts them back out', false,
+  public.can_read_board('rls-team-board'));
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+update public.workspaces set allowed_domain = 'rls.test', domain_role = 'guest'
+where id = 'cccccccc-0000-4000-8000-000000000003';
 
 set local role postgres;
 update public.workspace_members set role = 'blocked'
@@ -219,6 +255,18 @@ where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
 select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
 select public.claim_invites();
 select pg_temp.check('a removal survives the rule', false, public.can_read_board('rls-team-board'));
+
+-- And survives the switch being flipped twice, which is the cheapest way to undo a removal by
+-- accident: off deletes the rows the rule wrote, on writes them again, and hers is neither.
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+update public.workspaces set allowed_domain = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+update public.workspaces set allowed_domain = 'rls.test'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
+select pg_temp.check('and survives the rule being switched off and on', false,
+  public.can_read_board('rls-team-board'));
 
 -- Everybody ends up in exactly one workspace ------------------------------------------------------
 

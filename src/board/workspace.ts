@@ -268,8 +268,10 @@ export async function removeFromWorkspace(userId: string) {
       { onConflict: 'workspace_id,user_id' })
 }
 
+// A role given by hand is no longer the rule's to change, and no longer the rule's to take back
+// when the domain is switched off.
 export async function setTeamRole(userId: string, role: WorkspaceRole) {
   if (!supabase || !current) return
-  await supabase.from('workspace_members').update({ role })
+  await supabase.from('workspace_members').update({ role, via_domain: false })
     .eq('workspace_id', current.id).eq('user_id', userId)
 }
