@@ -13,7 +13,7 @@
       // owns everything after this; the two colours are repeated here because a <meta> cannot read
       // a CSS variable and this has to run before the stylesheet exists.
       try {
-        var mode = localStorage.getItem('tuval:theme') || 'system'
+        var mode = localStorage.getItem('tuval:theme') || 'light'
         var dark = mode === 'dark'
           || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         if (dark) {

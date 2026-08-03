@@ -30,18 +30,25 @@ beforeEach(() => {
   document.head.innerHTML = '<meta name="theme-color" content="#F2EFE9">'
 })
 
-test('with nothing stored it follows the system, both ways', async () => {
+test('with nothing stored it opens light, whatever the system says', async () => {
   system(true)
   const { getAppearance } = await load()
-  expect(getAppearance()).toBe('system')
-  expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
-  expect(themeColor()).toBe('#1A1917')
+  expect(getAppearance()).toBe('light')
+  expect(document.documentElement.getAttribute('data-theme')).toBe(null)
+  expect(themeColor()).toBe('#F2EFE9')
 
-  document.documentElement.removeAttribute('data-theme')
   system(false)
   await load()
   expect(document.documentElement.getAttribute('data-theme')).toBe(null)
   expect(themeColor()).toBe('#F2EFE9')
+})
+
+test('system is still a choice, it is just not the default', async () => {
+  system(true)
+  localStorage.setItem('tuval:theme', 'system')
+  const { getAppearance } = await load()
+  expect(getAppearance()).toBe('system')
+  expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
 })
 
 test('a stored choice outranks the system', async () => {
@@ -70,6 +77,7 @@ test('choosing dark persists and paints, and tells whoever is listening', async 
 
 test('the system flipping moves a system reader and leaves a decided one alone', async () => {
   system(false)
+  localStorage.setItem('tuval:theme', 'system')
   const { setAppearance } = await load()
 
   flip(true)
@@ -86,8 +94,8 @@ test('a browser that refuses storage still resolves a theme', async () => {
   Storage.prototype.getItem = () => { throw new Error('denied') }
   try {
     const { getAppearance } = await load()
-    expect(getAppearance()).toBe('system')
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(getAppearance()).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe(null)
   } finally {
     Storage.prototype.getItem = held
   }

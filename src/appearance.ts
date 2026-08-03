@@ -17,7 +17,7 @@ function read(): Appearance {
     const held = localStorage.getItem(KEY)
     if (held === 'light' || held === 'dark' || held === 'system') return held
   } catch { /* ignore */ }
-  return 'system'
+  return 'light'
 }
 
 let mode = read()
