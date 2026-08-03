@@ -51,6 +51,44 @@ do {
   process.stderr.write(`\r${items.length} items`)
 } while (cursor)
 
+// A picture on api.miro.com is only served to a token, and the browser that draws the board has
+// none — so it is fetched here, where the token already is, and carried inside the file. Anything
+// bigger than this is left behind rather than making a board nobody can save.
+const CAP = 4 * 1024 * 1024
+
+const asData = async (res) => {
+  const bytes = Buffer.from(await res.arrayBuffer())
+  if (bytes.length > CAP) return null
+  const mime = (res.headers.get('content-type') ?? 'image/png').split(';')[0]
+  return `data:${mime};base64,${bytes.toString('base64')}`
+}
+
+// With redirect=false the API answers with the address of the picture rather than the picture,
+// and that address is signed, so the second request carries no token.
+const picture = async (url) => {
+  const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } })
+  if (!res.ok) return null
+  if ((res.headers.get('content-type') ?? '').includes('json')) {
+    const { url: signed } = await res.json()
+    if (!signed) return null
+    const file = await fetch(signed)
+    return file.ok ? asData(file) : null
+  }
+  return asData(res)
+}
+
+let carried = 0
+const pictures = items.filter((i) => i.data?.imageUrl)
+for (const item of pictures) {
+  process.stderr.write(`\rpicture ${carried + 1} of ${pictures.length}`)
+  const data = await picture(item.data.imageUrl).catch(() => null)
+  if (data) { item.data.imageUrl = data; carried += 1 }
+}
+
 const { writeFile } = await import('node:fs/promises')
 await writeFile(out, JSON.stringify({ data: items }, null, 2))
-process.stderr.write(`\rWrote ${items.length} items to ${out}\n`)
+process.stderr.write(
+  `\rWrote ${items.length} items to ${out}`
+  + (pictures.length ? ` (${carried} of ${pictures.length} pictures carried)` : '')
+  + '\n',
+)

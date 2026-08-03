@@ -108,8 +108,51 @@ describe('miro import', () => {
     expect(skipped).toEqual({ embed: 1, image: 1, connector: 1 })
   })
 
+  it('draws a picture the exporter carried, and the arrow that points at it', () => {
+    const carried = miroToItems({
+      data: [
+        {
+          id: 'i2', type: 'image',
+          data: { imageUrl: 'data:image/png;base64,iVBORw0KGgo=' },
+          position: { x: 0, y: 0, origin: 'center', relativeTo: 'canvas_center' },
+          geometry: { width: 300, height: 200 },
+        },
+        {
+          id: 'sh2', type: 'shape', data: { shape: 'rectangle', content: 'A' },
+          position: { x: 500, y: 0, origin: 'center', relativeTo: 'canvas_center' },
+          geometry: { width: 100, height: 100 },
+        },
+        { id: 'c3', type: 'connector', startItem: { id: 'sh2' }, endItem: { id: 'i2' } },
+      ],
+    })
+    expect(carried.items.filter((i) => i.type === 'image')).toHaveLength(1)
+    expect(carried.items.filter((i) => i.type === 'connector')).toHaveLength(1)
+    expect(carried.skipped).toEqual({})
+  })
+
   it('draws frames before their contents', () => {
     expect(items[0].type).toBe('frame')
+  })
+
+  it('puts a backdrop behind what sits on it, whatever order they were made in', () => {
+    const { items: stack } = miroToItems({
+      data: [
+        {
+          id: 'label', type: 'shape', data: { shape: 'rectangle', content: 'Okul Adı' },
+          position: { x: 0, y: 0, origin: 'center', relativeTo: 'canvas_center' },
+          geometry: { width: 200, height: 60 },
+        },
+        // Made last in Miro, and a backdrop: creation order would paint it over the label.
+        {
+          id: 'panel', type: 'shape', data: { shape: 'rectangle' },
+          position: { x: 0, y: 0, origin: 'center', relativeTo: 'canvas_center' },
+          geometry: { width: 2000, height: 1200 },
+        },
+        { id: 'arrow', type: 'connector', startItem: { id: 'panel' }, endItem: { id: 'label' } },
+      ],
+    })
+    expect(stack.map((i) => ('text' in i && i.text) || i.type))
+      .toEqual(['shape', 'Okul Adı', 'connector'])
   })
 
   it('snaps colours onto the Tuval palette', () => {
@@ -119,7 +162,13 @@ describe('miro import', () => {
     expect(nearestSticky(undefined)).toBe('#F0E3B0')
   })
 
-  it('unescapes entities', () => {
+  it('unescapes entities, named and numbered', () => {
     expect(plain('a &amp; b &lt;c&gt;')).toBe('a & b <c>')
+    expect(plain('<p>Takip Durumu &#34;Bekliyor&#34;</p>')).toBe('Takip Durumu "Bekliyor"')
+    expect(plain('<p>T&#43;15 Süresi</p>')).toBe('T+15 Süresi')
+    expect(plain('<p>Mapping&#39;i</p>')).toBe("Mapping'i")
+    expect(plain('&#x41;&#x42;')).toBe('AB')
+    // An ampersand that was escaped stays one character rather than being read twice.
+    expect(plain('&amp;#34;')).toBe('&#34;')
   })
 })

@@ -270,6 +270,11 @@ Paste the board's address straight from the browser, or give just the id if you 
 token is created at *miro.com → Settings → Your apps* (a developer team app with `boards:read`)
 and never leaves your shell: Tuval does not talk to Miro, and the browser never sees the token.
 
+Pictures live behind Miro's own token, so the script fetches them while it still has one and
+carries them inside the file; anything over 4 MB is left behind and counted rather than making a
+board too big to save. Miro sends no z-order at all, so the stack is rebuilt from size — the big
+thing is the backdrop, what sits on it is smaller, arrows over the top.
+
 Then **board menu → Import from Miro** and pick the JSON — or drop the file straight onto a
 board.
 Frames, sticky notes, text, shapes, images, cards and connectors come over; positions are

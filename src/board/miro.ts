@@ -62,11 +62,14 @@ export function plain(html: string | undefined): string {
     .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
+    // Miro writes most punctuation as a number rather than a name: &#34; for a quote, &#43; for
+    // the plus in "T+15". Naming them one at a time leaves the next one on screen as itself.
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
     .trim()
 }
 
@@ -238,7 +241,11 @@ export function miroToItems(raw: unknown): MiroImport {
     items.push(c)
   }
 
-  // Frames first so children paint on top of them.
-  items.sort((a, b) => Number(b.type === 'frame') - Number(a.type === 'frame'))
+  // The items endpoint carries no z-order — not a field being ignored, one Miro does not send —
+  // so the stack is rebuilt rather than restored. Frames hold everything, then the big thing is
+  // the backdrop and what sits on it is smaller, then arrows over the top. Same size keeps the
+  // order it was made in, which is the one thing the API does say.
+  const rank = (i: Item) => (i.type === 'frame' ? 0 : i.type === 'connector' ? 2 : 1)
+  items.sort((a, b) => rank(a) - rank(b) || b.w * b.h - a.w * a.h)
   return { items, skipped }
 }
