@@ -54,7 +54,7 @@ do {
 // A picture on api.miro.com is only served to a token, and the browser that draws the board has
 // none — so it is fetched here, where the token already is, and carried inside the file. Anything
 // bigger than this is left behind rather than making a board nobody can save.
-const CAP = 4 * 1024 * 1024
+const CAP = 8 * 1024 * 1024
 
 const asData = async (res) => {
   const bytes = Buffer.from(await res.arrayBuffer())
@@ -79,16 +79,28 @@ const picture = async (url) => {
 
 let carried = 0
 const pictures = items.filter((i) => i.data?.imageUrl)
-for (const item of pictures) {
-  process.stderr.write(`\rpicture ${carried + 1} of ${pictures.length}`)
-  const data = await picture(item.data.imageUrl).catch(() => null)
+for (const [n, item] of pictures.entries()) {
+  process.stderr.write(`\rpicture ${n + 1} of ${pictures.length}`)
+  // The address on the board points at format=preview, which is the thumbnail Miro draws while
+  // you are far out — importing that is how a picture arrives blurred. The original is asked for
+  // first and the preview is what it falls back to, so too big still beats nothing.
+  const original = item.data.imageUrl.replace(/format=preview/, 'format=original')
+  const data = await picture(original).catch(() => null)
+    ?? await picture(item.data.imageUrl).catch(() => null)
   if (data) { item.data.imageUrl = data; carried += 1 }
 }
 
 const { writeFile } = await import('node:fs/promises')
-await writeFile(out, JSON.stringify({ data: items }, null, 2))
+const file = JSON.stringify({ data: items }, null, 2)
+await writeFile(out, file)
+const mb = (file.length / 1024 / 1024).toFixed(1)
 process.stderr.write(
-  `\rWrote ${items.length} items to ${out}`
+  `\rWrote ${items.length} items to ${out}, ${mb} MB`
   + (pictures.length ? ` (${carried} of ${pictures.length} pictures carried)` : '')
   + '\n',
 )
+// The pictures ride inside the board once imported, and a board is saved whole. Saying so here is
+// cheaper than finding out at the moment a save starts failing.
+if (file.length > 20 * 1024 * 1024) {
+  process.stderr.write('That is a heavy board: the pictures travel inside it and are saved with it.\n')
+}
