@@ -41,7 +41,7 @@ const WRITABLE = [
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
+  'Access-Control-Allow-Headers': 'authorization, content-type, x-tuval-run',
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
 }
 
@@ -81,9 +81,15 @@ Deno.serve(async (request) => {
     return send({ error: 'That key has written as much as it may today.' }, 429)
   }
 
+  // Which run these writes belong to. Only the caller knows where a run starts and stops, so it
+  // names it and this checks the shape and nothing else. Anything that is not a plain short name
+  // is dropped rather than refused: a client that sends rubbish should still get its write.
+  const named = (request.headers.get('x-tuval-run') ?? '').trim()
+  const run = /^[A-Za-z0-9._-]{1,64}$/.test(named) ? named : null
+
   // What the row is signed with. A caller cannot send these — they are not in WRITABLE — so an
   // agent cannot pass itself off as somebody, and a change made out here always says so.
-  const signature = { updated_by: acting, updated_via: key.agent || 'API key' }
+  const signature = { updated_by: acting, updated_via: key.agent || 'API key', updated_run: run }
 
   // The page gate, asked once for a whole page of rows rather than once per row.
   const readable = async (ids: string[]) => {

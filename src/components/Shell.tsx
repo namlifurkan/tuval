@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import { CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target } from 'lucide-react'
+import { Bot, CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { openJournal } from '../board/journal'
 import { armed } from '../board/keys'
@@ -18,6 +18,7 @@ import { Wordmark } from './Logo'
 const NAV = [
   { path: '/dashboard', label: 'Boards', icon: LayoutGrid },
   { path: '/inbox', label: 'Inbox', icon: Inbox },
+  { path: '/runs', label: 'Agent runs', icon: Bot },
   { path: '/issues', label: 'Issues', icon: CircleDot },
   { path: '/projects', label: 'Projects', icon: Target },
   { path: '/pages', label: 'Docs', icon: FileText },

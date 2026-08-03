@@ -31,6 +31,13 @@ const fromFile = (name) => {
 
 const read = (name) => process.env[name] || fromFile(name)
 
+// One run is one of these processes, which is one agent session. Everything written while it
+// lives carries the same name, so the person reviewing in the morning reads a run rather than
+// forty unrelated changes. TUVAL_RUN overrides it, for a caller that knows better — a CI job
+// naming the build, say.
+const RUN = (read('TUVAL_RUN') || `run-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}-${Math.random().toString(36).slice(2, 8)}`)
+  .replace(/[^A-Za-z0-9._-]/g, '').slice(0, 64)
+
 const KEY = read('TUVAL_API_KEY')
 const BASE = read('TUVAL_API_URL')
   || `${read('VITE_SUPABASE_URL').replace(/\/+$/, '')}/functions/v1/api`
@@ -51,6 +58,7 @@ async function ask(path, { markdown = false, method = 'GET', body } = {}) {
     method,
     headers: {
       authorization: `Bearer ${KEY}`,
+      'x-tuval-run': RUN,
       ...(body === undefined ? {} : { 'content-type': 'application/json' }),
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -140,10 +148,11 @@ const TOOLS = [
   {
     name: 'workspace',
     description:
-      'What this key can reach, and the addresses inside it. Says whether the key may write and '
-      + 'how many writes it has left today.',
+      'What this key can reach, and the addresses inside it. Says whether the key may write, how '
+      + 'many writes it has left today, and the name this session stamps on everything it writes '
+      + 'so a person can review the whole run at once.',
     inputSchema: { type: 'object', properties: {} },
-    run: () => ask(''),
+    run: async () => ({ ...await ask(''), run: RUN }),
   },
   {
     name: 'create_record',

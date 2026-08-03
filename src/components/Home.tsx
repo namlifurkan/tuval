@@ -7,6 +7,7 @@ import { Collection } from './Collection'
 import { Dashboard } from './Dashboard'
 import { Docs } from './Docs'
 import { Inbox } from './Inbox'
+import { Runs } from './Runs'
 const Published = lazy(() => import('./Published').then((m) => ({ default: m.Published })))
 const PublicForm = lazy(() => import('./PublicForm').then((m) => ({ default: m.PublicForm })))
 const Profile = lazy(() => import('./Profile').then((m) => ({ default: m.Profile })))
@@ -31,6 +32,7 @@ export function Home() {
   if (route.kind === 'projects') return <Projects />
   if (route.kind === 'docs') return <Docs />
   if (route.kind === 'inbox') return <Inbox />
+  if (route.kind === 'runs') return <Runs />
   if (route.kind === 'published') return <Suspense fallback={null}><Published /></Suspense>
   if (route.kind === 'form') return <Suspense fallback={null}><PublicForm /></Suspense>
   if (route.kind === 'page') return <Page key={route.id} />

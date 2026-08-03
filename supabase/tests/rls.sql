@@ -1576,6 +1576,46 @@ select pg_temp.check('and a caller with no account cannot reach it at all', true
   pg_temp.refused($$select public.mark_workspace_seen(
     'cccccccc-0000-4000-8000-000000000003')$$));
 
+-- A run is one thing ---------------------------------------------------------------------------------
+-- The stamp travels from the row onto its revision, a person's edit never carries one, and the
+-- summary answers only for somebody in the workspace.
+
+set local role postgres;
+insert into public.records (id, workspace_id, kind, title, updated_via, updated_run)
+values ('bbbb1111-0000-4000-8000-00000000ab01', 'cccccccc-0000-4000-8000-000000000003',
+        'issue', 'Written by a run', 'claudecode', 'run-20260803-abc123');
+update public.records set title = 'Renamed by the same run'
+where id = 'bbbb1111-0000-4000-8000-00000000ab01';
+
+select pg_temp.check('the run travels from the row onto its revision', true,
+  (select count(*) = 2 from public.record_revisions
+   where record_id = 'bbbb1111-0000-4000-8000-00000000ab01'
+     and run = 'run-20260803-abc123'));
+
+select pg_temp.check('and a shape nobody should be able to store is refused', true,
+  pg_temp.refused($$update public.records set updated_run = 'not a run name!'
+    where id = 'bbbb1111-0000-4000-8000-00000000ab01'$$));
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "aaaaaaaa-0000-4000-8000-000000000001", "role": "authenticated"}';
+
+update public.records set title = 'Renamed by a person'
+where id = 'bbbb1111-0000-4000-8000-00000000ab01';
+select pg_temp.check('a person editing carries no run', true,
+  (select updated_run is null from public.records
+   where id = 'bbbb1111-0000-4000-8000-00000000ab01'));
+
+select pg_temp.check('somebody in the workspace sees the run summarised', true,
+  (select records = 1 and writes = 2
+   from public.agent_runs('cccccccc-0000-4000-8000-000000000003')
+   where run = 'run-20260803-abc123'));
+
+set local request.jwt.claims = '{"sub": "99999999-0000-4000-8000-000000000009", "role": "authenticated"}';
+select pg_temp.check('and somebody outside it sees no runs at all', true,
+  (select count(*) = 0 from public.agent_runs('cccccccc-0000-4000-8000-000000000003')));
+
+set local role postgres;
+
 -- What went wrong, if anything --------------------------------------------------------------------
 
 set local role postgres;
