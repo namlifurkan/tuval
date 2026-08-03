@@ -73,22 +73,6 @@ export const findPage = (path: string) =>
 
 export const bandOf = (page: Page, id: string) => page.bands.find((b) => b.id === id)
 
-// The price is decided in one place and enforced in another, and neither of them is this file.
-// A sentence that quotes a stale number is a complaint waiting to happen, so it carries tokens
-// and the number arrives from src/board/plan.ts. Prerender does the same substitution.
-export const filled = (text: string, price: {
-  amount: number
-  currency: string
-  per: string
-  period: string
-  about: string
-  since: string
-  review: string
-}) => text
-  .replace('{price}', `${price.currency}${price.amount}`)
-  .replace('{per}', price.per)
-  .replace('{period}', price.period)
-  .replace('{about}', price.about)
-  .replace('{since}', price.since)
-  .replace('{review}', price.review)
-  .replace('{repo}', product.repo)
+// One token left, and it is not a price: the repository address, which is decided in
+// product.json because a link that changes should change in one place.
+export const filled = (text: string) => text.replace('{repo}', product.repo)

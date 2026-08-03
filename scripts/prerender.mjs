@@ -35,18 +35,8 @@ if (!readFileSync(join(DIST, 'index.html'), 'utf8').includes('<div id="root"></d
 // silently found three pages out of ten, which is exactly the failure a build step must not have.
 const { pages: all } = JSON.parse(readFileSync('src/site/pages.json', 'utf8'))
 
-// The price is decided in src/site/price.json and read here and by the React pages, so a crawler
-// and a visitor cannot be shown two different numbers.
-const price = JSON.parse(readFileSync('src/site/price.json', 'utf8'))
 const product = JSON.parse(readFileSync('src/site/product.json', 'utf8'))
-const fill = (text) => String(text)
-  .replace('{price}', `${price.currency}${price.amount}`)
-  .replace('{per}', price.per)
-  .replace('{period}', price.period)
-  .replace('{about}', price.about)
-  .replace('{since}', price.since)
-  .replace('{review}', price.review)
-  .replace('{repo}', product.repo)
+const fill = (text) => String(text).replace('{repo}', product.repo)
 
 const escape = (text) => fill(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -54,9 +44,8 @@ const escape = (text) => fill(text)
 
 const shell = readFileSync(join(DIST, 'index.html'), 'utf8')
 
-// The price-carrying result is the one search can give us without our ranking moving, and every
-// field it wants is already decided somewhere else in the repo. Written on the two pages that
-// carry the offer; a product marked up on eleven addresses is eleven products.
+// Written on the two pages that carry an offer; a product marked up on eleven addresses is
+// eleven products.
 //
 // No FAQPage: not one page here holds a question. Inventing three to earn the expansion is the
 // same trick as a badge with no stars behind it.
@@ -68,11 +57,13 @@ const application = JSON.stringify({
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   license: 'https://www.gnu.org/licenses/agpl-3.0.html',
+  // The free plan is the only offer that exists to be marked up. Publishing a price for a plan
+  // nobody can buy would put a number in a search result that no page here will honour.
   offers: {
     '@type': 'Offer',
-    price: price.amount,
+    price: 0,
     priceCurrency: 'TRY',
-    category: `per ${price.per} per ${price.period}`,
+    category: 'Free for up to three people',
   },
 })
 

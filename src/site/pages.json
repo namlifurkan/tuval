@@ -87,7 +87,7 @@
             },
             {
               "title": "Team",
-              "body": "{price} per {per} per {period}, VAT included, about {about}. Ten gigabytes each, up to two hundred people, and the API and webhooks so n8n and the rest can reach it."
+              "body": "Ten gigabytes each, up to two hundred people, and the API and webhooks so n8n and the rest can reach it. Not on sale yet: there is no payment to take it with."
             },
             {
               "title": "Your own server",
@@ -546,10 +546,10 @@
     },
     {
       "path": "/pricing",
-      "title": "Pricing — free for small teams, paid to be hosted | Tuval",
-      "description": "Free for up to three people with every feature. The paid plan is for people who would rather not run the servers. The code is AGPL and self-hosting is unlimited.",
+      "title": "Pricing — free for small teams, unlimited if you host it | Tuval",
+      "description": "Free for up to three people with a gigabyte of files, and unlimited on an install you run yourself. The hosted paid plan is not on sale yet. AGPL-3.0 licensed.",
       "claim": "The code is free. The disks are not.",
-      "lede": "What is priced is somebody else running it: the disks, the bandwidth and the answering. Billed in lira, since that is the currency a Turkish company can take.",
+      "lede": "What is priced is somebody else running it: the disks, the bandwidth and the answering. There is no price on this page yet, because there is nothing here to pay one with. Free is free, and running it yourself has no limits at all.",
       "bands": [
         {
           "tone": "paper",
@@ -572,7 +572,7 @@
         {
           "tone": "pigment",
           "heading": "Team",
-          "body": "Up to two hundred people, ten gigabytes of files each, and the API, webhooks and MCP server so n8n or a coding agent can reach the workspace. Everything on the free plan as well. Run it yourself and the seat count stops applying."
+          "body": "Up to two hundred people, ten gigabytes of files each, and the API, webhooks and MCP server so n8n or a coding agent can reach the workspace. Everything on the free plan as well. Run it yourself and none of these numbers apply."
         },
         {
           "tone": "paper",
@@ -582,8 +582,8 @@
         {
           "id": "pay",
           "tone": "paper",
-          "heading": "How you pay",
-          "body": "There is no card form yet. The first thirty customers are invoiced and pay by bank transfer: write to product@tuval.dev with your company details, an invoice comes back the same week, and the workspace is on the Team plan the day it is paid. A card checkout arrives when it is worth the fee; being invoiced is not a worse deal, and for a Turkish company it is usually the one accounting prefers."
+          "heading": "What it costs",
+          "body": "Nothing yet, because there is nothing here to take money with. No card form, no invoice, no price on this page — publishing one before a payment exists is asking to be trusted about a number nobody can act on. If the free plan is too small for you today, write to product@tuval.dev and we will sort something out for now. Running it yourself has no limits and needs no arrangement."
         },
         {
           "tone": "paper",
@@ -717,7 +717,7 @@
           },
           {
             "feature": "Fiyat",
-            "tuval": "3 kişiye ve 1 GB dosyaya kadar ücretsiz. Barındırılan plan {price} / {per} / {period}, KDV dahil, yaklaşık {about}.",
+            "tuval": "3 kişiye ve 1 GB dosyaya kadar ücretsiz. Barındırılan plan henüz satışta değil; kendi sunucunda sınırsız.",
             "them": "Kullanıcı başına abonelik, dolar üzerinden. Güncel tutamayacağımız bir rakamı buraya yazmıyoruz; kendi fiyat sayfalarına bakın."
           },
           {
@@ -824,7 +824,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
+            "tuval": "Free for up to 3 people with 1 GB of files. The hosted plan is not on sale yet; run it yourself and there are no limits at all.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {
@@ -924,7 +924,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
+            "tuval": "Free for up to 3 people with 1 GB of files. The hosted plan is not on sale yet; run it yourself and there are no limits at all.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {
@@ -1028,7 +1028,7 @@
           },
           {
             "feature": "Price",
-            "tuval": "Free for up to 3 people with 1 GB of files. Hosted plan {price} per {per} per {period}, VAT included, about {about}.",
+            "tuval": "Free for up to 3 people with 1 GB of files. The hosted plan is not on sale yet; run it yourself and there are no limits at all.",
             "them": "Per-user subscription. We do not print a figure we cannot keep current; see their pricing page."
           },
           {

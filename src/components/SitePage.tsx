@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { go, readRoute, routePath } from '../board/boards'
 import { FONT, PRODUCT } from '../board/brand'
-import { PRICE } from '../board/plan'
 import { bandOf, filled, findPage, LINK_NAMES, PAGES } from '../site/pages'
 import type { Band, Page } from '../site/pages'
 import { Account } from './Account'
@@ -17,7 +16,7 @@ const PAPER = '#F2EFE9'
 const DISPLAY = { fontFamily: '"Instrument Serif", "Iowan Old Style", Georgia, serif' }
 const READING = { fontFamily: FONT.stack }
 
-const say = (text: string) => filled(text, PRICE)
+const say = (text: string) => filled(text)
 
 // Which board a page opens on. This is most of what makes the pages different from each other:
 // a consultant lands on a five whys, a software team on a kanban, and the words on top of them
@@ -442,11 +441,7 @@ function PricingLayout({ page }: { page: Page }) {
           </div>
 
           <div className="border-t-2 border-[#C8452D] pt-6">
-            {price(
-              'Team',
-              `${PRICE.currency}${PRICE.amount}`,
-              `per ${PRICE.per}, per ${PRICE.period}${PRICE.taxIncluded ? ', VAT included' : ''} · about ${PRICE.about}`,
-            )}
+            {price('Team', '—', 'not on sale yet')}
             <p className="mt-8 max-w-[46ch] text-[15px] leading-[1.65] text-[#4A463E]" style={READING}>
               {say(team?.body ?? '')}
             </p>
@@ -456,7 +451,7 @@ function PricingLayout({ page }: { page: Page }) {
               className="mt-8 inline-block rounded-xl bg-[#C8452D] px-5 py-3 text-[15px] font-semibold text-[#F2EFE9] shadow-[2px_2px_0_#9E2F1B] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#141310]"
             >Start free</a>
             <p className="mt-6 max-w-[46ch] border-t border-[#141310]/12 pt-3 text-[12px] leading-[1.6] text-[#8A867C]">
-              {`${PRICE.currency}${PRICE.amount} since ${PRICE.since}. ${PRICE.review}`}
+              {say('There is no price here because there is nothing to pay it with yet. When there is, it will be written down with the date it took effect and the notice before it changes.')}
             </p>
           </div>
         </div>
