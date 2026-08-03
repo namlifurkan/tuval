@@ -78,18 +78,20 @@ try {
   const tally = rows.find((r) => 'failed' in r)
   const broken = rows.filter((r) => 'expected' in r)
 
+  // Set rather than exit: process.exit skips the finally below, which is how a hundred and
+  // twenty of these temporary files came to be sitting in the repository root.
   if (!tally) {
     console.error('No result from the suite. Raw output:\n' + out)
-    process.exit(1)
-  }
+    process.exitCode = 1
+  } else {
+    for (const row of broken) {
+      console.error(`  ✗ ${row.name}: expected ${row.expected}, got ${row.actual}`)
+    }
 
-  for (const row of broken) {
-    console.error(`  ✗ ${row.name}: expected ${row.expected}, got ${row.actual}`)
+    const failed = Number(tally.failed)
+    console.log(`${tally.checks - failed}/${tally.checks} access checks pass`)
+    process.exitCode = failed ? 1 : 0
   }
-
-  const failed = Number(tally.failed)
-  console.log(`${tally.checks - failed}/${tally.checks} access checks pass`)
-  process.exit(failed ? 1 : 0)
 } finally {
   try { unlinkSync(tmp) } catch { /* already gone */ }
 }

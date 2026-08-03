@@ -1096,6 +1096,7 @@ select pg_temp.check('turning it off puts the limits back', true,
   (select seats from public.plan_limits(
      public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) = 3);
 
+
 -- A domain the operator carries ---------------------------------------------------------------------
 -- The same arrangement one step smaller: a hosted install that is billing, deciding it is not
 -- billing these people. It reads the owner's confirmed address and nobody else's.
@@ -1123,6 +1124,30 @@ update public.tuval_settings set unlimited_domains = '{}' where id = 1;
 select pg_temp.check('and taking the domain off puts the limits back', true,
   (select seats from public.plan_limits(
      public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) = 3);
+
+-- One workspace, carried by hand rather than by a rule about everybody at a domain. Its own row,
+-- so it does not depend on what any earlier block left behind.
+insert into public.workspaces (id, slug, name, owner)
+values ('ffff0000-0000-4000-8000-00000000000f', 'carried', 'Carried',
+        'bbbbbbbb-0000-4000-8000-000000000002');
+
+select pg_temp.check('a workspace starts out billed like any other', true,
+  public.plan_of('ffff0000-0000-4000-8000-00000000000f') = 'free');
+
+update public.workspaces set plan = 'unlimited', plan_until = null
+where id = 'ffff0000-0000-4000-8000-00000000000f';
+select pg_temp.check('a workspace can be carried one at a time', true,
+  public.plan_of('ffff0000-0000-4000-8000-00000000000f') = 'unlimited');
+select pg_temp.check('and its seats stop being counted', true,
+  (select seats from public.plan_limits(
+     public.plan_of('ffff0000-0000-4000-8000-00000000000f'), 1)) > 1000000);
+select pg_temp.check('while the one beside it is untouched', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'free');
+
+update public.workspaces set plan_until = now() - interval '1 day'
+where id = 'ffff0000-0000-4000-8000-00000000000f';
+select pg_temp.check('a decision with a date on it ends when the date does', true,
+  public.plan_of('ffff0000-0000-4000-8000-00000000000f') = 'free');
 
 -- What one key opens ------------------------------------------------------------------------------
 -- A key is not the workspace. It may only read, it may run out, and it sees exactly the pages the
