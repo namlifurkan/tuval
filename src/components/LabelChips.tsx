@@ -18,7 +18,7 @@ export function LabelChips({ known, worn }: { known: Label[]; worn: string[] }) 
         >{label.name}</span>
       ))}
       {held.length > MOST && (
-        <span className="text-[10px] text-[#B6B1A6]">+{held.length - MOST}</span>
+        <span className="text-[10px] text-faint">+{held.length - MOST}</span>
       )}
     </span>
   )

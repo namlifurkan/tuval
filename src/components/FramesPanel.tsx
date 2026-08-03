@@ -156,7 +156,7 @@ export function FramesPanel() {
               type="button"
               title={t('Delete')}
               onClick={() => { removeItems([frame.id]); requestRender() }}
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#943321] opacity-0 hover:bg-[#F7E9E4] group-hover:opacity-100"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-pigment-deep opacity-0 hover:bg-pigment-wash group-hover:opacity-100"
             >
               <Trash2 size={13} strokeWidth={2} />
             </button>

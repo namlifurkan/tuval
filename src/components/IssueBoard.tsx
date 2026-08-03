@@ -39,14 +39,14 @@ export function IssueBoard({ issues, nameOf, onOpen }: {
           onDragLeave={() => setOver((s) => (s === status ? null : s))}
           onDrop={() => drop(status)}
           className={`min-h-[120px] rounded-xl border p-2 transition-colors
-            ${over === status ? 'border-pigment bg-[#F7E9E4]' : 'border-hairline bg-paper'}`}
+            ${over === status ? 'border-pigment bg-pigment-wash' : 'border-hairline bg-paper'}`}
         >
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span aria-hidden className="h-2.5 w-2.5 rounded-[3px]" style={{ background: TONE[status] }} />
             <span className="text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
               {t(status)}
             </span>
-            <span className="ml-auto text-[11px] text-[#B6B1A6]">{column(status).length}</span>
+            <span className="ml-auto text-[11px] text-faint">{column(status).length}</span>
           </div>
 
           {column(status).map((issue) => (
@@ -63,7 +63,7 @@ export function IssueBoard({ issues, nameOf, onOpen }: {
               {issue.assignee && (
                 <span
                   title={nameOf(issue.assignee)}
-                  className="mt-2 grid h-5 w-5 place-items-center rounded-md bg-[#3E5C93] text-[9px] font-bold text-white"
+                  className="mt-2 grid h-5 w-5 place-items-center rounded-md bg-avatar text-[9px] font-bold text-white"
                 >
                   {initials(nameOf(issue.assignee) || '?')}
                 </span>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { APPEARANCES, getAppearance, setAppearance, subscribeAppearance } from '../appearance'
 import { go } from '../board/boards'
 import { initials } from '../board/me'
 import { avatarUrl, profileName, setProfile, uploadAvatar } from '../board/profile'
@@ -39,6 +40,7 @@ export function Settings() {
   const user = useSyncExternalStore(subscribeAuth, getUser, getUser)
   const workspace = getWorkspace()
   const lang = useSyncExternalStore(subscribeLang, getLang, getLang)
+  const appearance = useSyncExternalStore(subscribeAppearance, getAppearance, getAppearance)
   const file = useRef<HTMLInputElement>(null)
 
   const [name, setName] = useState('')
@@ -107,12 +109,12 @@ export function Settings() {
             <button
               type="button"
               onClick={() => file.current?.click()}
-              className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-hairline bg-[#3E5C93] text-lg font-bold text-white"
+              className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-hairline bg-avatar text-lg font-bold text-white"
             >
               {face
                 ? <img src={face} alt="" className="h-full w-full object-cover" />
                 : initials(name || displayName(user.email))}
-              <span className="absolute inset-0 grid place-items-center bg-ink/60 text-[10px] font-semibold uppercase tracking-[0.13em] text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="absolute inset-0 grid place-items-center bg-ink/60 text-[10px] font-semibold uppercase tracking-[0.13em] text-paper opacity-0 transition-opacity group-hover:opacity-100">
                 {t('Change')}
               </span>
             </button>
@@ -240,6 +242,23 @@ export function Settings() {
           </div>
         </Row>
 
+        <Row
+          title={t('Appearance')}
+          note={t('Yours alone, kept in this browser. The board itself stays paper in every one of them — the surface you draw on belongs to the board, and changing it changes it for everybody.')}
+        >
+          <div className="flex gap-2">
+            {APPEARANCES.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setAppearance(a.id)}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors
+                  ${appearance === a.id ? 'bg-pigment-wash text-pigment' : 'hover:bg-shade'}`}
+              >{t(a.name)}</button>
+            ))}
+          </div>
+        </Row>
+
         <Row title={t('Language')}>
           <div className="flex gap-2">
             {LANGS.map((l) => (
@@ -248,7 +267,7 @@ export function Settings() {
                 type="button"
                 onClick={() => setLang(l.id)}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors
-                  ${lang === l.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-shade'}`}
+                  ${lang === l.id ? 'bg-pigment-wash text-pigment' : 'hover:bg-shade'}`}
               >{l.name}</button>
             ))}
           </div>

@@ -65,7 +65,7 @@ function Row({ page, kids, depth, here, open, toggle, add, move }: {
           if (id && id !== page.id) move(id, page, zone(e))
         }}
         className={`group flex items-center rounded-md pr-1 transition-colors
-          ${active ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}
+          ${active ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}
           ${over === 'inside' ? 'ring-1 ring-pigment' : ''}
           ${over === 'above' ? 'border-t border-pigment' : ''}
           ${over === 'below' ? 'border-b border-pigment' : ''}`}
@@ -305,7 +305,7 @@ export function PageTree() {
             ))}
           </ul>
         )
-        : <p className="mt-1 px-2 text-[12px] leading-snug text-[#B6B1A6]">{t('No pages yet')}</p>}
+        : <p className="mt-1 px-2 text-[12px] leading-snug text-faint">{t('No pages yet')}</p>}
       <div className="h-6" aria-hidden />
       </div>
     </div>

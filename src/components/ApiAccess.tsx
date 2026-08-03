@@ -106,12 +106,12 @@ export function ApiAccess() {
           <button
             type="button"
             onClick={() => void create()}
-            className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#943321]"
+            className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-on-pigment hover:bg-pigment-deep"
           >{t('New key')}</button>
         </div>
 
         {!!fresh && (
-          <div className="mt-2 rounded-lg border border-pigment bg-[#F7E9E4] p-2.5">
+          <div className="mt-2 rounded-lg border border-pigment bg-pigment-wash p-2.5">
             <p className="text-[12px] font-semibold text-pigment">
               {t('Copy it now — it is not shown again.')}
             </p>
@@ -123,20 +123,20 @@ export function ApiAccess() {
           {keys.map((key) => (
             <div key={key.id} className="flex items-center gap-2 px-3 py-2">
               <span className={`min-w-0 flex-1 truncate text-[13px]
-                ${key.revoked_at || expired(key) ? 'text-[#B6B1A6] line-through' : 'text-ink'}`}
+                ${key.revoked_at || expired(key) ? 'text-faint line-through' : 'text-ink'}`}
               >
                 {key.name || t('Untitled')}
-                <span className="ml-2 font-mono text-[11px] text-[#B6B1A6]">{key.hint}</span>
+                <span className="ml-2 font-mono text-[11px] text-faint">{key.hint}</span>
               </span>
               <span className="shrink-0 rounded-md bg-shade px-1.5 py-0.5 text-[11px] text-ink-soft">
                 {key.scope === 'write' ? t('read and write') : t('read only')}
               </span>
               {key.scope === 'write' && (
-                <span className={`shrink-0 text-[11px] ${writesToday(key) >= key.daily_writes ? 'text-[#943321]' : 'text-[#B6B1A6]'}`}>
+                <span className={`shrink-0 text-[11px] ${writesToday(key) >= key.daily_writes ? 'text-pigment-deep' : 'text-faint'}`}>
                   {t('{used} of {cap} writes today', { used: writesToday(key), cap: key.daily_writes })}
                 </span>
               )}
-              <span className="shrink-0 text-[11px] text-[#B6B1A6]">
+              <span className="shrink-0 text-[11px] text-faint">
                 {expired(key) ? t('expired')
                   : key.expires_at ? t('until {date}', { date: new Date(key.expires_at).toLocaleDateString() })
                   : key.last_used_at ? t('used') : t('never used')}
@@ -145,14 +145,14 @@ export function ApiAccess() {
                 <button
                   type="button"
                   onClick={() => void revokeKey(key.id).then(reload)}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-muted hover:text-[#943321]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-muted hover:text-pigment-deep"
                 >{t('Revoke')}</button>
               )}
               <button
                 type="button"
                 aria-label={t('Delete')}
                 onClick={() => void forgetKey(key.id).then(reload)}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
               >
                 <Trash2 size={12} />
               </button>
@@ -183,18 +183,18 @@ export function ApiAccess() {
             className="rounded-lg border border-hairline px-3 py-1.5 text-sm font-semibold text-ink-soft hover:border-pigment hover:text-pigment"
           >{t('Add')}</button>
         </div>
-        {!!failed && <p className="mt-1 text-[12px] text-[#943321]">{failed}</p>}
+        {!!failed && <p className="mt-1 text-[12px] text-pigment-deep">{failed}</p>}
 
         <div className="mt-2 divide-y divide-shade rounded-xl border border-hairline bg-surface">
           {hooks.map((hook) => (
             <div key={hook.id} className="px-3 py-2">
               <div className="flex items-center gap-2">
                 <span className={`h-2 w-2 shrink-0 rounded-full
-                  ${hook.last_status && hook.last_status < 300 ? 'bg-[#5E9A8A]'
-                    : hook.last_status ? 'bg-[#C8664A]' : 'bg-[#D6D1C6]'}`}
+                  ${hook.last_status && hook.last_status < 300 ? 'bg-ok'
+                    : hook.last_status ? 'bg-pigment' : 'bg-rule'}`}
                 />
                 <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{hook.url}</span>
-                <span className="shrink-0 text-[11px] text-[#B6B1A6]">
+                <span className="shrink-0 text-[11px] text-faint">
                   {hook.last_status ?? (hook.last_fired_at ? t('sent') : t('never sent'))}
                 </span>
                 <button
@@ -206,7 +206,7 @@ export function ApiAccess() {
                   type="button"
                   aria-label={t('Delete')}
                   onClick={() => void removeHook(hook.id).then(reload)}
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                 >
                   <Trash2 size={12} />
                 </button>

@@ -97,7 +97,7 @@ export function Ada() {
       <button
         type="button"
         onClick={() => dismissTip(tip.id)}
-        className="mt-2 text-xs font-semibold text-pigment hover:text-[#943321]"
+        className="mt-2 text-xs font-semibold text-pigment hover:text-pigment-deep"
       >
         {t('Got it')}
       </button>

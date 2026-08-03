@@ -75,7 +75,7 @@ export function Team() {
                   type="button"
                   title={t('Remove from workspace')}
                   onClick={() => { void removeFromWorkspace(mate.userId).then(refresh) }}
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -95,7 +95,7 @@ export function Team() {
                 type="button"
                 title={t('Remove')}
                 onClick={() => { void revokeWorkspaceInvite(waiting.email).then(refresh) }}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
               >
                 <Trash2 size={13} />
               </button>
@@ -126,7 +126,7 @@ export function Team() {
             type="button"
             disabled={!email.trim()}
             onClick={() => void invite()}
-            className="shrink-0 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="shrink-0 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-on-pigment disabled:opacity-40"
           >
             {t('Invite')}
           </button>

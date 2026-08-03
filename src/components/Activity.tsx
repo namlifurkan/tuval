@@ -83,7 +83,7 @@ export function Activity() {
                 ? <span className="text-pigment">{change.updated_via} · {t('agent')}</span>
                 : displayName(who?.email) || t('Somebody')}
             </span>
-            <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(change.updated_at)}</span>
+            <span className="shrink-0 text-[11px] text-faint">{when(change.updated_at)}</span>
           </button>
         )
       })}

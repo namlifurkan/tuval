@@ -29,11 +29,11 @@ export function PasswordGate() {
   }
 
   return (
-    <div className="pointer-events-auto border-b border-[#943321] bg-pigment px-5 py-3 text-white sm:px-8">
+    <div className="pointer-events-auto border-b border-pigment-deep bg-pigment px-5 py-3 text-on-pigment sm:px-8">
       <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center gap-x-4 gap-y-2">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{t('Finish setting up your account')}</p>
-          <p className="mt-0.5 max-w-[62ch] text-[12px] leading-snug text-[#FBEDE9]">
+          <p className="mt-0.5 max-w-[62ch] text-[12px] leading-snug text-on-pigment/80">
             {t('The email link confirmed {email}. Choose a password and you can sign in with it from now on.', { email: user.email ?? '' })}
           </p>
         </div>
@@ -45,7 +45,7 @@ export function PasswordGate() {
             type="password"
             autoComplete="new-password"
             placeholder={t('New password')}
-            className="w-[170px] rounded-lg border border-white/30 bg-white/10 px-2 py-1.5 text-sm text-white outline-none placeholder:text-[#FBEDE9]/70 focus:border-white"
+            className="w-[170px] rounded-lg border border-on-pigment/30 bg-on-pigment/10 px-2 py-1.5 text-sm text-on-pigment outline-none placeholder:text-on-pigment/60 focus:border-on-pigment"
           />
           <input
             value={again}
@@ -54,18 +54,18 @@ export function PasswordGate() {
             type="password"
             autoComplete="new-password"
             placeholder={t('Again')}
-            className="w-[150px] rounded-lg border border-white/30 bg-white/10 px-2 py-1.5 text-sm text-white outline-none placeholder:text-[#FBEDE9]/70 focus:border-white"
+            className="w-[150px] rounded-lg border border-on-pigment/30 bg-on-pigment/10 px-2 py-1.5 text-sm text-on-pigment outline-none placeholder:text-on-pigment/60 focus:border-on-pigment"
           />
           <button
             type="button"
             disabled={saving || !value || !again}
             onClick={() => void save()}
-            className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-pigment disabled:opacity-50"
+            className="rounded-lg bg-on-pigment px-3 py-1.5 text-sm font-semibold text-pigment disabled:opacity-50"
           >
             {saving ? t('Saving…') : t('Save password')}
           </button>
         </div>
-        {note && <p className="w-full text-[12px] text-white">{note}</p>}
+        {note && <p className="w-full text-[12px] text-on-pigment">{note}</p>}
       </div>
     </div>
   )

@@ -70,7 +70,7 @@ function Rule({ db, view, filter, fields }: {
         type="button"
         aria-label={t('Remove filter')}
         onClick={() => removeFilter(db, view.id, filter.id)}
-        className="grid h-5 w-5 place-items-center rounded text-muted hover:text-[#943321]"
+        className="grid h-5 w-5 place-items-center rounded text-muted hover:text-pigment-deep"
       >
         <X size={11} />
       </button>
@@ -169,7 +169,7 @@ export function ViewBar({ db, view, fields, hidden }: {
       </Popover>
 
       {!!hidden && (
-        <span className="text-[11px] text-[#B6B1A6]">
+        <span className="text-[11px] text-faint">
           {t('{n} hidden by filters', { n: hidden })}
         </span>
       )}

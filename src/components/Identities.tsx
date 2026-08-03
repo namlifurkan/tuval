@@ -39,7 +39,7 @@ export function Identities() {
           <button
             type="button"
             onClick={() => drop(identity)}
-            className="shrink-0 rounded-md px-1.5 py-0.5 text-xs text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+            className="shrink-0 rounded-md px-1.5 py-0.5 text-xs text-muted hover:bg-pigment-wash hover:text-pigment-deep"
           >
             {t('Disconnect')}
           </button>
@@ -57,7 +57,7 @@ export function Identities() {
         </button>
       ))}
 
-      {note && <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-[#943321]">{note}</p>}
+      {note && <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-pigment-deep">{note}</p>}
     </>
   )
 }

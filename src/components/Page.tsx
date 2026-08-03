@@ -135,7 +135,7 @@ export function Page() {
                 {up.icon && <span className="mr-1">{up.icon}</span>}
                 {up.title || t('Untitled page')}
               </a>
-              <ChevronRight size={12} className="text-[#C6C2B6]" />
+              <ChevronRight size={12} className="text-dim" />
             </span>
           ))}
         </nav>
@@ -210,7 +210,7 @@ export function Page() {
                 if (!confirm(t('Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.', { name: shown, days: TRASH_DAYS }))) return
                 void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/pages'))
               }}
-              className="grid h-7 w-7 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+              className="grid h-7 w-7 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
             >
               <Trash2 size={13} />
             </button>
@@ -224,7 +224,7 @@ export function Page() {
         readOnly={isLocked(here)}
         onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
         placeholder={t(database ? 'Untitled database' : 'Untitled page')}
-        className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
+        className="w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-dim"
       />
 
       {here && !database && <PageProps row={here} locked={isLocked(here)} />}
@@ -250,7 +250,7 @@ export function Page() {
             ) : ready && (
               <>
                 {!!damaged && (
-                  <div role="alert" className="mb-4 ml-[54px] rounded-xl border border-pigment bg-[#FCF4F2] p-4">
+                  <div role="alert" className="mb-4 ml-[54px] rounded-xl border border-pigment bg-pigment-wash p-4">
                     <p className="text-sm font-semibold text-ink">
                       {t('Part of this page could not be read.')}
                     </p>

@@ -79,12 +79,12 @@ export function PlanPanel() {
           </div>
         </div>
 
-        <p className="mt-2 text-[11px] text-[#B6B1A6]">
+        <p className="mt-2 text-[11px] text-faint">
           {t('{n} records, which are not counted against anything.', { n: held.records })}
         </p>
 
         {tight && held.plan === 'free' && (
-          <p className="mt-2 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-pigment">
+          <p className="mt-2 rounded-lg bg-pigment-wash px-2 py-1.5 text-[11px] leading-snug text-pigment">
             {t('Close to a limit. Nothing is deleted when you reach one — new people and new files are refused until there is room.')}
           </p>
         )}
@@ -95,7 +95,7 @@ export function PlanPanel() {
           <div
             key={plan}
             className={`rounded-xl border p-3
-              ${held.plan === plan ? 'border-pigment bg-[#F7E9E4]' : 'border-hairline bg-surface'}`}
+              ${held.plan === plan ? 'border-pigment bg-pigment-wash' : 'border-hairline bg-surface'}`}
           >
             <span className="text-[13px] font-semibold text-ink">
               {plan === 'team' ? t('Team') : t('Free')}
@@ -106,7 +106,7 @@ export function PlanPanel() {
             <ul className="mt-2 space-y-1">
               {WHAT_YOU_GET[plan].map((line) => (
                 <li key={line} className="flex gap-1.5 text-[12px] leading-snug text-ink-soft">
-                  <Check size={12} className="mt-0.5 shrink-0 text-[#8FA96B]" />
+                  <Check size={12} className="mt-0.5 shrink-0 text-ok" />
                   {t(line, { seats: plan === 'free' ? 3 : 200, bytes: plan === 'free' ? '1 GB' : '10 GB' })}
                 </li>
               ))}

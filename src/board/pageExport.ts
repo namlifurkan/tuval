@@ -1,6 +1,7 @@
 // Getting a page out of here. Markdown and HTML come from the editor itself; PDF pulls a
 // renderer heavier than the editor, so it is fetched only when somebody asks for one.
-import { FONT } from './brand'
+import { COLOR, FONT } from './brand'
+import { ARTIFACT_INK, ARTIFACT_PAPER } from './artifacts'
 
 type Editor = {
   blocksToMarkdownLossy: (blocks?: unknown[]) => Promise<string>
@@ -34,13 +35,14 @@ export async function exportHTML(editor: Editor, title: string) {
   const page = `<!doctype html>
 <html><head><meta charset="utf-8"><title>${title}</title>
 <style>
-  body { max-width: 46rem; margin: 3rem auto; padding: 0 1.5rem; background: #F2EFE9; color: #141310;
+  body { max-width: 46rem; margin: 3rem auto; padding: 0 1.5rem;
+         background: ${ARTIFACT_PAPER}; color: ${ARTIFACT_INK};
          font: 16px/1.7 ${FONT.stack} }
   h1, h2, h3 { line-height: 1.2; letter-spacing: -0.015em }
-  blockquote { border-left: 2px solid #B43E28; margin: 0; padding-left: 1rem; color: #4A463E }
-  code { background: #EBE7DE; padding: .1em .3em; border-radius: 3px }
+  blockquote { border-left: 2px solid ${COLOR.pigment}; margin: 0; padding-left: 1rem; color: ${COLOR.inkSoft} }
+  code { background: ${COLOR.wash}; padding: .1em .3em; border-radius: 3px }
   img { max-width: 100% }
-  table { border-collapse: collapse } td, th { border: 1px solid #E2DED5; padding: .4rem .6rem }
+  table { border-collapse: collapse } td, th { border: 1px solid ${COLOR.hairline}; padding: .4rem .6rem }
 </style></head><body><h1>${title}</h1>${body}</body></html>`
   download(`${safe(title)}.html`, new Blob([page], { type: 'text/html' }))
 }

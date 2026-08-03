@@ -88,7 +88,7 @@ export function CommentsPanel() {
                     </span>
                   )}
                 </div>
-                <p className="line-clamp-3 text-xs text-[#2E2B26]">{first?.text ?? t('(empty)')}</p>
+                <p className="line-clamp-3 text-xs text-ink">{first?.text ?? t('(empty)')}</p>
                 {comment.replies.length > 1 && (
                   <span className="mt-1 block text-[10px] text-muted">
                     +{comment.replies.length - 1} {t('replies')}

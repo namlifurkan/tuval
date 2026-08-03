@@ -1,3 +1,4 @@
+import { artifactSurface } from './artifacts'
 import { aabb, union } from './geometry'
 import type { Item } from './types'
 
@@ -15,7 +16,7 @@ const tone = (item: Item) =>
 // One drawing routine behind both the minimap and the board thumbnails: filled rectangles in
 // each item's own tone. A board is recognisable by its colour blocks long before its text.
 export function paintThumb(
-  ctx: CanvasRenderingContext2D, items: Item[], w: number, h: number, surface = '#F2EFE9',
+  ctx: CanvasRenderingContext2D, items: Item[], w: number, h: number, surface: string,
 ) {
   ctx.fillStyle = surface
   ctx.fillRect(0, 0, w, h)
@@ -45,7 +46,7 @@ export function paintThumb(
 
 // A board writes its own thumbnail while it is open, so the board list never has to load and
 // decode somebody else's document just to draw a preview.
-export function makeThumb(items: Item[], surface?: string): string {
+export function makeThumb(items: Item[], surface = artifactSurface()): string {
   const canvas = document.createElement('canvas')
   canvas.width = THUMB_W
   canvas.height = THUMB_H

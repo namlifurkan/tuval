@@ -61,7 +61,7 @@ export function TimeLog({ record, team }: { record: string; team: Teammate[] }) 
           <span className="min-w-0 flex-1 truncate text-ink-soft">
             {stint.note || t('no note')}
           </span>
-          <span className="shrink-0 text-[10px] text-[#B6B1A6]">
+          <span className="shrink-0 text-[10px] text-faint">
             {nameOf(stint.user_id)} · {stint.spent_on.slice(5)}
           </span>
           {stint.user_id === mine && (
@@ -69,7 +69,7 @@ export function TimeLog({ record, team }: { record: string; team: Teammate[] }) 
               type="button"
               aria-label={t('Remove')}
               onClick={() => void dropStint(stint.id)}
-              className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#943321] group-hover/stint:opacity-100"
+              className="shrink-0 text-faint opacity-0 hover:text-pigment-deep group-hover/stint:opacity-100"
             >
               <X size={11} />
             </button>

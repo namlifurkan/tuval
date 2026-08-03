@@ -92,7 +92,7 @@ export function TimeWeek() {
                   </th>
                   {row.days.map((minutes, i) => (
                     <td key={days[i]} className="px-2 py-1.5 text-right text-ink-soft">
-                      {minutes ? readable(minutes) : <span className="text-[#D8D5CD]">·</span>}
+                      {minutes ? readable(minutes) : <span className="text-rule">·</span>}
                     </td>
                   ))}
                   <td className="px-3 py-1.5 text-right font-semibold text-ink">

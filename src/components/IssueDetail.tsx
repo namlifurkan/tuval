@@ -52,7 +52,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
   return (
     <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[560px] overflow-y-auto border-l border-hairline bg-surface p-5 shadow-[-3px_0_0_rgba(20,19,16,0.06)]">
       <div className="mb-1 flex items-center gap-2">
-        <span className="font-mono text-[11px] text-[#B6B1A6]">{issueKey(issue, prefix)}</span>
+        <span className="font-mono text-[11px] text-faint">{issueKey(issue, prefix)}</span>
       </div>
 
       <div className="flex items-start gap-3">
@@ -181,7 +181,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
               <button
                 type="button"
                 onClick={toggle}
-                className="rounded-md border border-dashed border-[#D8D5CD] px-1.5 py-0.5 text-[11px] font-semibold text-muted hover:border-pigment hover:text-pigment"
+                className="rounded-md border border-dashed border-rule px-1.5 py-0.5 text-[11px] font-semibold text-muted hover:border-pigment hover:text-pigment"
               >+ {t('Label')}</button>
             )}
           >
@@ -211,7 +211,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
                       className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-shade"
                     >
                       <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                        ${worn.includes(label.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
+                        ${worn.includes(label.id) ? 'border-pigment bg-pigment text-on-pigment' : 'border-rule'}`}
                       >{worn.includes(label.id) ? '✓' : ''}</span>
                       <span
                         className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-ink"
@@ -242,7 +242,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
         <button
           type="button"
           onClick={() => { void archiveRecord(issue.id); onClose() }}
-          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-muted hover:bg-pigment-wash hover:text-pigment-deep"
         >
           {t('Archive')}
         </button>

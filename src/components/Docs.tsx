@@ -76,7 +76,7 @@ export function Docs() {
           type="button"
           disabled={busy}
           onClick={() => void add()}
-          className="flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep disabled:opacity-40"
         >
           <Plus size={15} strokeWidth={2.4} /> {t('New page')}
         </button>
@@ -91,7 +91,7 @@ export function Docs() {
         <button
           type="button"
           onClick={() => void sweep()}
-          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-muted hover:bg-pigment-wash hover:text-pigment-deep"
         >
           <Trash2 size={12} /> {t('Clear out empty pages')}
         </button>
@@ -110,20 +110,20 @@ export function Docs() {
                 <span className="block truncate text-[14.5px] font-medium text-ink group-hover:text-pigment">
                   {page.icon
                     ? <span className="mr-2">{page.icon}</span>
-                    : <FileText size={13} className="mr-2 inline-block -translate-y-px text-[#C6C2B6]" />}
+                    : <FileText size={13} className="mr-2 inline-block -translate-y-px text-dim" />}
                   {page.title || t('Untitled page')}
                 </span>
                 {!!trail.length && (
-                  <span className="mt-0.5 block truncate pl-[1.35rem] text-[11.5px] text-[#B6B1A6]">
+                  <span className="mt-0.5 block truncate pl-[1.35rem] text-[11.5px] text-faint">
                     {trail.map((up) => up.title || t('Untitled page')).join(' / ')}
                   </span>
                 )}
               </button>
-              <span className="shrink-0 text-[11.5px] tabular-nums text-[#C6C2B6]">{when(page.updated_at)}</span>
+              <span className="shrink-0 text-[11.5px] tabular-nums text-dim">{when(page.updated_at)}</span>
               <button
                 type="button"
                 onClick={() => void archiveRecord(page.id).then(loadTrash)}
-                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 transition-opacity hover:text-[#943321] group-hover:opacity-100"
+                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 transition-opacity hover:text-pigment-deep group-hover:opacity-100"
               >
                 {t('Archive')}
               </button>
@@ -143,7 +143,7 @@ export function Docs() {
           <button
             type="button"
             onClick={() => void burn()}
-            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-pigment-wash hover:text-pigment-deep"
           >{t('Empty it now')}</button>
           <div className="mt-2 divide-y divide-shade border-y border-shade">
             {binned.map((page: Row) => (
@@ -155,7 +155,7 @@ export function Docs() {
                 <button
                   type="button"
                   onClick={() => void restoreRecord(page)}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-[#F7E9E4]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-pigment-wash"
                 >{t('Restore')}</button>
                 <button
                   type="button"
@@ -165,7 +165,7 @@ export function Docs() {
                       void deleteRecord(page, removeCover)
                     }
                   }}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                 >{t('Delete for good')}</button>
               </div>
             ))}

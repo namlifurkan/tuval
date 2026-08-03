@@ -46,7 +46,7 @@ export function Profile() {
         {person.avatar
           ? <img src={person.avatar} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
           : (
-            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-[#EBE7DE] text-[22px] font-bold text-muted">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-shade text-[22px] font-bold text-muted">
               {(person.name || person.handle).slice(0, 1).toUpperCase()}
             </span>
           )}
@@ -104,7 +104,7 @@ export function Profile() {
               <span className="min-w-0 flex-1 truncate text-[15px] text-ink group-hover:text-pigment">
                 {one.title || t(one.kind === 'board' ? 'Untitled board' : 'Untitled page')}
               </span>
-              <span className="shrink-0 text-[11px] uppercase tracking-[0.12em] text-[#B6B1A6]">
+              <span className="shrink-0 text-[11px] uppercase tracking-[0.12em] text-faint">
                 {t(one.kind === 'board' ? 'Board' : 'Page')}
               </span>
             </a>
@@ -116,7 +116,7 @@ export function Profile() {
         <a href="/" className="opacity-60 transition-opacity hover:opacity-100">
           <Wordmark height={14} />
         </a>
-        <span className="text-[11px] text-[#B6B1A6]">
+        <span className="text-[11px] text-faint">
           {t('Published with {product}', { product: PRODUCT.name })}
         </span>
       </footer>

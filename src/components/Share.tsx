@@ -108,7 +108,7 @@ export function Share() {
           onClick={copyLink}
           className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-tint"
         >
-          {copied ? <Check size={15} className="text-[#5E9A8A]" /> : <Link2 size={15} />}
+          {copied ? <Check size={15} className="text-ok" /> : <Link2 size={15} />}
           {copied ? t('Copied') : t('Copy link')}
         </button>
 
@@ -144,13 +144,13 @@ export function Share() {
               type="button"
               onClick={() => void send()}
               disabled={!email.trim()}
-              className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
+              className="mx-1 mt-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-on-pigment disabled:opacity-40"
             >
               {t('Send invite')}
             </button>
             {note && (
               <p className={`px-2.5 pt-1.5 text-[11px] leading-snug ${
-                /failed|error|rate/i.test(note) ? 'text-[#943321]' : 'text-muted'
+                /failed|error|rate/i.test(note) ? 'text-pigment-deep' : 'text-muted'
               }`}>{note}</p>
             )}
           </>
@@ -192,10 +192,10 @@ export function Share() {
                   })
                 }}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-                  ${domain.domain ? 'bg-pigment' : 'bg-[#D8D5CD]'}`}
+                  ${domain.domain ? 'bg-pigment' : 'bg-dim'}`}
               >
                 <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-on-pigment transition-[left]
                     ${domain.domain ? 'left-[18px]' : 'left-0.5'}`}
                 />
               </button>
@@ -224,10 +224,10 @@ export function Share() {
                   void openBoardToWorld(room, next)
                 }}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-                  ${open ? 'bg-pigment' : 'bg-[#D8D5CD]'}`}
+                  ${open ? 'bg-pigment' : 'bg-dim'}`}
               >
                 <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-on-pigment transition-[left]
                     ${open ? 'left-[18px]' : 'left-0.5'}`}
                 />
               </button>
@@ -266,7 +266,7 @@ export function Share() {
                       type="button"
                       title={t('Remove')}
                       onClick={() => void removeMember(room, m.userId).then(refresh)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -283,7 +283,7 @@ export function Share() {
                   <button
                     type="button"
                     onClick={() => { void mailInvite(i.email, boardLink()); draft(i.email) }}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-pigment hover:bg-[#F7E9E4]"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-pigment hover:bg-pigment-wash"
                   >
                     {t('Email again')}
                   </button>
@@ -294,7 +294,7 @@ export function Share() {
                     type="button"
                     title={t('Remove')}
                     onClick={() => void revokeInvite(room, i.email).then(refresh)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                   >
                     <Trash2 size={13} />
                   </button>

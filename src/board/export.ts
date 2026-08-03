@@ -1,5 +1,4 @@
-import { surfaceColor } from './brand'
-import { getMeta } from './doc'
+import { artifactSurface } from './artifacts'
 import { readTexture } from './paperPrefs'
 import { boxOf, render } from './render'
 import type { Session } from './store'
@@ -43,7 +42,7 @@ export function renderToCanvas(items: Item[], scale = 2, padding = 40): HTMLCanv
     editing: null,
     editingCell: null,
     session: BLANK,
-    surface: surfaceColor(getMeta().surface as string),
+    surface: artifactSurface(),
     texture: readTexture(),
     showAnchors: false,
   })

@@ -1,4 +1,5 @@
 import { t } from '../i18n'
+import { COLOR } from './brand'
 import { createItems, getIndex, getItems, patchItems } from './doc'
 import { makeConnector, makeShape } from './items'
 import type { Id, Item, ShapeItem } from './types'
@@ -100,7 +101,7 @@ export function addMindNode(parentId: Id, asSibling: boolean): Id | null {
   const link = makeConnector(
     { itemId: parent, anchor: 'right', x: 0, y: 0 },
     { itemId: node.id, anchor: 'left', x: 0, y: 0 },
-    { shape: 'curved', stroke: '#8A867C', strokeWidth: 2, strokeStyle: 'solid', capStart: 'none', capEnd: 'none' },
+    { shape: 'curved', stroke: COLOR.muted, strokeWidth: 2, strokeStyle: 'solid', capStart: 'none', capEnd: 'none' },
   )
   createItems([node, link])
   layoutMindmap(rootOf(node.id))

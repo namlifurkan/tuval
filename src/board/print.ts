@@ -1,4 +1,5 @@
-import { FONT } from './brand'
+import { COLOR, FONT } from './brand'
+import { ARTIFACT_SHEET } from './artifacts'
 import { renderToCanvas } from './export'
 import { aabb, contains } from './geometry'
 import { sortedFrames } from './items'
@@ -13,7 +14,7 @@ const PRINT_CSS = `
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   body > *:not(#${ROOT_ID}) { display: none !important; }
-  #${ROOT_ID} { display: block !important; background: #fff; }
+  #${ROOT_ID} { display: block !important; background: ${ARTIFACT_SHEET}; }
   #${ROOT_ID} figure {
     margin: 0;
     height: 100vh;
@@ -29,7 +30,7 @@ const PRINT_CSS = `
   #${ROOT_ID} figcaption {
     margin-top: 8mm;
     font: 500 10pt ${FONT.stack};
-    color: #4a463e;
+    color: ${COLOR.inkSoft};
   }
 }
 #${ROOT_ID} { display: none; }

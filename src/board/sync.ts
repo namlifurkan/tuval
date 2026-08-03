@@ -2,7 +2,6 @@ import * as Y from 'yjs'
 import { getItems, room, ydoc } from './doc'
 import { readOnly } from './access'
 import { storagePath } from './storage'
-import { surfaceColor } from './brand'
 import { makeThumb } from './thumb'
 import {
   appendUpdate, claimBoard, compactUpdates, LOG_MAX, pullSnapshot, pullUpdates,
@@ -134,7 +133,7 @@ async function save() {
   const name = (getMeta().name as string) ?? ''
   const error = conflict
     ?? await claimBoard(room, name)
-    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems(), surfaceColor(String(getMeta().surface ?? 'paper'))))
+    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems()))
   if (error) {
     setCloudError(error)
     dirty = true

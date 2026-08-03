@@ -72,7 +72,7 @@ export function BoardsPanel() {
             type="button"
             onClick={create}
             title={t('New board')}
-            className="grid h-7 w-7 place-items-center rounded-md text-pigment hover:bg-[#F7E9E4]"
+            className="grid h-7 w-7 place-items-center rounded-md text-pigment hover:bg-pigment-wash"
           >
             <Plus size={16} />
           </button>
@@ -110,7 +110,7 @@ export function BoardsPanel() {
           <div
             key={b.room}
             className={`group flex items-center gap-2 rounded-lg px-2.5 py-2
-              ${b.room === here ? 'bg-[#F7E9E4]' : 'hover:bg-tint'}`}
+              ${b.room === here ? 'bg-pigment-wash' : 'hover:bg-tint'}`}
           >
             <button
               type="button"
@@ -144,7 +144,7 @@ export function BoardsPanel() {
                   }
                 }
               }}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-pigment-wash hover:text-pigment-deep group-hover:opacity-100"
             >
               <Trash2 size={14} />
             </button>

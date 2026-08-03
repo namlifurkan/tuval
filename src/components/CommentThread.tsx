@@ -97,7 +97,7 @@ export function CommentThread() {
             type="button"
             title={t(item.resolved ? 'Reopen' : 'Mark resolved')}
             onClick={() => { patchItem(item.id, { resolved: !item.resolved }); requestRender() }}
-            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-[#E4F7EC] text-[#00875A]' : 'hover:bg-tint'}`}
+            className={`grid h-7 w-7 place-items-center rounded-md ${item.resolved ? 'bg-ok/15 text-ok' : 'hover:bg-tint'}`}
           >
             <Check size={15} strokeWidth={2.2} />
           </button>
@@ -105,7 +105,7 @@ export function CommentThread() {
             type="button"
             title={t('Delete')}
             onClick={remove}
-            className="grid h-7 w-7 place-items-center rounded-md text-[#943321] hover:bg-[#F7E9E4]"
+            className="grid h-7 w-7 place-items-center rounded-md text-pigment-deep hover:bg-pigment-wash"
           >
             <Trash2 size={14} strokeWidth={2} />
           </button>
@@ -126,7 +126,7 @@ export function CommentThread() {
                 <span className="text-xs font-semibold text-ink">{r.author}</span>
                 <span className="text-[10px] text-muted">{timeAgo(r.at)}</span>
               </div>
-              <p className="whitespace-pre-wrap break-words text-sm text-[#2E2B26]">
+              <p className="whitespace-pre-wrap break-words text-sm text-ink">
                 <MentionText text={r.text} />
               </p>
             </div>
@@ -183,7 +183,7 @@ export function CommentThread() {
           type="button"
           onClick={submit}
           disabled={!draft.trim()}
-          className="shrink-0 rounded-lg bg-pigment px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-35"
+          className="shrink-0 rounded-lg bg-pigment px-2.5 py-1.5 text-xs font-semibold text-on-pigment disabled:opacity-35"
         >
           {t('Send')}
         </button>

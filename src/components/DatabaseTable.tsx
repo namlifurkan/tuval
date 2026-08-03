@@ -16,7 +16,7 @@ import { displayName } from '../board/supabase'
 import { t } from '../i18n'
 import { Popover } from './Popover'
 
-const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-ink outline-none focus:bg-[#F7E9E4]'
+const cell = 'w-full bg-transparent px-2.5 py-1.5 text-sm text-ink outline-none focus:bg-pigment-wash'
 
 const UNGROUPED = '__none__'
 
@@ -40,7 +40,7 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
     getRecords('doc').find((r) => r.id === id)?.title || t('Untitled')
 
   if (!field.db) {
-    return <span className="block px-2.5 py-1.5 text-[12px] text-[#C6C2B6]">{t('Pick a database')}</span>
+    return <span className="block px-2.5 py-1.5 text-[12px] text-dim">{t('Pick a database')}</span>
   }
 
   return (
@@ -54,7 +54,7 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
         >
           {linked.length
             ? linked.map((id) => <Chip key={id}>{named(id)}</Chip>)
-            : <span className="text-sm text-[#C6C2B6]">—</span>}
+            : <span className="text-sm text-dim">—</span>}
         </button>
       )}
     >
@@ -78,7 +78,7 @@ function RelationCell({ row, field }: { row: Row; field: Field }) {
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
               >
                 <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                  ${linked.includes(r.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
+                  ${linked.includes(r.id) ? 'border-pigment bg-pigment text-on-pigment' : 'border-rule'}`}
                 >{linked.includes(r.id) ? '✓' : ''}</span>
                 <span className="min-w-0 flex-1 truncate">{r.title || t('Untitled')}</span>
               </button>
@@ -123,8 +123,8 @@ function Cell({ db, row, field, fields, team }: {
   if (COMPUTED.includes(field.type)) {
     const shown = cellText(row, field, fields)
     return (
-      <span className={`block truncate px-2.5 py-1.5 text-sm ${shown === ERROR ? 'text-[#943321]' : 'text-ink-soft'}`}>
-        {shown || <span className="text-[#C6C2B6]">—</span>}
+      <span className={`block truncate px-2.5 py-1.5 text-sm ${shown === ERROR ? 'text-pigment-deep' : 'text-ink-soft'}`}>
+        {shown || <span className="text-dim">—</span>}
       </span>
     )
   }
@@ -303,7 +303,7 @@ function Head({ db, field, fields }: { db: Row; field: Field; fields: Field[] })
             <button
               type="button"
               onClick={() => { removeField(db, field.id); close() }}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-pigment-wash hover:text-pigment-deep"
             >{t('Delete column')}</button>
           </>
         )}
@@ -323,7 +323,7 @@ function Line({ db, row, fields, shown, team }: {
             value={row.title}
             onChange={(e) => patchRecord(row.id, { title: e.target.value })}
             placeholder={t('Untitled')}
-            className={`${cell} font-medium placeholder:text-[#C6C2B6]`}
+            className={`${cell} font-medium placeholder:text-dim`}
           />
           {/* Icons rather than words: the title is what the column is for, and three labels beside
               it left the name a sliver once a database had a few columns. */}
@@ -351,7 +351,7 @@ function Line({ db, row, fields, shown, team }: {
             aria-label={t('Archive')}
             title={t('Archive')}
             onClick={() => void archiveRecord(row.id)}
-            className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
+            className="mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-pigment-wash hover:text-pigment-deep group-hover:opacity-100"
           >
             <Trash2 size={12} />
           </button>
@@ -447,7 +447,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
 
         <tfoot>
           <tr className="border-t border-hairline">
-            <th scope="row" className="px-2.5 py-1.5 text-left text-[11px] font-normal text-[#B6B1A6]">
+            <th scope="row" className="px-2.5 py-1.5 text-left text-[11px] font-normal text-faint">
               {rows.length} {t(rows.length === 1 ? 'row' : 'rows')}
             </th>
             {shown.map((field) => (
@@ -506,7 +506,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
           const open = !shut.includes(key)
           return (
             <tbody key={key}>
-              <tr className="border-b border-shade bg-[#F7F5F0]">
+              <tr className="border-b border-shade bg-raise">
                 <th scope="colgroup" colSpan={span} className="p-0 text-left font-normal">
                   <div className="flex items-center">
                     <button
@@ -521,7 +521,7 @@ export function DatabaseTable({ db, rows, fields, group, team, onAddField }: {
                       {choice
                         ? <Tag choice={choice} />
                         : <span className="text-[12px] font-semibold text-muted">{t('No value')}</span>}
-                      <span className="text-[11px] text-[#B6B1A6]">{held.length}</span>
+                      <span className="text-[11px] text-faint">{held.length}</span>
                     </button>
                     <button
                       type="button"

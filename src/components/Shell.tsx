@@ -7,6 +7,7 @@ import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
 import { getWorkspace, loadWorkspace, subscribeWorkspace, workspaceError } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
+import { AppearanceToggle } from './AppearanceToggle'
 import { Collections } from './Collections'
 import { ProjectSwitcher } from './ProjectSwitcher'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -76,12 +77,12 @@ export function Shell({ title, wide, bare, action, children }: {
             aria-current={here === path ? 'page' : undefined}
             onClick={() => go(path)}
             className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold transition-colors
-              ${here === path ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+              ${here === path ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >
             <Icon size={15} strokeWidth={1.9} />
             <span className="min-w-0 flex-1 truncate">{t(label)}</span>
             {path === '/inbox' && waiting > 0 && (
-              <span className="shrink-0 rounded-full bg-pigment px-1.5 text-[10px] font-bold text-white">
+              <span className="shrink-0 rounded-full bg-pigment px-1.5 text-[10px] font-bold text-on-pigment">
                 {waiting}
               </span>
             )}
@@ -94,7 +95,7 @@ export function Shell({ title, wide, bare, action, children }: {
 
         <Collections />
 
-        <span className="mt-auto px-2 pt-4 text-[11px] leading-snug text-[#B6B1A6]">
+        <span className="mt-auto px-2 pt-4 text-[11px] leading-snug text-faint">
           {t('Press ⌘K for anything')}
         </span>
       </nav>
@@ -106,13 +107,14 @@ export function Shell({ title, wide, bare, action, children }: {
           <p className="truncate text-[13px] font-semibold text-muted">{title}</p>
           <div className="flex shrink-0 items-center gap-2">
             {action}
+            <AppearanceToggle />
             <Account />
           </div>
         </header>
 
         <main className={`mx-auto w-full px-6 pb-24 pt-8 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
           {workspaceProblem && (
-            <div className="mb-5 flex items-center gap-3 rounded-lg border border-hairline bg-[#F7E9E4] px-3 py-2 text-sm text-ink-soft">
+            <div className="mb-5 flex items-center gap-3 rounded-lg border border-hairline bg-pigment-wash px-3 py-2 text-sm text-ink-soft">
               <span className="min-w-0 flex-1">{t('Could not load the workspace.')}</span>
               <button
                 type="button"

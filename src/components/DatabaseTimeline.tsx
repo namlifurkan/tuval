@@ -94,7 +94,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
         className="overflow-x-auto rounded-xl border border-hairline bg-surface"
       >
         <div style={{ width: NAMES + days * DAY }}>
-          <div className="sticky top-0 flex border-b border-hairline bg-[#F7F5F0]">
+          <div className="sticky top-0 flex border-b border-hairline bg-raise">
             <div
               className="shrink-0 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted"
               style={{ width: NAMES }}
@@ -108,7 +108,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                     key={iso}
                     style={{ width: DAY }}
                     className={`shrink-0 py-1.5 text-center text-[10px] leading-tight
-                      ${first ? 'border-l border-[#D8D5CD] font-bold text-ink' : 'text-[#B6B1A6]'}`}
+                      ${first ? 'border-l border-rule font-bold text-ink' : 'text-faint'}`}
                   >
                     {first && (
                       <span className="block truncate">
@@ -116,7 +116,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                           .toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}
                       </span>
                     )}
-                    <span className={now ? 'rounded-full bg-pigment px-1 font-bold text-white' : ''}>
+                    <span className={now ? 'rounded-full bg-pigment px-1 font-bold text-on-pigment' : ''}>
                       {Number(iso.slice(8))}
                     </span>
                   </div>
@@ -148,7 +148,7 @@ export function DatabaseTimeline({ rows, view, fields }: {
                       setGrab({ id: row.id, edge: 'move', from: e.clientX, span })
                     }}
                     style={{ left, width }}
-                    className="absolute top-1 flex h-6 cursor-grab items-center rounded-md bg-pigment pl-2 pr-1 text-[11px] font-semibold text-white select-none hover:bg-[#943321]"
+                    className="absolute top-1 flex h-6 cursor-grab items-center rounded-md bg-pigment pl-2 pr-1 text-[11px] font-semibold text-on-pigment select-none hover:bg-pigment-deep"
                   >
                     <span className="min-w-0 flex-1 truncate">{row.title || t('Untitled')}</span>
                     {!!view.endBy && (

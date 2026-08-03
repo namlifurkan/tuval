@@ -91,12 +91,12 @@ export function DatabaseCalendar({ db, rows, view, fields }: {
               onDragLeave={() => setOver((was) => (was === iso ? '' : was))}
               onDrop={drop(iso)}
               className={`group min-h-[92px] border-b border-r border-hairline p-1
-                ${outside ? 'bg-[#F7F5F0]' : ''} ${over === iso ? 'ring-1 ring-inset ring-pigment' : ''}`}
+                ${outside ? 'bg-raise' : ''} ${over === iso ? 'ring-1 ring-inset ring-pigment' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={`grid h-5 w-5 place-items-center rounded-full text-[11px]
-                    ${now ? 'bg-pigment font-bold text-white' : outside ? 'text-[#C6C2B6]' : 'text-muted'}`}
+                    ${now ? 'bg-pigment font-bold text-on-pigment' : outside ? 'text-dim' : 'text-muted'}`}
                 >{dayNumber(iso)}</span>
                 <button
                   type="button"

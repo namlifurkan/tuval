@@ -39,7 +39,7 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
     <section
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => { e.preventDefault(); onDrop(e.dataTransfer.getData('text/plain'), rows.at(-1) ?? null) }}
-      className="flex w-[260px] shrink-0 flex-col rounded-xl border border-hairline bg-[#F7F5F0] p-2"
+      className="flex w-[260px] shrink-0 flex-col rounded-xl border border-hairline bg-raise p-2"
     >
       <header className="mb-2 flex items-center justify-between px-1">
         <span className="flex items-center gap-1.5">
@@ -52,7 +52,7 @@ function Column({ choice, rows, fields, onOpen, onDrop, onAdd }: {
             {choice?.name ?? t('No value')}
           </span>
         </span>
-        <span className="text-[11px] text-[#B6B1A6]">{rows.length}</span>
+        <span className="text-[11px] text-faint">{rows.length}</span>
       </header>
 
       {rows.map((row) => (
@@ -149,14 +149,14 @@ export function Database({ db }: { db: Row }) {
               aria-current={i === at ? 'true' : undefined}
               onClick={() => setAt(i)}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-                ${i === at ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+                ${i === at ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
             >{one.name}</button>
             {i === at && schema.views.length > 1 && (
               <button
                 type="button"
                 aria-label={t('Remove view')}
                 onClick={() => { removeView(db, one.id); setAt(0) }}
-                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
+                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-muted opacity-0 hover:text-pigment-deep group-hover:opacity-100"
               >
                 <X size={11} />
               </button>
@@ -240,7 +240,7 @@ export function Database({ db }: { db: Row }) {
         />
       )}
 
-      <p className="mt-3 text-[11px] text-[#B6B1A6]">
+      <p className="mt-3 text-[11px] text-faint">
         {mine.length} {t(mine.length === 1 ? 'row' : 'rows')} · {t('a row is a page: open one to write in it')}
       </p>
     </div>

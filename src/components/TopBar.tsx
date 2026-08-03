@@ -15,6 +15,7 @@ import { requestRender, useBoardStore } from '../board/store'
 import { leftovers } from '../board/tidy'
 import { useItems } from '../board/useBoard'
 import { Account } from './Account'
+import { AppearanceToggle } from './AppearanceToggle'
 import { Share } from './Share'
 import { Collaborators } from './Collaborators'
 import { goHome } from '../board/boards'
@@ -81,11 +82,16 @@ export function TopBar() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24"
-        style={dark
-          ? { background: '#F2EFE9', height: 76, boxShadow: '0 2px 0 rgba(20,19,16,0.18)' }
-          : { backgroundImage: `linear-gradient(to bottom, ${paint}, ${paint}B3, ${paint}00)` }}
+        style={{ backgroundImage: `linear-gradient(to bottom, ${paint}, ${paint}B3, ${paint}00)` }}
       />
-      <header className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4">
+      {/* The scrim is the surface fading out, whatever the surface is. A dark board used to get
+          an opaque paper band instead, which made choosing a dark surface the brightest screen
+          in the product. What actually has to change on a dark surface is the writing on it, so
+          the bar carries its own theme: the shell's tokens, resolved against the paint. */}
+      <header
+        data-theme={dark ? 'dark' : 'light'}
+        className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4"
+      >
         <div className="pointer-events-auto flex min-w-0 items-start gap-1.5">
           <IconButton title={t('Home')} className="mt-0.5" onClick={goHome}>
             <House size={18} strokeWidth={1.8} />
@@ -158,7 +164,7 @@ export function TopBar() {
                     type="button"
                     onClick={() => { setMeta('texture', tex.id); requestRender() }}
                     className={`rounded-lg px-2 py-1 text-xs font-semibold
-                      ${texture === tex.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                      ${texture === tex.id ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                   >{t(tex.name)}</button>
                 ))}
               </div>
@@ -170,7 +176,7 @@ export function TopBar() {
                     type="button"
                     onClick={() => setLang(l.id)}
                     className={`flex-1 rounded-lg px-2 py-1 text-xs font-semibold
-                      ${lang === l.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                      ${lang === l.id ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                   >{l.name}</button>
                 ))}
               </div>
@@ -211,7 +217,7 @@ export function TopBar() {
                   }
                   menu.close()
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#943321] hover:bg-[#F7E9E4]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-pigment-deep hover:bg-pigment-wash"
               >
                 <Trash2 size={15} /> {t('Clear board')}
               </button>
@@ -225,7 +231,7 @@ export function TopBar() {
             <span
               role="status"
               title={saveProblem}
-              className="rounded-lg border border-pigment/30 bg-[#F7E9E4] px-2 py-1 text-[11px] font-semibold text-[#943321]"
+              className="rounded-lg border border-pigment/30 bg-pigment-wash px-2 py-1 text-[11px] font-semibold text-pigment-deep"
             >{t('Not saved to the cloud')}</span>
           )}
           <IconButton title={t('Search — ⌘F')} onClick={() => update({ searchOpen: true })}>
@@ -236,6 +242,7 @@ export function TopBar() {
           <span className="mx-1 h-6 w-px bg-hairline" aria-hidden />
 
           <Collaborators />
+          <AppearanceToggle />
           <Account />
 
           <Share />
@@ -246,7 +253,7 @@ export function TopBar() {
               if (frames.length) update({ presenting: 0, selection: [] })
               else alert(t('At least one frame is needed to present.'))
             }}
-            className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
+            className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep"
           >
             {t('Present')}
           </button>

@@ -98,7 +98,7 @@ export function SearchPanel() {
               onClick={() => { jump(i); update({ searchOpen: false }) }}
               onPointerEnter={() => setCursor(n)}
               className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left
-                ${n === active ? 'bg-[#F7E9E4] ring-1 ring-pigment/25' : 'hover:bg-tint'}`}
+                ${n === active ? 'bg-pigment-wash ring-1 ring-pigment/25' : 'hover:bg-tint'}`}
             >
               <span className="shrink-0 rounded-md bg-shade px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft">
                 {t(TYPE_LABEL[i.type] ?? i.type)}

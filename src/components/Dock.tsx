@@ -180,7 +180,7 @@ export function Dock() {
       style={{ width: unit, height: unit }}
       className={`tap-target grid place-items-center rounded-xl transition-[background-color,box-shadow] duration-150
         ${active
-          ? 'bg-[#F7E9E4] text-pigment shadow-[1px_1px_0_rgba(20,19,16,0.10)] ring-1 ring-pigment/25'
+          ? 'bg-pigment-wash text-pigment shadow-[1px_1px_0_rgba(20,19,16,0.10)] ring-1 ring-pigment/25'
           : 'text-ink hover:bg-shade hover:shadow-[1px_1px_0_rgba(20,19,16,0.10)] hover:ring-1 hover:ring-black/[0.07]'}`}
     >
       {icon}
@@ -237,7 +237,7 @@ export function Dock() {
                         title={k}
                         onClick={() => { update({ shape: { ...shape, kind: k } }); setTool('shape'); shapePop.close() }}
                         className={`grid h-9 w-9 place-items-center rounded-lg hover:bg-tint
-                          ${shape.kind === k ? 'bg-[#F7E9E4] text-pigment' : 'text-ink'}`}
+                          ${shape.kind === k ? 'bg-pigment-wash text-pigment' : 'text-ink'}`}
                       >
                         <ShapeGlyph kind={k} size={22} />
                       </button>
@@ -261,17 +261,17 @@ export function Dock() {
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: false, eraser: false } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${!pen.highlighter && !pen.eraser ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                 >{t('Pen')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, highlighter: true, eraser: false, strokeWidth: Math.max(pen.strokeWidth, 16) } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.highlighter && !pen.eraser ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                 >{t('Highlighter')}</button>
                 <button
                   type="button"
                   onClick={() => update({ pen: { ...pen, eraser: true } })}
-                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  className={`min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-xs font-semibold ${pen.eraser ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                 >{t('Eraser')}</button>
               </div>
               <div className="mb-2 flex items-center gap-2 px-1">
@@ -512,7 +512,7 @@ export function Dock() {
                     type="button"
                     onClick={() => setDockSide(o.id)}
                     className={`rounded-lg px-1 py-1.5 text-xs font-semibold
-                      ${side === o.id ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                      ${side === o.id ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                   >{t(o.name)}</button>
                 ))}
               </div>
@@ -524,7 +524,7 @@ export function Dock() {
                     type="button"
                     onClick={() => setDockSize(s)}
                     className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold uppercase
-                      ${prefs.size === s ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                      ${prefs.size === s ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                   >{s}</button>
                 ))}
               </div>

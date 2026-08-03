@@ -138,15 +138,15 @@ export function PublicForm() {
         <button
           type="submit"
           disabled={sending}
-          className="rounded-lg bg-pigment px-4 py-2 text-sm font-semibold text-white hover:bg-[#943321] disabled:opacity-40"
+          className="rounded-lg bg-pigment px-4 py-2 text-sm font-semibold text-on-pigment hover:bg-pigment-deep disabled:opacity-40"
         >{sending ? t('Sending…') : t('Send')}</button>
 
         {failed && (
-          <p className="text-[12px] text-[#943321]">{t('That did not go through. Try again.')}</p>
+          <p className="text-[12px] text-pigment-deep">{t('That did not go through. Try again.')}</p>
         )}
       </form>
 
-      <p className="mt-16 border-t border-hairline pt-4 text-[11px] text-[#B6B1A6]">
+      <p className="mt-16 border-t border-hairline pt-4 text-[11px] text-faint">
         {t('Published with {product}', { product: PRODUCT.name })}
       </p>
     </main>

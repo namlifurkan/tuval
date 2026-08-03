@@ -75,7 +75,7 @@ export function Collection() {
 
   const chip = (on: boolean) =>
     `rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors ${
-      on ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`
+      on ? 'bg-pigment text-on-pigment' : 'bg-tint text-ink-soft hover:bg-hairline'}`
 
   const field = 'rounded-lg border border-hairline bg-surface px-2 py-1.5 text-[13px] outline-none focus:border-pigment'
 
@@ -87,7 +87,7 @@ export function Collection() {
           value={title}
           onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
           placeholder={t('Untitled collection')}
-          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
+          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-dim"
         />
         <button
           type="button"

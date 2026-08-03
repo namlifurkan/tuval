@@ -58,12 +58,12 @@ export interface Scene {
   dpr: number
 }
 
-const CHROME = {
+export const CHROME = {
   light: {
     ink: BRAND.selection,
     halo: 'rgba(255, 255, 255, 0.85)',
     handleHalo: 'rgba(252, 251, 248, 0.9)',
-    label: '#8A867C',
+    label: COLOR.inkSoft,
     ghost: 'rgba(20, 19, 16, 0.30)',
     ghostSoft: 'rgba(20, 19, 16, 0.45)',
     stub: 'rgba(20, 19, 16, 0.35)',
@@ -186,7 +186,7 @@ function drawFrame(s: Scene, item: Item & { type: 'frame' }) {
 }
 
 const STATUS_TONE: Record<string, string> = {
-  todo: '#8A867C',
+  todo: COLOR.muted,
   doing: '#DE9A4E',
   blocked: '#C8664A',
   done: '#5E9A8A',
@@ -208,7 +208,7 @@ function drawRecord(s: Scene, item: Item & { type: 'record' }) {
   ctx.setLineDash(missing ? [5, 4] : [])
   ctx.strokeRect(item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
 
-  const tone = missing ? '#C8664A' : status ? STATUS_TONE[status] ?? '#8A867C' : '#D6D1C6'
+  const tone = missing ? '#C8664A' : status ? STATUS_TONE[status] ?? COLOR.muted : '#D6D1C6'
   ctx.fillStyle = tone
   ctx.fillRect(item.x, item.y, 4, item.h)
 
@@ -220,7 +220,7 @@ function drawRecord(s: Scene, item: Item & { type: 'record' }) {
 
   if (missing || status) {
     ctx.font = fontString({ ...item, bold: true }, 11)
-    ctx.fillStyle = '#8A867C'
+    ctx.fillStyle = COLOR.muted
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
     ctx.fillText(missing ? 'MISSING' : status!.toUpperCase(), item.x + pad + 16, item.y + pad + 5)
@@ -539,7 +539,7 @@ function drawEmbed(s: Scene, item: Item & { type: 'embed' }) {
   ctx.lineWidth = 1 / cam.z
   ctx.stroke()
   const size = Math.min(item.h * 0.16, 26)
-  ctx.fillStyle = '#8A867C'
+  ctx.fillStyle = COLOR.muted
   ctx.font = fontString({ bold: false, italic: false, fontFamily: FONT.family }, size)
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -684,7 +684,7 @@ function drawCommentPin(s: Scene, item: Item & { type: 'comment' }) {
   ctx.fill()
   ctx.stroke()
   const first = item.replies[0]
-  ctx.fillStyle = first?.color ?? '#8A867C'
+  ctx.fillStyle = first?.color ?? COLOR.muted
   ctx.fillRect(c.x - PIN_R + 4, c.y - PIN_R + 4, (PIN_R - 4) * 2, (PIN_R - 4) * 2)
   ctx.fillStyle = '#FCFBF8'
   ctx.font = `700 11px ${FONT.stack}`

@@ -207,10 +207,10 @@ export function Palette() {
               aria-pressed={only === scope.id}
               onClick={() => { setOnly(scope.id); setAt(0); field.current?.focus() }}
               className={`rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors
-                ${only === scope.id ? 'bg-[#F7E9E4] text-pigment' : 'text-muted hover:bg-shade'}`}
+                ${only === scope.id ? 'bg-pigment-wash text-pigment' : 'text-muted hover:bg-shade'}`}
             >{t(scope.label)}</button>
           ))}
-          <span className="ml-auto self-center text-[10px] text-[#C6C2B6]">{t('tab')}</span>
+          <span className="ml-auto self-center text-[10px] text-dim">{t('tab')}</span>
         </div>
 
         <div className="max-h-[46vh] overflow-y-auto p-1">
@@ -221,7 +221,7 @@ export function Palette() {
               onMouseEnter={() => setAt(i)}
               onClick={() => choose(action)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm
-                ${i === at ? 'bg-[#F7E9E4] text-pigment' : 'text-ink'}`}
+                ${i === at ? 'bg-pigment-wash text-pigment' : 'text-ink'}`}
             >
               <span className="min-w-0 flex-1">
                 <span className="block truncate">{action.label}</span>

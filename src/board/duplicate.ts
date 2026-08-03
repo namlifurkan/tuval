@@ -5,7 +5,7 @@ import { claimBoard, copyImage, pullSnapshot, pushSnapshot } from './cloud'
 import { makeThumb } from './thumb'
 import { storagePath } from './storage'
 import { getUser } from './supabase'
-import { surfaceColor } from './brand'
+import { artifactSurface } from './artifacts'
 import type { Item } from './types'
 
 // Reading a board that is not the one on screen: whatever this browser has, topped up from the
@@ -65,7 +65,7 @@ export async function duplicateBoard(room: string, name: string): Promise<string
     opened: Date.now(),
     items: items.length - frames,
     frames,
-    thumb: makeThumb(items, surfaceColor(String(meta.get('surface') ?? 'paper'))),
+    thumb: makeThumb(items, artifactSurface(meta.toJSON())),
   })
 
   // Pushed straight away so the copy is on the board list of every device, not only the one

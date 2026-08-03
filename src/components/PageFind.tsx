@@ -71,7 +71,7 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
     setAt(every ? 0 : here)
   }
 
-  const box = 'rounded-md border border-hairline bg-surface px-2 py-1 text-[12px] text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment'
+  const box = 'rounded-md border border-hairline bg-surface px-2 py-1 text-[12px] text-ink outline-none placeholder:text-faint focus:border-pigment'
   const tap = 'grid h-6 w-6 place-items-center rounded-md text-muted hover:bg-shade hover:text-ink disabled:opacity-30'
 
   return (
@@ -86,7 +86,7 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-1 w-[300px] rounded-xl border border-hairline bg-[#F7F5F0] p-2 shadow-[0_8px_24px_rgba(20,19,16,0.12)]">
+        <div className="absolute right-0 top-full z-20 mt-1 w-[300px] rounded-xl border border-hairline bg-raise p-2 shadow-[0_8px_24px_rgba(20,19,16,0.12)]">
           <div className="flex items-center gap-1">
             <input
               ref={field}
@@ -132,7 +132,7 @@ export function PageFind({ editor, locked }: { editor: Editor; locked?: boolean 
                 type="button"
                 disabled={!hits.length}
                 onClick={() => change(true)}
-                className="shrink-0 rounded-md bg-pigment px-2 py-1 text-[12px] font-semibold text-white hover:bg-[#943321] disabled:opacity-30"
+                className="shrink-0 rounded-md bg-pigment px-2 py-1 text-[12px] font-semibold text-on-pigment hover:bg-pigment-deep disabled:opacity-30"
               >{t('All')}</button>
             </div>
           )}

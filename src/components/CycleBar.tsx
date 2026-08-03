@@ -30,7 +30,7 @@ export function CycleBar({ rows, only, onPick, burn, current }: {
           type="button"
           onClick={() => onPick('')}
           className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-            ${!only ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+            ${!only ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
         >{t('Everything')}</button>
 
         {cycles.slice(0, 6).map((cycle) => (
@@ -39,17 +39,17 @@ export function CycleBar({ rows, only, onPick, burn, current }: {
               type="button"
               onClick={() => onPick(cycle.id)}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-                ${only === cycle.id ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+                ${only === cycle.id ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
             >
               {named(cycle)}
               {cycle.id === current?.id && <span className="ml-1 text-pigment">•</span>}
-              <span className="ml-1.5 text-[#B6B1A6]">{count(cycle.id)}</span>
+              <span className="ml-1.5 text-faint">{count(cycle.id)}</span>
             </button>
             <button
               type="button"
               aria-label={t('Remove')}
               onClick={() => void removeCycle(cycle.id)}
-              className="ml-0.5 grid h-5 w-5 place-items-center rounded text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
+              className="ml-0.5 grid h-5 w-5 place-items-center rounded text-muted opacity-0 hover:text-pigment-deep group-hover:opacity-100"
             >
               <X size={10} />
             </button>

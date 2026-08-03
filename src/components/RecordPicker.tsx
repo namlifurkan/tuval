@@ -54,7 +54,7 @@ export function RecordPicker({ onPick }: { onPick: (rows: Row[]) => void }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('Search issues, pages and projects')}
-        className="mb-1.5 w-full rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment"
+        className="mb-1.5 w-full rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-faint focus:border-pigment"
       />
       <div className="max-h-[280px] overflow-y-auto">
         {!found.length && (
@@ -69,7 +69,7 @@ export function RecordPicker({ onPick }: { onPick: (rows: Row[]) => void }) {
               onClick={() => onPick([row])}
               className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-tint"
             >
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#B6B1A6]">
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-faint">
                 {t(KIND_NAMES[row.kind] ?? row.kind)}
               </span>
               <span className="truncate text-sm text-ink">{row.title || t('Untitled')}</span>

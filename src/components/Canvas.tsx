@@ -140,7 +140,7 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
         opened: Date.now(),
         items: all.filter((i) => i.type !== 'frame').length,
         frames: all.filter((i) => i.type === 'frame').length,
-        ...(fresh ? { thumb: makeThumb(all, surfaceColor(String(getMeta().surface ?? 'paper'))) } : {}),
+        ...(fresh ? { thumb: makeThumb(all) } : {}),
       })
     }
     record()

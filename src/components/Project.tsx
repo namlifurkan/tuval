@@ -69,7 +69,7 @@ export function Project() {
           value={title}
           onChange={(e) => { setTitle(e.target.value); patchRecord(id, { title: e.target.value }) }}
           placeholder={t('Untitled project')}
-          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-[#C6C2B6]"
+          className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink outline-none placeholder:text-dim"
         />
       </div>
 
@@ -89,7 +89,7 @@ export function Project() {
           onChange={(e) => setSpan(here, e.target.value, targetOf(here))}
           className="rounded-md border border-transparent px-1 py-0.5 text-[13px] text-ink-soft outline-none hover:bg-shade focus:border-pigment"
         />
-        <span className="text-[#B6B1A6]">→</span>
+        <span className="text-faint">→</span>
         <input
           type="date"
           value={targetOf(here)}
@@ -122,7 +122,7 @@ export function Project() {
               onClick={(e) => { e.preventDefault(); go(`/i/${row.id}`) }}
               className={line}
             >
-              <span className={`min-w-0 flex-1 truncate ${isClosed(row) ? 'text-[#B6B1A6] line-through' : ''}`}>
+              <span className={`min-w-0 flex-1 truncate ${isClosed(row) ? 'text-faint line-through' : ''}`}>
                 {row.title || t('Untitled')}
               </span>
               {row.status && (

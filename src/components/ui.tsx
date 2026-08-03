@@ -21,7 +21,7 @@ export function IconButton({
       onClick={onClick}
       className={`tap-target relative grid h-9 w-9 place-items-center rounded-lg text-ink transition-[background-color,box-shadow] duration-150
         ${active
-          ? 'bg-[#F7E9E4] text-pigment ring-1 ring-pigment/25'
+          ? 'bg-pigment-wash text-pigment ring-1 ring-pigment/25'
           : 'hover:bg-shade hover:ring-1 hover:ring-black/[0.07]'}
         ${disabled ? 'cursor-not-allowed opacity-35' : ''} ${className}`}
     >
@@ -165,7 +165,7 @@ export function ColorGrid({
           title={c}
           className={`h-6 w-6 rounded-md border transition-transform hover:scale-110
             ${value === c ? 'ring-2 ring-pigment ring-offset-1' : ''}
-            ${c === 'transparent' ? 'border-dashed border-[#C6C2B6]' : 'border-black/10'}`}
+            ${c === 'transparent' ? 'border-dashed border-dim' : 'border-black/10'}`}
           style={{
             background: c === 'transparent'
               ? 'repeating-conic-gradient(#EAE6DD 0% 25%, #fff 0% 50%) 50%/8px 8px'

@@ -52,7 +52,7 @@ export function ImportButton({ parent = null }: { parent?: string | null }) {
           {haul.skipped > 0 && ` ${t('{n} files were left out of this pass.', { n: haul.skipped })}`}
         </span>
       )}
-      {!!failed && <span className="text-[12px] text-[#943321]">{failed}</span>}
+      {!!failed && <span className="text-[12px] text-pigment-deep">{failed}</span>}
     </>
   )
 }

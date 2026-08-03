@@ -45,19 +45,19 @@ export function Recurring() {
         <button
           type="button"
           onClick={add}
-          className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#943321]"
+          className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-on-pigment hover:bg-pigment-deep"
         >{t('Add')}</button>
       </div>
 
       <div className="mt-2 divide-y divide-shade rounded-xl border border-hairline bg-surface">
         {held.map((rule) => (
           <div key={rule.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
-            <Repeat size={12} className={rule.active ? 'text-pigment' : 'text-[#C6C2B6]'} />
+            <Repeat size={12} className={rule.active ? 'text-pigment' : 'text-dim'} />
             <span className={`min-w-0 flex-1 truncate text-[13px]
-              ${rule.active ? 'text-ink' : 'text-[#B6B1A6]'}`}
+              ${rule.active ? 'text-ink' : 'text-faint'}`}
             >{rule.title}</span>
             <span className="shrink-0 text-[11px] text-muted">{t(`every ${rule.every}`)}</span>
-            <span className="shrink-0 text-[11px] text-[#B6B1A6]">
+            <span className="shrink-0 text-[11px] text-faint">
               {t('next {day}', { day: rule.next_on })}
             </span>
             <select
@@ -79,7 +79,7 @@ export function Recurring() {
               type="button"
               aria-label={t('Delete')}
               onClick={() => void dropRule(rule.id)}
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
             >
               <Trash2 size={12} />
             </button>

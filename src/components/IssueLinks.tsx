@@ -21,9 +21,9 @@ function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop:
       <a
         href={`/i/${issue.id}`}
         className={`min-w-0 flex-1 truncate text-[12px] hover:text-pigment
-          ${isClosed(issue) ? 'text-[#B6B1A6] line-through' : 'text-ink'}`}
+          ${isClosed(issue) ? 'text-faint line-through' : 'text-ink'}`}
       >
-        <span className="mr-1.5 font-mono text-[10px] text-[#B6B1A6]">
+        <span className="mr-1.5 font-mono text-[10px] text-faint">
           {issueKey(issue, prefix)}
         </span>
         {issue.title || t('Untitled')}
@@ -32,7 +32,7 @@ function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop:
         type="button"
         aria-label={t('Remove')}
         onClick={onDrop}
-        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#943321] group-hover/line:opacity-100"
+        className="shrink-0 text-faint opacity-0 hover:text-pigment-deep group-hover/line:opacity-100"
       >
         <X size={11} />
       </button>

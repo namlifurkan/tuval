@@ -60,7 +60,7 @@ export function RecordHistory({ record, nameOf }: {
             key={revision.id}
             className="group/rev flex items-center gap-2 rounded-md px-1 py-0.5 text-[12px] hover:bg-tint"
           >
-            <span className="w-[64px] shrink-0 text-[11px] text-[#B6B1A6]">{when(revision.at)}</span>
+            <span className="w-[64px] shrink-0 text-[11px] text-faint">{when(revision.at)}</span>
             <span className={`shrink-0 truncate text-[11px] ${revision.via ? 'text-pigment' : 'text-muted'}`}>
               {revision.via ? `${revision.via} · ${t('agent')}` : nameOf(revision.actor) || t('Somebody')}
             </span>

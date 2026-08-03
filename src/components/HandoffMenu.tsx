@@ -60,7 +60,7 @@ export function HandoffMenu() {
         title={t('Hand off to AI')}
         active={pop.open}
         onClick={pop.toggle}
-        className={pop.open ? '' : 'text-pigment hover:bg-[#F7E9E4] hover:ring-pigment/25'}
+        className={pop.open ? '' : 'text-pigment hover:bg-pigment-wash hover:ring-pigment/25'}
       >
         <Spark size={18} />
       </IconButton>

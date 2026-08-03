@@ -48,7 +48,7 @@ export function HistoryPanel() {
           const label = prompt(t('Version name'), t('Checkpoint'))
           if (label !== null) saveVersion(label)
         }}
-        className="m-2 rounded-lg bg-pigment px-2 py-1.5 text-xs font-semibold text-white"
+        className="m-2 rounded-lg bg-pigment px-2 py-1.5 text-xs font-semibold text-on-pigment"
       >
         {t('Save current state')}
       </button>
@@ -86,7 +86,7 @@ export function HistoryPanel() {
                   type="button"
                   title={t('Delete')}
                   onClick={() => deleteVersion(v.id)}
-                  className="grid h-6 w-6 place-items-center rounded-md text-[#943321] hover:bg-[#F7E9E4]"
+                  className="grid h-6 w-6 place-items-center rounded-md text-pigment-deep hover:bg-pigment-wash"
                 >
                   <Trash2 size={12} strokeWidth={2.2} />
                 </button>

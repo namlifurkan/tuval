@@ -1,3 +1,4 @@
+import { COLOR } from './brand'
 import { CLOSED, getRecords, loadRecords } from './records'
 import type { Record as Row, Status } from './records'
 import { getUser, supabase } from './supabase'
@@ -7,7 +8,7 @@ import { getWorkspace } from './workspace'
 // same fact and drifting apart is how a product starts to feel unmade.
 export const STATUS_TONE: { [K in Status]: string } = {
   backlog: '#C6C2B6',
-  todo: '#8A867C',
+  todo: COLOR.muted,
   doing: '#DE9A4E',
   review: '#7FA5BE',
   blocked: '#C8664A',

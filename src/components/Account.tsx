@@ -84,7 +84,7 @@ export function Account() {
           type="button"
           title={user.email}
           onClick={pop.toggle}
-          className="grid h-8 w-8 place-items-center overflow-hidden rounded-md bg-[#3E5C93] text-[11px] font-bold text-white"
+          className="grid h-8 w-8 place-items-center overflow-hidden rounded-md bg-avatar text-[11px] font-bold text-white"
         >
           {face ? <img src={face} alt="" className="h-full w-full object-cover" /> : initial}
         </button>
@@ -98,7 +98,7 @@ export function Account() {
         {user ? (
           <>
             <div className="flex items-center gap-2.5 px-2.5 pb-2 pt-1">
-              <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-md bg-[#3E5C93] text-xs font-bold text-white">
+              <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-md bg-avatar text-xs font-bold text-white">
                 {face ? <img src={face} alt="" className="h-full w-full object-cover" /> : initial}
               </span>
               <div className="min-w-0">
@@ -148,11 +148,11 @@ export function Account() {
                 </button>
               ))}
             </div>
-            <div className="mx-2.5 mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.13em] text-[#B6B1A6]">
+            <div className="mx-2.5 mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.13em] text-faint">
               <span className="h-px flex-1 bg-shade" />{t('or')}<span className="h-px flex-1 bg-shade" />
             </div>
             {authError && state === 'idle' && (
-              <p className="mx-1 mb-2 rounded-lg border border-hairline bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-snug text-ink">
+              <p className="mx-1 mb-2 rounded-lg border border-hairline bg-pigment-wash px-2 py-1.5 text-[11px] leading-snug text-ink">
                 {isStaleLink
                   ? t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })
                   : t('Signing in did not go through: {reason}', { reason: authError })}
@@ -186,17 +186,17 @@ export function Account() {
                   type="button"
                   disabled={state === 'sending' || !email.trim()}
                   onClick={() => void send()}
-                  className="mx-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
+                  className="mx-1 w-[calc(100%-8px)] rounded-lg bg-pigment px-2 py-1.5 text-sm font-semibold text-on-pigment disabled:opacity-40"
                 >
                   {state === 'sending' ? t('Sending…') : password ? t('Sign in') : t('Send link')}
                 </button>
               </>
             )}
             {state === 'error' && (
-              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#943321]">{reason}</p>
+              <p className="px-2.5 pt-2 text-[11px] leading-snug text-pigment-deep">{reason}</p>
             )}
             {authTrouble() === 'expired' && (
-              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#943321]">
+              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-pigment-deep">
                 {t('Your session expired and could not be renewed. Sign in again.')}
               </p>
             )}

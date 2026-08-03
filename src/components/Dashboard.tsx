@@ -62,7 +62,7 @@ function Tile({ board, mine, onForget, onCopy }: {
         {board.thumb
           ? <img src={board.thumb} alt="" className="aspect-[8/5] w-full object-cover" />
           : (
-            <span className="grid aspect-[8/5] w-full place-items-center text-[11px] uppercase tracking-[0.13em] text-[#B6B1A6]">
+            <span className="grid aspect-[8/5] w-full place-items-center text-[11px] uppercase tracking-[0.13em] text-faint">
               {board.items ? t('no preview yet') : t('empty')}
             </span>
           )}
@@ -107,7 +107,7 @@ function Tile({ board, mine, onForget, onCopy }: {
             type="button"
             title={t('Move to trash')}
             onClick={onForget}
-            className="grid h-7 w-7 place-items-center rounded-md border border-hairline bg-surface text-muted hover:text-[#943321]"
+            className="grid h-7 w-7 place-items-center rounded-md border border-hairline bg-surface text-muted hover:text-pigment-deep"
           >
             <Trash2 size={13} />
           </button>
@@ -251,7 +251,7 @@ export function Dashboard() {
         )}
 
         {cloudProblem && (
-          <div className="mb-4 flex items-center gap-3 rounded-lg border border-hairline bg-[#F7E9E4] px-3 py-2 text-sm text-ink-soft">
+          <div className="mb-4 flex items-center gap-3 rounded-lg border border-hairline bg-pigment-wash px-3 py-2 text-sm text-ink-soft">
             <span className="min-w-0 flex-1">{t('Could not reach the cloud. Your boards are still there.')}</span>
             <button
               type="button"
@@ -268,7 +268,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => start(undefined, scope || undefined)}
-            className="ml-auto flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
+            className="ml-auto flex items-center gap-1.5 rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep"
           >
             <Plus size={15} strokeWidth={2.4} /> {t('New board')}
           </button>
@@ -343,7 +343,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={burn}
-            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-muted hover:bg-pigment-wash hover:text-pigment-deep"
           >{t('Empty the trash ({n})', { n: trash.length })}</button>
           <Band
             title={t('Trash')}
@@ -361,12 +361,12 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={restore(b, cloudRooms.has(b.room))}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-[#F7E9E4]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-pigment hover:bg-pigment-wash"
                   >{t('Restore')}</button>
                   <button
                     type="button"
                     onClick={erase(b, cloudRooms.has(b.room))}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] text-muted hover:bg-pigment-wash hover:text-pigment-deep"
                   >{t('Delete for good')}</button>
                 </div>
               </div>

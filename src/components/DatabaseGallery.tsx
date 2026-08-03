@@ -96,7 +96,7 @@ export function DatabaseGallery({ dbId, rows, fields, team }: {
       <button
         type="button"
         onClick={() => void createRecord('', 'doc', dbId)}
-        className="grid aspect-[8/5] place-items-center rounded-xl border border-dashed border-[#D8D5CD] text-sm font-semibold text-muted hover:border-pigment hover:text-pigment"
+        className="grid aspect-[8/5] place-items-center rounded-xl border border-dashed border-rule text-sm font-semibold text-muted hover:border-pigment hover:text-pigment"
       >
         <span className="flex items-center gap-1.5"><Plus size={14} /> {t('New row')}</span>
       </button>

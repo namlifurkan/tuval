@@ -110,7 +110,7 @@ export function ContextMenu() {
               type="button"
               onClick={() => { e.run(); close() }}
               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm
-                ${e.danger ? 'text-[#943321] hover:bg-[#F7E9E4]' : 'text-ink hover:bg-tint'}`}
+                ${e.danger ? 'text-pigment-deep hover:bg-pigment-wash' : 'text-ink hover:bg-tint'}`}
             >
               <span>{e.label}</span>
               {e.shortcut && <span className="ml-6 text-xs text-muted">{e.shortcut}</span>}

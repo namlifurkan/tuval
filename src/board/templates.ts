@@ -1,4 +1,5 @@
 import { t } from '../i18n'
+import { COLOR } from './brand'
 import { makeConnector, makeFrame, makeShape, makeSticky, makeTable, makeText } from './items'
 import type { Item, TextStyle, Vec } from './types'
 import { DEFAULT_TEXT_STYLE } from './types'
@@ -158,7 +159,7 @@ export const TEMPLATES: Template[] = [
         items.push(makeConnector(
           { itemId: core.id, anchor: null, x: 0, y: 0 },
           { itemId: b.id, anchor: null, x: 0, y: 0 },
-          { shape: 'curved', stroke: '#8A867C', strokeWidth: 3, strokeStyle: 'solid', capStart: 'none', capEnd: 'none' },
+          { shape: 'curved', stroke: COLOR.muted, strokeWidth: 3, strokeStyle: 'solid', capStart: 'none', capEnd: 'none' },
         ))
       })
       return items

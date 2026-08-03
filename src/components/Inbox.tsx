@@ -109,7 +109,7 @@ export function Inbox() {
                   {said(notice)} {named(notice.record_id)}
                 </span>
               </span>
-              <span className="shrink-0 text-[11px] text-[#B6B1A6]">{when(notice.created_at)}</span>
+              <span className="shrink-0 text-[11px] text-faint">{when(notice.created_at)}</span>
             </button>
           )
         })}

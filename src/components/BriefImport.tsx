@@ -146,7 +146,7 @@ export function BriefImport() {
           type="button"
           disabled={!nodeCount}
           onClick={create}
-          className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-pigment px-3 py-1.5 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t('Create')} ⌘↵
         </button>

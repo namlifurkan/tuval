@@ -1,5 +1,8 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
+// Mounted before anything else and never unmounted, which is what the appearance module needs:
+// index.html settles the first paint, and this keeps the shell following the system afterwards.
+import '../appearance'
 import { t } from '../i18n'
 
 interface State { error: Error | null }
@@ -45,7 +48,7 @@ export class Boundary extends Component<{ children: ReactNode }, State> {
             <button
               type="button"
               onClick={() => location.reload()}
-              className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321]"
+              className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep"
             >
               {t('Reload')}
             </button>

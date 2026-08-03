@@ -22,6 +22,10 @@ const tr: Record<string, string> = {
   'Surface': 'Zemin',
   'Texture': 'Doku',
   'Language': 'Dil',
+  'Appearance': 'Görünüm',
+  'System': 'Sistem',
+  'Yours alone, kept in this browser. The board itself stays paper in every one of them — the surface you draw on belongs to the board, and changing it changes it for everybody.':
+    'Yalnızca sana ait, bu tarayıcıda tutuluyor. Board\'un kendisi hepsinde kağıt kalır — üzerine çizdiğin zemin board\'a aittir, onu değiştirmek herkes için değiştirir.',
   'Clear board': 'Board\'u temizle',
   'Delete everything on this board?': 'Board\'daki her şey silinsin mi?',
   'Search — ⌘F': 'Ara — ⌘F',

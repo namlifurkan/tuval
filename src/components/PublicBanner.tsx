@@ -61,7 +61,7 @@ export function PublicBanner() {
         <button
           type="button"
           onClick={copy}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-pigment hover:bg-[#F7E9E4]"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-pigment hover:bg-pigment-wash"
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? t('Copied') : t('Copy the brief')}

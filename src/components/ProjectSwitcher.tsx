@@ -34,7 +34,7 @@ export function ProjectSwitcher() {
         >
           {here
             ? <Target size={13} className="shrink-0" style={{ color: PHASE_TONE[phaseOf(here.id)] }} />
-            : <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-[#C6C2B6]" />}
+            : <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-dim" />}
           <span className="min-w-0 flex-1 truncate">
             {here ? (here.title || t('Untitled project')) : t('Everything')}
           </span>
@@ -49,7 +49,7 @@ export function ProjectSwitcher() {
             onClick={() => { setScope(''); close() }}
             className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-shade"
           >
-            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-[#C6C2B6]" />
+            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-dim" />
             <span className="min-w-0 flex-1 truncate">{t('Everything')}</span>
             {!scope && <Check size={13} className="shrink-0 text-pigment" />}
           </button>

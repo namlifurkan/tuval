@@ -67,7 +67,7 @@ function Chip({
       title={title}
       onClick={onClick}
       className={`tap-target grid h-8 w-8 place-items-center rounded-lg transition-colors
-        ${active ? 'bg-[#F7E9E4] text-pigment' : 'text-ink hover:bg-tint'}`}
+        ${active ? 'bg-pigment-wash text-pigment' : 'text-ink hover:bg-tint'}`}
     >
       {children}
     </button>
@@ -166,7 +166,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ strokeStyle: st })}
                 className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                  ${first.strokeStyle === st ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  ${first.strokeStyle === st ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
               >{st}</button>
             ))}
           </div>
@@ -182,7 +182,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ shape: sh }, (i) => i.type === 'connector')}
                 className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize
-                  ${first.shape === sh ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  ${first.shape === sh ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
               >{sh}</button>
             ))}
           </div>
@@ -193,7 +193,7 @@ export function Inspector() {
                 type="button"
                 onClick={() => patch({ capEnd: c }, (i) => i.type === 'connector')}
                 className={`flex-1 rounded-lg px-1 py-1.5 text-[10px] font-semibold capitalize
-                  ${first.capEnd === c ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                  ${first.capEnd === c ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
               >{c}</button>
             ))}
           </div>
@@ -240,7 +240,7 @@ export function Inspector() {
                 type="button"
                 title={t('Remove')}
                 onClick={() => patchItem(wire.id, { labels: (wire.labels ?? []).filter((_, j) => j !== i) })}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted hover:bg-pigment-wash hover:text-pigment-deep"
               >
                 <Trash2 size={12} />
               </button>
@@ -262,7 +262,7 @@ export function Inspector() {
             <button
               type="button"
               onClick={() => { quickCreateFromSelection('right'); requestRender() }}
-              className="flex-1 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-xs font-semibold text-pigment"
+              className="flex-1 rounded-lg bg-pigment-wash px-2 py-1.5 text-xs font-semibold text-pigment"
             >
               {t('Add child')} <span className="opacity-60">Tab</span>
             </button>
@@ -307,7 +307,7 @@ export function Inspector() {
                     requestRender()
                   }}
                   className={`flex items-center gap-1.5 rounded-md py-1 pl-1 pr-2 text-xs font-semibold transition-colors
-                    ${on ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-tint'}`}
+                    ${on ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-tint'}`}
                 >
                   <span
                     className="grid h-5 w-5 place-items-center rounded-md text-[9px] font-bold text-white"
@@ -455,7 +455,7 @@ export function Inspector() {
       {card && (
         <Section title={t(CARD_TITLES[card.kind] ?? 'Issue')}>
           {card.missing && (
-            <p className="mb-2 rounded-lg bg-[#F7E9E4] px-2 py-1.5 text-[11px] leading-relaxed text-pigment">
+            <p className="mb-2 rounded-lg bg-pigment-wash px-2 py-1.5 text-[11px] leading-relaxed text-pigment">
               {t('The record behind this card was deleted or is no longer reachable.')}
             </p>
           )}
@@ -471,7 +471,7 @@ export function Inspector() {
                     requestRender()
                   }}
                   className={`rounded-lg px-1 py-1.5 text-[11px] font-semibold capitalize
-                    ${card.snapshot.status === st ? 'bg-[#F7E9E4] text-pigment' : 'hover:bg-tint'}`}
+                    ${card.snapshot.status === st ? 'bg-pigment-wash text-pigment' : 'hover:bg-tint'}`}
                 >{t(st)}</button>
               ))}
             </div>
@@ -490,7 +490,7 @@ export function Inspector() {
           <button
             type="button"
             onClick={() => void promoteToIssue(promotable.map((i) => i.id))}
-            className="w-full rounded-lg bg-pigment px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#943321]"
+            className="w-full rounded-lg bg-pigment px-2 py-1.5 text-xs font-semibold text-on-pigment transition-colors hover:bg-pigment-deep"
           >
             {promotable.length > 1
               ? t('Turn {n} into issues', { n: promotable.length })
@@ -579,7 +579,7 @@ export function Inspector() {
             type="button"
             title={`${t('Delete')} — Del`}
             onClick={() => deleteSelection()}
-            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#943321] hover:bg-[#F7E9E4]"
+            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-pigment-deep hover:bg-pigment-wash"
           >
             <Trash2 size={15} strokeWidth={1.9} />
           </button>

@@ -40,7 +40,7 @@ export function EmbedLayer() {
             <iframe
               src={item.url}
               title={item.title}
-              className="h-full w-full border-0 bg-[#EBE7DE]"
+              className="h-full w-full border-0 bg-shade"
               loading="lazy"
               referrerPolicy="no-referrer"
               allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture; fullscreen"
@@ -48,7 +48,7 @@ export function EmbedLayer() {
             />
             {selected && !live && (
               <div className="pointer-events-none absolute inset-0 grid place-items-end justify-center pb-2">
-                <span className="rounded-md bg-ink/80 px-2 py-0.5 text-[11px] font-medium text-white">
+                <span className="rounded-md bg-ink/80 px-2 py-0.5 text-[11px] font-medium text-paper">
                   {t('Double click to use the content')}
                 </span>
               </div>
@@ -57,7 +57,7 @@ export function EmbedLayer() {
               <button
                 type="button"
                 onClick={() => { update({ activeEmbed: null }); requestRender() }}
-                className="absolute right-2 top-2 rounded-lg bg-ink px-2 py-1 text-[11px] font-semibold text-white"
+                className="absolute right-2 top-2 rounded-lg bg-ink px-2 py-1 text-[11px] font-semibold text-paper"
               >
                 Kilidi kapat
               </button>

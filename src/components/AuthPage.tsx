@@ -28,7 +28,7 @@ const PROVIDERS: { id: Provider; name: string; path: string }[] = [
 ]
 
 const field = 'w-full rounded-lg border border-hairline bg-surface px-3 py-2.5 text-sm outline-none focus:border-pigment'
-const primary = 'w-full rounded-lg bg-pigment px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40'
+const primary = 'w-full rounded-lg bg-pigment px-3 py-2.5 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep disabled:opacity-40'
 const quiet = 'text-[13px] font-semibold text-pigment hover:underline'
 
 const COPY: Record<Page, { title: string; blurb: string }> = {
@@ -103,7 +103,7 @@ export function AuthPage() {
         <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{t(copy.blurb)}</p>
 
         {authError && (
-          <p className="mt-4 rounded-lg border border-hairline bg-[#F7E9E4] px-3 py-2 text-[12px] leading-snug text-ink">
+          <p className="mt-4 rounded-lg border border-hairline bg-pigment-wash px-3 py-2 text-[12px] leading-snug text-ink">
             {isStaleLink
               ? t('That sign-in link no longer works: {reason}. Links are single use and they expire, so ask for a fresh one below.', { reason: authError })
               : t('Signing in did not go through: {reason}', { reason: authError })}
@@ -160,12 +160,12 @@ export function AuthPage() {
         )}
 
         {state === 'error' && (
-          <p className="mt-3 text-[12px] leading-snug text-[#943321]">{reason}</p>
+          <p className="mt-3 text-[12px] leading-snug text-pigment-deep">{reason}</p>
         )}
 
         {(page === 'login' || page === 'register') && (
           <>
-            <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-[0.13em] text-[#B6B1A6]">
+            <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-[0.13em] text-faint">
               <span className="h-px flex-1 bg-hairline" />{t('or')}<span className="h-px flex-1 bg-hairline" />
             </div>
             <div className="grid grid-cols-3 gap-2">

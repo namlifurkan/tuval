@@ -107,10 +107,10 @@ export function Collaborators() {
             title={t('Guidance')}
             onClick={() => setAdaOff(!ada.off)}
             className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-              ${ada.off ? 'bg-[#D8D5CD]' : 'bg-pigment'}`}
+              ${ada.off ? 'bg-dim' : 'bg-pigment'}`}
           >
             <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-on-pigment transition-[left]
                 ${ada.off ? 'left-0.5' : 'left-[18px]'}`}
             />
           </button>

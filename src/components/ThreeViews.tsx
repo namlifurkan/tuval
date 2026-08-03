@@ -115,7 +115,7 @@ const Dot = ({ status, onClick }: { status: string; onClick: () => void }) => (
     type="button"
     onClick={onClick}
     title={`${LABEL[status]} — click to move it on`}
-    className="grid h-6 w-6 shrink-0 place-items-center rounded-[5px] hover:bg-[#EBE7DE]"
+    className="grid h-6 w-6 shrink-0 place-items-center rounded-[5px] hover:bg-shade"
   >
     <span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: TONE[status] }} />
   </button>
@@ -266,7 +266,7 @@ export function ThreeViews() {
     : ''
 
   const tab = (on: boolean) => `rounded-[5px] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
-    on ? 'bg-ink text-paper' : 'text-muted hover:bg-[#EBE7DE]'}`
+    on ? 'bg-ink text-paper' : 'text-muted hover:bg-shade'}`
 
   return (
     <div className="mx-auto max-w-[80rem] px-6">
@@ -291,7 +291,7 @@ export function ThreeViews() {
               <button
                 type="button"
                 onClick={promote}
-                className={`${BUTTON} bg-pigment text-paper shadow-[2px_2px_0_#9E2F1B] hover:bg-[#943321]`}
+                className={`${BUTTON} bg-pigment text-paper shadow-[2px_2px_0_#9E2F1B] hover:bg-pigment-deep`}
               >
                 {chosen.size && notes.some((n) => chosen.has(n.id))
                   ? `Turn ${said(notes.filter((n) => chosen.has(n.id)).length)} into work`
@@ -325,7 +325,7 @@ export function ThreeViews() {
                 key={card.id}
                 onPointerDown={() => pick(card.id)}
                 className={`grid grid-cols-[1fr_auto] items-center gap-2 border-b border-ink/8 px-2 py-2 last:border-0 ${
-                  chosen.has(card.id) ? 'bg-[#F7E9E4]' : 'hover:bg-paper'}`}
+                  chosen.has(card.id) ? 'bg-pigment-wash' : 'hover:bg-paper'}`}
               >
                 <div className="min-w-0">
                   <input
@@ -337,7 +337,7 @@ export function ThreeViews() {
                     className="w-full truncate rounded-[5px] bg-transparent px-2 py-1 text-[13.5px] outline-none focus:bg-paper focus:ring-1 focus:ring-ink/25"
                     style={READING}
                   />
-                  <span className="block px-2 pt-0.5 text-[11px] text-[#B6B1A6]">
+                  <span className="block px-2 pt-0.5 text-[11px] text-faint">
                     {card.recordId} · {FRAME_TITLE}
                   </span>
                 </div>
@@ -368,7 +368,7 @@ export function ThreeViews() {
                   setCopied(true)
                   window.setTimeout(() => setCopied(false), 1600)
                 }}
-                className="ml-auto flex items-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] font-semibold text-muted hover:bg-[#EBE7DE] hover:text-ink"
+                className="ml-auto flex items-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] font-semibold text-muted hover:bg-shade hover:text-ink"
               >
                 {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
               </button>
@@ -390,7 +390,7 @@ export function ThreeViews() {
                       <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
                         {LABEL[status]}
                       </span>
-                      <span className="text-[11px] text-[#B6B1A6]">{here.length}</span>
+                      <span className="text-[11px] text-faint">{here.length}</span>
                     </div>
                     {here.map((card) => (
                       <button
@@ -399,10 +399,10 @@ export function ThreeViews() {
                         onClick={() => onwards(card)}
                         className={`mb-1.5 block w-full rounded-lg border px-3 py-2 text-left last:mb-0 ${
                           chosen.has(card.id)
-                            ? 'border-ink bg-[#F7E9E4]'
+                            ? 'border-ink bg-pigment-wash'
                             : 'border-ink/12 hover:border-ink/40'}`}
                       >
-                        <span className="block font-mono text-[10.5px] text-[#B6B1A6]">
+                        <span className="block font-mono text-[10.5px] text-faint">
                           {card.recordId}
                         </span>
                         <span className="mt-0.5 block text-[13px] leading-snug" style={READING}>
@@ -411,7 +411,7 @@ export function ThreeViews() {
                       </button>
                     ))}
                     {!here.length && (
-                      <div className="rounded-lg border border-dashed border-ink/12 px-3 py-2 text-[11.5px] text-[#B6B1A6]">
+                      <div className="rounded-lg border border-dashed border-ink/12 px-3 py-2 text-[11.5px] text-faint">
                         Nothing here
                       </div>
                     )}

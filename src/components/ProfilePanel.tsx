@@ -52,7 +52,7 @@ export function ProfilePanel() {
 
   // No width in the shared class: a w-full here beat every w-[…] set beside it, which is how the
   // label field came to take the whole row and leave the address a sliver.
-  const field = 'rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-[#B6B1A6] focus:border-pigment'
+  const field = 'rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-faint focus:border-pigment'
   const label = 'text-[11px] font-bold uppercase tracking-[0.13em] text-muted'
 
   return (
@@ -138,7 +138,7 @@ export function ProfilePanel() {
           type="button"
           disabled={bad}
           onClick={save}
-          className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#943321] disabled:opacity-40"
+          className="rounded-lg bg-pigment px-3 py-2 text-sm font-semibold text-on-pigment transition-colors hover:bg-pigment-deep disabled:opacity-40"
         >{t('Save')}</button>
 
         {held?.handle && (

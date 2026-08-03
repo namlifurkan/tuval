@@ -46,7 +46,7 @@ export function Published() {
         {page.title || t('Untitled page')}
       </h1>
       <div className="mt-6"><PageReader /></div>
-      <p className="mt-16 border-t border-hairline pt-4 text-[11px] text-[#B6B1A6]">
+      <p className="mt-16 border-t border-hairline pt-4 text-[11px] text-faint">
         {t('Published with {product}', { product: PRODUCT.name })}
       </p>
     </main>

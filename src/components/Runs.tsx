@@ -107,7 +107,7 @@ export function Runs() {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14.5px] font-medium text-ink">
                     {run.via || t('A key')}
-                    <span className="ml-2 font-mono text-[11px] font-normal text-[#B6B1A6]">
+                    <span className="ml-2 font-mono text-[11px] font-normal text-faint">
                       {run.run}
                     </span>
                   </span>
@@ -150,7 +150,7 @@ export function Runs() {
                             {touch.changed.length
                               ? touch.changed.map((field) => (
                                 <span key={field} className="mr-3 inline-block">
-                                  <span className="text-[#B6B1A6]">{t(field)}</span>{' '}
+                                  <span className="text-faint">{t(field)}</span>{' '}
                                   {before(touch.was[field])}
                                 </span>
                               ))

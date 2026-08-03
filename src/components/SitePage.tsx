@@ -5,6 +5,7 @@ import { FONT, PRODUCT } from '../board/brand'
 import { bandOf, filled, findPage, LINK_NAMES, PAGES } from '../site/pages'
 import type { Band, Page } from '../site/pages'
 import { Account } from './Account'
+import { AppearanceToggle } from './AppearanceToggle'
 import { BoardPicture } from './BoardPicture'
 import { SiteDemo } from './SiteDemo'
 import { ThreeViews } from './ThreeViews'
@@ -51,6 +52,7 @@ function Header() {
           ))}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <AppearanceToggle />
           {PRODUCT.published ? (
             <a
               href={PRODUCT.repo}
@@ -101,7 +103,7 @@ function Hero({ page }: { page: Page }) {
           <a
             href="/dashboard"
             onClick={(e) => { e.preventDefault(); go('/dashboard') }}
-            className="rounded-xl bg-pigment px-5 py-3 text-[15px] font-semibold text-paper shadow-[2px_2px_0_#9E2F1B] transition-[transform,box-shadow,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#943321] hover:shadow-[3px_4px_0_#9E2F1B] active:translate-y-0 active:shadow-[1px_1px_0_#9E2F1B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="rounded-xl bg-pigment px-5 py-3 text-[15px] font-semibold text-paper shadow-[2px_2px_0_#9E2F1B] transition-[transform,box-shadow,background-color] duration-150 hover:-translate-y-0.5 hover:bg-pigment-deep hover:shadow-[3px_4px_0_#9E2F1B] active:translate-y-0 active:shadow-[1px_1px_0_#9E2F1B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >Start a board</a>
           <Second />
         </div>
@@ -115,7 +117,7 @@ function Hero({ page }: { page: Page }) {
 // yourself.
 function Second({ big }: { big?: boolean }) {
   const size = big ? 'px-5 py-3 text-[14px]' : 'px-5 py-3 text-[15px]'
-  const look = `rounded-xl border border-ink/20 font-semibold transition-colors duration-150 hover:border-ink hover:bg-[#EBE7DE] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${size}`
+  const look = `rounded-xl border border-ink/20 font-semibold transition-colors duration-150 hover:border-ink hover:bg-shade focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${size}`
   return PRODUCT.published
     ? <a href={PRODUCT.repo} target="_blank" rel="noreferrer" className={look}>Read the source</a>
     : (
@@ -304,7 +306,7 @@ function Onward({ page }: { page: Page }) {
               >{one.claim}</span>
               <ArrowRight
                 size={19}
-                className="hidden shrink-0 text-[#C6C2B6] transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-pigment sm:block"
+                className="hidden shrink-0 text-dim transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-pigment sm:block"
               />
             </a>
           </li>
@@ -316,7 +318,7 @@ function Onward({ page }: { page: Page }) {
 
 function Footer() {
   return (
-    <footer style={{ background: '#141310', color: PAPER }}>
+    <footer data-theme="light" style={{ background: '#141310', color: PAPER }}>
       <div className="mx-auto max-w-[80rem] px-6 py-16">
         <div className="flex flex-wrap gap-x-16 gap-y-10">
           <div className="min-w-[17rem] flex-1">
@@ -371,7 +373,7 @@ function SurfaceLayout({ page }: { page: Page }) {
     <>
       <Hero page={page} />
       {shown && (
-        <div className="bg-[#EBE7DE] py-12">
+        <div className="bg-shade py-12">
           <SiteDemo kind={shown.demo!} template={BOARD[page.path]} tall />
           <Caption title={shown.heading} body={shown.body} />
         </div>
@@ -392,7 +394,7 @@ function TradeLayout({ page }: { page: Page }) {
     <>
       <Hero page={page} />
       {shown && (
-        <div className="bg-[#EBE7DE] py-12">
+        <div className="bg-shade py-12">
           <SiteDemo kind="canvas" template={BOARD[page.path]} tall />
           <Caption title={shown.heading} body={shown.body} />
         </div>
@@ -507,7 +509,7 @@ function Commands({ band }: { band: Band }) {
       <p className="mt-2.5 max-w-[62ch] text-[14.5px] leading-[1.65] text-ink-soft" style={READING}>
         {band.body}
       </p>
-      <ol className="mt-6 overflow-x-auto rounded-xl border border-ink/12 bg-ink py-4 text-[#EBE7DE]">
+      <ol className="mt-6 overflow-x-auto rounded-xl border border-ink/12 bg-ink py-4 text-shade">
         {band.lines?.map((line) => (
           <li key={line} className="flex gap-3 whitespace-pre px-5 py-1.5 font-mono text-[12.5px] leading-[1.6]">
             <span aria-hidden className="select-none text-pigment">$</span>
@@ -692,7 +694,7 @@ function HomeLayout({ page }: { page: Page }) {
 
       {promote && <Statement heading={promote.heading} body={promote.body} />}
 
-      <section className="bg-[#EBE7DE]">
+      <section className="bg-shade">
         <div className="mx-auto max-w-[80rem] px-6 py-20">
           <Rule label="The three views, in full" />
           <Columns bands={columns} />
@@ -703,7 +705,7 @@ function HomeLayout({ page }: { page: Page }) {
         <Ledger band={bandOf(page, 'migrate')!} label="Coming from something else" />
       )}
 
-      <section className="border-t border-ink/12 bg-[#EBE7DE]">
+      <section className="border-t border-ink/12 bg-shade">
         {bandOf(page, 'price') && <Ledger band={bandOf(page, 'price')!} label="What it costs" />}
       </section>
 

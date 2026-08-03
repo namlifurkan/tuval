@@ -142,7 +142,7 @@ export const Diagram = createReactBlockSpec(
           onClick={() => setOpen(true)}
         >
           {drawn.fault ? (
-            <p className="rounded-md bg-[#F7E9E4] px-2 py-1.5 font-mono text-[12px] text-pigment">
+            <p className="rounded-md bg-pigment-wash px-2 py-1.5 font-mono text-[12px] text-pigment">
               {drawn.fault}
             </p>
           ) : (

@@ -19,7 +19,7 @@ export default function App() {
   const board = readRoute().kind === 'board'
 
   return (
-    <div key={lang} className="h-dvh w-dvw bg-[#F2EFE9]">
+    <div key={lang} className="h-dvh w-dvw bg-paper">
       <Suspense fallback={null}>{board ? <Board /> : <Home />}</Suspense>
     </div>
   )

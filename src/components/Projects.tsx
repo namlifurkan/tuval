@@ -61,7 +61,7 @@ function Roadmap({ rows }: { rows: Row[] }) {
   return (
     <div className="mt-4 overflow-x-auto rounded-xl border border-hairline bg-surface">
       <div style={{ width: NAMES + days * DAY }}>
-        <div className="flex border-b border-hairline bg-[#F7F5F0]">
+        <div className="flex border-b border-hairline bg-raise">
           <div className="shrink-0" style={{ width: NAMES }} />
           <div className="flex">
             {Array.from({ length: days }, (_, i) => addDays(from, i)).map((iso) => {
@@ -72,7 +72,7 @@ function Roadmap({ rows }: { rows: Row[] }) {
                   key={iso}
                   style={{ width: DAY }}
                   className={`shrink-0 py-1.5 text-center text-[9px] leading-tight
-                    ${first ? 'border-l border-[#D8D5CD] font-bold text-ink' : 'text-[#C6C2B6]'}`}
+                    ${first ? 'border-l border-rule font-bold text-ink' : 'text-dim'}`}
                 >
                   {first
                     ? new Date(`${iso}T00:00:00Z`)
@@ -142,7 +142,7 @@ export function Projects() {
             type="button"
             onClick={() => setView(v)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-              ${view === v ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+              ${view === v ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >{t(v)}</button>
         ))}
       </div>
@@ -158,7 +158,7 @@ export function Projects() {
         <button
           type="button"
           onClick={() => void add()}
-          className="grid h-9 w-9 place-items-center rounded-lg bg-pigment text-white hover:bg-[#943321]"
+          className="grid h-9 w-9 place-items-center rounded-lg bg-pigment text-on-pigment hover:bg-pigment-deep"
           aria-label={t('Add')}
         >
           <Plus size={16} />
@@ -186,7 +186,7 @@ export function Projects() {
                     className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none"
                   />
                   {isLate(project) && (
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-[#943321]">
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-pigment-deep">
                       {t('late')}
                     </span>
                   )}
@@ -201,7 +201,7 @@ export function Projects() {
                   <button
                     type="button"
                     onClick={() => void archiveRecord(project.id)}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 hover:text-[#943321] group-hover:opacity-100"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-muted opacity-0 hover:text-pigment-deep group-hover:opacity-100"
                   >{t('Archive')}</button>
                 </div>
 
@@ -213,7 +213,7 @@ export function Projects() {
                     onChange={(e) => setSpan(project, e.target.value, targetOf(project))}
                     className={field}
                   />
-                  <span className="text-[11px] text-[#C6C2B6]">→</span>
+                  <span className="text-[11px] text-dim">→</span>
                   <input
                     type="date"
                     value={targetOf(project)}

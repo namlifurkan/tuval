@@ -211,7 +211,7 @@ export function Issues() {
             type="button"
             onClick={() => setView(v)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-              ${view === v ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+              ${view === v ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >{t(v)}</button>
         ))}
 
@@ -235,11 +235,11 @@ export function Issues() {
             type="button"
             onClick={() => setFilter(s)}
             className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors
-              ${filter === s ? 'bg-[#F7E9E4] text-pigment' : 'text-ink-soft hover:bg-shade'}`}
+              ${filter === s ? 'bg-pigment-wash text-pigment' : 'text-ink-soft hover:bg-shade'}`}
           >
             {t(CHIP[s as keyof typeof CHIP] ?? s)}
             {s !== 'all' && (
-              <span className="ml-1.5 text-[#B6B1A6]">
+              <span className="ml-1.5 text-faint">
                 {s === 'mine' ? counted.filter((r) => r.assignee === mine).length
                   : s === 'new' ? fresh
                   : s === 'agent' ? counted.filter((r) => writtenByAgent(r.updated_via)).length
@@ -280,7 +280,7 @@ export function Issues() {
               <h2 className="flex items-center gap-2 pb-1 text-[11px] font-bold uppercase tracking-[0.13em] text-muted">
                 {group === 'status' && <Dot status={band.key as Status} />}
                 {t(band.label)}
-                <span className="text-[#B6B1A6]">{band.rows.length}</span>
+                <span className="text-faint">{band.rows.length}</span>
               </h2>
             )}
 
@@ -290,7 +290,7 @@ export function Issues() {
                   key={issue.id}
                   onMouseEnter={() => setAt(walk.indexOf(issue))}
                   className={`group flex items-center gap-2.5 py-2.5
-                    ${picked.includes(issue.id) ? 'bg-[#F7E9E4]' : walk[at]?.id === issue.id ? 'bg-tint' : ''}`}
+                    ${picked.includes(issue.id) ? 'bg-pigment-wash' : walk[at]?.id === issue.id ? 'bg-tint' : ''}`}
                 >
                   <button
                     type="button"
@@ -300,8 +300,8 @@ export function Issues() {
                       was.includes(issue.id) ? was.filter((x) => x !== issue.id) : [...was, issue.id])}
                     className={`grid h-4 w-4 shrink-0 place-items-center rounded-[3px] border text-[9px] transition-opacity
                       ${picked.includes(issue.id)
-                        ? 'border-pigment bg-pigment text-white opacity-100'
-                        : 'border-[#D8D5CD] opacity-0 group-hover:opacity-100'}`}
+                        ? 'border-pigment bg-pigment text-on-pigment opacity-100'
+                        : 'border-rule opacity-0 group-hover:opacity-100'}`}
                   >{picked.includes(issue.id) ? '✓' : ''}</button>
 
                   <Dot
@@ -321,7 +321,7 @@ export function Issues() {
                         : writtenByAgent(issue.updated_via) ? 'bg-pigment' : 'bg-ink'}`}
                   />
 
-                  <span className="w-[62px] shrink-0 font-mono text-[11px] tabular-nums text-[#B6B1A6]">
+                  <span className="w-[62px] shrink-0 font-mono text-[11px] tabular-nums text-faint">
                     {issueKey(issue, prefix)}
                   </span>
 
@@ -336,7 +336,7 @@ export function Issues() {
                   {(() => {
                     const kids = progressOf(issue.id, isClosed)
                     return kids && (
-                      <span className="shrink-0 font-mono text-[10px] text-[#B6B1A6]">
+                      <span className="shrink-0 font-mono text-[10px] text-faint">
                         {kids.done}/{kids.total}
                       </span>
                     )
@@ -351,7 +351,7 @@ export function Issues() {
                   {issue.assignee && (
                     <span
                       title={nameOf(issue.assignee)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#3E5C93] text-[10px] font-bold text-white"
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-avatar text-[10px] font-bold text-white"
                     >
                       {initials(nameOf(issue.assignee) || '?')}
                     </span>
@@ -370,7 +370,7 @@ export function Issues() {
                     type="button"
                     title={t('Archive')}
                     onClick={() => void archiveRecord(issue.id)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#943321] group-hover:opacity-100"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-pigment-wash hover:text-pigment-deep group-hover:opacity-100"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -436,7 +436,7 @@ export function Issues() {
           <button
             type="button"
             onClick={() => { picked.forEach((id) => void archiveRecord(id)); setPicked([]) }}
-            className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+            className="rounded-md px-2 py-1 text-[12px] font-semibold text-muted hover:bg-pigment-wash hover:text-pigment-deep"
           >{t('Archive')}</button>
           <button
             type="button"
@@ -447,7 +447,7 @@ export function Issues() {
       )}
 
       {view === 'list' && !!shown.length && (
-        <p className="mt-4 text-[11px] text-[#B6B1A6]">
+        <p className="mt-4 text-[11px] text-faint">
           {t('j k move · enter opens · c writes · x chooses · delete archives · 1–7 set the state · g then i p d b n s')}
         </p>
       )}

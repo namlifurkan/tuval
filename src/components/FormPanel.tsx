@@ -53,7 +53,7 @@ export function FormPanel({ db, fields }: { db: Row; fields: Field[] }) {
           <button
             type="button"
             onClick={() => void makeForm(db.id, db.title || t('Untitled database')).then(setHeld)}
-            className="w-full rounded-md bg-pigment px-2 py-1.5 text-[12px] font-semibold text-white hover:bg-[#943321]"
+            className="w-full rounded-md bg-pigment px-2 py-1.5 text-[12px] font-semibold text-on-pigment hover:bg-pigment-deep"
           >{t('Make a form')}</button>
         </>
       ) : (
@@ -90,10 +90,10 @@ export function FormPanel({ db, fields }: { db: Row; fields: Field[] }) {
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[12px] hover:bg-shade"
             >
               <span className={`grid h-3.5 w-3.5 shrink-0 place-items-center rounded-[3px] border text-[9px]
-                ${form.asks.includes(f.id) ? 'border-pigment bg-pigment text-white' : 'border-[#D8D5CD]'}`}
+                ${form.asks.includes(f.id) ? 'border-pigment bg-pigment text-on-pigment' : 'border-rule'}`}
               >{form.asks.includes(f.id) ? '✓' : ''}</span>
               <span className="min-w-0 flex-1 truncate">{f.name}</span>
-              <span className="shrink-0 text-[10px] text-[#B6B1A6]">{t(f.type)}</span>
+              <span className="shrink-0 text-[10px] text-faint">{t(f.type)}</span>
             </button>
           ))}
 
@@ -117,7 +117,7 @@ export function FormPanel({ db, fields }: { db: Row; fields: Field[] }) {
             <button
               type="button"
               onClick={() => void removeForm(form.id).then(() => setHeld(null))}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-[#F7E9E4] hover:text-[#943321]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-muted hover:bg-pigment-wash hover:text-pigment-deep"
             >{t('Delete the form')}</button>
           </div>
         </>

@@ -8,6 +8,20 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#F2EFE9" />
     <meta name="description" content="Tuval — open source infinite canvas. Local-first, self-hostable." />
+    <script>
+      // Before the first paint, or the answer to a dark screen is a white flash. src/appearance.ts
+      // owns everything after this; the two colours are repeated here because a <meta> cannot read
+      // a CSS variable and this has to run before the stylesheet exists.
+      try {
+        var mode = localStorage.getItem('tuval:theme') || 'system'
+        var dark = mode === 'dark'
+          || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        if (dark) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1A1917')
+        }
+      } catch (e) { /* a browser that refuses storage still gets a page */ }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />

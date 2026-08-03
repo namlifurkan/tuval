@@ -5,17 +5,84 @@
   --color-ink: #141310;
   --color-ink-soft: #4a463e;
   --color-muted: #69665e;
+  --color-faint: #b6b1a6;
+  --color-dim: #c6c2b6;
+  --color-rule: #d8d5cd;
   --color-hairline: #e2ded5;
   --color-shade: #eae6dd;
   --color-tint: #efebe2;
   --color-paper: #f2efe9;
+  --color-raise: #f7f5f0;
   --color-surface: #fcfbf8;
   --color-pigment: #b43e28;
+  --color-pigment-deep: #943321;
+  --color-pigment-wash: #f7e9e4;
+  --color-on-pigment: #ffffff;
+  --color-ok: #4e8c79;
+  --color-avatar: #3e5c93;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
   --radius-2xl: 14px;
+}
+
+/* Night ------------------------------------------------------------------------------------
+   The shell dims; the canvas does not. Paper is the product, and a sheet of paper laid on a
+   dark table is what a lit studio actually looks like. Written outside a @layer on purpose:
+   Tailwind emits @theme into `@layer theme`, and any unlayered declaration beats a layered one
+   whatever the specificity. Move either block into a layer and every value below silently
+   stops winning.
+
+   Both directions are spelled out, not just dark, because the attribute is also how a subtree
+   opts out: the board's top bar reads against the board's own paint, which is a light island
+   on a dark shell as often as the reverse. */
+[data-theme='light'] {
+  --color-ink: #141310;
+  --color-ink-soft: #4a463e;
+  --color-muted: #69665e;
+  --color-faint: #b6b1a6;
+  --color-dim: #c6c2b6;
+  --color-rule: #d8d5cd;
+  --color-hairline: #e2ded5;
+  --color-shade: #eae6dd;
+  --color-tint: #efebe2;
+  --color-paper: #f2efe9;
+  --color-raise: #f7f5f0;
+  --color-surface: #fcfbf8;
+  --color-pigment: #b43e28;
+  --color-pigment-deep: #943321;
+  --color-pigment-wash: #f7e9e4;
+  --color-on-pigment: #ffffff;
+  --color-ok: #4e8c79;
+}
+
+[data-theme='dark'] {
+  --color-ink: #efebe3;
+  --color-ink-soft: #c9c3b8;
+  --color-muted: #9e978c;
+  --color-faint: #837c72;
+  --color-dim: #6b655c;
+  --color-rule: #423d37;
+  --color-hairline: #38342f;
+  --color-shade: #2f2c28;
+  --color-tint: #2a2724;
+  --color-paper: #1a1917;
+  --color-raise: #262320;
+  --color-surface: #221f1c;
+  --color-pigment: #e27153;
+  --color-pigment-deep: #f0937a;
+  --color-pigment-wash: #3a211a;
+  --color-on-pigment: #1a1917;
+  --color-ok: #7fc3ae;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 html,

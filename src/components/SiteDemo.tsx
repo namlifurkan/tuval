@@ -102,7 +102,7 @@ function CanvasDemo({ template, tall }: { template?: string; tall?: boolean }) {
               title={`${id} — ${key}`}
               onClick={() => { setTool(id); requestRender() }}
               className={`grid h-9 w-9 place-items-center rounded-lg transition-colors
-                ${tool === id ? 'bg-[#F7E9E4] text-pigment' : 'text-ink hover:bg-shade'}`}
+                ${tool === id ? 'bg-pigment-wash text-pigment' : 'text-ink hover:bg-shade'}`}
             >
               <Icon size={19} />
             </button>
@@ -177,7 +177,7 @@ function DatabaseDemo() {
             type="button"
             onClick={() => setBy(f.id)}
             className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors
-              ${by === f.id ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
+              ${by === f.id ? 'bg-pigment text-on-pigment' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
           >{f.name}</button>
         ))}
       </div>
@@ -230,7 +230,7 @@ function IssuesDemo() {
             type="button"
             onClick={() => setGroup(one)}
             className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors
-              ${group === one ? 'bg-pigment text-white' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
+              ${group === one ? 'bg-pigment text-on-pigment' : 'bg-tint text-ink-soft hover:bg-hairline'}`}
           >{one}</button>
         ))}
       </div>
@@ -241,7 +241,7 @@ function IssuesDemo() {
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-soft">
               {band.label || 'Everything'}
             </span>
-            <span className="text-[11px] tabular-nums text-[#B6B1A6]">{band.rows.length}</span>
+            <span className="text-[11px] tabular-nums text-faint">{band.rows.length}</span>
           </div>
           <ul className="divide-y divide-tint border-t border-tint">
             {band.rows.map((row) => (
@@ -252,7 +252,7 @@ function IssuesDemo() {
                   style={{ background: row.status ? STATUS_TONE[row.status] ?? '#C6C2B6' : '#C6C2B6' }}
                 />
                 <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{row.title}</span>
-                <span className="shrink-0 text-[11px] tabular-nums text-[#B6B1A6]">
+                <span className="shrink-0 text-[11px] tabular-nums text-faint">
                   {row.estimate ? `${row.estimate} pt` : ''}
                 </span>
                 <span className="w-[4.5rem] shrink-0 text-right text-[11px] font-semibold tabular-nums text-muted">

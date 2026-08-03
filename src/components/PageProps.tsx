@@ -113,7 +113,7 @@ export function PageProps({ row, locked }: { row: Row; locked?: boolean }) {
                 <button
                   type="button"
                   onClick={toggle}
-                  className="grid h-5 w-5 place-items-center rounded text-[#B6B1A6] hover:bg-shade hover:text-ink"
+                  className="grid h-5 w-5 place-items-center rounded text-faint hover:bg-shade hover:text-ink"
                   title={t('Add a tag')}
                 ><Plus size={13} /></button>
               )}
