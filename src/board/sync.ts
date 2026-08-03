@@ -126,6 +126,8 @@ async function merge() {
 async function save() {
   timer = 0
   if (!room || !dirty || !restored || !getUser() || readOnly()) return
+  const untouched = !stamp && !getItems().length && !getMeta().name
+  if (untouched) return
   const saving = revision
   await appendLog()
   const conflict = await merge()

@@ -10,6 +10,7 @@ const mocked = vi.hoisted(() => {
       }),
     },
     user: { id: 'user-1' } as { id: string } | null,
+    meta: { name: 'Board', surface: 'paper' } as Record<string, unknown>,
     pullSnapshot: vi.fn(),
     pushSnapshot: vi.fn(),
     snapshotStamp: vi.fn(),
@@ -31,7 +32,7 @@ vi.mock('./doc', () => ({
   room: 'board-1',
   ydoc: mocked.ydoc,
   getItems: () => [],
-  getMeta: () => ({ name: 'Board', surface: 'paper' }),
+  getMeta: () => mocked.meta,
 }))
 vi.mock('./access', () => ({ readOnly: () => false }))
 vi.mock('./storage', () => ({ storagePath: () => null }))
@@ -62,6 +63,7 @@ beforeEach(() => {
   vi.resetModules()
   mocked.handlers.clear()
   mocked.user = { id: 'user-1' }
+  mocked.meta = { name: 'Board', surface: 'paper' }
   mocked.pullSnapshot.mockReset().mockResolvedValue(null)
   mocked.pushSnapshot.mockReset().mockResolvedValue(null)
   mocked.snapshotStamp.mockReset().mockResolvedValue(null)
@@ -109,6 +111,36 @@ describe('cloud sync', () => {
     await settle()
     expect(mocked.pushSnapshot).toHaveBeenCalledTimes(2)
     expect(sync.cloudError()).toBe(null)
+  })
+
+  it('does not claim a row for a board nobody has put anything on', async () => {
+    mocked.meta = {}
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    await settle()
+    expect(mocked.claimBoard).not.toHaveBeenCalled()
+    expect(mocked.pushSnapshot).not.toHaveBeenCalled()
+
+    for (const handler of mocked.handlers) handler(new Uint8Array([7]), 'local')
+    await vi.advanceTimersByTimeAsync(2_500)
+    await settle()
+    expect(mocked.claimBoard).not.toHaveBeenCalled()
+  })
+
+  it('claims the row as soon as the board has a name', async () => {
+    mocked.meta = {}
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    await settle()
+    expect(mocked.claimBoard).not.toHaveBeenCalled()
+
+    mocked.meta = { name: 'Quarter plan' }
+    for (const handler of mocked.handlers) handler(new Uint8Array([7]), 'local')
+    await vi.advanceTimersByTimeAsync(2_500)
+    await settle()
+    expect(mocked.claimBoard).toHaveBeenCalledOnce()
   })
 
   it('saves an edit that arrives while an earlier save is in flight', async () => {
