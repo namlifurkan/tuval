@@ -1,8 +1,8 @@
-import { COLOR } from '../board/brand'
-
 // Redrawn from public/brand/tuval-logo.png: an open canvas frame crossed by a pigment band.
 // Bars are proportionally heavier than the source art so the mark survives at UI sizes.
-export function Logo({ size = 24, ink = COLOR.ink, pigment = COLOR.pigment }: {
+// The two fills read the theme tokens rather than the palette constants, so the frame turns
+// with the page; anywhere the mark sits on a band of its own, that band names the tokens.
+export function Logo({ size = 24, ink = 'var(--color-ink)', pigment = 'var(--color-pigment)' }: {
   size?: number
   ink?: string
   pigment?: string

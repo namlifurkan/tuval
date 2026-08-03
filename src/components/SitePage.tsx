@@ -318,7 +318,14 @@ function Onward({ page }: { page: Page }) {
 
 function Footer() {
   return (
-    <footer data-theme="light" style={{ background: '#141310', color: PAPER }}>
+    <footer
+      style={{
+        background: '#141310',
+        color: PAPER,
+        '--color-paper': PAPER,
+        '--color-ink': PAPER,
+      } as React.CSSProperties}
+    >
       <div className="mx-auto max-w-[80rem] px-6 py-16">
         <div className="flex flex-wrap gap-x-16 gap-y-10">
           <div className="min-w-[17rem] flex-1">
