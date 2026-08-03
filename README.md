@@ -7,7 +7,8 @@ An alternative to paying three subscriptions for one team's work. All code, desi
 are our own; no visual identity or asset is copied from any commercial product.
 
 [Self-hosting](docs/self-hosting.md) · [HTTP API](docs/api.md) · [MCP server](docs/mcp.md) ·
-[Agents](docs/agents.md) · [Keyboard](docs/keyboard.md) · [Contributing](CONTRIBUTING.md)
+[Agents](docs/agents.md) · [Keyboard](docs/keyboard.md) · [Reproducing](docs/REPRODUCING.md) ·
+[Contributing](CONTRIBUTING.md)
 
 ## What is in here
 

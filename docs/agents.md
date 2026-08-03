@@ -145,6 +145,15 @@ Plainly, because the shape of the door is easy to mistake for the shape of the p
   changed, which a person can put back from the record. See
   [what a write leaves behind](api.md#what-a-write-leaves-behind).
 
+## Reviewing what it did
+
+Every write carries the name of the run it belonged to — the MCP server mints one per session,
+and a caller can name its own with an `x-tuval-run` header. `/runs` in the app lists them: who
+ran it, how long it took, which records it touched, what each one was before, and one action to
+put any of it back.
+
+What that is worth is measured rather than asserted: [Reproducing](REPRODUCING.md).
+
 ## Related
 
 - [HTTP API](api.md) — every endpoint, in full
