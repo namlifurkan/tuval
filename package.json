@@ -1,7 +1,7 @@
 {
   "name": "tuval",
   "version": "0.1.0",
-  "description": "Açık kaynak sonsuz tuval — Canvas 2D + Yjs CRDT",
+  "description": "A\u00e7\u0131k kaynak sonsuz tuval \u2014 Canvas 2D + Yjs CRDT",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -9,11 +9,12 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "node scripts/worker-env.mjs && tsc -b && vite build && node scripts/prerender.mjs",
-    "lint": "oxlint",
-    "preview": "vite preview",
     "collab": "HOST=0.0.0.0 PORT=1234 node node_modules/y-websocket/bin/server.cjs",
+    "dev": "vite",
+    "lint": "oxlint",
+    "pretest": "node scripts/worker-env.mjs",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
