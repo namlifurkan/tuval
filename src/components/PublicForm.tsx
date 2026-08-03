@@ -142,7 +142,7 @@ export function PublicForm() {
         >{sending ? t('Sending…') : t('Send')}</button>
 
         {failed && (
-          <p className="text-[12px] text-[#DC2626]">{t('That did not go through. Try again.')}</p>
+          <p className="text-[12px] text-[#A83621]">{t('That did not go through. Try again.')}</p>
         )}
       </form>
 

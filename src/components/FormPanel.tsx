@@ -117,7 +117,7 @@ export function FormPanel({ db, fields }: { db: Row; fields: Field[] }) {
             <button
               type="button"
               onClick={() => void removeForm(form.id).then(() => setHeld(null))}
-              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+              className="w-full rounded-md px-2 py-1 text-left text-[12px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
             >{t('Delete the form')}</button>
           </div>
         </>

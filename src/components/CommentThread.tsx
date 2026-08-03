@@ -105,7 +105,7 @@ export function CommentThread() {
             type="button"
             title={t('Delete')}
             onClick={remove}
-            className="grid h-7 w-7 place-items-center rounded-md text-[#DC2626] hover:bg-[#FEF2F2]"
+            className="grid h-7 w-7 place-items-center rounded-md text-[#A83621] hover:bg-[#F7E9E4]"
           >
             <Trash2 size={14} strokeWidth={2} />
           </button>

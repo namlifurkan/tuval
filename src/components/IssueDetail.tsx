@@ -242,7 +242,7 @@ export function IssueDetail({ issue, team, nameOf, prefix, onClose }: {
         <button
           type="button"
           onClick={() => { void archiveRecord(issue.id); onClose() }}
-          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          className="flex-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
         >
           {t('Archive')}
         </button>

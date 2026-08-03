@@ -70,7 +70,7 @@ function Rule({ db, view, filter, fields }: {
         type="button"
         aria-label={t('Remove filter')}
         onClick={() => removeFilter(db, view.id, filter.id)}
-        className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:text-[#DC2626]"
+        className="grid h-5 w-5 place-items-center rounded text-[#8A867C] hover:text-[#A83621]"
       >
         <X size={11} />
       </button>

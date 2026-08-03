@@ -370,7 +370,7 @@ export function Issues() {
                     type="button"
                     title={t('Archive')}
                     onClick={() => void archiveRecord(issue.id)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#A83621] group-hover:opacity-100"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -436,7 +436,7 @@ export function Issues() {
           <button
             type="button"
             onClick={() => { picked.forEach((id) => void archiveRecord(id)); setPicked([]) }}
-            className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+            className="rounded-md px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
           >{t('Archive')}</button>
           <button
             type="button"

@@ -160,7 +160,7 @@ export function AuthPage() {
         )}
 
         {state === 'error' && (
-          <p className="mt-3 text-[12px] leading-snug text-[#DC2626]">{reason}</p>
+          <p className="mt-3 text-[12px] leading-snug text-[#A83621]">{reason}</p>
         )}
 
         {(page === 'login' || page === 'register') && (

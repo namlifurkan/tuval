@@ -79,7 +79,7 @@ export function Recurring() {
               type="button"
               aria-label={t('Delete')}
               onClick={() => void dropRule(rule.id)}
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
             >
               <Trash2 size={12} />
             </button>

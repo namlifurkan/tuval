@@ -69,7 +69,7 @@ export function TimeLog({ record, team }: { record: string; team: Teammate[] }) 
               type="button"
               aria-label={t('Remove')}
               onClick={() => void dropStint(stint.id)}
-              className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#DC2626] group-hover/stint:opacity-100"
+              className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#A83621] group-hover/stint:opacity-100"
             >
               <X size={11} />
             </button>

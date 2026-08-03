@@ -74,7 +74,7 @@ export function IconPicker({ value, onPick }: { value: string; onPick: (emoji: s
               <button
                 type="button"
                 onClick={() => { onPick(''); setOpen(false) }}
-                className="mb-1 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-left text-[12px] font-semibold text-[#8A867C] hover:text-[#DC2626]"
+                className="mb-1 w-full rounded-lg border border-[#E2DED5] bg-[#FCFBF8] px-2 py-1.5 text-left text-[12px] font-semibold text-[#8A867C] hover:text-[#A83621]"
               >
                 {t('Remove icon')}
               </button>

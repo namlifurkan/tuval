@@ -210,7 +210,7 @@ export function Page() {
                 if (!confirm(t('Move "{name}" to the trash? Anything inside it goes too, and it can be brought back for {days} days.', { name: shown, days: TRASH_DAYS }))) return
                 void archiveRecord(id).then(() => go(trail.length ? `/d/${trail[trail.length - 1].id}` : '/pages'))
               }}
-              className="grid h-7 w-7 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+              className="grid h-7 w-7 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
             >
               <Trash2 size={13} />
             </button>

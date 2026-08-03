@@ -186,7 +186,7 @@ export function Projects() {
                     className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[#141310] outline-none"
                   />
                   {isLate(project) && (
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-[#DC2626]">
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-[#A83621]">
                       {t('late')}
                     </span>
                   )}
@@ -201,7 +201,7 @@ export function Projects() {
                   <button
                     type="button"
                     onClick={() => void archiveRecord(project.id)}
-                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 hover:text-[#DC2626] group-hover:opacity-100"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
                   >{t('Archive')}</button>
                 </div>
 

@@ -150,7 +150,7 @@ export function Share() {
             </button>
             {note && (
               <p className={`px-2.5 pt-1.5 text-[11px] leading-snug ${
-                /failed|error|rate/i.test(note) ? 'text-[#DC2626]' : 'text-[#8A867C]'
+                /failed|error|rate/i.test(note) ? 'text-[#A83621]' : 'text-[#8A867C]'
               }`}>{note}</p>
             )}
           </>
@@ -266,7 +266,7 @@ export function Share() {
                       type="button"
                       title={t('Remove')}
                       onClick={() => void removeMember(room, m.userId).then(refresh)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -294,7 +294,7 @@ export function Share() {
                     type="button"
                     title={t('Remove')}
                     onClick={() => void revokeInvite(room, i.email).then(refresh)}
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
                   >
                     <Trash2 size={13} />
                   </button>

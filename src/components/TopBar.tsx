@@ -211,7 +211,7 @@ export function TopBar() {
                   }
                   menu.close()
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#DC2626] hover:bg-[#FEF2F2]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[#A83621] hover:bg-[#F7E9E4]"
               >
                 <Trash2 size={15} /> {t('Clear board')}
               </button>

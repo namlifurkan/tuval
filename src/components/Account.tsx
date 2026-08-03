@@ -193,10 +193,10 @@ export function Account() {
               </>
             )}
             {state === 'error' && (
-              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#DC2626]">{reason}</p>
+              <p className="px-2.5 pt-2 text-[11px] leading-snug text-[#A83621]">{reason}</p>
             )}
             {authTrouble() === 'expired' && (
-              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#DC2626]">
+              <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-[#A83621]">
                 {t('Your session expired and could not be renewed. Sign in again.')}
               </p>
             )}

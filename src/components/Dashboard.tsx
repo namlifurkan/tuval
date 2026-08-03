@@ -107,7 +107,7 @@ function Tile({ board, mine, onForget, onCopy }: {
             type="button"
             title={t('Move to trash')}
             onClick={onForget}
-            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#DC2626]"
+            className="grid h-7 w-7 place-items-center rounded-md border border-[#E2DED5] bg-[#FCFBF8] text-[#8A867C] hover:text-[#A83621]"
           >
             <Trash2 size={13} />
           </button>
@@ -343,7 +343,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={burn}
-            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+            className="mt-10 -mb-8 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
           >{t('Empty the trash ({n})', { n: trash.length })}</button>
           <Band
             title={t('Trash')}
@@ -366,7 +366,7 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={erase(b, cloudRooms.has(b.room))}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
                   >{t('Delete for good')}</button>
                 </div>
               </div>

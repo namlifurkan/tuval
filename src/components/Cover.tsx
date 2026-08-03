@@ -59,7 +59,7 @@ export function Cover({ id, path }: { id: string; path: string }) {
         >
           {busy ? t('Uploading…') : t('Add a cover')}
         </button>
-        {trouble && <p className="mt-1 text-[12px] text-[#DC2626]">{trouble}</p>}
+        {trouble && <p className="mt-1 text-[12px] text-[#A83621]">{trouble}</p>}
       </>
     )
   }
@@ -80,7 +80,7 @@ export function Cover({ id, path }: { id: string; path: string }) {
         <button
           type="button"
           onClick={() => { void removeCover(path); patchRecord(id, { cover: '' }) }}
-          className="rounded-md border border-[#E2DED5] bg-[#FCFBF8]/92 px-2 py-1 text-[11px] font-semibold text-[#8A867C] backdrop-blur-[2px] hover:text-[#DC2626]"
+          className="rounded-md border border-[#E2DED5] bg-[#FCFBF8]/92 px-2 py-1 text-[11px] font-semibold text-[#8A867C] backdrop-blur-[2px] hover:text-[#A83621]"
         >
           {t('Remove cover')}
         </button>

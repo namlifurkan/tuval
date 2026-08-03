@@ -144,7 +144,7 @@ export function BoardsPanel() {
                   }
                 }
               }}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#FEF2F2] hover:text-[#DC2626] group-hover:opacity-100"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#8A867C] opacity-0 transition-opacity hover:bg-[#F7E9E4] hover:text-[#A83621] group-hover:opacity-100"
             >
               <Trash2 size={14} />
             </button>

@@ -132,7 +132,7 @@ export function ApiAccess() {
                 {key.scope === 'write' ? t('read and write') : t('read only')}
               </span>
               {key.scope === 'write' && (
-                <span className={`shrink-0 text-[11px] ${writesToday(key) >= key.daily_writes ? 'text-[#DC2626]' : 'text-[#B6B1A6]'}`}>
+                <span className={`shrink-0 text-[11px] ${writesToday(key) >= key.daily_writes ? 'text-[#A83621]' : 'text-[#B6B1A6]'}`}>
                   {t('{used} of {cap} writes today', { used: writesToday(key), cap: key.daily_writes })}
                 </span>
               )}
@@ -145,14 +145,14 @@ export function ApiAccess() {
                 <button
                   type="button"
                   onClick={() => void revokeKey(key.id).then(reload)}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] hover:text-[#DC2626]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#8A867C] hover:text-[#A83621]"
                 >{t('Revoke')}</button>
               )}
               <button
                 type="button"
                 aria-label={t('Delete')}
                 onClick={() => void forgetKey(key.id).then(reload)}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
               >
                 <Trash2 size={12} />
               </button>
@@ -183,7 +183,7 @@ export function ApiAccess() {
             className="rounded-lg border border-[#E2DED5] px-3 py-1.5 text-sm font-semibold text-[#4A463E] hover:border-[#C8452D] hover:text-[#C8452D]"
           >{t('Add')}</button>
         </div>
-        {!!failed && <p className="mt-1 text-[12px] text-[#DC2626]">{failed}</p>}
+        {!!failed && <p className="mt-1 text-[12px] text-[#A83621]">{failed}</p>}
 
         <div className="mt-2 divide-y divide-[#EAE6DD] rounded-xl border border-[#E2DED5] bg-[#FCFBF8]">
           {hooks.map((hook) => (
@@ -206,7 +206,7 @@ export function ApiAccess() {
                   type="button"
                   aria-label={t('Delete')}
                   onClick={() => void removeHook(hook.id).then(reload)}
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
                 >
                   <Trash2 size={12} />
                 </button>

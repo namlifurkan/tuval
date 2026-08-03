@@ -240,7 +240,7 @@ export function Inspector() {
                 type="button"
                 title={t('Remove')}
                 onClick={() => patchItem(wire.id, { labels: (wire.labels ?? []).filter((_, j) => j !== i) })}
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
               >
                 <Trash2 size={12} />
               </button>
@@ -579,7 +579,7 @@ export function Inspector() {
             type="button"
             title={`${t('Delete')} — Del`}
             onClick={() => deleteSelection()}
-            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#DC2626] hover:bg-[#FEF2F2]"
+            className="tap-target ml-auto grid h-8 w-8 place-items-center rounded-lg text-[#A83621] hover:bg-[#F7E9E4]"
           >
             <Trash2 size={15} strokeWidth={1.9} />
           </button>

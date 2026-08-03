@@ -156,7 +156,7 @@ export function Database({ db }: { db: Row }) {
                 type="button"
                 aria-label={t('Remove view')}
                 onClick={() => { removeView(db, one.id); setAt(0) }}
-                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#DC2626] group-hover:opacity-100"
+                className="ml-0.5 grid h-5 w-5 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
               >
                 <X size={11} />
               </button>

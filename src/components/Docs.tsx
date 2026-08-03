@@ -91,7 +91,7 @@ export function Docs() {
         <button
           type="button"
           onClick={() => void sweep()}
-          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+          className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
         >
           <Trash2 size={12} /> {t('Clear out empty pages')}
         </button>
@@ -123,7 +123,7 @@ export function Docs() {
               <button
                 type="button"
                 onClick={() => void archiveRecord(page.id).then(loadTrash)}
-                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#DC2626] group-hover:opacity-100"
+                className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] opacity-0 transition-opacity hover:text-[#A83621] group-hover:opacity-100"
               >
                 {t('Archive')}
               </button>
@@ -143,7 +143,7 @@ export function Docs() {
           <button
             type="button"
             onClick={() => void burn()}
-            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+            className="mt-2 rounded-lg px-2 py-1 text-[12px] font-semibold text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
           >{t('Empty it now')}</button>
           <div className="mt-2 divide-y divide-[#EAE6DD] border-y border-[#EAE6DD]">
             {binned.map((page: Row) => (
@@ -165,7 +165,7 @@ export function Docs() {
                       void deleteRecord(page, removeCover)
                     }
                   }}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] text-[#8A867C] hover:bg-[#F7E9E4] hover:text-[#A83621]"
                 >{t('Delete for good')}</button>
               </div>
             ))}

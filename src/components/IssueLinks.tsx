@@ -32,7 +32,7 @@ function Line({ issue, prefix, onDrop }: { issue: Issue; prefix: string; onDrop:
         type="button"
         aria-label={t('Remove')}
         onClick={onDrop}
-        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#DC2626] group-hover/line:opacity-100"
+        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#A83621] group-hover/line:opacity-100"
       >
         <X size={11} />
       </button>

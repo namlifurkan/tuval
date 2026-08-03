@@ -147,7 +147,7 @@ function Chip({ file, onOpen, onDrop }: {
         type="button"
         aria-label={t('Remove')}
         onClick={onDrop}
-        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#DC2626] group-hover/chip:opacity-100"
+        className="shrink-0 text-[#B6B1A6] opacity-0 hover:text-[#A83621] group-hover/chip:opacity-100"
       >
         <X size={10} />
       </button>
@@ -209,7 +209,7 @@ export function FilesCell({ row, field }: { row: Row; field: Field }) {
         title={failed || t('Attach a file')}
         onClick={() => picker.current?.click()}
         className={`grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] hover:bg-[#EAE6DD] hover:text-[#C8452D] disabled:opacity-40
-          ${failed ? 'text-[#DC2626]' : ''}`}
+          ${failed ? 'text-[#A83621]' : ''}`}
       >
         <Paperclip size={12} />
       </button>

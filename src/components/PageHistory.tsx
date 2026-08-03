@@ -77,7 +77,7 @@ export function PageHistory({ editor }: { editor: { document: unknown[]; replace
                 type="button"
                 aria-label={t('Delete')}
                 onClick={() => deleteVersion(v.id)}
-                className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#DC2626] group-hover:opacity-100"
+                className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#8A867C] opacity-0 hover:text-[#A83621] group-hover:opacity-100"
               >
                 <Trash2 size={11} />
               </button>
