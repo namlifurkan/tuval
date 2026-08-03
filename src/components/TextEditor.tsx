@@ -3,6 +3,7 @@ import { toScreen } from '../board/camera'
 import { patchItem, removeItems } from '../board/doc'
 import { CODE_THEME } from '../board/code'
 import { CODE_LINE, CODE_PAD, cellRect, codeHeight, setCell } from '../board/items'
+import { MARK_KEYS, toggleMark } from '../board/marks'
 import { connectorGeometry } from '../board/render'
 import { textInsetFor } from '../board/shapes'
 import { requestRender, useBoardStore } from '../board/store'
@@ -206,6 +207,14 @@ export function TextEditor() {
         spellCheck={false}
         onChange={(e) => commit(e.target.value)}
         onKeyDown={(e) => {
+          // The board's own handler steps aside for anything being typed into, so while the text
+          // is open these are the only place ⌘B can be caught.
+          const mod = e.metaKey || e.ctrlKey
+          if (mod && !e.altKey && MARK_KEYS[e.key.toLowerCase()]) {
+            e.preventDefault()
+            if (toggleMark([item.id], MARK_KEYS[e.key.toLowerCase()])) requestRender()
+            return
+          }
           if (!isTable) return
           if (e.key === 'Tab') { e.preventDefault(); moveCell(0, e.shiftKey ? -1 : 1) }
           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); moveCell(1, 0) }

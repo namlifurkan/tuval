@@ -17,6 +17,7 @@ import { readClip, rehomePastedImages, writeClip } from '../board/clipboard'
 import { addImage } from '../board/images'
 import { addPdf, isPdf, MAX_PAGES } from '../board/pdf'
 import { cloneItems, makeEmbed, makeSticky, makeText, withPreview } from '../board/items'
+import { MARK_KEYS, toggleMark } from '../board/marks'
 import { me, subscribeMe } from '../board/me'
 import { boxOf, render } from '../board/render'
 import { consumeDirty, flyToRect, requestRender, session, useBoardStore } from '../board/store'
@@ -300,6 +301,11 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
       if (mod && e.key.toLowerCase() === 'd') {
         e.preventDefault()
         duplicateSelection()
+        return
+      }
+      if (mod && !e.altKey && MARK_KEYS[e.key.toLowerCase()]) {
+        e.preventDefault()
+        if (toggleMark(s.selection, MARK_KEYS[e.key.toLowerCase()])) requestRender()
         return
       }
       if (mod && e.altKey && e.code === 'KeyC') { e.preventDefault(); copyStyle(); return }
