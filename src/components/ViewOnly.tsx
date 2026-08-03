@@ -1,7 +1,7 @@
 import { Eye } from 'lucide-react'
 import { useEffect, useSyncExternalStore } from 'react'
 import { readOnly, setRole, subscribeAccess } from '../board/access'
-import { myRole, touchMembership } from '../board/cloud'
+import { myRole } from '../board/cloud'
 import { room } from '../board/doc'
 import { boardIsOpen } from '../board/publicProfile'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
@@ -17,7 +17,7 @@ export function ViewOnly() {
     if (!cloudEnabled) { setRole(null); return }
     let live = true
     const settle = async () => {
-      const mine = user ? await touchMembership(room).then(() => myRole(room)) : null
+      const mine = user ? await myRole(room) : null
       if (mine) return mine
       return (await boardIsOpen(room)) ? ('viewer' as const) : null
     }

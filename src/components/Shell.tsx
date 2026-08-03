@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import { Bot, CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target } from 'lucide-react'
+import { Bot, CircleDot, FileText, Inbox, LayoutGrid, Settings2, Target, Users } from 'lucide-react'
 import { go, readRoute } from '../board/boards'
 import { openJournal } from '../board/journal'
 import { armed } from '../board/keys'
@@ -23,6 +23,7 @@ const NAV = [
   { path: '/issues', label: 'Issues', icon: CircleDot },
   { path: '/projects', label: 'Projects', icon: Target },
   { path: '/pages', label: 'Docs', icon: FileText },
+  { path: '/team', label: 'Team', icon: Users },
   { path: '/settings', label: 'Settings', icon: Settings2 },
 ]
 
@@ -49,6 +50,7 @@ export function Shell({ title, wide, bare, action, children }: {
   useEffect(() => {
     const where: { [key: string]: string } = {
       i: '/issues', p: '/projects', d: '/pages', b: '/dashboard', n: '/inbox', s: '/settings',
+      t: '/team',
     }
     const key = armed('g', (second) => {
       if (second === 'j') { void openJournal(); return true }

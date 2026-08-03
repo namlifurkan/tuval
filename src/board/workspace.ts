@@ -3,13 +3,32 @@ import { t } from '../i18n'
 
 export type WorkspaceRole = 'admin' | 'member' | 'guest'
 
-export interface Workspace { id: string; name: string; slug: string; owner: string; prefix: string }
-export interface Teammate { userId: string; email: string; role: WorkspaceRole; owner: boolean }
+export interface Workspace {
+  id: string
+  name: string
+  slug: string
+  owner: string
+  prefix: string
+  allowed_domain: string | null
+  domain_role: 'member' | 'guest'
+}
+
+export interface Teammate {
+  userId: string
+  email: string
+  name: string
+  avatar: string
+  role: WorkspaceRole
+  owner: boolean
+  viaDomain: boolean
+}
 
 export const ROLES: WorkspaceRole[] = ['admin', 'member', 'guest']
 
 const KEY = 'tuval:workspace'
-const COLUMNS = 'id, name, slug, owner, prefix'
+const COLUMNS = 'id, name, slug, owner, prefix, allowed_domain, domain_role'
+
+export const myDomain = () => (getUser()?.email ?? '').split('@')[1]?.toLowerCase() ?? ''
 
 let current: Workspace | null = null
 let chosen = read()
@@ -149,13 +168,17 @@ export async function renameWorkspace(name: string) {
 export async function listTeam(): Promise<Teammate[]> {
   if (!supabase || !current) return []
   const { data } = await supabase
-    .from('workspace_members').select('user_id, email, role').eq('workspace_id', current.id)
+    .from('workspace_members').select('user_id, email, role, via_domain')
+    .eq('workspace_id', current.id).neq('role', 'blocked')
 
   const team: Teammate[] = (data ?? []).map((r) => ({
     userId: r.user_id as string,
     email: (r.email as string) ?? '',
+    name: '',
+    avatar: '',
     role: r.role as WorkspaceRole,
     owner: false,
+    viaDomain: !!r.via_domain,
   }))
 
   // The owner has no membership row; the workspace itself records them.
@@ -164,11 +187,38 @@ export async function listTeam(): Promise<Teammate[]> {
     team.unshift({
       userId: current.owner,
       email: current.owner === me?.id ? (me?.email ?? '') : '',
+      name: '',
+      avatar: '',
       role: 'admin',
       owner: true,
+      viaDomain: false,
     })
   }
+
+  // A list of addresses is a list of accounts; a list of faces is the team. Whoever has not
+  // made a profile keeps their address, which is the only name they have given us.
+  const { data: faces } = await supabase
+    .from('profiles').select('user_id, name, avatar').in('user_id', team.map((m) => m.userId))
+  const known = new Map((faces ?? []).map((p) => [p.user_id as string, p]))
+  for (const mate of team) {
+    const face = known.get(mate.userId)
+    mate.name = (face?.name as string) ?? ''
+    mate.avatar = (face?.avatar as string) ?? ''
+  }
   return team
+}
+
+// The rule that lets a colleague in without being asked for. The domain itself is never typed:
+// it is the one this account signs in with, which is the only one the database will accept.
+export async function setWorkspaceDomain(open: boolean, role: 'member' | 'guest') {
+  if (!supabase || !current) return 'No workspace'
+  const allowed_domain = open ? myDomain() : null
+  const { error } = await supabase
+    .from('workspaces').update({ allowed_domain, domain_role: role }).eq('id', current.id)
+  if (error) return error.message
+  current = { ...current, allowed_domain, domain_role: role }
+  listeners.forEach((l) => l())
+  return null
 }
 
 // Inviting somebody who has never signed in is the normal case, and their user id is not known

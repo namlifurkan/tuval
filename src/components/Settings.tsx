@@ -15,7 +15,6 @@ import { PlanPanel } from './PlanPanel'
 import { Recurring } from './Recurring'
 import { TimeWeek } from './TimeWeek'
 import { Identities } from './Identities'
-import { Team } from './Team'
 import { Shell } from './Shell'
 import { getWorkspace } from '../board/workspace'
 
@@ -176,13 +175,6 @@ export function Settings() {
             </button>
             {note && <span className="text-[12px] text-muted">{note}</span>}
           </div>
-        </Row>
-
-        <Row
-          title={t('Workspace')}
-          note={t('Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.')}
-        >
-          <Team />
         </Row>
 
         <Row

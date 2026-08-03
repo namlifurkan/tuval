@@ -973,9 +973,14 @@ const tr: Record<string, string> = {
   'Search, or write an issue': 'Ara, ya da bir iş yaz',
   'Nothing matches': 'Eşleşen yok',
   'Workspace name': 'Çalışma alanı adı',
-  'Everyone here can open the boards in this workspace. A board can still be hidden from the team or opened to a guest from its own Share menu.':
-    'Buradaki herkes bu çalışma alanındaki board\'ları açabilir. Bir board yine de kendi Paylaş menüsünden ekipten gizlenebilir veya bir konuğa açılabilir.',
   'Remove from workspace': 'Çalışma alanından çıkar',
+  'by domain': 'alan adıyla',
+  'Anyone signing in with that address joins and can read the boards, docs and projects here. They take no seat.':
+    'O adresle giriş yapan herkes katılır; buradaki board\'ları, dokümanları ve projeleri okuyabilir. Koltuk tutmazlar.',
+  'Anyone signing in with that address joins and can work on everything here. Each of them takes a seat.':
+    'O adresle giriş yapan herkes katılır ve buradaki her şeyde çalışabilir. Her biri bir koltuk tutar.',
+  'Off: only the people below are in this workspace.':
+    'Kapalı: bu çalışma alanında yalnızca aşağıdaki kişiler var.',
   'Invited {email}. They join when they sign in with that address.':
     '{email} davet edildi. O adresle giriş yapınca katılır.',
   'admin': 'yönetici',
@@ -1157,10 +1162,6 @@ const tr: Record<string, string> = {
   'The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.':
     'Davet, Supabase SMTP\'nden giriş bağlantısı olarak gider. Authentication → SMTP Settings\'ten ayarla; yoksa dahili gönderici birkaç mesajdan sonra kısar.',
   'Everyone at {domain}': '{domain} uzantılı herkes',
-  'Anyone signing in with that domain can open this board, no invite needed.':
-    'O uzantıyla giren herkes bu board\'u açabilir, davete gerek yok.',
-  'Off: only the people listed below can open this board.':
-    'Kapalı: board\'u yalnızca aşağıdaki kişiler açabilir.',
 }
 
 const CATALOG: Record<Lang, Record<string, string> | null> = { en: null, tr }

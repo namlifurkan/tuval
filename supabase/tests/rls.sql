@@ -162,22 +162,68 @@ select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test')
 select pg_temp.check('blocked in workspace cannot read', false, public.can_read_board('rls-team-board'));
 
 -- The domain rule --------------------------------------------------------------------------------
+-- It belongs to the workspace, and it hands over everything a workspace holds. Nobody is let in
+-- by the rule alone: a membership row is written when they sign in, which is what a removal can
+-- then stand against.
 
 set local role postgres;
 delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
-update public.boards set allowed_domain = 'other.test', domain_role = 'viewer' where id = 'rls-team-board';
+
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
+                        email_confirmed_at, created_at, updated_at,
+                        raw_app_meta_data, raw_user_meta_data)
+values
+  ('dddddddd-0000-4000-8000-000000000004', '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'cara@rls.test', '', now(), now(), now(),
+   '{"provider":"email","providers":["email"]}', '{}'),
+  ('eeeeeeee-0000-4000-8000-000000000005', '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'eve@gmail.com', '', now(), now(), now(),
+   '{"provider":"email","providers":["email"]}', '{}');
+
+select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
+select pg_temp.check('a workspace cannot be opened to a domain its owner is not at', true,
+  pg_temp.refused($q$update public.workspaces set allowed_domain = 'other.test'
+                     where id = 'cccccccc-0000-4000-8000-000000000003'$q$));
+
+set local role postgres;
+insert into public.workspaces (id, slug, name, owner)
+values ('ffffffff-0000-4000-8000-000000000006', 'eve-gmail', 'Eve', 'eeeeeeee-0000-4000-8000-000000000005');
+select pg_temp.becomes('eeeeeeee-0000-4000-8000-000000000005', 'eve@gmail.com');
+select pg_temp.check('a mailbox provider does not stand for a company', true,
+  pg_temp.refused($q$update public.workspaces set allowed_domain = 'gmail.com'
+                     where id = 'ffffffff-0000-4000-8000-000000000006'$q$));
+
+set local role postgres;
+update public.workspaces set allowed_domain = 'rls.test', domain_role = 'guest'
+where id = 'cccccccc-0000-4000-8000-000000000003';
+
+select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
+select pg_temp.check('the rule alone lets nobody in', false, public.can_read_board('rls-team-board'));
+select public.claim_invites();
+select pg_temp.check('the right domain joins on sign-in', true, public.can_read_board('rls-team-board'));
+select pg_temp.check('and joins as a guest, who cannot write', false, public.can_write_board('rls-team-board'));
+select pg_temp.check('a guest of the rule takes no seat', true,
+  public.workspace_seats('cccccccc-0000-4000-8000-000000000003') = 1);
 
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
-select pg_temp.check('right domain reads',       true,  public.can_read_board('rls-team-board'));
-select pg_temp.check('viewer domain cannot write', false, public.can_write_board('rls-team-board'));
+select public.claim_invites();
+select pg_temp.check('another domain stays out', false, public.can_read_board('rls-team-board'));
 
-select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@elsewhere.test');
-select pg_temp.check('wrong domain cannot read', false, public.can_read_board('rls-team-board'));
+set local role postgres;
+update public.workspace_members set role = 'blocked'
+where workspace_id = 'cccccccc-0000-4000-8000-000000000003'
+  and user_id = 'dddddddd-0000-4000-8000-000000000004';
+
+select pg_temp.becomes('dddddddd-0000-4000-8000-000000000004', 'cara@rls.test');
+select public.claim_invites();
+select pg_temp.check('a removal survives the rule', false, public.can_read_board('rls-team-board'));
 
 -- Everybody ends up in exactly one workspace ------------------------------------------------------
 
 set local role postgres;
-update public.boards set allowed_domain = null where id = 'rls-team-board';
+update public.workspaces set allowed_domain = null
+where id = 'cccccccc-0000-4000-8000-000000000003';
+delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
 
 select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('a new account gets a workspace', true, public.ensure_workspace() is not null);
@@ -1380,7 +1426,6 @@ set local role postgres;
 select set_config('request.jwt.claims', '', true);
 delete from public.board_members where board_id = 'rls-team-board';
 delete from public.workspace_members where workspace_id = 'cccccccc-0000-4000-8000-000000000003';
-update public.boards set allowed_domain = null where id = 'rls-team-board';
 
 select pg_temp.becomes('aaaaaaaa-0000-4000-8000-000000000001', 'ann@rls.test');
 select pg_temp.check('the owner appends an update and is told its number', true,

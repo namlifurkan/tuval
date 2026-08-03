@@ -159,6 +159,7 @@ export type Route =
   | { kind: 'docs' }
   | { kind: 'inbox' }
   | { kind: 'runs' }
+  | { kind: 'team' }
   | { kind: 'published'; slug: string }
   | { kind: 'form'; slug: string }
   | { kind: 'page'; id: string }
@@ -181,6 +182,7 @@ export function readRoute(): Route {
   if (path === '/pages') return { kind: 'docs' }
   if (path === '/inbox') return { kind: 'inbox' }
   if (path === '/runs') return { kind: 'runs' }
+  if (path === '/team') return { kind: 'team' }
   const shown = /^\/p\/(.+)$/.exec(path)
   if (shown) return { kind: 'published', slug: decodeURIComponent(shown[1]) }
   const asking = /^\/f\/(.+)$/.exec(path)

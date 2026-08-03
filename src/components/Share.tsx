@@ -2,10 +2,9 @@ import { Check, Link2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { getMeta, room } from '../board/doc'
 import {
-  getDomainAccess, invite, listInvites, listMembers, mailInvite, myDomain, myRole, removeMember,
-  revokeInvite, setDomainAccess, setMemberRole,
+  invite, listInvites, listMembers, mailInvite, myRole, removeMember, revokeInvite, setMemberRole,
 } from '../board/cloud'
-import type { DomainAccess, Invite, Member } from '../board/cloud'
+import type { Invite, Member } from '../board/cloud'
 import { boardIsOpen, openBoardToWorld } from '../board/publicProfile'
 import { cloudEnabled, getUser, subscribeAuth } from '../board/supabase'
 import { t } from '../i18n'
@@ -26,7 +25,6 @@ export function Share() {
   const [email, setEmail] = useState('')
   const [newRole, setNewRole] = useState<Role>('editor')
   const [note, setNote] = useState('')
-  const [domain, setDomain] = useState<DomainAccess>({ domain: null, role: 'editor' })
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -35,7 +33,6 @@ export function Share() {
     void listMembers(room).then(setMembers)
     void listInvites(room).then(setInvites)
     void myRole(room).then(setRole)
-    void getDomainAccess(room).then(setDomain)
     void boardIsOpen(room).then(setOpen)
   }, [user])
 
@@ -158,54 +155,6 @@ export function Share() {
 
         {user && owner && (
           <>
-            <div className="my-1 h-px bg-shade" />
-            <div className="flex items-center gap-2 px-2.5 pb-1 pt-1">
-              <span className="min-w-0 flex-1 text-xs font-semibold text-muted">
-                {t('Everyone at {domain}', { domain: myDomain() || '—' })}
-              </span>
-              {domain.domain && (
-                <select
-                  value={domain.role}
-                  onChange={(e) => {
-                    const next: DomainAccess = { ...domain, role: e.target.value as Role }
-                    setDomain(next)
-                    void setDomainAccess(room, next).then((p) => p && setNote(p))
-                  }}
-                  className="shrink-0 rounded-md border border-hairline bg-surface px-1 py-0.5 text-xs outline-none"
-                >
-                  {ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}
-                </select>
-              )}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={!!domain.domain}
-                onClick={() => {
-                  const next: DomainAccess = {
-                    ...domain,
-                    domain: domain.domain ? null : myDomain(),
-                  }
-                  setDomain(next)
-                  void setDomainAccess(room, next).then((problem) => {
-                    if (problem) { setNote(problem); void getDomainAccess(room).then(setDomain) }
-                    else setNote('')
-                  })
-                }}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors
-                  ${domain.domain ? 'bg-pigment' : 'bg-dim'}`}
-              >
-                <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-on-pigment transition-[left]
-                    ${domain.domain ? 'left-[18px]' : 'left-0.5'}`}
-                />
-              </button>
-            </div>
-            <p className="px-2.5 pb-1 text-[11px] leading-snug text-muted">
-              {domain.domain
-                ? t('Anyone signing in with that domain can open this board, no invite needed.')
-                : t('Off: only the people listed below can open this board.')}
-            </p>
-
             {/* Its own switch, not a role on the list above. Sharing answers who else may work
                 on this; this answers whether a stranger may read it, and running the two through
                 one setting is how somebody publishes a board they meant to send to a colleague. */}

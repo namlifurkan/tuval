@@ -324,32 +324,6 @@ export interface Member {
   owner: boolean
 }
 
-export interface DomainAccess {
-  domain: string | null
-  role: 'editor' | 'viewer'
-}
-
-export const myDomain = () => (getUser()?.email ?? '').split('@')[1]?.toLowerCase() ?? ''
-
-export async function getDomainAccess(room: string): Promise<DomainAccess> {
-  if (!supabase || !getUser()) return { domain: null, role: 'editor' }
-  const { data } = await supabase
-    .from('boards').select('allowed_domain, domain_role').eq('id', room).maybeSingle()
-  return {
-    domain: (data?.allowed_domain as string) ?? null,
-    role: (data?.domain_role as 'editor' | 'viewer') ?? 'editor',
-  }
-}
-
-export async function setDomainAccess(room: string, next: DomainAccess) {
-  if (!supabase || !getUser()) return 'not signed in'
-  const { error } = await supabase
-    .from('boards')
-    .update({ allowed_domain: next.domain, domain_role: next.role })
-    .eq('id', room)
-  return error ? error.message : null
-}
-
 export interface Invite {
   email: string
   role: 'editor' | 'viewer'
@@ -410,15 +384,11 @@ export async function revokeInvite(room: string, email: string) {
   await supabase?.from('board_invites').delete().eq('board_id', room).eq('email', email)
 }
 
-// Removing has to leave a trace: deleting the row would let the domain rule hand the board
-// straight back on the next open.
+// Removing has to leave a trace: deleting the row would let an invitation, or the workspace's
+// domain rule, hand the board straight back on the next open.
 export async function removeMember(room: string, userId: string) {
   await supabase?.from('board_members')
     .upsert({ board_id: room, user_id: userId, role: 'blocked' }, { onConflict: 'board_id,user_id' })
-}
-
-export async function touchMembership(room: string) {
-  await supabase?.rpc('touch_membership', { board: room })
 }
 
 export async function setMemberRole(room: string, userId: string, role: 'editor' | 'viewer') {
@@ -437,15 +407,20 @@ export async function myRole(room: string): Promise<'owner' | 'editor' | 'viewer
   const user = getUser()
   if (!supabase || !user) return null
   const board = await supabase
-    .from('boards').select('owner, allowed_domain, domain_role').eq('id', room).maybeSingle()
+    .from('boards').select('owner, workspace_id').eq('id', room).maybeSingle()
   if (!board.data) return null
   if (board.data.owner === user.id) return 'owner'
   const mine = await supabase
     .from('board_members').select('role').eq('board_id', room).eq('user_id', user.id).maybeSingle()
   const role = mine.data?.role as 'editor' | 'viewer' | 'blocked' | undefined
   if (role) return role === 'blocked' ? null : role
-  const domain = board.data.allowed_domain as string | null
-  const mail = (user.email ?? '').split('@')[1]?.toLowerCase()
-  if (domain && mail === domain) return (board.data.domain_role as 'editor' | 'viewer') ?? 'editor'
+
+  // The workspace is the other way onto a board, and a guest of one may read it and nothing
+  // more. Saying so here is what keeps the canvas from accepting edits the database will refuse.
+  const workspace = board.data.workspace_id as string | null
+  if (!workspace) return null
+  const seat = await supabase.from('workspace_members')
+    .select('role').eq('workspace_id', workspace).eq('user_id', user.id).maybeSingle()
+  if (seat.data?.role === 'guest') return 'viewer'
   return null
 }
