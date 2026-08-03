@@ -83,7 +83,7 @@ Five things are checked before any of the above happens, and each one answers on
 
 | Check | If it fails |
 |---|---|
-| The workspace is on the `team` plan, or the install is [`self_hosted`](self-hosting.md#the-fourth-command-is-not-optional) | `401` |
+| The workspace is not on the `free` plan — paid, [`self_hosted`](self-hosting.md#the-fourth-command-is-not-optional), or on a [carried domain](self-hosting.md#carrying-somebody-on-a-hosted-install) | `401` |
 | The key is not revoked and not past its `expires_at` | `401` |
 | Somebody is still behind the key — a key whose maker has no row, or was taken out of the workspace, or was blocked | `401` |
 | The key's scope is `write`, for anything that is not a `GET` | `403` |
@@ -137,9 +137,10 @@ Plainly, because the shape of the door is easy to mistake for the shape of the p
 - **No live collaboration.** Presence and document sync run over Supabase Realtime between
   browsers. An agent holding a key is not a participant in a session; it reads rows and writes
   rows, and the app sees the result the next time it reads.
-- **Nothing on the free plan.** Not a reduced rate limit — off. Pay for `team`, or set
-  `self_hosted = true` on your own install, where it is on. The daily write allowance applies
-  either way; raise `api_keys.daily_writes` if a thousand changes a day is not enough.
+- **Nothing on the free plan.** Not a reduced rate limit — off. Pay for `team`, set
+  `self_hosted = true` on your own install, or be on a domain the operator carries. The daily
+  write allowance applies to a paid workspace; raise `api_keys.daily_writes` if a thousand
+  changes a day is not enough. A workspace nobody is billing is not counted at all.
 - **Nothing quietly.** Every write is signed with the key's name and leaves a version of what it
   changed, which a person can put back from the record. See
   [what a write leaves behind](api.md#what-a-write-leaves-behind).

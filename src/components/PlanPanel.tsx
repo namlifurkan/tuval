@@ -1,7 +1,8 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { Check } from 'lucide-react'
 import {
-  getUsage, loadUsage, nearlyFull, PRICE, readableBytes, share, subscribePlan, WHAT_YOU_GET,
+  getUsage, loadUsage, nearlyFull, readableBytes, share, subscribePlan, uncapped,
+  WHAT_YOU_GET,
 } from '../board/plan'
 import { getWorkspace, subscribeWorkspace } from '../board/workspace'
 import { t } from '../i18n'
@@ -32,8 +33,13 @@ export function PlanPanel() {
       <div className="rounded-xl border border-[#E2DED5] bg-[#FCFBF8] p-3">
         <div className="flex flex-wrap items-baseline gap-2">
           <span className="text-[15px] font-semibold text-[#141310]">
-            {held.plan === 'team' ? t('Team') : t('Free')}
+            {held.plan === 'unlimited' ? t('Not billed') : held.plan === 'team' ? t('Team') : t('Free')}
           </span>
+          {held.plan === 'unlimited' && (
+            <span className="text-[11px] text-[#8A867C]">
+              {t('this install does not bill this workspace')}
+            </span>
+          )}
           {held.plan === 'team' && held.until && (
             <span className="text-[11px] text-[#8A867C]">
               {t('paid until {day}', { day: held.until.slice(0, 10) })}
@@ -41,12 +47,7 @@ export function PlanPanel() {
           )}
           {held.plan === 'free' && (
             <span className="text-[11px] text-[#8A867C]">
-              {t('{price}{currency} per {per} per {period} for the rest', {
-                price: PRICE.amount,
-                currency: PRICE.currency,
-                per: t(PRICE.per),
-                period: t(PRICE.period),
-              })}
+              {t('the paid plan is not open yet')}
             </span>
           )}
         </div>
@@ -55,7 +56,9 @@ export function PlanPanel() {
           <div>
             <div className="flex items-baseline justify-between text-[11px]">
               <span className="text-[#8A867C]">{t('People')}</span>
-              <span className="text-[#4A463E]">{held.seats} / {held.seat_limit}</span>
+              <span className="text-[#4A463E]">
+                {held.seats}{uncapped(held.seat_limit) ? '' : ` / ${held.seat_limit}`}
+              </span>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#EFEBE2]">
               <div className="h-full rounded-full transition-[width]" style={fills(seats)} />
@@ -66,7 +69,8 @@ export function PlanPanel() {
             <div className="flex items-baseline justify-between text-[11px]">
               <span className="text-[#8A867C]">{t('Files')}</span>
               <span className="text-[#4A463E]">
-                {readableBytes(held.bytes)} / {readableBytes(held.byte_limit)}
+                {readableBytes(held.bytes)}
+                {uncapped(held.byte_limit) ? '' : ` / ${readableBytes(held.byte_limit)}`}
               </span>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#EFEBE2]">
@@ -97,9 +101,7 @@ export function PlanPanel() {
               {plan === 'team' ? t('Team') : t('Free')}
             </span>
             <span className="ml-2 text-[11px] text-[#8A867C]">
-              {plan === 'team'
-                ? `${PRICE.amount}${PRICE.currency} / ${t(PRICE.per)} / ${t(PRICE.period)}`
-                : t('nothing')}
+              {plan === 'team' ? t('not on sale yet') : t('nothing')}
             </span>
             <ul className="mt-2 space-y-1">
               {WHAT_YOU_GET[plan].map((line) => (

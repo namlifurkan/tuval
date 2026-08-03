@@ -37,12 +37,33 @@ update public.tuval_settings set self_hosted = true where id = 1;
 Check it took:
 
 ```sql
-select public.is_self_hosted(), * from public.plan_limits('free', 1);
--- t | 2147483647 | 9223372036854775807 | t
+select public.is_self_hosted(), public.plan_of(id) from public.workspaces limit 1;
+-- t | unlimited
 ```
 
-`is_self_hosted()` is read by the API door, the seat trigger, the storage trigger and the usage
-screen, so one answer changes all four rather than four places agreeing by luck.
+`is_self_hosted()` is read by `plan_of()`, which the API door, the seat trigger, the storage
+trigger and the usage screen all ask, so one answer changes all four rather than four places
+agreeing by luck.
+
+## Carrying somebody on a hosted install
+
+The same switch, one step smaller: an install that *is* billing can still decide it is not
+billing certain people. A workspace whose owner has a confirmed address at one of these domains
+has no seat limit, no storage limit and the API on — the same as self-hosting, for that
+workspace.
+
+```sql
+update public.tuval_settings
+set unlimited_domains = array['example.com', 'example.org'] where id = 1;
+```
+
+It reads the **owner's** address, and only a confirmed one. Being invited into somebody else's
+workspace does not carry the arrangement into theirs, and does not take it away from your own. An
+unconfirmed address is a claim, and this is not a claim somebody should be able to make about
+themselves by typing it.
+
+Empty by default, and it stays empty in the repository: one install's arrangement is not
+another's.
 
 ## What you need
 

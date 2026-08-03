@@ -1081,17 +1081,48 @@ update public.tuval_settings set self_hosted = true where id = 1;
 select pg_temp.check('the same workspace self-hosted has one', true,
   (select k.workspace_id from public.workspace_for_key('tuv_selfhost_token') k)
     = 'cccccccc-0000-4000-8000-000000000003');
-select pg_temp.check('and the plan reads as team without anybody paying', true,
-  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'team');
+select pg_temp.check('and the plan reads as one nobody is billing', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'unlimited');
 select pg_temp.check('seats stop being capped', true,
-  (select seats from public.plan_limits('free', 1)) > 1000000);
+  (select seats from public.plan_limits(
+     public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) > 1000000);
 select pg_temp.check('and so does storage', true,
-  (select bytes from public.plan_limits('free', 1)) > 1000000000000::bigint);
+  (select bytes from public.plan_limits(
+     public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) > 1000000000000::bigint);
 
 set local role postgres;
 update public.tuval_settings set self_hosted = false where id = 1;
 select pg_temp.check('turning it off puts the limits back', true,
-  (select seats from public.plan_limits('free', 1)) = 3);
+  (select seats from public.plan_limits(
+     public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) = 3);
+
+-- A domain the operator carries ---------------------------------------------------------------------
+-- The same arrangement one step smaller: a hosted install that is billing, deciding it is not
+-- billing these people. It reads the owner's confirmed address and nobody else's.
+
+update public.tuval_settings set unlimited_domains = array['RLS.test'] where id = 1;
+
+select pg_temp.check('the owner of a carried domain is not billed', true,
+  public.plan_of('cccccccc-0000-4000-8000-000000000003') = 'unlimited');
+select pg_temp.check('and it is matched however the operator typed it', true,
+  public.unlimited_owner('cccccccc-0000-4000-8000-000000000003'));
+select pg_temp.check('a workspace owned from another domain is billed as before', false,
+  public.plan_of('dddddddd-0000-4000-8000-000000000004') = 'unlimited');
+select pg_temp.check('the carried workspace has the API without paying', true,
+  (select k.workspace_id from public.workspace_for_key('tuv_selfhost_token') k)
+    = 'cccccccc-0000-4000-8000-000000000003');
+
+update auth.users set email_confirmed_at = null
+where id = 'aaaaaaaa-0000-4000-8000-000000000001';
+select pg_temp.check('an address nobody confirmed is a claim, not an arrangement', false,
+  public.unlimited_owner('cccccccc-0000-4000-8000-000000000003'));
+update auth.users set email_confirmed_at = now()
+where id = 'aaaaaaaa-0000-4000-8000-000000000001';
+
+update public.tuval_settings set unlimited_domains = '{}' where id = 1;
+select pg_temp.check('and taking the domain off puts the limits back', true,
+  (select seats from public.plan_limits(
+     public.plan_of('cccccccc-0000-4000-8000-000000000003'), 1)) = 3);
 
 -- What one key opens ------------------------------------------------------------------------------
 -- A key is not the workspace. It may only read, it may run out, and it sees exactly the pages the

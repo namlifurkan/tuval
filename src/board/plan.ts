@@ -8,21 +8,14 @@ import { getWorkspace } from './workspace'
 // The numbers live here and are enforced in the database. A limit checked only in the browser of
 // an open-source product is a limit somebody deletes in an afternoon.
 
-export type Plan = 'free' | 'team'
+export type Plan = 'free' | 'team' | 'unlimited'
 
-// One place to change the price. It is a starting point, not a market study.
-//
-// Billed in lira, which is the only currency a Turkish entity can actually take money in. On an
-// English page that number means nothing to a reader in London, so an approximation travels with
-// it: shown as "about", never as a second price, and updated when the rate moves enough to be a
-// lie. What is charged is always the lira figure.
-// Turkish consumer law requires the price a buyer is shown to be the price they pay, tax
-// included. Saying so is not decoration: a figure with the tax left off is the shape of a
-// complaint.
-//
-// In JSON because three readers need it and none of them can import the others: this module, the
-// marketing copy, and the build script that writes the marketing copy out as HTML.
-export { default as PRICE } from '../site/price.json'
+// Not a tier anybody buys: it is what a workspace this install is not billing answers, whether
+// that is because somebody runs Tuval themselves or because the operator carries their domain.
+export const UNCAPPED = 2147483647
+
+// No price is published while there is nothing here to take money with. When there is, it comes
+// back with the date it took effect beside it.
 
 export interface Usage {
   plan: Plan
@@ -60,7 +53,7 @@ export const readableBytes = (bytes: number) => {
 
 // What a plan is for, said plainly. Everything not on this list is on every plan, including the
 // self-hosted one, because holding a feature back to make a plan look thin is not what this is.
-export const WHAT_YOU_GET: { [K in Plan]: string[] } = {
+export const WHAT_YOU_GET: { [K in Exclude<Plan, 'unlimited'>]: string[] } = {
   free: [
     'Up to {seats} people',
     '{bytes} of files',
@@ -76,7 +69,11 @@ export const WHAT_YOU_GET: { [K in Plan]: string[] } = {
 }
 
 // A number that says how close to a wall somebody is, which is the only thing a bar is for.
+export const uncapped = (limit: number) => limit >= UNCAPPED
+
+// A number that says how close to a wall somebody is, which is the only thing a bar is for. With
+// no wall there is nothing to be close to, so it reads empty rather than reading zero of nothing.
 export const share = (used: number, limit: number) =>
-  limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0
+  limit > 0 && !uncapped(limit) ? Math.min(100, Math.round((used / limit) * 100)) : 0
 
 export const nearlyFull = (used: number, limit: number) => share(used, limit) >= 80
