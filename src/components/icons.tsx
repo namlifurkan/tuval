@@ -1,3 +1,6 @@
+import { shapeToSvgPath } from '../board/shapes'
+import type { ShapeKind } from '../board/types'
+
 type Props = { size?: number; strokeWidth?: number }
 
 function Ico({ size = 20, strokeWidth = 1.4, d }: Props & { d: string[] }) {
@@ -105,3 +108,20 @@ export function Spark({ size = 20, strokeWidth = 1.4 }: Props) {
 export const More = (p: Props) => (
   <Ico {...p} d={['M3.5 10.5 H6.5 V13.5 H3.5 Z', 'M10.5 10.5 H13.5 V13.5 H10.5 Z', 'M17.5 10.5 H20.5 V13.5 H17.5 Z']} />
 )
+
+// A shape drawn from the same path the canvas uses, so the button and the thing it makes cannot
+// drift apart. Cached because the dock and the inspector both draw the whole set.
+const dCache = new Map<ShapeKind, string>()
+
+export function ShapeGlyph({ kind, size = 20 }: { kind: ShapeKind; size?: number }) {
+  let d = dCache.get(kind)
+  if (!d) {
+    d = shapeToSvgPath(kind, 2.5, 2.5, 19, 19)
+    dCache.set(kind, d)
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d={d} stroke="currentColor" strokeWidth={1.7} strokeLinejoin="round" />
+    </svg>
+  )
+}

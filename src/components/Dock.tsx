@@ -15,15 +15,15 @@ import { makeEmbed, makeFrame, makeText, RECORD_H, RECORD_W } from '../board/ite
 import { recordItemsFor } from '../board/promote'
 import { insertItems } from '../board/interaction'
 import { boxOf } from '../board/render'
-import { SHAPE_GROUPS, shapeToSvgPath } from '../board/shapes'
+import { SHAPE_GROUPS } from '../board/shapes'
 import { TEMPLATES } from '../board/templates'
 import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import type { Tool } from '../board/store'
 import { t } from '../i18n'
-import { LINE_COLORS, STICKY_COLORS, type Item, type ShapeKind } from '../board/types'
+import { LINE_COLORS, STICKY_COLORS, type Item } from '../board/types'
 import {
   CodeTool, Comment, Connector, EraserTool, Fit, FrameTool, Highlight, ImageTool, Minimap, Mindmap, More,
-  Nib, RecordTool, Select, Sticky, TableTool, Templates, TextTool,
+  Nib, RecordTool, Select, ShapeGlyph, Sticky, TableTool, Templates, TextTool,
 } from './icons'
 import { RecordPicker } from './RecordPicker'
 import { ColorGrid, IconButton, Popover, usePopover } from './ui'
@@ -37,21 +37,6 @@ const VIEW_SAFE = new Set<DockItemId>(['select', 'minimap', 'fit', 'zoom'])
 
 const MAGNIFY_AMPLITUDE = 0.5
 const MAGNIFY_SPREAD = 66
-
-const dCache = new Map<ShapeKind, string>()
-
-export function ShapeGlyph({ kind, size = 20 }: { kind: ShapeKind; size?: number }) {
-  let d = dCache.get(kind)
-  if (!d) {
-    d = shapeToSvgPath(kind, 2.5, 2.5, 19, 19)
-    dCache.set(kind, d)
-  }
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d={d} stroke="currentColor" strokeWidth={1.7} strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 export function Dock() {
   const prefs = useSyncExternalStore(subscribeDock, getDockPrefs, getDockPrefs)

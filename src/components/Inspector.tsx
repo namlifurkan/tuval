@@ -9,6 +9,8 @@ import { patchRecord, STATUSES } from '../board/records'
 import { boardPeople, isAssigned, toggleAssignee } from '../board/people'
 import { initials } from '../board/me'
 import { isNode, layoutMindmap, rootOf } from '../board/mindmap'
+import { SHAPE_LIST } from '../board/shapes'
+import { ShapeGlyph } from './icons'
 import { mindmapBranch, quickCreateFromSelection } from '../board/interaction'
 import { LABEL_SIZES, labelInk, STATUS_LABELS } from '../board/labels'
 import { t } from '../i18n'
@@ -123,6 +125,27 @@ export function Inspector() {
           {Math.round(first.w as number)} × {Math.round(first.h as number)}
         </span>
       </header>
+
+      {has(selected, 'shape') && (
+        <Section title={t('Shape')}>
+          {/* Drawn as a triangle and wanted as a square: the shape is a property of the item, so
+              it is changed here rather than by drawing it again. */}
+          <div className="grid grid-cols-6 gap-1">
+            {SHAPE_LIST.map((k) => (
+              <button
+                key={k}
+                type="button"
+                title={k}
+                onClick={() => patch({ kind: k }, (i) => i.type === 'shape')}
+                className={`grid h-8 w-8 place-items-center rounded-lg hover:bg-tint
+                  ${first.kind === k ? 'bg-pigment-wash text-pigment' : 'text-ink'}`}
+              >
+                <ShapeGlyph kind={k} size={19} />
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {(has(selected, 'sticky') || has(selected, 'shape') || has(selected, 'text')) && (
         <Section title={t('Fill')}>
