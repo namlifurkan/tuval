@@ -229,6 +229,6 @@ export const DEFAULT_TEXT_STYLE: TextStyle = {
 export const BRAND = {
   selection: '#141310',
   ink: '#141310',
-  guide: '#C8452D',
-  pigment: '#C8452D',
+  guide: '#B43E28',
+  pigment: '#B43E28',
 }

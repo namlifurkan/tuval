@@ -37,7 +37,7 @@ export async function exportHTML(editor: Editor, title: string) {
   body { max-width: 46rem; margin: 3rem auto; padding: 0 1.5rem; background: #F2EFE9; color: #141310;
          font: 16px/1.7 ${FONT.stack} }
   h1, h2, h3 { line-height: 1.2; letter-spacing: -0.015em }
-  blockquote { border-left: 2px solid #C8452D; margin: 0; padding-left: 1rem; color: #4A463E }
+  blockquote { border-left: 2px solid #B43E28; margin: 0; padding-left: 1rem; color: #4A463E }
   code { background: #EBE7DE; padding: .1em .3em; border-radius: 3px }
   img { max-width: 100% }
   table { border-collapse: collapse } td, th { border: 1px solid #E2DED5; padding: .4rem .6rem }
