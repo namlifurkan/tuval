@@ -95,18 +95,27 @@ export async function claimBoard(room: string, name: string): Promise<string | n
   const workspace = getWorkspace() ?? await loadWorkspace()
   if (!workspace) return 'No workspace'
 
-  const touch = await supabase
+  const touch = () => supabase!
     .from('boards')
     .update({ name, updated_at: new Date().toISOString() })
     .eq('id', room)
     .select('id')
-  if (touch.data?.length) return null
-  if (touch.error) return touch.error.message
+
+  const first = await touch()
+  if (first.data?.length) return null
+  if (first.error) return first.error.message
 
   const created = await supabase
     .from('boards')
     .insert({ id: room, owner: user.id, name, workspace_id: workspace.id })
-  return created.error ? created.error.message : null
+  if (!created.error) return null
+  // Two writers can both find no row and both insert it; the loser is told the key is taken,
+  // which is the same news as the row being there. Whether it is ours to write is a separate
+  // question, and touching it again is what answers that.
+  if (created.error.code !== '23505') return created.error.message
+  const second = await touch()
+  if (second.data?.length) return null
+  return second.error?.message ?? 'That board belongs to somebody else'
 }
 
 // A brief an agent left for whoever opens the board first. Reading it does not take it: the

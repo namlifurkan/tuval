@@ -205,6 +205,26 @@ describe('what the log no longer has to keep', () => {
     expect(sync.cloudError()).toBe(null)
   })
 
+  it('asks for the row once when the log and the save both need it', async () => {
+    // Both found no row and both inserted one; the loser was told the key was taken, which is
+    // how a fresh board started answering 23505 instead of saving.
+    let finish!: (value: string | null) => void
+    mocked.claimBoard.mockReset()
+      .mockImplementationOnce(() => new Promise((resolve) => { finish = resolve }))
+      .mockResolvedValue(null)
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    mocked.handlers.forEach((handler) => handler(new Uint8Array([7])))
+    await vi.advanceTimersByTimeAsync(2_500)
+    await settle()
+    expect(mocked.claimBoard).toHaveBeenCalledOnce()
+
+    finish(null)
+    await settle()
+    expect(sync.cloudError()).toBe(null)
+  })
+
   it('holds the log while the claim is refused rather than writing what will bounce', async () => {
     mocked.claimBoard.mockReset()
       .mockResolvedValue('new row violates row-level security policy for table "boards"')

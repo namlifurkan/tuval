@@ -32,6 +32,22 @@ let claimed = false
 // nothing to keep, and a row would turn every glance into a board in the list.
 const untouched = () => !stamp && !getItems().length && !getMeta().name
 
+// The log and the save both need the row, and on a new board they ask within a moment of each
+// other: two asks found no row and both inserted one, and the loser was told the key was taken.
+// They share the ask instead. A later save gets a fresh one, which is what keeps the name and
+// the date current.
+let claiming: Promise<string | null> | null = null
+
+async function claim(): Promise<string | null> {
+  if (!claiming) {
+    claiming = claimBoard(room, (getMeta().name as string) ?? '')
+      .finally(() => { claiming = null })
+  }
+  const error = await claiming
+  claimed = !error
+  return error
+}
+
 const counts = () => {
   const all = getItems()
   return {
@@ -92,9 +108,8 @@ async function appendLog() {
     // document and has no such limit, so the snapshot carries this one on its own.
     if (update.length > LOG_MAX) { schedule(); return }
     if (!claimed) {
-      const claim = await claimBoard(room, (getMeta().name as string) ?? '')
-      claimed = !claim
-      if (claim) throw new Error(claim)
+      const refused = await claim()
+      if (refused) throw new Error(refused)
     }
     const seq = await appendUpdate(room, update)
     if (seq) mark(seq, Date.now())
@@ -144,15 +159,13 @@ async function save() {
   if (!room || !dirty || !restored || !getUser() || readOnly()) return
   if (untouched()) return
   const saving = revision
-  const name = (getMeta().name as string) ?? ''
   // The board is claimed before anything is written about it, because everything written about it
   // is checked against the row the claim creates.
-  const claim = await claimBoard(room, name)
-  claimed = !claim
+  const refused = await claim()
   await appendLog()
   const conflict = await merge()
   const { items, frames } = counts()
-  const error = claim
+  const error = refused
     ?? conflict
     ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems()))
   if (error) {
