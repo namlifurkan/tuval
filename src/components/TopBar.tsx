@@ -89,7 +89,7 @@ export function TopBar() {
           in the product. What actually has to change on a dark surface is the writing on it, so
           the bar carries its own theme: the shell's tokens, resolved against the paint. */}
       <header
-        data-theme={dark ? 'dark' : 'light'}
+        data-theme={dark ? 'dark' : 'tuval'}
         className="pointer-events-none absolute inset-x-4 top-4 z-40 flex items-start justify-between gap-4"
       >
         <div className="pointer-events-auto flex min-w-0 items-start gap-1.5">

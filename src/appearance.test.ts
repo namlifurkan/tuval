@@ -22,6 +22,7 @@ async function load() {
   return import('./appearance')
 }
 
+const painted = () => document.documentElement.getAttribute('data-theme')
 const themeColor = () => document.querySelector('meta[name="theme-color"]')?.getAttribute('content')
 
 beforeEach(() => {
@@ -30,17 +31,16 @@ beforeEach(() => {
   document.head.innerHTML = '<meta name="theme-color" content="#F2EFE9">'
 })
 
-test('with nothing stored it opens light, whatever the system says', async () => {
+test('with nothing stored it opens on our own paper, whatever the system says', async () => {
   system(true)
   const { getAppearance } = await load()
-  expect(getAppearance()).toBe('light')
-  expect(document.documentElement.getAttribute('data-theme')).toBe(null)
+  expect(getAppearance()).toBe('tuval')
+  expect(painted()).toBe('tuval')
   expect(themeColor()).toBe('#F2EFE9')
 
   system(false)
   await load()
-  expect(document.documentElement.getAttribute('data-theme')).toBe(null)
-  expect(themeColor()).toBe('#F2EFE9')
+  expect(painted()).toBe('tuval')
 })
 
 test('system is still a choice, it is just not the default', async () => {
@@ -48,15 +48,20 @@ test('system is still a choice, it is just not the default', async () => {
   localStorage.setItem('tuval:theme', 'system')
   const { getAppearance } = await load()
   expect(getAppearance()).toBe('system')
-  expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+  expect(painted()).toBe('dark')
+
+  system(false)
+  await load()
+  expect(painted()).toBe('tuval')
 })
 
-test('a stored choice outranks the system', async () => {
+test('plain white is its own theme, not the absence of one', async () => {
   localStorage.setItem('tuval:theme', 'light')
   system(true)
-  await load()
-  expect(document.documentElement.getAttribute('data-theme')).toBe(null)
-  expect(themeColor()).toBe('#F2EFE9')
+  const { isDark } = await load()
+  expect(painted()).toBe('light')
+  expect(themeColor()).toBe('#FFFFFF')
+  expect(isDark()).toBe(false)
 })
 
 test('choosing dark persists and paints, and tells whoever is listening', async () => {
@@ -67,7 +72,8 @@ test('choosing dark persists and paints, and tells whoever is listening', async 
 
   setAppearance('dark')
   expect(localStorage.getItem('tuval:theme')).toBe('dark')
-  expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+  expect(painted()).toBe('dark')
+  expect(themeColor()).toBe('#1A1917')
   expect(isDark()).toBe(true)
   expect(told).toBe(1)
 
@@ -81,11 +87,19 @@ test('the system flipping moves a system reader and leaves a decided one alone',
   const { setAppearance } = await load()
 
   flip(true)
-  expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+  expect(painted()).toBe('dark')
 
   setAppearance('light')
   flip(true)
-  expect(document.documentElement.getAttribute('data-theme')).toBe(null)
+  expect(painted()).toBe('light')
+})
+
+test('a stored value nobody ships any more falls back rather than painting nothing', async () => {
+  system(true)
+  localStorage.setItem('tuval:theme', 'sepia')
+  const { getAppearance } = await load()
+  expect(getAppearance()).toBe('tuval')
+  expect(painted()).toBe('tuval')
 })
 
 test('a browser that refuses storage still resolves a theme', async () => {
@@ -94,8 +108,8 @@ test('a browser that refuses storage still resolves a theme', async () => {
   Storage.prototype.getItem = () => { throw new Error('denied') }
   try {
     const { getAppearance } = await load()
-    expect(getAppearance()).toBe('light')
-    expect(document.documentElement.getAttribute('data-theme')).toBe(null)
+    expect(getAppearance()).toBe('tuval')
+    expect(painted()).toBe('tuval')
   } finally {
     Storage.prototype.getItem = held
   }

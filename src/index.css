@@ -20,6 +20,7 @@
   --color-on-pigment: #ffffff;
   --color-ok: #4e8c79;
   --color-avatar: #3e5c93;
+  --logo-ink: #141310;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
@@ -37,7 +38,8 @@
    Both directions are spelled out, not just dark, because the attribute is also how a subtree
    opts out: the board's top bar reads against the board's own paint, which is a light island
    on a dark shell as often as the reverse. */
-[data-theme='light'] {
+/* Tuval: the paper the product is drawn on. Warm neutrals, one pigment. */
+[data-theme='tuval'] {
   --color-ink: #141310;
   --color-ink-soft: #4a463e;
   --color-muted: #69665e;
@@ -55,6 +57,31 @@
   --color-pigment-wash: #f7e9e4;
   --color-on-pigment: #ffffff;
   --color-ok: #4e8c79;
+  --logo-ink: var(--color-ink);
+}
+
+/* White: the same drawing on plain paper. The page, the sheet and anything raised above it are
+   all #ffffff, so structure is carried by the hairline rather than by a fill — which is what a
+   white interface does anyway once nothing is tinted. */
+[data-theme='light'] {
+  --color-ink: #121212;
+  --color-ink-soft: #474747;
+  --color-muted: #666666;
+  --color-faint: #b0b0b0;
+  --color-dim: #c3c3c3;
+  --color-rule: #d7d7d7;
+  --color-hairline: #e4e4e4;
+  --color-shade: #f0f0f0;
+  --color-tint: #f6f6f6;
+  --color-paper: #ffffff;
+  --color-raise: #ffffff;
+  --color-surface: #ffffff;
+  --color-pigment: #b43e28;
+  --color-pigment-deep: #943321;
+  --color-pigment-wash: #fbeeea;
+  --color-on-pigment: #ffffff;
+  --color-ok: #47826f;
+  --logo-ink: var(--color-ink);
 }
 
 [data-theme='dark'] {
@@ -75,6 +102,7 @@
   --color-pigment-wash: #3a211a;
   --color-on-pigment: #1a1917;
   --color-ok: #7fc3ae;
+  --logo-ink: var(--color-ink-soft);
 }
 
 :root {

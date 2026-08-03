@@ -1,13 +1,17 @@
-export type Appearance = 'system' | 'light' | 'dark'
+import { PRODUCT } from './board/brand'
+
+export type Appearance = 'system' | 'tuval' | 'light' | 'dark'
+export type Theme = Exclude<Appearance, 'system'>
 
 export const APPEARANCES: { id: Appearance; name: string }[] = [
   { id: 'system', name: 'System' },
+  { id: 'tuval', name: PRODUCT.name },
   { id: 'light', name: 'Light' },
   { id: 'dark', name: 'Dark' },
 ]
 
 const KEY = 'tuval:theme'
-const BAR = { light: '#F2EFE9', dark: '#1A1917' }
+const BAR: { [K in Theme]: string } = { tuval: '#F2EFE9', light: '#FFFFFF', dark: '#1A1917' }
 
 const night = matchMedia('(prefers-color-scheme: dark)')
 const listeners = new Set<() => void>()
@@ -15,23 +19,21 @@ const listeners = new Set<() => void>()
 function read(): Appearance {
   try {
     const held = localStorage.getItem(KEY)
-    if (held === 'light' || held === 'dark' || held === 'system') return held
+    if (held && APPEARANCES.some((a) => a.id === held)) return held as Appearance
   } catch { /* ignore */ }
-  return 'light'
+  return 'tuval'
 }
 
 let mode = read()
 
 export const getAppearance = () => mode
-export const isDark = () => mode === 'dark' || (mode === 'system' && night.matches)
+export const theme = (): Theme => (mode === 'system' ? (night.matches ? 'dark' : 'tuval') : mode)
+export const isDark = () => theme() === 'dark'
 
 function apply() {
-  const dark = isDark()
-  const root = document.documentElement
-  if (dark) root.setAttribute('data-theme', 'dark')
-  else root.removeAttribute('data-theme')
-  document.querySelector('meta[name="theme-color"]')
-    ?.setAttribute('content', dark ? BAR.dark : BAR.light)
+  const shown = theme()
+  document.documentElement.setAttribute('data-theme', shown)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', BAR[shown])
 }
 
 export function setAppearance(next: Appearance) {

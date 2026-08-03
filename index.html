@@ -13,13 +13,13 @@
       // owns everything after this; the two colours are repeated here because a <meta> cannot read
       // a CSS variable and this has to run before the stylesheet exists.
       try {
-        var mode = localStorage.getItem('tuval:theme') || 'light'
-        var dark = mode === 'dark'
-          || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
-        if (dark) {
-          document.documentElement.setAttribute('data-theme', 'dark')
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1A1917')
+        var mode = localStorage.getItem('tuval:theme') || 'tuval'
+        if (mode === 'system') {
+          mode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'tuval'
         }
+        var bar = { tuval: '#F2EFE9', light: '#FFFFFF', dark: '#1A1917' }[mode] || '#F2EFE9'
+        document.documentElement.setAttribute('data-theme', mode)
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', bar)
       } catch (e) { /* a browser that refuses storage still gets a page */ }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

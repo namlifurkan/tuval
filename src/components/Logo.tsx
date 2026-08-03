@@ -2,7 +2,7 @@
 // Bars are proportionally heavier than the source art so the mark survives at UI sizes.
 // The two fills read the theme tokens rather than the palette constants, so the frame turns
 // with the page; anywhere the mark sits on a band of its own, that band names the tokens.
-export function Logo({ size = 24, ink = 'var(--color-ink)', pigment = 'var(--color-pigment)' }: {
+export function Logo({ size = 24, ink = 'var(--logo-ink)', pigment = 'var(--color-pigment)' }: {
   size?: number
   ink?: string
   pigment?: string
