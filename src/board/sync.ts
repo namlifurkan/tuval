@@ -249,10 +249,25 @@ export async function drawPendingBrief() {
   if (title && !getMeta().name) setMeta('name', title)
 }
 
+// IndexedDB answering is not the board arriving. On a browser that has never opened this board —
+// a shared link, a second machine, a cleared profile — the local document is empty and correct,
+// and everything on the board comes from the cloud a moment later. Anything drawing before then
+// draws an empty board and corrects itself in front of the person watching.
+//
+// Resolved rather than pending when there is nothing to wait for, and resolved on failure too: a
+// cloud that cannot be reached is a board to open and work in, not a reason to hold the screen.
+let arrived: (() => void) | null = null
+const arrival = new Promise<void>((done) => { arrived = done })
+const nothingToWaitFor = () => { arrived?.(); arrived = null }
+if (!supabase) nothingToWaitFor()
+
+export const cloudArrival = () => arrival
+
 // The cloud copy is merged, never assigned: a CRDT update applied on top of the local doc
 // converges whatever each side missed while offline.
 async function restore() {
-  if (restored || restoring || !getUser()) return
+  if (restored || restoring) return
+  if (!getUser()) { nothingToWaitFor(); return }
   restoring = true
   try {
     if (!await loadWorkspace()) throw new Error('No workspace')
@@ -275,6 +290,7 @@ async function restore() {
     }
   } finally {
     restoring = false
+    nothingToWaitFor()
   }
 }
 

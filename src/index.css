@@ -171,6 +171,19 @@ svg.lucide {
   clip-path: inset(0 0 0 0);
 }
 
+/* What the server sends for a reader with no JavaScript: the page's text, with no classes on it.
+   React replaces it the moment it mounts, and until then it painted as browser-default headings
+   and a footer of thirty-five links — the flash that reads as a broken page. Out of sight, still
+   in the document, still read by anything that does not run the bundle. */
+[data-prerendered] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* The pigment bands are the only contrast event on the site, and they used to simply be there.
    Arriving is what makes an event of one. Colour is safe to animate; layout is not. */
 [data-arrive] {

@@ -25,12 +25,12 @@ import { Minimap } from './Minimap'
 import { startRealtime } from '../board/realtime'
 import { refreshSnapshots } from '../board/promote'
 import { subscribeRecords } from '../board/records'
-import { startCloudSync, sweepOrphanImages } from '../board/sync'
+import { cloudArrival, startCloudSync, sweepOrphanImages } from '../board/sync'
 import { takeTemplate } from '../board/boards'
 import { insertItems } from '../board/interaction'
 import { TEMPLATES } from '../board/templates'
-import { PRODUCT } from '../board/brand'
-import { persistence } from '../board/doc'
+import { isDarkSurface, PRODUCT, SURFACES, surfaceColor } from '../board/brand'
+import { getMeta, persistence, room } from '../board/doc'
 import { useBoardStore } from '../board/store'
 import { getDockPrefs, subscribeDock } from '../board/dockPrefs'
 
@@ -81,17 +81,35 @@ function useDocumentReady() {
     if (!persistence) return
     let live = true
     const done = () => { if (live) setReady(true) }
-    void persistence.whenSynced.then(done)
+    // Both, because either one alone lifts on half a board: IndexedDB answers for what this
+    // browser has seen before, and the cloud for everything it has not.
+    void Promise.all([persistence.whenSynced, cloudArrival()]).then(done)
     const giveUp = setTimeout(done, PATIENCE)
     return () => { live = false; clearTimeout(giveUp) }
   }, [])
   return ready
 }
 
+// The curtain is the board's own paper, never the shell's. They are the same colour in the
+// default theme, which is why this went unnoticed: in light or dark the shell paper is white or
+// near-black, so lifting the curtain was itself the change of background people were seeing.
+// A board painted some other colour is remembered, so the second open has nothing to reveal.
+const SURFACE_SEEN = 'tuval:surface-seen'
+
+const lastSurface = (): string => {
+  try { return localStorage.getItem(`${SURFACE_SEEN}:${room}`) || SURFACES[0].id } catch { return SURFACES[0].id }
+}
+
+const rememberSurface = (id: string) => {
+  try { localStorage.setItem(`${SURFACE_SEEN}:${room}`, id) } catch { /* storage refused */ }
+}
+
 function Curtain({ up }: { up: boolean }) {
   const [gone, setGone] = useState(false)
+  const [surface] = useState(() => surfaceColor(lastSurface()))
   useEffect(() => {
     if (!up) return
+    rememberSurface(String(getMeta().surface ?? SURFACES[0].id))
     const t = setTimeout(() => setGone(true), SETTLE)
     return () => clearTimeout(t)
   }, [up])
@@ -99,11 +117,14 @@ function Curtain({ up }: { up: boolean }) {
   return (
     <div
       aria-hidden
-      style={{ transitionDuration: `${SETTLE}ms` }}
-      className={`pointer-events-none absolute inset-0 z-[60] grid place-items-center bg-paper
+      style={{ transitionDuration: `${SETTLE}ms`, background: surface }}
+      className={`pointer-events-none absolute inset-0 z-[60] grid place-items-center
         transition-opacity ${up ? 'opacity-0' : 'opacity-100'}`}
     >
-      <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-muted">
+      <span
+        className="text-[11px] font-bold uppercase tracking-[0.32em]"
+        style={{ color: isDarkSurface(surface) ? '#ffffff40' : '#14131040' }}
+      >
         {PRODUCT.name}
       </span>
     </div>

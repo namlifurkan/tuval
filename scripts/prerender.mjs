@@ -148,7 +148,12 @@ for (const page of all) {
       /<meta name="description"[^>]*\/>\n?\s*/,
       (found) => (head.includes('name="description"') ? '' : found),
     )
-    .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
+    // Marked, because this is written for a reader that does not run the bundle and it carries no
+    // classes of its own. Left visible it paints as a wall of browser-default headings and links
+    // for as long as the bundle takes to boot, and then vanishes — which is the flash people see
+    // and read as the page being broken. The stylesheet takes it out of sight and leaves it in
+    // the document, where a crawler still reads it.
+    .replace('<div id="root"></div>', `<div id="root"><div data-prerendered>${body}</div></div>`)
 
   const where = page.path === '/' ? join(DIST, 'index.html') : join(DIST, page.path.slice(1), 'index.html')
   mkdirSync(dirname(where), { recursive: true })
