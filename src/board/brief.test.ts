@@ -28,6 +28,7 @@ vi.mock('./cloud', () => ({
   claimBoard: async () => null,
   compactUpdates: async () => 0,
   LOG_MAX: 1_048_576,
+  NOT_MINE: 'not-mine',
   pullSnapshot: async () => null,
   pullUpdates: async () => [],
   pushSnapshot: async () => null,

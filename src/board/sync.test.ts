@@ -20,6 +20,7 @@ const mocked = vi.hoisted(() => {
     appendUpdate: vi.fn(),
     pullUpdates: vi.fn(),
     compactUpdates: vi.fn(),
+    setForeign: vi.fn(),
   }
 })
 
@@ -34,7 +35,7 @@ vi.mock('./doc', () => ({
   getItems: () => [],
   getMeta: () => mocked.meta,
 }))
-vi.mock('./access', () => ({ readOnly: () => false }))
+vi.mock('./access', () => ({ readOnly: () => false, setForeign: mocked.setForeign }))
 vi.mock('./storage', () => ({ storagePath: () => null }))
 vi.mock('./thumb', () => ({ makeThumb: () => 'thumb' }))
 vi.mock('./cloud', () => ({
@@ -49,6 +50,7 @@ vi.mock('./cloud', () => ({
   pullUpdates: mocked.pullUpdates,
   compactUpdates: mocked.compactUpdates,
   LOG_MAX: 1_048_576,
+  NOT_MINE: 'not-mine',
 }))
 vi.mock('./supabase', () => ({
   getUser: () => mocked.user,
@@ -75,6 +77,7 @@ beforeEach(() => {
   mocked.appendUpdate.mockReset().mockResolvedValue(1)
   mocked.pullUpdates.mockReset().mockResolvedValue([])
   mocked.compactUpdates.mockReset().mockResolvedValue(0)
+  mocked.setForeign.mockReset()
 })
 
 afterEach(() => vi.useRealTimers())
@@ -222,6 +225,28 @@ describe('what the log no longer has to keep', () => {
 
     finish(null)
     await settle()
+    expect(sync.cloudError()).toBe(null)
+  })
+
+  it('stops asking when the row belongs to another account', async () => {
+    // Retrying is asking the same question for ever: the answer will not change until somebody
+    // signs in as the other account. The board goes read-only and says so instead.
+    mocked.claimBoard.mockReset().mockResolvedValue('not-mine')
+    const sync = await import('./sync')
+
+    sync.startCloudSync()
+    mocked.handlers.forEach((handler) => handler(new Uint8Array([7])))
+    await vi.advanceTimersByTimeAsync(3_000)
+    await settle()
+    expect(mocked.setForeign).toHaveBeenCalledWith(true)
+    const asked = mocked.claimBoard.mock.calls.length
+
+    await vi.advanceTimersByTimeAsync(30_000)
+    await settle()
+    expect(mocked.claimBoard.mock.calls.length).toBe(asked)
+    expect(mocked.appendUpdate).not.toHaveBeenCalled()
+    // Nothing to show in the corner: the banner explains it, and a badge saying the save failed
+    // would be a second, worse account of the same thing.
     expect(sync.cloudError()).toBe(null)
   })
 

@@ -87,6 +87,10 @@ export async function listCloudBoardIds(rooms: string[]): Promise<Set<string>> {
   return found
 }
 
+// The row is there and it is not ours to write. Not a failure to retry — an answer, and the
+// caller has to act on it rather than keep asking.
+export const NOT_MINE = 'not-mine'
+
 // Never re-send owner on an existing row: a board shared with you belongs to someone else,
 // and an upsert would try to take it over and be refused by the update policy.
 export async function claimBoard(room: string, name: string): Promise<string | null> {
@@ -115,7 +119,7 @@ export async function claimBoard(room: string, name: string): Promise<string | n
   if (created.error.code !== '23505') return created.error.message
   const second = await touch()
   if (second.data?.length) return null
-  return second.error?.message ?? 'That board belongs to somebody else'
+  return second.error?.message ?? NOT_MINE
 }
 
 // A brief an agent left for whoever opens the board first. Reading it does not take it: the

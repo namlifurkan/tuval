@@ -1,10 +1,10 @@
 import * as Y from 'yjs'
 import { createItems, getItems, room, ydoc } from './doc'
-import { readOnly } from './access'
+import { readOnly, setForeign } from './access'
 import { storagePath } from './storage'
 import { makeThumb } from './thumb'
 import {
-  appendUpdate, claimBoard, clearPendingBrief, compactUpdates, LOG_MAX, pullSnapshot,
+  appendUpdate, claimBoard, clearPendingBrief, compactUpdates, LOG_MAX, NOT_MINE, pullSnapshot,
   pullUpdates, pushSnapshot, readPendingBrief, snapshotStamp, sweepImages,
 } from './cloud'
 import { getUser, subscribeAuth, supabase } from './supabase'
@@ -116,7 +116,9 @@ async function appendLog() {
     setCloudError(null)
   } catch (error) {
     logPending.unshift(update)
-    setCloudError(error instanceof Error ? error.message : String(error))
+    const why = error instanceof Error ? error.message : String(error)
+    if (why === NOT_MINE) { logPending = []; setForeign(true); return }
+    setCloudError(why)
     if (!logTimer) logTimer = window.setTimeout(() => { logTimer = 0; void appendLog() }, RETRY_AFTER)
   } finally {
     logging = false
@@ -169,6 +171,15 @@ async function save() {
     ?? conflict
     ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems()))
   if (error) {
+    // The row belongs to another account, so retrying is asking the same question for ever. The
+    // board goes read-only and says why, which is the only thing left that helps.
+    if (error === NOT_MINE) {
+      logPending = []
+      setForeign(true)
+      setCloudError(null)
+      dirty = false
+      return
+    }
     setCloudError(error)
     dirty = true
     console.warn('[tuval] cloud save failed:', error)

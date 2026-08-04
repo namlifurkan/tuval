@@ -553,6 +553,8 @@ const tr: Record<string, string> = {
   'A calendar places rows by a date column. Add one, then choose it above.':
     'Takvim, satırları bir tarih sütununa göre yerleştirir. Bir tane ekle, sonra yukarıdan seç.',
   'Go to calendar': 'Takvime git',
+  'Another account owns this board': 'Bu board başka bir hesaba ait',
+  'Copy it to mine': 'Bana kopyala',
   'Import from Miro': "Miro'dan içeri aktar",
   'No target date': 'Bitiş tarihi yok',
   'Build a board from a brief or a Miro export': "Bir brief'ten ya da Miro dışa aktarımından board kur",
