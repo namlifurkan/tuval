@@ -940,6 +940,9 @@ const tr: Record<string, string> = {
   '{pages} pages, {databases} databases, {rows} rows.':
     '{pages} sayfa, {databases} veritabanı, {rows} satır.',
   '{n} files were left out of this pass.': 'Bu turda {n} dosya dışarıda kaldı.',
+  '{n} of them could not be written and are not here.': 'Bunlardan {n} tanesi yazılamadı ve burada değil.',
+  'A spreadsheet becomes a database rather than something on a board. Open Pages and use Import.':
+    'Hesap tablosu tuvale değil veritabanına dönüşür. Sayfalar\'ı açıp İçeri aktar\'ı kullan.',
   'That file could not be read. A Notion export, a .zip, a .csv or a .md file.':
     'Bu dosya okunamadı. Notion dışa aktarımı, .zip, .csv veya .md olmalı.',
   'Timeline': 'Zaman çizelgesi',

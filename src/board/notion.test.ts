@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { strToU8, zipSync } from 'fflate'
-import { asDay, expand, guessType } from './notion'
+import { asDay, asNumber, expand, guessType, headerAt, numbersIn } from './notion'
 
 describe('guessType', () => {
   it('reads the whole column, not the first cell', () => {
@@ -28,6 +28,66 @@ describe('guessType', () => {
     expect(guessType([])).toBe('text')
     expect(guessType(['', '  '])).toBe('text')
   })
+
+  it('still calls a Turkish money column a number', () => {
+    expect(guessType(['1.234', '2.500', '890'])).toBe('number')
+    expect(guessType(['1.234,56', '99,90'])).toBe('number')
+  })
+
+  it('reads a date written with dots', () => {
+    expect(guessType(['03.08.2026', '14.12.2026'])).toBe('date')
+  })
+})
+
+// The three rows the panel produced by running the old regex. Each one was silently wrong.
+describe('which mark is the decimal point', () => {
+  it('takes three digits after a dot as a grouping mark', () => {
+    expect(numbersIn(['1.234'])).toEqual({ decimal: ',' })
+    expect(asNumber('1.234', { decimal: ',' })).toBe(1234)
+  })
+
+  it('reads a Turkish decimal instead of dropping the column to text', () => {
+    expect(numbersIn(['1.234,56'])).toEqual({ decimal: ',' })
+    expect(asNumber('1.234,56', { decimal: ',' })).toBe(1234.56)
+    expect(asNumber('1234,56', { decimal: ',' })).toBe(1234.56)
+  })
+
+  it('leaves an English column alone', () => {
+    expect(numbersIn(['1,234.56', '99.90'])).toEqual({ decimal: '.' })
+    expect(asNumber('1,234.56', { decimal: '.' })).toBe(1234.56)
+    expect(asNumber('1234.56', { decimal: '.' })).toBe(1234.56)
+  })
+
+  it('does not read a leading zero as a thousand', () => {
+    expect(numbersIn(['0.500', '0.250'])).toEqual({ decimal: '.' })
+    expect(asNumber('0.500', { decimal: '.' })).toBe(0.5)
+  })
+
+  it('strips every grouping mark, not the first one', () => {
+    expect(asNumber('1.234.567,89', { decimal: ',' })).toBe(1234567.89)
+    expect(asNumber('1,234,567.89', { decimal: '.' })).toBe(1234567.89)
+  })
+
+  it('is nothing at all when the column is not numbers', () => {
+    expect(numbersIn(['1.234', 'Ayşe'])).toBeNull()
+    expect(numbersIn([])).toBeNull()
+  })
+})
+
+describe('where the headings are', () => {
+  it('takes row one when row one is the headings', () => {
+    expect(headerAt([['Name', 'Fee'], ['Ayşe', '1.200']])).toBe(0)
+  })
+
+  it('walks past what the file calls itself', () => {
+    expect(headerAt([['2026 Müşteri Listesi'], ['Name', 'Fee'], ['Ayşe', '1.200']])).toBe(1)
+    expect(headerAt([['2026 Müşteri Listesi', '', ''], ['Name', 'Fee', 'City'], ['Ayşe', '1.200', 'İzmir']])).toBe(1)
+  })
+
+  it('takes row one rather than guess when there is nothing under it', () => {
+    expect(headerAt([['Name', 'Fee']])).toBe(0)
+    expect(headerAt([])).toBe(0)
+  })
 })
 
 describe('asDay', () => {
@@ -39,6 +99,11 @@ describe('asDay', () => {
   it('turns a written date into one, without the clock moving it', () => {
     expect(asDay('August 14, 2026')).toBe('2026-08-14')
     expect(asDay('January 1, 2026')).toBe('2026-01-01')
+  })
+
+  it('reads a date written with dots as the day it says', () => {
+    expect(asDay('03.08.2026')).toBe('2026-08-03')
+    expect(asDay('3.8.2026')).toBe('2026-08-03')
   })
 
   it('is empty rather than wrong', () => {

@@ -439,6 +439,11 @@ export function Canvas({ embedded = false }: { embedded?: boolean } = {}) {
       // JSON in a text box; it opens the import panel now, which counts what is in there first.
       else if (/\.(json|md|markdown)$/i.test(file.name)) void file.text().then((seed) =>
         useBoardStore.getState().update({ briefOpen: true, briefSeed: seed }))
+      // A spreadsheet is a table, and a board is not where a table goes. Dropped here it used to
+      // become two thousand characters of commas in a text box, or in the .xlsx case nothing at
+      // all — the file vanished and the person was left looking at an empty canvas.
+      else if (/\.(csv|xlsx|xls)$/i.test(file.name)) alert(
+        t('A spreadsheet becomes a database rather than something on a board. Open Pages and use Import.'))
       else if (file.type.startsWith('text/')) file.text().then((t) => {
         const item = makeText(p.x, p.y, 400, useBoardStore.getState().textStyle)
         item.text = t.slice(0, 2000)

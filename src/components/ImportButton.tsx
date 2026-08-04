@@ -46,10 +46,11 @@ export function ImportButton({ parent = null }: { parent?: string | null }) {
       </button>
 
       {!!haul && (
-        <span className="text-[12px] text-muted">
+        <span className={`text-[12px] ${haul.lost > 0 ? 'text-pigment-deep' : 'text-muted'}`}>
           {t('{pages} pages, {databases} databases, {rows} rows.',
             { pages: haul.pages, databases: haul.databases, rows: haul.rows })}
           {haul.skipped > 0 && ` ${t('{n} files were left out of this pass.', { n: haul.skipped })}`}
+          {haul.lost > 0 && ` ${t('{n} of them could not be written and are not here.', { n: haul.lost })}`}
         </span>
       )}
       {!!failed && <span className="text-[12px] text-pigment-deep">{failed}</span>}
