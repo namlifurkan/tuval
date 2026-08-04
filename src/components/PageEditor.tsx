@@ -151,19 +151,34 @@ export function PageEditor({ title, locked }: { title: string; locked?: boolean 
               },
             }))
 
-          if (named.length || found.length) return [...named, ...found]
-          return [{
-            title: t('New page: {title}', { title: query || t('Untitled page') }),
-            onItemClick: () => {
-              void createRecord(query, 'doc', mine || null).then((id) => {
-                if (!id) return
-                editor.insertInlineContent([
-                  { type: MENTION, props: { pageId: id, userId: '', label: query || t('Untitled page') } },
-                  ' ',
-                ])
-              })
+          // What is written on a page and what somebody has to do about it are the same sentence
+          // typed once. An action line becomes a piece of work here rather than being retyped in
+          // the tracker, and the page keeps a link to the work instead of a copy of it.
+          const make = (kind: 'doc' | 'issue') => () => {
+            const label = query || (kind === 'issue' ? t('Untitled') : t('Untitled page'))
+            void createRecord(query, kind, kind === 'doc' ? mine || null : null).then((id) => {
+              if (!id) return
+              editor.insertInlineContent([
+                { type: MENTION, props: { pageId: id, userId: '', label } },
+                ' ',
+              ])
+            })
+          }
+
+          const fresh = [
+            {
+              title: t('New issue: {title}', { title: query || t('Untitled') }),
+              subtext: t('Files it and links it here'),
+              onItemClick: make('issue'),
             },
-          }]
+            {
+              title: t('New page: {title}', { title: query || t('Untitled page') }),
+              onItemClick: make('doc'),
+            },
+          ]
+
+          if (named.length || found.length) return [...named, ...found, ...fresh]
+          return fresh
         }}
       />
     </BlockNoteView>

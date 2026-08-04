@@ -6,6 +6,7 @@ import '@blocknote/mantine/style.css'
 import { go } from '../board/boards'
 import { COLOR, FONT, PIGMENTS } from '../board/brand'
 import { MENTION } from '../board/mention'
+import { getRecords } from '../board/records'
 import { Bookmark, Callout, Contents, Diagram, Equation, Frame } from './pageBlocks'
 
 // BlockNote ships its own look and its own font. Neither is ours, so the whole surface is
@@ -47,6 +48,12 @@ export const paper = { light: theme, dark: theme }
 // A page named inside another page. The whole point of a wiki is that the naming is the link,
 // so it carries the id and shows the title, and a renamed page is still pointed at.
 //
+// A mention keeps an id and nothing else, so where it goes is read from the record it names. An
+// issue lives at a different address than a page, and a mention written before the record was
+// promoted should still land on whatever it is now.
+const addressOf = (id: string) =>
+  (getRecords('issue').some((r) => r.id === id) ? `/i/${id}` : `/d/${id}`)
+
 // The same mark names a page or a person; which id it carries is the difference. A person is
 // not a link to anywhere, so it is drawn as a chip rather than underlined like a destination.
 const Mention = createReactInlineContentSpec(
@@ -63,8 +70,8 @@ const Mention = createReactInlineContentSpec(
         </span>
       ) : (
         <a
-          href={`/d/${inlineContent.props.pageId}`}
-          onClick={(e) => { e.preventDefault(); go(`/d/${inlineContent.props.pageId}`) }}
+          href={addressOf(inlineContent.props.pageId)}
+          onClick={(e) => { e.preventDefault(); go(addressOf(inlineContent.props.pageId)) }}
           className="rounded px-0.5 font-medium text-pigment underline decoration-pigment/40 underline-offset-2 hover:decoration-pigment"
         >
           {inlineContent.props.label || 'Untitled page'}
