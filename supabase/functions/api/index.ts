@@ -176,14 +176,38 @@ Deno.serve(async (request) => {
   // so can decide what to do about it.
   if (parts[0] === 'boards' && request.method === 'GET') {
     if (!parts[1]) {
-      const { data } = await db.from('boards')
-        .select('id, name, updated_at, board_snapshots(items, frames, updated_at)')
-        .eq('workspace_id', workspace).is('deleted_at', null)
-        .order('updated_at', { ascending: false }).limit(100)
-      const open = await Promise.all((data ?? []).map(async (row) =>
+      // A board shared with the person this key speaks for lives in the workspace of whoever
+      // shared it, and the read below serves it. Listing only this workspace would answer for one
+      // of those doors and not the other, which is how somebody ends up holding a board they can
+      // read and cannot find.
+      const { data: joined } = await db.from('board_members')
+        .select('board_id').eq('user_id', acting)
+      const invited = (joined ?? []).map((row) => row.board_id as string)
+
+      const [ours, theirs] = await Promise.all([
+        db.from('boards')
+          .select('id, name, updated_at, board_snapshots(items, frames, updated_at)')
+          .eq('workspace_id', workspace).is('deleted_at', null),
+        invited.length
+          ? db.from('boards')
+            .select('id, name, updated_at, board_snapshots(items, frames, updated_at)')
+            .in('id', invited).is('deleted_at', null)
+          : Promise.resolve({ data: [] }),
+      ])
+
+      const held = new Map<string, Record<string, unknown>>()
+      for (const row of [...(ours.data ?? []), ...(theirs.data ?? [])]) {
+        held.set(String(row.id), row as Record<string, unknown>)
+      }
+      const data = [...held.values()]
+        .sort((a, b) => Date.parse(String(b.updated_at)) - Date.parse(String(a.updated_at)))
+        .slice(0, 100)
+
+      const open = await Promise.all(data.map(async (row) =>
         await db.rpc('can_read_board_as', { who: acting, board: row.id }).then((r) => r.data === true)))
-      return send((data ?? []).filter((_, at) => open[at]).map((row) => {
-        const snap = Array.isArray(row.board_snapshots) ? row.board_snapshots[0] : row.board_snapshots
+      return send(data.filter((_, at) => open[at]).map((row) => {
+        const held = row.board_snapshots
+        const snap = (Array.isArray(held) ? held[0] : held) as { items?: number; frames?: number; updated_at?: string } | null
         return {
           id: row.id,
           title: row.name,
