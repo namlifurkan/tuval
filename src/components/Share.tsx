@@ -2,7 +2,7 @@ import { Check, Link2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { getMeta, room } from '../board/doc'
 import {
-  invite, listInvites, listMembers, mailInvite, myRole, removeMember, revokeInvite, setMemberRole,
+  invite, listInvites, listMembers, myRole, removeMember, revokeInvite, setMemberRole,
 } from '../board/cloud'
 import type { Invite, Member } from '../board/cloud'
 import { boardIsOpen, openBoardToWorld } from '../board/publicProfile'
@@ -75,18 +75,24 @@ export function Share() {
 
   const owner = role === 'owner'
 
+  // Access lands with the row, and the row is the whole of it: claim_invites turns it into
+  // membership the next time that address signs in, from any link, on any day.
+  //
+  // What used to go out here was a magic link, because auth mail is the only mail Supabase
+  // sends. Somebody who already had an account got "Your sign-in link" — no board, no sender, no
+  // sign that it was an invitation — and clicking it while signed in as somebody else switched
+  // their account without saying so. A draft they send themselves says what happened.
   const send = async () => {
     const to = email.trim()
     if (!to) return
-    setNote(t('Sending…'))
+    setNote(t('Granting…'))
     const problem = await invite(room, to, newRole)
     if (problem) { setNote(problem); return }
     setEmail('')
     refresh()
-    const mail = await mailInvite(to, boardLink())
-    setNote(mail
-      ? t('Access granted, but the email failed: {reason}', { reason: mail })
-      : t('Invite emailed to {email}.', { email: to }))
+    navigator.clipboard?.writeText(boardLink())
+    setNote(t('{email} can open it now. Link copied — send it to them.', { email: to }))
+    draft(to)
   }
 
   return (
@@ -231,7 +237,7 @@ export function Share() {
                 {owner && (
                   <button
                     type="button"
-                    onClick={() => { void mailInvite(i.email, boardLink()); draft(i.email) }}
+                    onClick={() => draft(i.email)}
                     className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold text-pigment hover:bg-pigment-wash"
                   >
                     {t('Email again')}
@@ -255,7 +261,7 @@ export function Share() {
 
         {user && owner && (
           <p className="px-2.5 pb-1 pt-2 text-[11px] leading-snug text-muted">
-            {t('The invite goes out as a sign-in link from your Supabase SMTP. Configure it under Authentication → SMTP Settings, or the built-in sender will throttle after a few messages.')}
+            {t('Access is granted the moment that address signs in. Tuval does not send mail: your mail app opens with the invite ready, you press send.')}
           </p>
         )}
       </Popover>

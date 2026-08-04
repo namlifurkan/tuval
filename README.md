@@ -115,11 +115,15 @@ update tuval_settings set blocked_domains = '{gmail.com,outlook.com,yahoo.com}';
 Both are enforced by a trigger, so a client that talks to the API directly obeys them too.
 The defaults are conservative: own domain only, nothing blocked.
 
-The invite itself travels as a sign-in link, which is the only mail Supabase sends on your
-behalf. Configure **Authentication → SMTP Settings** with your own server before relying on
-it: the built-in sender is throttled to a handful of messages an hour and is not meant for
-production. Editing the *Magic Link* template under **Authentication → Email Templates** is
-worth the two minutes, since that is the text an invited colleague reads.
+Tuval sends no mail of its own. Inviting somebody writes the row that grants them access —
+it becomes membership the moment that address signs in, from any link — and opens your own
+mail client with the board link and a sentence explaining it. You press send.
+
+It used to ride on a Supabase sign-in link instead, because auth mail is the only mail
+Supabase sends. A colleague who already had an account received "Your sign-in link" with no
+board on it and no sender, and clicking it while signed in as somebody else moved them to
+the invited address without saying so. A message you wrote yourself is worth more than a
+template you cannot word.
 
 The document itself is still a Yjs CRDT. Every update is appended to `board_updates` as it
 happens and the snapshot row is a compaction of that log, so a board edited in two places
