@@ -941,10 +941,14 @@ const tr: Record<string, string> = {
     '{pages} sayfa, {databases} veritabanı, {rows} satır.',
   '{n} files were left out of this pass.': 'Bu turda {n} dosya dışarıda kaldı.',
   '{n} of them could not be written and are not here.': 'Bunlardan {n} tanesi yazılamadı ve burada değil.',
+  'That spreadsheet is too large to open here.': 'Bu hesap tablosu burada açılamayacak kadar büyük.',
+  'That file is not a spreadsheet.': 'Bu dosya bir hesap tablosu değil.',
+  '“{sheet}” holds more than {n} rows. Nothing was imported.':
+    '“{sheet}” {n} satırdan fazlasını tutuyor. Hiçbir şey içeri aktarılmadı.',
+  'That file could not be read. A Notion export, a .zip, a .csv, an .xlsx or a .md file.':
+    'Bu dosya okunamadı. Notion dışa aktarımı, .zip, .csv, .xlsx ya da .md olmalı.',
   'A spreadsheet becomes a database rather than something on a board. Open Pages and use Import.':
     'Hesap tablosu tuvale değil veritabanına dönüşür. Sayfalar\'ı açıp İçeri aktar\'ı kullan.',
-  'That file could not be read. A Notion export, a .zip, a .csv or a .md file.':
-    'Bu dosya okunamadı. Notion dışa aktarımı, .zip, .csv veya .md olmalı.',
   'Timeline': 'Zaman çizelgesi',
   'Starts on…': 'Başlangıç…',
   'Ends on…': 'Bitiş…',

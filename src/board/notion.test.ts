@@ -1,6 +1,78 @@
 import { describe, expect, it } from 'vitest'
 import { strToU8, zipSync } from 'fflate'
-import { asDay, asNumber, expand, guessType, headerAt, numbersIn } from './notion'
+import { asDay, asNumber, expand, guessType, headerAt, numbersIn, sheetsIn } from './notion'
+
+// The smallest workbook Excel would recognise, written by hand so the test owns every byte.
+function workbook(sheets: { name: string; xml: string }[], extra: Record<string, string> = {}) {
+  const files: Record<string, Uint8Array> = {
+    'xl/workbook.xml': strToU8(
+      '<?xml version="1.0"?><workbook xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+      + sheets.map((s, i) => `<sheet name="${s.name}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')
+      + '</sheets></workbook>'),
+    'xl/_rels/workbook.xml.rels': strToU8(
+      '<?xml version="1.0"?><Relationships>'
+      + sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Target="worksheets/sheet${i + 1}.xml"/>`).join('')
+      + '</Relationships>'),
+  }
+  sheets.forEach((s, i) => { files[`xl/worksheets/sheet${i + 1}.xml`] = strToU8(s.xml) })
+  for (const [path, text] of Object.entries(extra)) files[path] = strToU8(text)
+  return zipSync(files)
+}
+
+const sheet = (rows: string) => `<?xml version="1.0"?><worksheet><sheetData>${rows}</sheetData></worksheet>`
+
+describe('sheetsIn', () => {
+  it('reads a tab as a table, by the name on the tab', () => {
+    const held = sheetsIn(workbook([{
+      name: 'Satışlar',
+      xml: sheet('<row r="1"><c r="A1" t="inlineStr"><is><t>Ad</t></is></c><c r="B1" t="inlineStr"><is><t>Tutar</t></is></c></row>'
+        + '<row r="2"><c r="A2" t="inlineStr"><is><t>Ayşe</t></is></c><c r="B2"><v>1234.5</v></c></row>'),
+    }]))
+    expect(held).toHaveLength(1)
+    expect(held[0].name).toBe('Satışlar')
+    expect(held[0].rows).toEqual([['Ad', 'Tutar'], ['Ayşe', '1234.5']])
+  })
+
+  it('takes the shared string a cell points at', () => {
+    const held = sheetsIn(workbook(
+      [{ name: 'S', xml: sheet('<row r="1"><c r="A1" t="s"><v>1</v></c></row>') }],
+      { 'xl/sharedStrings.xml': '<?xml version="1.0"?><sst><si><t>first</t></si><si><r><t>se</t></r><r><t>cond</t></r></si></sst>' },
+    ))
+    expect(held[0].rows).toEqual([['second']])
+  })
+
+  it('turns a dated serial number into the day it means', () => {
+    const held = sheetsIn(workbook(
+      [{ name: 'S', xml: sheet('<row r="1"><c r="A1" s="1"><v>46237</v></c><c r="B1" s="0"><v>46237</v></c></row>') }],
+      { 'xl/styles.xml': '<?xml version="1.0"?><styleSheet><cellXfs><xf numFmtId="0"/><xf numFmtId="14"/></cellXfs></styleSheet>' },
+    ))
+    // The same number, once wearing a date format and once not.
+    expect(held[0].rows[0][0]).toBe('2026-08-03')
+    expect(held[0].rows[0][1]).toBe('46237')
+  })
+
+  it('holds a gap open rather than sliding the next cell into it', () => {
+    const held = sheetsIn(workbook([{
+      name: 'S',
+      xml: sheet('<row r="1"><c r="A1" t="inlineStr"><is><t>a</t></is></c><c r="C1" t="inlineStr"><is><t>c</t></is></c></row>'),
+    }]))
+    expect(held[0].rows).toEqual([['a', '', 'c']])
+  })
+
+  it('refuses a sheet whole rather than importing half of it', () => {
+    const rows = Array.from({ length: 2001 }, (_, i) =>
+      `<row r="${i + 1}"><c r="A${i + 1}"><v>${i}</v></c></row>`).join('')
+    expect(() => sheetsIn(workbook([{ name: 'Big', xml: sheet(rows) }]))).toThrow(/2000/)
+  })
+
+  it('drops a relationship pointing out of the file', () => {
+    const bytes = zipSync({
+      'xl/workbook.xml': strToU8('<?xml version="1.0"?><workbook xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>'),
+      'xl/_rels/workbook.xml.rels': strToU8('<?xml version="1.0"?><Relationships><Relationship Id="rId1" TargetMode="External" Target="https://elsewhere.test/sheet1.xml"/></Relationships>'),
+    })
+    expect(sheetsIn(bytes)).toEqual([])
+  })
+})
 
 describe('guessType', () => {
   it('reads the whole column, not the first cell', () => {

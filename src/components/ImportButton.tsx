@@ -19,8 +19,13 @@ export function ImportButton({ parent = null }: { parent?: string | null }) {
     setHaul(null)
     try {
       setHaul(await importNotion([...files], parent))
-    } catch {
-      setFailed(t('That file could not be read. A Notion export, a .zip, a .csv or a .md file.'))
+    } catch (e) {
+      // A refusal we wrote says why it refused, and that sentence is the useful one. Anything
+      // else is a parser giving up, and the person only needs to know which files are accepted.
+      const said = e instanceof Error ? e.message : ''
+      setFailed(said && !/^\w+Error/.test(said)
+        ? said
+        : t('That file could not be read. A Notion export, a .zip, a .csv, an .xlsx or a .md file.'))
     }
     setBusy(false)
     if (picker.current) picker.current.value = ''
@@ -32,7 +37,7 @@ export function ImportButton({ parent = null }: { parent?: string | null }) {
         ref={picker}
         type="file"
         multiple
-        accept=".zip,.csv,.md,.markdown,text/csv,text/markdown,application/zip"
+        accept=".zip,.csv,.xlsx,.md,.markdown,text/csv,text/markdown,application/zip,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         onChange={(e) => void take(e.target.files)}
         className="hidden"
       />

@@ -11,6 +11,7 @@ import { FRAGMENT, hex, textOf } from './page'
 import { loadPages } from './records'
 import { getUser, supabase } from './supabase'
 import { getWorkspace } from './workspace'
+import { t } from '../i18n'
 
 // A Notion export is a zip of Markdown files for pages and CSV files for databases, with the
 // folder tree carrying the nesting. Nothing here is Notion-specific beyond that shape, so a
@@ -50,6 +51,131 @@ function decode(bytes: Uint8Array): string {
   catch { return new TextDecoder('windows-1254').decode(bytes) }
 }
 
+// An .xlsx is a zip of XML, and it is opened here rather than on a server on purpose: the file
+// comes from outside, the parsing is the dangerous part, and a browser tab is the one place where
+// it cannot reach the service key. Everything below is the price of that — a zip bomb is cheap to
+// make and a spreadsheet is a normal thing to be sent.
+const ZIP_BYTES = 15 * 1024 * 1024
+const OPENED_BYTES = 150 * 1024 * 1024
+const ZIP_ENTRIES = 500
+const BLOWUP = 100
+// Past this a sheet is refused whole. Half a spreadsheet is worse than none: the half that is
+// there looks complete, and anything summed over it is wrong.
+const SHEET_ROWS = 2000
+
+// Excel counts days from the 30th of December 1899, which is a day earlier than it should be
+// because it believes 1900 was a leap year. Nobody has ever fixed it and nobody can.
+const EXCEL_EPOCH = Date.UTC(1899, 11, 30)
+
+// The formats Excel ships that mean a date, and any custom one written out of days and months.
+const BUILT_IN_DATES = new Set([14, 15, 16, 17, 22, 45, 46, 47])
+
+const parse = (xml: string) => new DOMParser().parseFromString(xml, 'application/xml')
+
+const flatten = (node: Element | null) =>
+  node ? [...node.getElementsByTagName('t')].map((t) => t.textContent ?? '').join('') : ''
+
+function stringsIn(xml: string): string[] {
+  return [...parse(xml).getElementsByTagName('si')].map(flatten)
+}
+
+// A cell says which format it wears by index, and the format says whether it is a date. Without
+// this a column of dates arrives as a column of five-digit numbers, which sorts and sums and is
+// wrong in every one of those.
+function dateStylesIn(xml: string): Set<number> {
+  const doc = parse(xml)
+  const custom = new Set<number>()
+  for (const fmt of [...doc.getElementsByTagName('numFmt')]) {
+    const code = fmt.getAttribute('formatCode') ?? ''
+    const id = Number(fmt.getAttribute('numFmtId'))
+    if (/[dy]/.test(code.replace(/\[[^\]]*\]/g, '').replace(/"[^"]*"/g, ''))) custom.add(id)
+  }
+  const xfs = doc.getElementsByTagName('cellXfs')[0]
+  const out = new Set<number>()
+  ;[...(xfs?.getElementsByTagName('xf') ?? [])].forEach((xf, at) => {
+    const id = Number(xf.getAttribute('numFmtId') ?? 0)
+    if (BUILT_IN_DATES.has(id) || custom.has(id)) out.add(at)
+  })
+  return out
+}
+
+const columnOf = (ref: string) => {
+  const letters = /^[A-Z]+/.exec(ref)?.[0] ?? 'A'
+  return [...letters].reduce((at, ch) => at * 26 + (ch.charCodeAt(0) - 64), 0) - 1
+}
+
+const dayOfSerial = (serial: number) =>
+  new Date(EXCEL_EPOCH + Math.round(serial) * 86400000).toISOString().slice(0, 10)
+
+function rowsOfSheet(xml: string, strings: string[], dated: Set<number>): string[][] {
+  const rows: string[][] = []
+  for (const row of [...parse(xml).getElementsByTagName('row')]) {
+    const line: string[] = []
+    for (const cell of [...row.getElementsByTagName('c')]) {
+      const at = columnOf(cell.getAttribute('r') ?? 'A')
+      const kind = cell.getAttribute('t')
+      const value = cell.getElementsByTagName('v')[0]?.textContent ?? ''
+      let held = value
+      if (kind === 's') held = strings[Number(value)] ?? ''
+      else if (kind === 'inlineStr') held = flatten(cell.getElementsByTagName('is')[0])
+      else if (kind === 'b') held = value === '1' ? 'true' : 'false'
+      else if (!kind || kind === 'n') {
+        // A formula cell keeps the answer beside the formula. The answer is what we take: our own
+        // formula type speaks a different language and Excel's would not survive the trip.
+        const style = Number(cell.getAttribute('s') ?? -1)
+        if (value && dated.has(style)) held = dayOfSerial(Number(value))
+      }
+      while (line.length < at) line.push('')
+      line[at] = held
+    }
+    if (line.some((v) => v.trim())) rows.push(line)
+  }
+  const width = Math.max(0, ...rows.map((r) => r.length))
+  return rows.map((r) => Array.from({ length: width }, (_, i) => r[i] ?? ''))
+}
+
+// Every sheet becomes its own table, named the way the tab is named.
+export function sheetsIn(bytes: Uint8Array): { name: string; rows: string[][] }[] {
+  if (bytes.length > ZIP_BYTES) throw new Error(t('That spreadsheet is too large to open here.'))
+
+  const held = unzipSync(bytes)
+  const names = Object.keys(held)
+  if (names.length > ZIP_ENTRIES) throw new Error(t('That file is not a spreadsheet.'))
+  const opened = names.reduce((sum, name) => sum + held[name].length, 0)
+  if (opened > OPENED_BYTES || opened > bytes.length * BLOWUP) {
+    throw new Error(t('That spreadsheet is too large to open here.'))
+  }
+
+  const read = (path: string) => (held[path] ? decode(held[path]) : '')
+  const strings = held['xl/sharedStrings.xml'] ? stringsIn(read('xl/sharedStrings.xml')) : []
+  const dated = held['xl/styles.xml'] ? dateStylesIn(read('xl/styles.xml')) : new Set<number>()
+
+  // Which file is which tab is written in the relationships, and a relationship may point out of
+  // the file entirely. Those are dropped: a spreadsheet has no business fetching anything.
+  const rels = new Map<string, string>()
+  for (const rel of [...parse(read('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship')]) {
+    const target = rel.getAttribute('Target') ?? ''
+    if (rel.getAttribute('TargetMode') === 'External' || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue
+    rels.set(rel.getAttribute('Id') ?? '', `xl/${target.replace(/^\/?xl\//, '')}`)
+  }
+
+  const out: { name: string; rows: string[][] }[] = []
+  for (const sheet of [...parse(read('xl/workbook.xml')).getElementsByTagName('sheet')]) {
+    const id = sheet.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id')
+      ?? sheet.getAttribute('r:id') ?? ''
+    const path = rels.get(id)
+    if (!path || !held[path]) continue
+    const rows = rowsOfSheet(read(path), strings, dated)
+    if (!rows.length) continue
+    if (rows.length > SHEET_ROWS) {
+      throw new Error(t('“{sheet}” holds more than {n} rows. Nothing was imported.',
+        { sheet: sheet.getAttribute('name') ?? 'Sheet', n: SHEET_ROWS }))
+    }
+    out.push({ name: sheet.getAttribute('name') || 'Sheet', rows })
+  }
+  return out
+}
+
 // A large Notion export arrives as a zip of zips — Part-1.zip, Part-2.zip — so unpacking has to
 // be willing to go round again. Twice is enough: Notion does not nest further, and a zip that
 // contains itself should stop rather than spin.
@@ -67,6 +193,19 @@ export async function expand(files: File[]): Promise<Entry[]> {
   const out: Entry[] = []
   for (const file of files) {
     if (/\.zip$/i.test(file.name)) out.push(...unpack(new Uint8Array(await file.arrayBuffer())))
+    // A sheet is a table with a name on a tab, which is a CSV with a name on a file. Turning it
+    // into one means the reading below — where the headings are, which mark is the decimal point,
+    // what a column holds — happens once, for both kinds of file.
+    else if (/\.xlsx$/i.test(file.name)) {
+      const sheets = sheetsIn(new Uint8Array(await file.arrayBuffer()))
+      const book = file.name.replace(/\.xlsx$/i, '')
+      for (const sheet of sheets) {
+        out.push({
+          path: `${sheets.length === 1 ? book : sheet.name}.csv`,
+          text: Papa.unparse(sheet.rows),
+        })
+      }
+    }
     else out.push({ path: file.name, text: clean(decode(new Uint8Array(await file.arrayBuffer()))) })
   }
   // The `_all` copy is the same database written twice, once per view.
