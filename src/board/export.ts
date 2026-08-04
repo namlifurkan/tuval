@@ -1,8 +1,9 @@
 import { artifactSurface } from './artifacts'
+import { aabb, overlaps } from './geometry'
 import { readTexture } from './paperPrefs'
 import { boxOf, render } from './render'
 import type { Session } from './store'
-import type { Item } from './types'
+import type { FrameItem, Item, Rect } from './types'
 
 const BLANK: Session = {
   preview: new Map(),
@@ -19,9 +20,11 @@ const BLANK: Session = {
   cursor: 'default',
 }
 
-export function renderToCanvas(items: Item[], scale = 2, padding = 40): HTMLCanvasElement | null {
+export function renderToCanvas(
+  items: Item[], scale = 2, padding = 40, rect?: Rect,
+): HTMLCanvasElement | null {
   if (!items.length) return null
-  const box = boxOf(items)
+  const box = rect ?? boxOf(items)
   const w = Math.ceil((box.w + padding * 2) * scale)
   const h = Math.ceil((box.h + padding * 2) * scale)
   if (w < 1 || h < 1 || w * h > 64e6) return null
@@ -49,8 +52,7 @@ export function renderToCanvas(items: Item[], scale = 2, padding = 40): HTMLCanv
   return canvas
 }
 
-export function exportPng(items: Item[], name = 'board', scale = 2) {
-  const canvas = renderToCanvas(items, scale)
+function download(canvas: HTMLCanvasElement | null, name: string) {
   if (!canvas) return
   canvas.toBlob((blob) => {
     if (!blob) return
@@ -61,6 +63,22 @@ export function exportPng(items: Item[], name = 'board', scale = 2) {
     a.click()
     URL.revokeObjectURL(url)
   }, 'image/png')
+}
+
+export function exportPng(items: Item[], name = 'board', scale = 2) {
+  download(renderToCanvas(items, scale), name)
+}
+
+// A frame is an artboard: what comes out is the rectangle somebody drew, at the size they drew it,
+// and nothing of ours around it. Everything touching the frame is drawn and the canvas edge cuts
+// what hangs over, because bleeding past the edge is what a full-width picture is for.
+export function frameCanvas(frame: FrameItem, all: Item[], width = frame.w) {
+  const inside = all.filter((i) => i.id === frame.id || overlaps(frame, aabb(i)))
+  return renderToCanvas(inside, width / frame.w, 0, frame)
+}
+
+export function exportFramePng(frame: FrameItem, all: Item[], width = frame.w) {
+  download(frameCanvas(frame, all, width), frame.title || 'frame')
 }
 
 export async function copyPngToClipboard(items: Item[], scale = 2) {

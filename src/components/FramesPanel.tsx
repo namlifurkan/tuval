@@ -1,21 +1,19 @@
 import { t } from '../i18n'
-import { ChevronDown, ChevronUp, Play, Printer, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Play, Printer, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { patchItem, removeItems } from '../board/doc'
-import { renderToCanvas } from '../board/export'
+import { exportFramePng, frameCanvas } from '../board/export'
 import { patchItems } from '../board/doc'
 import { sortedFrames } from '../board/items'
 import { printFrames } from '../board/print'
 import { flyToRect, requestRender, useBoardStore } from '../board/store'
 import { useItems } from '../board/useBoard'
 import type { FrameItem } from '../board/types'
-import { aabb, contains } from '../board/geometry'
 import { IconButton } from './ui'
 
 function Thumb({ frame }: { frame: FrameItem }) {
   const items = useItems()
-  const inside = items.filter((i) => i.id === frame.id || contains(frame, aabb(i)))
-  const canvas = renderToCanvas(inside, 0.12, 0)
+  const canvas = frameCanvas(frame, items, frame.w * 0.12)
   return (
     <div className="h-[52px] w-[84px] shrink-0 overflow-hidden rounded-md border border-hairline bg-surface">
       {canvas && (
@@ -63,7 +61,7 @@ export function FramesPanel() {
   return (
     <div className="absolute left-4 top-[76px] z-40 flex max-h-[calc(100dvh-140px)] w-[220px] flex-col rounded-xl border border-black/5 bg-surface shadow-[3px_3px_0_rgba(20,19,16,0.09)]">
       <div className="flex items-center justify-between border-b border-shade px-3 py-2">
-        <span className="text-xs font-semibold text-ink">Frame'ler ({frames.length})</span>
+        <span className="text-xs font-semibold text-ink">{t('Frames')} ({frames.length})</span>
         <div className="flex items-center gap-0.5">
           <IconButton
             title={t('Start presentation')}
@@ -152,6 +150,14 @@ export function FramesPanel() {
                 <ChevronDown size={12} strokeWidth={2.5} />
               </button>
             </div>
+            <button
+              type="button"
+              title={t('Export as PNG')}
+              onClick={() => exportFramePng(frame, items)}
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-ink-soft opacity-0 hover:bg-shade group-hover:opacity-100"
+            >
+              <Download size={13} strokeWidth={2} />
+            </button>
             <button
               type="button"
               title={t('Delete')}

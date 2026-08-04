@@ -284,7 +284,16 @@ export function Dock() {
                 className="mb-1 w-full rounded-lg px-2.5 py-1.5 text-left text-sm font-semibold text-pigment hover:bg-tint"
               >{t('Open frame panel')}</button>
               <div className="px-1 pb-2 pt-1 text-xs font-semibold text-ink">{t('Frame size')}</div>
-              {([['16:9', 1920, 1080], ['4:3', 1600, 1200], ['1:1', 1200, 1200], ['A4 dikey', 1240, 1754], ['Telefon', 750, 1334]] as [string, number, number][]).map(([label, w, h]) => (
+              {([
+                ['16:9', 1920, 1080],
+                ['4:3', 1600, 1200],
+                [t('A4 portrait'), 1240, 1754],
+                [t('Phone'), 750, 1334],
+                [t('Post'), 1080, 1080],
+                [t('Post, tall'), 1080, 1350],
+                [t('Story'), 1080, 1920],
+                [t('Link card'), 1200, 630],
+              ] as [string, number, number][]).map(([label, w, h]) => (
                 <button
                   key={label}
                   type="button"

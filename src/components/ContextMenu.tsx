@@ -1,6 +1,6 @@
 import { t } from '../i18n'
 import { getIndex, getItems, patchItems } from '../board/doc'
-import { exportPng } from '../board/export'
+import { exportFramePng, exportPng } from '../board/export'
 import {
   arrangeInGrid, copyStyle, deleteSelection, duplicateSelection, groupSelection, hasStyleClipboard,
   openLinkOf, pasteStyle, reorder, selectInsideFrame, ungroupSelection,
@@ -60,7 +60,9 @@ export function ContextMenu() {
     },
     {
       label: t('Export as PNG'),
-      run: () => exportPng(items, items.length === 1 && items[0].type === 'frame' ? items[0].title : 'secim'),
+      run: () => (items.length === 1 && items[0].type === 'frame'
+        ? exportFramePng(items[0], getItems())
+        : exportPng(items, 'selection')),
       hidden: !items.length,
     },
     { label: 'Stili kopyala', shortcut: '⌘⌥C', run: () => copyStyle(), hidden: !items.length },

@@ -135,6 +135,54 @@ export const TEMPLATES: Template[] = [
     },
   },
   {
+    id: 'screens',
+    name: 'Screen flow',
+    description: 'Three screens and the path between them',
+    build: (o) => {
+      const items: Item[] = []
+      const line = { stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid' as const }
+      const chrome = { kind: 'browser' as const, fill: '#FFFFFF', ...line }
+      const box = { kind: 'field' as const, fill: '#FFFFFF', stroke: '#B9B3A6', strokeWidth: 2, strokeStyle: 'solid' as const }
+      const key = { kind: 'stadium' as const, fill: '#B43E28', stroke: 'transparent', strokeWidth: 0, strokeStyle: 'solid' as const }
+
+      const W = 420
+      const H = 300
+      const screens = [
+        { title: t('Sign in'), rows: [t('Email'), t('Password')], action: t('Continue') },
+        { title: t('Dashboard'), rows: [t('Search'), t('Recent')], action: t('New') },
+        { title: t('Settings'), rows: [t('Name'), t('Notifications')], action: t('Save') },
+      ]
+
+      const shells = screens.map((screen, i) => {
+        const x = o.x + i * (W + 200)
+        const shell = makeShape(x, o.y, W, H, chrome, { ...DEFAULT_TEXT_STYLE, fontSize: 0 })
+        items.push(shell)
+        items.push(heading(x, o.y - 56, W, screen.title, 26))
+        screen.rows.forEach((label, at) => {
+          const field = makeShape(x + 40, o.y + 96 + at * 56, W - 80, 40, box, { ...DEFAULT_TEXT_STYLE, fontSize: 16 })
+          field.text = label
+          items.push(field)
+        })
+        const button = makeShape(x + 40, o.y + 218, 150, 44, key, {
+          ...DEFAULT_TEXT_STYLE, fontSize: 16, bold: true, textColor: '#FFFFFF',
+        })
+        button.text = screen.action
+        items.push(button)
+        return shell
+      })
+
+      const conn = { shape: 'elbow' as const, ...line, capStart: 'none' as const, capEnd: 'arrow' as const }
+      for (let i = 1; i < shells.length; i += 1) {
+        items.push(makeConnector(
+          { itemId: shells[i - 1].id, anchor: 'right', x: 0, y: 0 },
+          { itemId: shells[i].id, anchor: 'left', x: 0, y: 0 },
+          conn,
+        ))
+      }
+      return items
+    },
+  },
+  {
     id: 'mindmap',
     name: 'Mind map',
     description: 'A centre and five branches',
