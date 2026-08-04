@@ -38,6 +38,8 @@ install.
 | `update_record` | Change a title, status, assignee, priority, due date, parent, project or cycle |
 | `append_to_page` | Add Markdown to the end of a page or issue |
 | `create_board` | Open an infinite canvas drawn from a Markdown brief |
+| `read_board` | What is drawn on a board, as prose: frames, reading order, the flow between items |
+| `list_boards` | The boards in this workspace, with item and frame counts |
 
 ## Writing
 
@@ -68,6 +70,15 @@ Until it is folded in:
 Both stop being true the moment somebody opens the page. It is a delay, not a separate place, and
 nothing is lost either way. If a promise you made depends on the text being findable right now,
 say so.
+
+### Reading one back
+
+`read_board` answers from a copy, not from the document. The browser writes the reading beside the
+snapshot every time it saves, the same way it writes a page's Markdown, because nothing outside a
+browser can compose a CRDT. So a board somebody changed and has not saved reads as it last did,
+and a board nobody has opened since this existed says it has no reading yet rather than answering
+empty. The `X-Tuval-Read-At` header carries the date of the copy; if what you were asked depends
+on the board being current, say which it is.
 
 ### Where `create_board` lands, exactly
 
@@ -116,7 +127,7 @@ opened the page and typed.
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node scripts/mcp.mjs
 ```
 
-Seven tools come back. If the key is missing, the plan has the API off, the key may only read or
+Ten tools come back. If the key is missing, the plan has the API off, the key may only read or
 it has spent its writes, `tools/call` answers with the reason as text rather than a transport
 error, so the model can read it and decide what to do.
 

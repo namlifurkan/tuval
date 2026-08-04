@@ -169,6 +169,57 @@ Deno.serve(async (request) => {
     }, 201)
   }
 
+  // What is on a board, as prose. The document itself is a CRDT that only a browser composes, so
+  // what is served is the reading the browser wrote beside it on its last save — the same bargain
+  // a page's markdown makes. It is named as a copy and dated, because a board nobody has opened
+  // since the last change has a reading that is honestly out of date, and a reader that is told
+  // so can decide what to do about it.
+  if (parts[0] === 'boards' && request.method === 'GET') {
+    if (!parts[1]) {
+      const { data } = await db.from('boards')
+        .select('id, name, updated_at, board_snapshots(items, frames, updated_at)')
+        .eq('workspace_id', workspace).is('deleted_at', null)
+        .order('updated_at', { ascending: false }).limit(100)
+      const open = await Promise.all((data ?? []).map(async (row) =>
+        await db.rpc('can_read_board_as', { who: acting, board: row.id }).then((r) => r.data === true)))
+      return send((data ?? []).filter((_, at) => open[at]).map((row) => {
+        const snap = Array.isArray(row.board_snapshots) ? row.board_snapshots[0] : row.board_snapshots
+        return {
+          id: row.id,
+          title: row.name,
+          url: `/b/${row.id as string}`,
+          items: snap?.items ?? 0,
+          frames: snap?.frames ?? 0,
+          read_at: snap?.updated_at ?? null,
+          markdown: `/boards/${row.id as string}/markdown`,
+        }
+      }))
+    }
+
+    const id = parts[1]
+    const { data: mine } = await db.rpc('can_read_board_as', { who: acting, board: id })
+    if (mine !== true) return send({ error: 'No such board.' }, 404)
+    if (parts[2] !== 'markdown') return send({ error: 'Read a board at /boards/<id>/markdown.' }, 404)
+
+    const { data } = await db.from('board_snapshots')
+      .select('markdown, updated_at, items').eq('board_id', id).maybeSingle()
+    if (!data?.markdown) {
+      return send({
+        error: 'This board has no reading yet.',
+        waiting: 'A board is composed in the browser, so its text appears once somebody has opened it since this was added.',
+      }, 409)
+    }
+    const held = `${UNTRUSTED}\n\n`
+      + `<<<RECORD_CONTENT>>>\n${sealed(data.markdown as string)}\n<<</RECORD_CONTENT>>>\n`
+    return new Response(held, {
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'X-Tuval-Read-At': String(data.updated_at ?? ''),
+        ...CORS,
+      },
+    })
+  }
+
   if (parts[0] === 'cycles' && request.method === 'GET') {
     const { data } = await db.from('cycles')
       .select('id, number, name, starts_on, ends_on')

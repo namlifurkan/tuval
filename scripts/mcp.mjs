@@ -142,6 +142,31 @@ const TOOLS = [
     run: ({ id }) => ask(`/records/${encodeURIComponent(id)}/markdown`, { markdown: true }),
   },
   {
+    name: 'read_board',
+    description:
+      'Read what is drawn on a board, as markdown: frames become sections, the items in them '
+      + 'become a list in reading order, connectors between them become a flow, and comments are '
+      + 'attached to what they were left on.\n\n'
+      + 'This is a copy, written by the browser each time somebody saves. A board changed by '
+      + 'somebody who has not saved since, or one nobody has opened since this door was built, '
+      + 'reads as it last did or says it has no reading yet. The response header X-Tuval-Read-At '
+      + 'is when the copy was written; say so if the answer depends on it.',
+    inputSchema: {
+      type: 'object',
+      properties: { id: { type: 'string', description: 'The board id, the part after /b/' } },
+      required: ['id'],
+    },
+    run: ({ id }) => ask(`/boards/${encodeURIComponent(id)}/markdown`, { markdown: true }),
+  },
+  {
+    name: 'list_boards',
+    description:
+      'The boards in this workspace, newest first, with how many items and frames each holds and '
+      + 'the address to read it in full.',
+    inputSchema: { type: 'object', properties: {} },
+    run: () => ask('/boards'),
+  },
+  {
     name: 'list_records',
     description:
       'List records of one kind: issue, doc, database, project, person, company, event or file. '

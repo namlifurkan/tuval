@@ -3,6 +3,7 @@ import { createItems, getItems, room, ydoc } from './doc'
 import { readOnly, setForeign } from './access'
 import { storagePath } from './storage'
 import { makeThumb } from './thumb'
+import { boardToGraph, graphToMarkdown } from './agent'
 import {
   appendUpdate, claimBoard, clearPendingBrief, compactUpdates, LOG_MAX, NOT_MINE, pullSnapshot,
   pullUpdates, pushSnapshot, readPendingBrief, snapshotStamp, sweepImages,
@@ -169,7 +170,16 @@ async function save() {
   const { items, frames } = counts()
   const error = refused
     ?? conflict
-    ?? await pushSnapshot(room, Y.encodeStateAsUpdate(ydoc), items, frames, makeThumb(getItems()))
+    // The reading goes up with the bytes. A board is a CRDT and only a browser materialises one,
+    // so anything outside — the API, an agent, a script — has no way to see what is on it. The
+    // page markdown is written the same way and for the same reason: the copy is what a reader
+    // that is not a browser gets, and it is exactly as old as the last time somebody had this
+    // board open.
+    ?? await pushSnapshot(
+      room, Y.encodeStateAsUpdate(ydoc), items, frames,
+      makeThumb(getItems()),
+      graphToMarkdown(boardToGraph(getItems(), (getMeta().name as string) || 'Board')),
+    )
   if (error) {
     // The row belongs to another account, so retrying is asking the same question for ever. The
     // board goes read-only and says why, which is the only thing left that helps.

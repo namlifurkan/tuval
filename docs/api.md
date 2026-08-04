@@ -130,6 +130,27 @@ If you are wiring an agent to this API, leave that text in the prompt. An instru
 model through an imported spreadsheet cell is the cheap version of this attack, and the sentence
 is what makes it fail.
 
+## Boards
+
+A board is a CRDT, and only a browser composes one. So the canvas is written from outside and
+read from a copy: `POST /boards` leaves a brief that becomes items the first time somebody opens
+the board, and `GET /boards/<id>/markdown` returns the reading the browser wrote beside the
+document on its last save.
+
+| | |
+|---|---|
+| `GET /boards` | The boards you can read, newest first, with item and frame counts |
+| `GET /boards/<id>/markdown` | What is drawn on it, as prose |
+| `POST /boards` | `{ title, brief }` — a board drawn from a brief |
+
+Frames become sections, the items inside them a list in reading order, the connectors between
+them a flow, and a comment is attached to whatever it was left on.
+
+The copy is exactly as old as the last save by somebody with the board open. `X-Tuval-Read-At` on
+the response says when it was written, and a board nobody has opened since this existed answers
+`409` rather than pretending to be empty. If the answer depends on the board being current, say
+so to whoever asked.
+
 ## Everything else
 
 | | |

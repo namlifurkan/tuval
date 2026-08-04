@@ -245,7 +245,7 @@ export async function sweepImages(room: string, referenced: Set<string>): Promis
 }
 
 export async function pushSnapshot(
-  room: string, doc: Uint8Array, items: number, frames: number, thumb?: string,
+  room: string, doc: Uint8Array, items: number, frames: number, thumb?: string, reading?: string,
 ): Promise<string | null> {
   if (!supabase || !getUser()) return null
   const snapshot = await snapshotBase64(doc)
@@ -255,6 +255,7 @@ export async function pushSnapshot(
     item_count: items,
     frame_count: frames,
     thumbnail: thumb || null,
+    reading: reading || null,
   })
   return error ? error.message : null
 }

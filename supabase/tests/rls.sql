@@ -103,6 +103,17 @@ select pg_temp.check('signed-in stranger reads a public board',        true,  pu
 select pg_temp.check('signed-in stranger sees the public row',         true,  exists(select 1 from public.boards where id = 'rls-public-board'));
 select pg_temp.check('signed-in stranger sees the public snapshot',    true,  exists(select 1 from public.board_snapshots where board_id = 'rls-public-board'));
 select pg_temp.check('signed-in stranger cannot write a public board', false, public.can_write_board('rls-public-board'));
+
+-- The API asks the same question on somebody's behalf, because it holds the service key and has
+-- no auth.uid() of its own. Two rules that answer differently is the failure worth testing for.
+set local role postgres;
+select pg_temp.check('the door reads a board for its owner', true,
+  public.can_read_board_as('aaaaaaaa-0000-4000-8000-000000000001', 'rls-team-board'));
+select pg_temp.check('the door refuses a stranger the same board', false,
+  public.can_read_board_as('bbbbbbbb-0000-4000-8000-000000000002', 'rls-team-board'));
+select pg_temp.check('the door reads a published board for a stranger', true,
+  public.can_read_board_as('bbbbbbbb-0000-4000-8000-000000000002', 'rls-public-board'));
+select pg_temp.becomes('bbbbbbbb-0000-4000-8000-000000000002', 'bob@other.test');
 select pg_temp.check('an expired board is closed again',               false, public.board_is_public('rls-expired-board'));
 select pg_temp.check('an expired board refuses the same reader',       false, public.can_read_board('rls-expired-board'));
 select pg_temp.check('an expired board hides its row',                 false, exists(select 1 from public.boards where id = 'rls-expired-board'));
