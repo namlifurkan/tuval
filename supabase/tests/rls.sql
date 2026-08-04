@@ -917,6 +917,17 @@ select pg_temp.check('a record still saves with a broken hook registered', true,
 select pg_temp.check('and it is really there', true,
   exists(select 1 from public.records where title = 'Saved anyway'));
 
+-- Thirty rows in one statement is an import, and the hook hears about it once rather than thirty
+-- times. What is checked here is that all thirty arrive: the batching lives in a statement
+-- trigger, and a statement trigger that throws takes the whole insert with it.
+select pg_temp.check('a bulk insert goes in whole with a hook registered', true,
+  not pg_temp.refused(
+    $q$insert into public.records (workspace_id, kind, title)
+       select 'cccccccc-0000-4000-8000-000000000003', 'issue', 'Bulk ' || n
+       from generate_series(1, 30) n$q$));
+select pg_temp.check('and all thirty are there', true,
+  (select count(*) = 30 from public.records where title like 'Bulk %'));
+
 -- A form is answered by somebody with no account ----------------------------------------------------
 
 set local role postgres;
