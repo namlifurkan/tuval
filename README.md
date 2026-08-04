@@ -14,14 +14,14 @@ are our own; no visual identity or asset is copied from any commercial product.
 
 | | |
 |---|---|
-| **Canvas** | Infinite board, 32 shapes, connectors, frames, comments, templates, Miro and PDF import |
+| **Canvas** | Infinite board, 32 shapes, connectors, frames, comments, nine templates, frame export at the size you drew it, Miro and PDF import |
 | **Pages** | Block editor, sub-pages, backlinks, `@` mentions, version history, trash, export to md/html/pdf |
 | **Databases** | Six views — table, list, board, gallery, calendar, timeline — and 20 column types |
 | **Issues** | `TUV-12` numbers, estimates, labels, sub-issues, blocking relations, seven statuses |
 | **Projects and cycles** | Two-week cycles with a burn line, projects with a roadmap read from their issues |
-| **Forms and bookings** | Answers land straight in a database |
-| **Workspace** | `⌘K` search across bodies, inbox, activity, what changed since you last looked, page permissions, publish to `/p/<slug>`, backup |
-| **Outside** | [HTTP API](docs/api.md), webhooks, [MCP server](docs/mcp.md), Notion and CSV import |
+| **Forms** | Answers land straight in a database |
+| **Workspace** | `⌘K` search across bodies, inbox, activity, what changed since you last looked, page permissions, publish to `/p/<slug>` with an end date, calendar over every date the workspace already knows, backup |
+| **Outside** | [HTTP API](docs/api.md), webhooks, [MCP server](docs/mcp.md), Notion, Excel and CSV import |
 
 ## Why
 

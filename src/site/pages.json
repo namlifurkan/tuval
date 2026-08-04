@@ -28,7 +28,7 @@
             "Frames, connectors, sticky notes, pen, shapes, tables and mind maps",
             "Images, PDFs placed page by page, live embeds and code blocks",
             "Presentation mode, comments and version history",
-            "Templates, and importers for an existing Miro board or a Notion export"
+            "Templates, and importers for an existing Miro board, a Notion export or a spreadsheet"
           ]
         },
         {
@@ -657,7 +657,7 @@
         {
           "tone": "pigment",
           "heading": "Drop the zip in, unopened",
-          "body": "A large export arrives as a zip of zips — Part-1.zip, Part-2.zip — and unpacking goes round again rather than asking you to do it by hand. A plain folder of .md and .csv files imports exactly as well."
+          "body": "A large export arrives as a zip of zips — Part-1.zip, Part-2.zip — and unpacking goes round again rather than asking you to do it by hand. A plain folder of .md and .csv files imports exactly as well, and so does an .xlsx: every sheet becomes its own database, read with the locale it was typed in."
         },
         {
           "heading": "What comes across",
@@ -834,8 +834,8 @@
           },
           {
             "feature": "Templates",
-            "tuval": "Eight board templates and four database kits.",
-            "them": "A large first-party gallery plus a public community library. Far more than eight."
+            "tuval": "Nine board templates and seven database kits.",
+            "them": "A large first-party gallery plus a public community library. Far more than nine."
           },
           {
             "feature": "Real-time editing",
@@ -888,7 +888,7 @@
         {
           "tone": "paper",
           "heading": "What Miro does better",
-          "body": "Almost everything to do with maturity. Their multiplayer has been carrying workshops for years; ours is written and unproven with two people in the room. They have native mobile and tablet apps; we have decided not to build a phone layout at all. They have thousands of templates and an app marketplace; we have eight templates and a REST API. They have a support organisation, published security certifications and enterprise identity provisioning; we have an issue tracker and one maintainer."
+          "body": "Almost everything to do with maturity. Their multiplayer has been carrying workshops for years; ours is written and unproven with two people in the room. They have native mobile and tablet apps; we have decided not to build a phone layout at all. They have thousands of templates and an app marketplace; we have nine templates and a REST API. They have a support organisation, published security certifications and enterprise identity provisioning; we have an issue tracker and one maintainer."
         },
         {
           "tone": "paper",
@@ -1097,7 +1097,7 @@
         {
           "tone": "paper",
           "heading": "What Linear does better",
-          "body": "Nearly everything a tracker is judged on. Custom workflow states, teams with their own keys and cycles, configurable cycle lengths, saved views and insights: we have a fixed seven states, one prefix and a fourteen-day constant. Their keyboard model is deeper than ours and it is what the product is famous for. They have importers, so moving in takes an afternoon; we have none. They link branches and pull requests; we do not talk to GitHub at all."
+          "body": "Nearly everything a tracker is judged on. Custom workflow states, teams with their own keys and cycles, configurable cycle lengths, saved views and insights: we have a fixed seven states, one prefix and a fourteen-day constant. Their keyboard model is deeper than ours and it is what the product is famous for. They import from other trackers, so moving in takes an afternoon; we read Notion, Miro and spreadsheets but nothing tracker-shaped. They link branches and pull requests; we do not talk to GitHub at all."
         },
         {
           "tone": "paper",

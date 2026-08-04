@@ -694,10 +694,8 @@ const tr: Record<string, string> = {
   'Everything on the free plan': 'Ücretsiz plandaki her şey',
   'The code is AGPL. Run it on your own machine and every limit here is yours to set — this price is for somebody else keeping the disks spinning.':
     'Kod AGPL. Kendi makinende çalıştır, buradaki bütün sınırlar senin belirlediğin olur — bu fiyat, diskleri başkasının döndürmesi için.',
-  'Make a booking link': 'Randevu bağlantısı oluştur',
   'A conversation': 'Görüşme',
   'What is being booked?': 'Ne için randevu?',
-  'A line for whoever is booking': 'Randevu alacak kişi için bir satır',
   'Mon': 'Pzt', 'Tue': 'Sal', 'Wed': 'Çar', 'Thu': 'Per', 'Fri': 'Cum', 'Sat': 'Cmt', 'Sun': 'Paz',
   '{n} min': '{n} dk',
   'at least': 'en az',
