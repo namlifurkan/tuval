@@ -43,18 +43,47 @@ export function pickSnapshot(embedded: unknown): Snapshot | null {
   return { items: items ?? 0, frames: frames ?? 0, thumb: thumb ?? null }
 }
 
+const BOARD_COLUMNS =
+  'id, name, owner, project_id, updated_at, deleted_at, board_snapshots(items, frames, thumb)'
+
+// A board that reaches you through an invitation lives in the workspace of whoever sent it. The
+// invitation makes you a member of that one board and of nothing around it, so asking only for
+// the boards in your own workspace leaves it out: it opens from the link and appears nowhere,
+// which reads as the link being the only copy of it. Asked for both ways and merged, because a
+// board can be in your workspace and have you listed on it as well.
+export function dedupeBoards<T extends { id: unknown; updated_at?: unknown }>(rows: T[]): T[] {
+  const held = new Map<string, T>()
+  for (const row of rows) held.set(String(row.id), row)
+  return [...held.values()].sort((a, b) =>
+    Date.parse(String(b.updated_at ?? '')) - Date.parse(String(a.updated_at ?? '')) || 0)
+}
+
 export async function listCloudBoards(): Promise<CloudBoard[]> {
   const user = getUser()
   if (!supabase || !user) return []
   const workspace = getWorkspace() ?? await loadWorkspace()
   if (!workspace) return []
-  const { data, error } = await supabase
-    .from('boards')
-    .select('id, name, owner, project_id, updated_at, deleted_at, board_snapshots(items, frames, thumb)')
-    .eq('workspace_id', workspace.id)
-    .order('updated_at', { ascending: false })
-  if (error) throw error
-  return (data ?? []).map((row) => {
+
+  // An invitation becomes a membership when it is claimed, and that happens as the workspace
+  // loads — which a tab that already has one does not do again. The dashboard is where somebody
+  // goes to look for what was shared with them, so it is the place that should ask rather than
+  // the place that tells them to reload.
+  await supabase.rpc('claim_invites')
+
+  const { data: joined } = await supabase.from('board_members')
+    .select('board_id').eq('user_id', user.id)
+  const invited = (joined ?? []).map((row) => row.board_id as string)
+
+  const [ours, theirs] = await Promise.all([
+    supabase.from('boards').select(BOARD_COLUMNS).eq('workspace_id', workspace.id),
+    invited.length
+      ? supabase.from('boards').select(BOARD_COLUMNS).in('id', invited)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+  if (ours.error) throw ours.error
+
+  const data = dedupeBoards([...(ours.data ?? []), ...(theirs.data ?? [])])
+  return data.map((row) => {
     const snap = pickSnapshot(row.board_snapshots)
     return {
       room: row.id as string,

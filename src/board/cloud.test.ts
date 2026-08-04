@@ -1,5 +1,24 @@
 import { describe, expect, it } from 'vitest'
-import { decodeSnapshot, mergeBoardLists, orphansIn, pickSnapshot, snapshotBase64 } from './cloud'
+import { decodeSnapshot, dedupeBoards, mergeBoardLists, orphansIn, pickSnapshot, snapshotBase64 } from './cloud'
+
+describe('boards asked for two ways', () => {
+  it('lists a board once when it answers to both questions', () => {
+    const held = dedupeBoards([
+      { id: 'a', updated_at: '2026-08-01T00:00:00Z' },
+      { id: 'a', updated_at: '2026-08-01T00:00:00Z' },
+      { id: 'b', updated_at: '2026-08-03T00:00:00Z' },
+    ])
+    expect(held.map((r) => r.id)).toEqual(['b', 'a'])
+  })
+
+  it('keeps the newest first across both answers', () => {
+    const held = dedupeBoards([
+      { id: 'mine', updated_at: '2026-07-01T00:00:00Z' },
+      { id: 'shared', updated_at: '2026-08-04T00:00:00Z' },
+    ])
+    expect(held[0].id).toBe('shared')
+  })
+})
 
 describe('embedded snapshot', () => {
   const snap = { items: 90, frames: 7, thumb: 'data:image/webp;base64,xx' }
