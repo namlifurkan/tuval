@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Ada } from './Ada'
 import { Boundary } from './Boundary'
 import { Canvas } from './Canvas'
@@ -29,6 +29,8 @@ import { startCloudSync, sweepOrphanImages } from '../board/sync'
 import { takeTemplate } from '../board/boards'
 import { insertItems } from '../board/interaction'
 import { TEMPLATES } from '../board/templates'
+import { PRODUCT } from '../board/brand'
+import { persistence } from '../board/doc'
 import { useBoardStore } from '../board/store'
 import { getDockPrefs, subscribeDock } from '../board/dockPrefs'
 
@@ -63,8 +65,54 @@ function usePendingTemplate() {
   }, [])
 }
 
+// The document arrives from IndexedDB a moment after the page does, and until it does the board
+// is drawn from defaults: white paper under a board whose surface is grey, the name reading
+// "Untitled board", the cards not there yet. Every one of those corrects itself a frame later,
+// which reads as the page changing its mind. It waits behind a sheet of its own paper instead.
+//
+// The wait is capped: a document that never loads is a board to open and fix, not a page to be
+// held at by a curtain.
+const SETTLE = 220
+const PATIENCE = 4000
+
+function useDocumentReady() {
+  const [ready, setReady] = useState(!persistence)
+  useEffect(() => {
+    if (!persistence) return
+    let live = true
+    const done = () => { if (live) setReady(true) }
+    void persistence.whenSynced.then(done)
+    const giveUp = setTimeout(done, PATIENCE)
+    return () => { live = false; clearTimeout(giveUp) }
+  }, [])
+  return ready
+}
+
+function Curtain({ up }: { up: boolean }) {
+  const [gone, setGone] = useState(false)
+  useEffect(() => {
+    if (!up) return
+    const t = setTimeout(() => setGone(true), SETTLE)
+    return () => clearTimeout(t)
+  }, [up])
+  if (gone) return null
+  return (
+    <div
+      aria-hidden
+      style={{ transitionDuration: `${SETTLE}ms` }}
+      className={`pointer-events-none absolute inset-0 z-[60] grid place-items-center bg-paper
+        transition-opacity ${up ? 'opacity-0' : 'opacity-100'}`}
+    >
+      <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-muted">
+        {PRODUCT.name}
+      </span>
+    </div>
+  )
+}
+
 export default function Board() {
   const presenting = useBoardStore((s) => s.presenting)
+  const ready = useDocumentReady()
   usePendingTemplate()
 
   // The document only starts talking to the cloud once a board is on screen. Started from the
@@ -96,6 +144,7 @@ export default function Board() {
 
   return (
     <div className="relative h-dvh w-dvw select-none overflow-hidden bg-paper text-ink">
+      <Curtain up={ready} />
       <Canvas />
       <EmbedLayer />
       <TextEditor />
