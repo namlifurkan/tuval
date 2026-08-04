@@ -4,20 +4,35 @@ import { go } from '../board/boards'
 import { coverUrl } from '../board/cover'
 import { cellsOf, linksOf } from '../board/database'
 import type { Field } from '../board/database'
+import { attachmentUrl, attachmentsOf } from '../board/files'
 import { createRecord, getRecords } from '../board/records'
 import type { Record as Row } from '../board/records'
 import type { Teammate } from '../board/workspace'
 import { t } from '../i18n'
 
-function Tile({ row }: { row: Row }) {
+const PICTURE = /\.(png|jpe?g|gif|webp|avif|svg)$/i
+
+export function pictureOf(row: Row, fields: Field[]): string {
+  const cells = cellsOf(row)
+  for (const field of fields) {
+    if (field.type !== 'files') continue
+    const shot = attachmentsOf(cells[field.id]).find((a) => PICTURE.test(a.path))
+    if (shot) return shot.path
+  }
+  return ''
+}
+
+function Tile({ row, fields }: { row: Row; fields: Field[] }) {
   const [url, setUrl] = useState('')
+  const picture = row.cover ? '' : pictureOf(row, fields)
 
   useEffect(() => {
-    if (!row.cover) { setUrl(''); return }
+    const asked = row.cover ? coverUrl(row.cover) : picture ? attachmentUrl(picture) : null
+    if (!asked) { setUrl(''); return }
     let live = true
-    void coverUrl(row.cover).then((made) => { if (live) setUrl(made) })
+    void asked.then((made) => { if (live) setUrl(made) })
     return () => { live = false }
-  }, [row.cover])
+  }, [row.cover, picture])
 
   return (
     <span className="grid aspect-[8/5] w-full place-items-center overflow-hidden border-b border-shade bg-paper text-[40px] leading-none">
@@ -62,8 +77,8 @@ function Value({ row, field, team }: { row: Row; field: Field; team: Teammate[] 
   return <span className="truncate text-[11px] text-muted">{String(held)}</span>
 }
 
-// The same rows as the table, given room to be looked at rather than read. The icon stands in
-// for the cover picture until pages have one.
+// The same rows as the table, given room to be looked at rather than read. A row with no cover
+// of its own is shown by the first picture attached to it, and the icon only when it has neither.
 export function DatabaseGallery({ dbId, rows, fields, team }: {
   dbId: string
   rows: Row[]
@@ -79,7 +94,7 @@ export function DatabaseGallery({ dbId, rows, fields, team }: {
           onClick={() => go(`/d/${row.id}`)}
           className="flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface text-left transition-shadow hover:shadow-[3px_3px_0_rgba(20,19,16,0.09)]"
         >
-          <Tile row={row} />
+          <Tile row={row} fields={fields} />
           <span className="min-w-0 p-2.5">
             <span className="block truncate text-sm font-medium text-ink">
               {row.title || t('Untitled')}

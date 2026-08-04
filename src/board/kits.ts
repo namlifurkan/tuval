@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
-import { TONES } from './database'
-import type { Field, FieldType, Schema } from './database'
+import { TONES, viewOn } from './database'
+import type { Field, FieldType, Schema, ViewKind } from './database'
 import { createRecord, flushRecords, loadPages, patchRecord } from './records'
 import type { Record as Row } from './records'
 
@@ -20,7 +20,9 @@ interface Ask {
   to?: string
 }
 
-interface Table { name: string; icon: string; asks: Ask[] }
+// A table opens on the views its trade actually works in. The column each one hangs on is picked
+// the same way a hand-made view picks it, so a kit says what it wants to see and not where.
+interface Table { name: string; icon: string; asks: Ask[]; views?: ViewKind[] }
 
 export interface Kit { id: string; name: string; blurb: string; tables: Table[] }
 
@@ -54,6 +56,7 @@ export const KITS: Kit[] = [
       {
         name: 'Deals',
         icon: '💰',
+        views: ['board', 'calendar'],
         asks: [
           { name: 'Stage', type: 'status' },
           { name: 'Value', type: 'number' },
@@ -66,6 +69,7 @@ export const KITS: Kit[] = [
       {
         name: 'Conversations',
         icon: '💬',
+        views: ['calendar'],
         asks: [
           { name: 'On', type: 'date' },
           { name: 'With', type: 'relation', to: 'People' },
@@ -93,6 +97,7 @@ export const KITS: Kit[] = [
       {
         name: 'Jobs',
         icon: '📦',
+        views: ['board', 'timeline'],
         asks: [
           { name: 'Client', type: 'relation', to: 'Clients' },
           { name: 'Stage', type: 'status' },
@@ -106,11 +111,26 @@ export const KITS: Kit[] = [
       {
         name: 'Deliverables',
         icon: '📤',
+        views: ['calendar'],
         asks: [
           { name: 'Job', type: 'relation', to: 'Jobs' },
           { name: 'Due', type: 'date' },
           { name: 'Sent', type: 'checkbox' },
           { name: 'Files', type: 'files' },
+        ],
+      },
+      {
+        // What they said back. Deliverables is what we owe; this is the answer, and it is the one
+        // record in the kit whose author is outside the company.
+        name: 'Approvals',
+        icon: '✅',
+        views: ['board', 'calendar'],
+        asks: [
+          { name: 'Decision', type: 'status' },
+          { name: 'Deliverable', type: 'relation', to: 'Deliverables' },
+          { name: 'Asked on', type: 'date' },
+          { name: 'Asked of', type: 'text' },
+          { name: 'Said', type: 'text' },
         ],
       },
     ],
@@ -132,6 +152,7 @@ export const KITS: Kit[] = [
       {
         name: 'Candidates',
         icon: '🧑‍💼',
+        views: ['board'],
         asks: [
           { name: 'Role', type: 'relation', to: 'Roles' },
           { name: 'Stage', type: 'status' },
@@ -166,6 +187,7 @@ export const KITS: Kit[] = [
       {
         name: 'Incidents',
         icon: '🔥',
+        views: ['calendar'],
         asks: [
           { name: 'Happened', type: 'date' },
           { name: 'Severity', type: 'select', choices: ['Noticed', 'Degraded', 'Down'] },
@@ -191,6 +213,101 @@ export const KITS: Kit[] = [
           { name: 'Kind', type: 'select', choices: ['Paper', 'Post', 'Talk', 'Book', 'Thread', 'Person'] },
           { name: 'Read', type: 'date' },
           { name: 'Worth it', type: 'checkbox' },
+        ],
+      },
+    ],
+  },
+  {
+    // Where a post is decided, not where it is sent. Nothing here talks to a network: an account
+    // token we could lose is a worse thing to hold than a calendar is a good thing to have.
+    id: 'content',
+    name: 'Content',
+    blurb: 'What goes out, on which day, on which channel, and what it belongs to.',
+    tables: [
+      {
+        name: 'Posts',
+        icon: '📣',
+        views: ['calendar', 'board', 'gallery'],
+        asks: [
+          { name: 'Publish', type: 'date' },
+          { name: 'Stage', type: 'status' },
+          { name: 'Channel', type: 'select', choices: ['Instagram', 'X', 'LinkedIn', 'YouTube', 'Newsletter'] },
+          { name: 'Copy', type: 'text' },
+          { name: 'Assets', type: 'files' },
+          { name: 'Campaign', type: 'relation', to: 'Campaigns' },
+          { name: 'Owner', type: 'person' },
+        ],
+      },
+      {
+        name: 'Campaigns',
+        icon: '🎯',
+        views: ['timeline', 'board'],
+        asks: [
+          { name: 'Starts', type: 'date' },
+          { name: 'Ends', type: 'date' },
+          { name: 'Stage', type: 'status' },
+          { name: 'Goal', type: 'text' },
+          { name: 'Owner', type: 'person' },
+        ],
+      },
+    ],
+  },
+  {
+    // One table, because the second one would be a todo list and there is already a todo list.
+    // What a meeting leaves behind that nothing else holds is who was there and what was settled.
+    id: 'office',
+    name: 'Meetings',
+    blurb: 'When you met, who was there, and what was settled.',
+    tables: [
+      {
+        name: 'Meetings',
+        icon: '📅',
+        views: ['calendar'],
+        asks: [
+          { name: 'On', type: 'date' },
+          { name: 'Kind', type: 'select', choices: ['Standup', 'Review', 'One to one', 'Client', 'Planning'] },
+          { name: 'Attendees', type: 'person' },
+          { name: 'Decided', type: 'text' },
+          { name: 'Follow up by', type: 'date' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'research',
+    name: 'Research',
+    blurb: 'Who you spoke to, what you ran, and what came out of it.',
+    tables: [
+      {
+        name: 'Studies',
+        icon: '🔬',
+        views: ['calendar', 'board'],
+        asks: [
+          { name: 'On', type: 'date' },
+          { name: 'Stage', type: 'status' },
+          { name: 'Kind', type: 'select', choices: ['Interview', 'Usability test', 'Survey', 'Diary'] },
+          { name: 'Participants', type: 'relation', to: 'Participants' },
+          { name: 'Asked', type: 'text' },
+        ],
+      },
+      {
+        name: 'Findings',
+        icon: '💡',
+        views: ['board', 'gallery'],
+        asks: [
+          { name: 'Weight', type: 'select', choices: ['Blocker', 'Friction', 'Delight'] },
+          { name: 'Study', type: 'relation', to: 'Studies' },
+          { name: 'Says', type: 'text' },
+          { name: 'Evidence', type: 'files' },
+        ],
+      },
+      {
+        name: 'Participants',
+        icon: '🧑',
+        asks: [
+          { name: 'Segment', type: 'select', choices: ['New', 'Returning', 'Churned', 'Internal'] },
+          { name: 'Contact', type: 'email' },
+          { name: 'Spoke on', type: 'date' },
         ],
       },
     ],
@@ -226,9 +343,13 @@ export async function useKit(kit: Kit, parent: string | null): Promise<string | 
     const id = await createRecord(table.name, 'database', parent)
     if (!id) continue
     made.set(table.name, id)
+    const fields = table.asks.map(fieldFor)
     schemas.set(table.name, {
-      fields: table.asks.map(fieldFor),
-      views: [{ id: nanoid(8), name: 'Table', kind: 'table' }],
+      fields,
+      views: [
+        viewOn(fields, 'table', 'Table'),
+        ...(table.views ?? []).map((kind) => viewOn(fields, kind, kind[0].toUpperCase() + kind.slice(1))),
+      ],
     })
     patchRecord(id, { icon: table.icon })
   }

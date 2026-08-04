@@ -212,17 +212,18 @@ export function addChoice(db: Row, fieldId: string, name: string): Choice {
 // A board needs something to group by and a calendar needs something to place by. Both pick the
 // first column that can answer, so a new view shows the rows rather than an empty frame with a
 // note telling you to configure it.
-export function addView(db: Row, kind: ViewKind, name: string) {
-  const held = schemaOf(db)
+export function viewOn(fields: Field[], kind: ViewKind, name: string): View {
   const groupBy = kind === 'board'
-    ? held.fields.find((f) => f.type === 'status' || f.type === 'select')?.id
+    ? (fields.find((f) => f.type === 'status') ?? fields.find((f) => f.type === 'select'))?.id
     : undefined
   const dated = kind === 'calendar' || kind === 'timeline'
-  const dateBy = dated ? held.fields.find((f) => f.type === 'date')?.id : undefined
-  writeSchema(db.id, {
-    ...held,
-    views: [...held.views, { id: nanoid(8), name, kind, groupBy, dateBy }],
-  })
+  const dateBy = dated ? fields.find((f) => f.type === 'date')?.id : undefined
+  return { id: nanoid(8), name, kind, groupBy, dateBy }
+}
+
+export function addView(db: Row, kind: ViewKind, name: string) {
+  const held = schemaOf(db)
+  writeSchema(db.id, { ...held, views: [...held.views, viewOn(held.fields, kind, name)] })
 }
 
 // Dates are kept the way a date input hands them over, as YYYY-MM-DD, so a day is compared by
