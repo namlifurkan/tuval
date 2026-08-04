@@ -192,14 +192,22 @@ const TOOLS = [
       },
       required: ['title'],
     },
-    run: (args) => ask('/records', {
-      method: 'POST',
-      body: {
-        kind: args.kind || 'issue',
-        ...changes(args),
-        ...(args.text ? { description: args.text } : {}),
-      },
-    }),
+    run: async (args) => {
+      const made = await ask('/records', {
+        method: 'POST',
+        body: {
+          kind: args.kind || 'issue',
+          ...changes(args),
+          ...(args.text ? { description: args.text } : {}),
+        },
+      })
+      // Filed, but not handed to anybody. An issue with no command that proves it finished is a
+      // description of a wish, and the seat that reviews agent work is one person.
+      if ((args.kind || 'issue') === 'issue' && !made?.data?.check) {
+        return { ...made, waiting: 'No check on this issue yet, so it will not be dispatched. Add data { "check": "…" } when you know what proves it done.' }
+      }
+      return made
+    },
   },
   {
     name: 'update_record',
@@ -213,12 +221,25 @@ const TOOLS = [
       properties: { id: { type: 'string', description: 'The record id' }, ...FIELDS },
       required: ['id'],
     },
-    run: ({ id, ...rest }) => {
+    run: async ({ id, ...rest }) => {
       const body = changes(rest)
       // Refused here rather than sent: an empty change still spends one of the key's writes for
       // the day, and answers with the row unchanged, which reads like it did something.
       if (!Object.keys(body).length) {
         throw new Error(`Nothing to change. Send at least one of: ${Object.keys(FIELDS).join(', ')}.`)
+      }
+      // Review is where a person's attention gets spent, so nothing arrives there on an agent's
+      // word alone. The record has to carry a command that says it is done, and the acceptance
+      // criterion is written when the work is described — written afterwards it only describes
+      // whatever the agent happened to do.
+      if (body.status === 'review') {
+        const held = body.data ?? (await ask(`/records/${encodeURIComponent(id)}`)).data
+        if (!held?.check) {
+          throw new Error(
+            'This record carries no check, so it cannot go to review. Give it one first: '
+            + 'update_record with data { "check": "<a command that passes when the work is done>" }.',
+          )
+        }
       }
       return ask(`/records/${encodeURIComponent(id)}`, { method: 'PATCH', body })
     },
