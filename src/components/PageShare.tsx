@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Globe, Lock, Users } from 'lucide-react'
 import {
-  pageMembers, publicUrl, publish, removePageMember, setPageMember, unpublish,
+  DAYS_OPEN, daysLeft, openUntil, pageMembers, publicUrl, publish, removePageMember, setPageMember,
+  unpublish,
 } from '../board/pageAccess'
 import type { PageMember, PageRole } from '../board/pageAccess'
 import type { Record as Row } from '../board/records'
@@ -40,6 +41,7 @@ export function PageShare({ record }: { record: Row }) {
   }
 
   const restricted = named.length > 0
+  const left = daysLeft(record)
   const Icon = open ? Globe : restricted ? Lock : Users
 
   return (
@@ -69,13 +71,34 @@ export function PageShare({ record }: { record: Row }) {
             {open ? t('Stop publishing') : t('Publish to the web')}
           </button>
           {open && (
-            <button
-              type="button"
-              onClick={copy}
-              className="w-full truncate rounded-md px-2 py-1 text-left text-[11px] text-muted hover:bg-shade hover:text-pigment"
-            >
-              {copied ? t('Copied') : publicUrl(record)}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={copy}
+                className="w-full truncate rounded-md px-2 py-1 text-left text-[11px] text-muted hover:bg-shade hover:text-pigment"
+              >
+                {copied ? t('Copied') : publicUrl(record)}
+              </button>
+              <div className="flex items-center gap-1 px-2 py-1">
+                <span className="min-w-0 flex-1 text-[11px] text-muted">
+                  {left === null
+                    ? t('Open until you close it')
+                    : left === 0
+                      ? t('Closed')
+                      : t('{n} days left', { n: left })}
+                </span>
+                <select
+                  value={record.public_until ? String(DAYS_OPEN.find((d) => d >= (left ?? 0)) ?? DAYS_OPEN[0]) : ''}
+                  onChange={(e) => void openUntil(record, e.target.value ? Number(e.target.value) : null)}
+                  className="shrink-0 rounded border border-hairline bg-surface px-1 py-0.5 text-[11px] outline-none"
+                >
+                  <option value="">{t('No end')}</option>
+                  {DAYS_OPEN.map((d) => (
+                    <option key={d} value={d}>{t('{n} days', { n: d })}</option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
 
           <p className="mt-2 px-1 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">

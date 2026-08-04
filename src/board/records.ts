@@ -32,6 +32,8 @@ export interface Record {
   // Set when a page is opened to the world; the slug is its address and outlives unpublishing.
   published_at: string | null
   public_slug: string | null
+  // When the opening closes itself. Null is open until somebody closes it.
+  public_until: string | null
   // Stamped by the database, never by a caller, so a column showing them cannot be wrong.
   created_at: string
   created_by: string | null
@@ -52,6 +54,7 @@ export interface Record {
 const COLUMNS =
   'id, kind, title, description, icon, cover, parent_id, status, assignee, priority, due_at, '
   + 'position, created_at, created_by, updated_at, updated_by, updated_via, published_at, public_slug, '
+  + 'public_until, '
   + 'seq, estimate, cycle_id, project_id, data'
 
 // One store per kind. The page tree is drawn on every screen and the issue list only on one, so

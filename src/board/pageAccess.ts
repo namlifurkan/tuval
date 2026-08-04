@@ -27,6 +27,21 @@ export async function publish(record: Row) {
 export const unpublish = (record: Row) =>
   patchRecord(record.id, { published_at: null })
 
+// A link handed to somebody outside the company usually has a reason that ends. Giving it an end
+// when it is handed over is the only moment anybody is thinking about it; the database closes it
+// afterwards whether or not anyone remembers.
+export const DAYS_OPEN = [7, 30, 90] as const
+
+export const openUntil = (record: Row, days: number | null) =>
+  patchRecord(record.id, {
+    public_until: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
+  })
+
+export const daysLeft = (record: Row) =>
+  (record.public_until
+    ? Math.max(0, Math.ceil((Date.parse(record.public_until) - Date.now()) / 86400_000))
+    : null)
+
 export async function pageMembers(record: string): Promise<PageMember[]> {
   if (!supabase) return []
   const { data } = await supabase

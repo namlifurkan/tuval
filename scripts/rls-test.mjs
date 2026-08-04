@@ -22,7 +22,7 @@ const ask = (sql) => {
   writeFileSync(file, sql)
   try {
     return execFileSync(
-      'npx', ['-y', 'supabase@latest', 'db', 'query', '--linked', '-f', file],
+      'npx', ['-y', 'supabase@latest', 'db', 'query', '--linked', '--output-format', 'json', '-f', file],
       { encoding: 'utf8', maxBuffer: 1 << 24 },
     )
   } finally {
@@ -56,7 +56,7 @@ writeFileSync(tmp, parts.join('\n\n'))
 let out
 try {
   out = execFileSync(
-    'npx', ['-y', 'supabase@latest', 'db', 'query', '--linked', '-f', tmp],
+    'npx', ['-y', 'supabase@latest', 'db', 'query', '--linked', '--output-format', 'json', '-f', tmp],
     { encoding: 'utf8', maxBuffer: 1 << 24 },
   )
 } catch (e) {

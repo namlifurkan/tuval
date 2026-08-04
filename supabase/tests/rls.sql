@@ -38,6 +38,16 @@ values ('rls-team-board', 'aaaaaaaa-0000-4000-8000-000000000001', 'Team', 'ccccc
 insert into public.board_snapshots (board_id, doc, items, frames)
 values ('rls-team-board', '\x00'::bytea, 3, 1);
 
+insert into public.boards (id, owner, name, workspace_id, public_at)
+values ('rls-public-board', 'aaaaaaaa-0000-4000-8000-000000000001', 'Published', 'cccccccc-0000-4000-8000-000000000003', now());
+
+insert into public.board_snapshots (board_id, doc, items, frames)
+values ('rls-public-board', '\x00'::bytea, 1, 0);
+
+-- Published once and already past its end. The link is out there; the door is not.
+insert into public.boards (id, owner, name, workspace_id, public_at, public_until)
+values ('rls-expired-board', 'aaaaaaaa-0000-4000-8000-000000000001', 'Expired', 'cccccccc-0000-4000-8000-000000000003', now() - interval '2 days', now() - interval '1 day');
+
 create temporary table result (name text, expected boolean, actual boolean);
 -- The checks run while impersonating a user, and that role has to be able to record them.
 -- Publishing is checked as a caller with no account at all, so anon needs it too.
@@ -86,6 +96,16 @@ select pg_temp.check('stranger sees no row',            false, exists(select 1 f
 select pg_temp.check('stranger sees no snapshot',       false, exists(select 1 from public.board_snapshots where board_id = 'rls-team-board'));
 select pg_temp.check('stranger sees no workspace',      false, exists(select 1 from public.workspaces where id = 'cccccccc-0000-4000-8000-000000000003'));
 select pg_temp.check('stranger is not in the workspace', false, public.in_workspace('cccccccc-0000-4000-8000-000000000003'));
+
+-- A published board is the one thing the same stranger may read. Reading only: publishing a board
+-- hands out a copy, not a pen.
+select pg_temp.check('signed-in stranger reads a public board',        true,  public.can_read_board('rls-public-board'));
+select pg_temp.check('signed-in stranger sees the public row',         true,  exists(select 1 from public.boards where id = 'rls-public-board'));
+select pg_temp.check('signed-in stranger sees the public snapshot',    true,  exists(select 1 from public.board_snapshots where board_id = 'rls-public-board'));
+select pg_temp.check('signed-in stranger cannot write a public board', false, public.can_write_board('rls-public-board'));
+select pg_temp.check('an expired board is closed again',               false, public.board_is_public('rls-expired-board'));
+select pg_temp.check('an expired board refuses the same reader',       false, public.can_read_board('rls-expired-board'));
+select pg_temp.check('an expired board hides its row',                 false, exists(select 1 from public.boards where id = 'rls-expired-board'));
 
 -- Realtime broadcast has its own table and must enforce the same board gate.
 set local role postgres;
@@ -672,6 +692,26 @@ select pg_temp.check('and its body', true,
   exists(select 1 from public.record_docs where record_id = 'eeeeeeee-0000-4000-8000-000000000005'));
 select pg_temp.check('but not the page under it', false,
   exists(select 1 from public.records where id = 'ffffffff-0000-4000-8000-000000000006'));
+
+-- Given an end that has passed, the same link closes itself without anybody remembering to.
+set local role postgres;
+update public.records set public_until = now() - interval '1 hour'
+where id = 'eeeeeeee-0000-4000-8000-000000000005';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('an expired page is closed again', false,
+  exists(select 1 from public.records where public_slug = 'quiet-page'));
+select pg_temp.check('and its body with it', false,
+  exists(select 1 from public.record_docs where record_id = 'eeeeeeee-0000-4000-8000-000000000005'));
+
+set local role postgres;
+update public.records set public_until = null where id = 'eeeeeeee-0000-4000-8000-000000000005';
+
+select set_config('request.jwt.claims', null, true);
+set local role anon;
+select pg_temp.check('and opens again when the end is taken off', true,
+  exists(select 1 from public.records where public_slug = 'quiet-page'));
 
 set local role postgres;
 update public.records set published_at = null where id = 'eeeeeeee-0000-4000-8000-000000000005';
