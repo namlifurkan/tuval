@@ -1,3 +1,4 @@
+import { cellsOf, schemaOf } from './database'
 import { getCycles } from './issues'
 import type { Cycle } from './issues'
 import { startOf, targetOf } from './projects'
@@ -44,13 +45,28 @@ export function marksFrom(
     }
   }
 
+  // Which column a table keeps its dates in: the one its own calendar hangs on, and failing that
+  // the first date it has. A row set up to be looked at on a calendar belongs on this one too,
+  // and asking each table rather than each row means a table with no dates costs nothing.
+  const dated = new Map<string, string>()
+  for (const table of source.databases) {
+    const schema = schemaOf(table)
+    const on = schema.views.find((v) => v.kind === 'calendar' && v.dateBy)?.dateBy
+      ?? schema.fields.find((f) => f.type === 'date')?.id
+    if (on) dated.set(table.id, on)
+  }
+
   // A database row is a `doc` record like a page is, so the two arrive in one list. Calling a row
   // a page on the calendar would be the same mistake the read path already makes elsewhere.
   for (const row of source.pages) {
-    const day = dayOfStamp(row.due_at ?? '')
+    const inTable = row.parent_id && tables.has(row.parent_id)
+    // A row's own date column stands in for a due date it was never given: the person who set up
+    // a Publish column meant that day, and made it the day the table is read by.
+    const held = inTable ? cellsOf(row)[dated.get(row.parent_id ?? '') ?? ''] : undefined
+    const day = dayOfStamp(row.due_at ?? (typeof held === 'string' ? held : ''))
     if (!within(day, from, to)) continue
-    const kind: MarkKind = row.parent_id && tables.has(row.parent_id) ? 'row' : 'page'
-    marks.push({ id: row.id, day, title: row.title, kind, icon: row.icon, href: `/d/${row.id}`, movable: true })
+    const kind: MarkKind = inTable ? 'row' : 'page'
+    marks.push({ id: row.id, day, title: row.title, kind, icon: row.icon, href: `/d/${row.id}`, movable: !!row.due_at })
   }
 
   for (const row of source.projects) {

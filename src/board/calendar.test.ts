@@ -31,6 +31,31 @@ describe('workspace calendar', () => {
     expect(marks.map((m) => m.id)).toEqual(['b'])
   })
 
+  it('reads a row by the column its table is looked at on', () => {
+    const table = row({
+      id: 'db', kind: 'database', title: 'Posts',
+      data: {
+        fields: [{ id: 'f1', name: 'Publish', type: 'date' }],
+        views: [{ id: 'v1', name: 'Calendar', kind: 'calendar', dateBy: 'f1' }],
+      },
+    })
+    const marks = marksFrom({
+      ...NOTHING,
+      databases: [table],
+      pages: [row({ id: 'post', kind: 'doc', title: 'Launch teaser', parent_id: 'db', data: { f1: '2026-08-12' } })],
+    }, '2026-08-01', '2026-08-31')
+    expect(marks.map((m) => [m.day, m.kind, m.movable])).toEqual([['2026-08-12', 'row', false]])
+  })
+
+  it('leaves a row alone when its table keeps no dates', () => {
+    const marks = marksFrom({
+      ...NOTHING,
+      databases: [row({ id: 'db', kind: 'database', title: 'People', data: { fields: [{ id: 'f1', name: 'Email', type: 'email' }] } })],
+      pages: [row({ id: 'p', kind: 'doc', title: 'Ann', parent_id: 'db', data: { f1: 'ann@test' } })],
+    }, '2026-08-01', '2026-08-31')
+    expect(marks).toEqual([])
+  })
+
   it('calls a database row a row and a page a page', () => {
     const marks = marksFrom({
       ...NOTHING,
