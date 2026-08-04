@@ -118,11 +118,23 @@ the next time somebody opens that page, as real paragraphs, and clears the colum
 is readable through `GET /records/<id>/markdown` but not findable through `GET /search` — search
 indexes the document, and the text is not in the document yet.
 
+## What comes back is quoted, not addressed to you
+
+Every record was typed by somebody, and a key that reads may also write. So both doors that hand
+back page text say what that text is: `GET /search` carries a `note` beside its `results`, and
+`GET /records/<id>/markdown` puts the whole page between `<<<RECORD_CONTENT>>>` markers under the
+same sentence. A page that writes those markers itself has them escaped on the way out, so it
+cannot close the quote and start speaking.
+
+If you are wiring an agent to this API, leave that text in the prompt. An instruction reaching a
+model through an imported spreadsheet cell is the cheap version of this attack, and the sentence
+is what makes it fail.
+
 ## Everything else
 
 | | |
 |---|---|
-| `GET /search?q=<words>&limit=` | Titles and bodies, across every kind. Returns an excerpt and an id |
+| `GET /search?q=<words>&limit=` | Titles and bodies, across every kind. `{ note, results }`, each result an excerpt and an id |
 | `GET /cycles` | The two-week cycles |
 | `GET /labels` | The workspace's labels |
 | `GET /` | What this key can reach |
