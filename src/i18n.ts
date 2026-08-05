@@ -1153,6 +1153,9 @@ const tr: Record<string, string> = {
   'Cloud': 'Bulut',
   'Could not reach the cloud. Your boards are still there.': 'Buluta ulaşılamadı. Board’larınız hâlâ orada.',
   'Could not load the workspace.': 'Çalışma alanı yüklenemedi.',
+  'A change could not be saved, so what you see here is what the database still holds.':
+    'Bir değişiklik kaydedilemedi; burada gördüğünüz, veritabanının hâlâ tuttuğu hâli.',
+  'See the whole run': 'Koşunun tamamını gör',
   'Not saved to the cloud': 'Buluta kaydedilmedi',
   'Image could not be uploaded. Try again.': 'Görsel yüklenemedi. Yeniden deneyin.',
   'Live connection unavailable': 'Canlı bağlantı kullanılamıyor',

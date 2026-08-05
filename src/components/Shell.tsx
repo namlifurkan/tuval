@@ -6,6 +6,7 @@ import { go, readRoute } from '../board/boards'
 import { openJournal } from '../board/journal'
 import { armed } from '../board/keys'
 import { loadInbox, subscribeInbox, unreadCount } from '../board/notifications'
+import { clearSaveFailed, saveFailed, subscribeRecords } from '../board/records'
 import { getWorkspace, loadWorkspace, subscribeWorkspace, workspaceError } from '../board/workspace'
 import { t } from '../i18n'
 import { Account } from './Account'
@@ -45,6 +46,7 @@ export function Shell({ title, wide, bare, action, children }: {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const workspaceProblem = useSyncExternalStore(subscribeWorkspace, workspaceError, workspaceError)
   const waiting = useSyncExternalStore(subscribeInbox, unreadCount, unreadCount)
+  const unsaved = useSyncExternalStore(subscribeRecords, saveFailed, saveFailed)
   const here = location.pathname.replace(/\/+$/, '') || '/'
 
   // Asked for once wherever you land, so the badge is right on a page that is not the inbox.
@@ -54,7 +56,7 @@ export function Shell({ title, wide, bare, action, children }: {
   useEffect(() => {
     const where: { [key: string]: string } = {
       i: '/issues', p: '/projects', d: '/pages', b: '/dashboard', n: '/inbox', s: '/settings',
-      t: '/team', c: '/calendar', a: '/databases',
+      t: '/team', c: '/calendar', a: '/databases', r: '/runs',
     }
     const key = armed('g', (second) => {
       if (second === 'j') { void openJournal(); return true }
@@ -119,6 +121,18 @@ export function Shell({ title, wide, bare, action, children }: {
         </header>
 
         <main className={`mx-auto w-full px-6 pb-24 pt-8 ${wide ? 'max-w-[1180px]' : 'max-w-[900px]'}`}>
+          {unsaved && (
+            <div className="mb-5 flex items-center gap-3 rounded-lg border border-hairline bg-pigment-wash px-3 py-2 text-sm text-ink-soft">
+              <span className="min-w-0 flex-1">
+                {t('A change could not be saved, so what you see here is what the database still holds.')}
+              </span>
+              <button
+                type="button"
+                onClick={clearSaveFailed}
+                className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-pigment hover:bg-surface"
+              >{t('Dismiss')}</button>
+            </div>
+          )}
           {workspaceProblem && (
             <div className="mb-5 flex items-center gap-3 rounded-lg border border-hairline bg-pigment-wash px-3 py-2 text-sm text-ink-soft">
               <span className="min-w-0 flex-1">{t('Could not load the workspace.')}</span>

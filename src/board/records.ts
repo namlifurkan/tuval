@@ -69,6 +69,18 @@ export const subscribeRecords = (fn: () => void) => {
   return () => { listeners.delete(fn) }
 }
 
+// A write that did not land. It used to be swallowed: the row was re-read from the database, so
+// the screen jumped back to what an agent had put there and the person who had just undone it
+// was left unable to tell "the undo failed" from "the undo worked and something wrote again".
+let unsaved = false
+export const saveFailed = () => unsaved
+function setSaveFailed(next: boolean) {
+  if (unsaved === next) return
+  unsaved = next
+  listeners.forEach((l) => l())
+}
+export const clearSaveFailed = () => setSaveFailed(false)
+
 const kindOf = (id: string): Kind | null => {
   for (const [kind, rows] of cache) if (rows.some((r) => r.id === id)) return kind
   return null
@@ -253,7 +265,10 @@ export async function flushRecord(id: string) {
       })
       : null,
   ])
-  if (failed.some((r) => r?.error)) await loadRecords(kind)
+  if (failed.some((r) => r?.error)) {
+    setSaveFailed(true)
+    await loadRecords(kind)
+  }
 }
 
 export const flushRecords = () =>
