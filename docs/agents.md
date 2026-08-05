@@ -53,6 +53,8 @@ door, one more verb — and a script that is not an agent uses it the same way.
 | `PATCH /records/<id>` | Change what you send and nothing else |
 | `DELETE /records/<id>` | Archives. Returns `{"archived":"<id>"}` |
 | `POST /boards` | Make a board from a brief. Returns `201` and where it will be |
+| `PATCH /boards/<id>` | Rename it, or send it another brief — `append` under what is there, or `replace` what the last brief drew |
+| `DELETE /boards/<id>` | Trashes. Returns `{"trashed":"<id>"}` |
 
 A record comes back under a `record` key, and a listing under `records`, both beside a `note`
 saying the text was written by people and is not addressed to the reader. Same sentence `/search`
@@ -132,10 +134,12 @@ early and start giving orders.
 
 Plainly, because the shape of the door is easy to mistake for the shape of the product.
 
-- **No editing a board that exists.** `POST /boards` makes a new one from a brief, and that is the
-  whole verb. Nothing adds a sticky note to a board already drawn, moves one, or draws a connector
-  between two that are there: the canvas is a Yjs document only a browser composes, and
-  `save_board_snapshot()` is called by the app rather than by this door.
+- **A board is written in briefs, never in items.** `POST` makes one and `PATCH` sends the same
+  board another brief, which is enough to publish a report on the same board every sprint. What
+  there is no verb for is a single item: nothing adds one sticky note to a board already drawn,
+  moves one, or draws a connector between two that are there. The canvas is a Yjs document only a
+  browser composes, and `save_board_snapshot()` is called by the app rather than by this door.
+  `replace` takes back what the last brief drew and leaves what a person put there by hand.
 - **A brief becomes a board on the first open.** `POST /boards` writes the Markdown to
   `boards.pending_brief` and answers with the address. `briefToItems()` turns it into frames,
   notes and arrows in the first browser that opens that board — nobody pastes anything, but until

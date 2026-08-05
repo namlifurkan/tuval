@@ -154,11 +154,21 @@ export async function claimBoard(room: string, name: string): Promise<string | n
 // A brief an agent left for whoever opens the board first. Reading it does not take it: the
 // brief is turned into items before it is cleared, so a failure to draw leaves the words where
 // they were rather than losing them.
-export async function readPendingBrief(room: string): Promise<string | null> {
+//
+// The mode comes with it because it belongs to this brief rather than to the board: the same
+// board can be added to one month and redrawn the next.
+export interface PendingBrief {
+  brief: string
+  mode: 'append' | 'replace'
+}
+
+export async function readPendingBrief(room: string): Promise<PendingBrief | null> {
   if (!supabase || !getUser()) return null
   const { data } = await supabase
-    .from('boards').select('pending_brief').eq('id', room).maybeSingle()
-  return (data?.pending_brief as string | null) || null
+    .from('boards').select('pending_brief, pending_mode').eq('id', room).maybeSingle()
+  const brief = (data?.pending_brief as string | null) || null
+  if (!brief) return null
+  return { brief, mode: data?.pending_mode === 'replace' ? 'replace' : 'append' }
 }
 
 // Cleared with the text that was read as the condition, so two tabs opening at once draw it
@@ -166,7 +176,7 @@ export async function readPendingBrief(room: string): Promise<string | null> {
 export async function clearPendingBrief(room: string, brief: string): Promise<boolean> {
   if (!supabase || !getUser()) return false
   const { data } = await supabase
-    .from('boards').update({ pending_brief: null })
+    .from('boards').update({ pending_brief: null, pending_mode: null })
     .eq('id', room).eq('pending_brief', brief).select('id')
   return !!data?.length
 }

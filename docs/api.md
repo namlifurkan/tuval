@@ -141,18 +141,51 @@ is what makes it fail.
 ## Boards
 
 A board is a CRDT, and only a browser composes one. So the canvas is written from outside and
-read from a copy: `POST /boards` leaves a brief that becomes items the first time somebody opens
-the board, and `GET /boards/<id>/markdown` returns the reading the browser wrote beside the
-document on its last save.
+read from a copy: `POST /boards` and `PATCH /boards/<id>` leave a brief that becomes items the
+first time somebody opens the board, and `GET /boards/<id>/markdown` returns the reading the
+browser wrote beside the document on its last save.
+
+Reading a board and redrawing one are separate permissions, asked separately. A key whose holder
+may only view a board can read it and cannot write it, and the refusal is `404` rather than `403`
+— the same answer a board in somebody else's workspace gives, and for the same reason it is given
+on records: what you may not touch is not described to you.
 
 | | |
 |---|---|
 | `GET /boards` | The boards you can read, newest first, with item and frame counts |
 | `GET /boards/<id>/markdown` | What is drawn on it, as prose |
-| `POST /boards` | `{ title, brief }` — a board drawn from a brief |
+| `POST /boards` | `{ title, brief, mode? }` — a board drawn from a brief. `201` |
+| `PATCH /boards/<id>` | `{ title?, brief?, mode? }` — rename it, or send it another brief |
+| `DELETE /boards/<id>` | Trashes rather than deletes. Returns `{"trashed":"<id>"}` |
 
 Frames become sections, the items inside them a list in reading order, the connectors between
 them a flow, and a comment is attached to whatever it was left on.
+
+### When a brief becomes items
+
+Not when you send it. The brief is kept on the board's row and drawn **the first time somebody
+opens that board in a browser**, because the canvas is a CRDT and only a browser composes one. A
+board you have just made and nobody has opened is a brief waiting, and both `POST` and `PATCH`
+answer with a `waiting` line saying so rather than reporting frames that do not exist yet. If a
+person needs to see it, they open the board — nothing else makes it happen.
+
+### `append` and `replace`
+
+`mode` says what the new brief does about what is already on the canvas. It travels with the
+brief, not with the board, so the same board can be added to one month and redrawn the next.
+
+| `mode` | What happens on the next open |
+|---|---|
+| `append` (default) | Drawn below everything already there, with a gap. Nothing is removed |
+| `replace` | What the last brief drew is removed, and the new one is drawn where it stood |
+
+`replace` only takes back items a brief drew — they are marked when they are made. Anything a
+person added by hand stays where it is, and a person's edits **to a brief's own items** go with
+the redraw, because those items are what is being replaced. Put work you mean to keep in its own
+note rather than in the middle of a generated one.
+
+A publishing integration wants `PATCH` with `replace`: one board, rewritten every run. `append` is
+for a log that should accumulate — a standup board where each day is added under the last.
 
 The copy is exactly as old as the last save by somebody with the board open. `X-Tuval-Read-At` on
 the response says when it was written, and a board nobody has opened since this existed answers

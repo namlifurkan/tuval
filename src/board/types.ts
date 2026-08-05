@@ -42,6 +42,10 @@ export interface BaseItem {
   groupId: Id | null
   locked: boolean
   opacity: number
+  // What drew this, when a person did not. Set on everything a brief becomes, so a brief sent to
+  // the same board a second time can take back its own work and leave what somebody added by
+  // hand — the canvas half of the signature a record carries in `updated_via`.
+  via?: string
 }
 
 export interface StickyItem extends BaseItem, TextStyle {

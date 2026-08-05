@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { createItems, getItems, room, ydoc } from './doc'
+import { createItems, getItems, removeItems, room, ydoc } from './doc'
 import { readOnly, setForeign } from './access'
 import { storagePath } from './storage'
 import { makeThumb } from './thumb'
@@ -11,6 +11,10 @@ import {
 import { getUser, subscribeAuth, supabase } from './supabase'
 import { getMeta, setMeta } from './doc'
 import { loadWorkspace } from './workspace'
+
+// The mark every item a brief draws carries, and the air left between one draw and the next.
+const DRAWN_BY_BRIEF = 'brief'
+const BRIEF_GAP = 160
 
 const SAVE_AFTER = 2500
 const RETRY_AFTER = 5000
@@ -242,20 +246,46 @@ function schedule() {
 // of it: parse, then claim the brief, then create. Parsing before the claim means a brief that
 // cannot be read stays on the row for the next visitor, and claiming before the items are made
 // means two tabs opening together draw one board rather than two overlapping ones.
+//
+// A brief can now arrive at a board that already has something on it, so where it lands and what
+// it displaces are the brief's own to say. `replace` removes what a brief drew before — items
+// carrying the mark, and nothing else, so a report can be published every sprint without taking
+// anybody's notes with it. `append` draws below everything, because a second brief at the origin
+// lands on top of the first and is not a board anybody can read.
 export async function drawPendingBrief() {
   if (readOnly()) return
-  const brief = await readPendingBrief(room)
-  if (!brief) return
+  const pending = await readPendingBrief(room)
+  if (!pending) return
+  const { brief, mode } = pending
 
-  const { briefToItems } = await import('./importer')
-  const { items, title } = briefToItems(brief, { x: 0, y: 0 })
+  const [{ briefToItems }, { boundsOf }] = await Promise.all([
+    import('./importer'),
+    import('./geometry'),
+  ])
+
+  const standing = getItems()
+  const drawnBefore = mode === 'replace'
+    ? standing.filter((item) => item.via === DRAWN_BY_BRIEF)
+    : []
+  const keeping = standing.filter((item) => !drawnBefore.includes(item))
+
+  // Where the last brief stood, if it is being taken back — a report that moves across the canvas
+  // every time it is published is a report nobody keeps open. Otherwise below everything, because
+  // a second brief at the origin lands on the first.
+  const under = keeping.length ? boundsOf(keeping) : null
+  const origin = drawnBefore.length
+    ? { x: boundsOf(drawnBefore).x, y: boundsOf(drawnBefore).y }
+    : { x: 0, y: under ? under.y + under.h + BRIEF_GAP : 0 }
+
+  const { items, title } = briefToItems(brief, origin)
   if (!items.length) {
     await clearPendingBrief(room, brief)
     return
   }
   if (!await clearPendingBrief(room, brief)) return
 
-  createItems(items)
+  if (drawnBefore.length) removeItems(drawnBefore.map((item) => item.id))
+  createItems(items.map((item) => ({ ...item, via: DRAWN_BY_BRIEF })))
   if (title && !getMeta().name) setMeta('name', title)
 }
 

@@ -60,6 +60,10 @@ const WRITABLE = [
 // nothing reads until a browser tries to draw it.
 const BRIEF_MAX = 100_000
 
+// How a brief meets what is already on the board. `replace` takes back what the last brief drew
+// and leaves everything a person put there, which is what makes a report publishable twice.
+const MODES = ['append', 'replace']
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type, x-tuval-run',
@@ -124,6 +128,13 @@ Deno.serve(async (request) => {
     return data === true
   }
 
+  // Reading a board and redrawing one are different questions. A viewer may open it and must not
+  // replace what is on it, so this is its own gate rather than the read asked twice.
+  const boardWritable = async (board: string) => {
+    const { data } = await db.rpc('can_write_board_as', { who: acting, board })
+    return data === true
+  }
+
   // Everything after /api is the path, so /api/records/<id> and /functions/v1/api/records/<id>
   // are the same request seen from two sides of a proxy.
   const path = new URL(request.url).pathname.replace(/^.*\/api/, '').replace(/\/+$/, '')
@@ -142,6 +153,7 @@ Deno.serve(async (request) => {
       cycles: '/cycles',
       labels: '/labels',
       boards: '/boards',
+      board: '/boards/<id>',
     })
   }
 
@@ -159,9 +171,14 @@ Deno.serve(async (request) => {
       return send({ error: `A brief may be at most ${BRIEF_MAX} characters.` }, 413)
     }
 
+    const mode = String(asked.mode ?? 'append')
+    if (!MODES.includes(mode)) return send({ error: 'mode is append or replace.' }, 400)
+
     const id = crypto.randomUUID().replace(/-/g, '').slice(0, 10)
-    const { error } = await db.from('boards')
-      .insert({ id, owner: acting, name: title, workspace_id: workspace, pending_brief: brief })
+    const { error } = await db.from('boards').insert({
+      id, owner: acting, name: title, workspace_id: workspace,
+      pending_brief: brief, pending_mode: mode,
+    })
     if (error) return send({ error: error.message }, 400)
     return send({
       id,
@@ -169,6 +186,68 @@ Deno.serve(async (request) => {
       url: `/b/${id}`,
       waiting: 'The brief becomes items the first time somebody opens this board.',
     }, 201)
+  }
+
+  // The same board again. An integration that publishes every sprint had to make a new board each
+  // run and could not tidy up the old ones, which is four boards and three of them rubbish by the
+  // end of the month.
+  if (parts[0] === 'boards' && request.method === 'PATCH' && parts[1]) {
+    const id = parts[1]
+    if (!(await boardWritable(id))) return send({ error: 'No such board.' }, 404)
+
+    const body = await request.json().catch(() => null)
+    if (!body || typeof body !== 'object') return send({ error: 'Send a JSON object.' }, 400)
+    const asked = body as Record<string, unknown>
+
+    const patch: Record<string, unknown> = {}
+    if ('title' in asked) {
+      const title = String(asked.title ?? '').trim().slice(0, 200)
+      if (!title) return send({ error: 'A board needs a name.' }, 400)
+      patch.name = title
+    }
+    if ('brief' in asked) {
+      const brief = String(asked.brief ?? '').trim()
+      if (!brief) return send({ error: 'Send a brief for the board to be drawn from.' }, 400)
+      if (brief.length > BRIEF_MAX) {
+        return send({ error: `A brief may be at most ${BRIEF_MAX} characters.` }, 413)
+      }
+      const mode = String(asked.mode ?? 'append')
+      if (!MODES.includes(mode)) return send({ error: 'mode is append or replace.' }, 400)
+      patch.pending_brief = brief
+      patch.pending_mode = mode
+    }
+    if (!Object.keys(patch).length) return send({ error: 'Send a title or a brief.' }, 400)
+
+    const { data, error } = await db.from('boards')
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('id', id).is('deleted_at', null).select('id, name').maybeSingle()
+    if (error) return send({ error: error.message }, 400)
+    if (!data) return send({ error: 'No such board.' }, 404)
+    return send({
+      id,
+      title: data.name,
+      url: `/b/${id}`,
+      ...(patch.pending_brief
+        ? {
+          mode: patch.pending_mode,
+          waiting: patch.pending_mode === 'replace'
+            ? 'The brief is drawn the next time somebody opens this board, and what the last brief drew is removed first.'
+            : 'The brief is drawn below what is already there, the next time somebody opens this board.',
+        }
+        : {}),
+    })
+  }
+
+  // Marked rather than removed, the same as a record: everything on a board hangs off this row by
+  // a cascade, so taking it away for good is the one action here that cannot be undone.
+  if (parts[0] === 'boards' && request.method === 'DELETE' && parts[1]) {
+    const id = parts[1]
+    if (!(await boardWritable(id))) return send({ error: 'No such board.' }, 404)
+    const { data, error } = await db.from('boards')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id).is('deleted_at', null).select('id').maybeSingle()
+    if (error) return send({ error: error.message }, 400)
+    return data ? send({ trashed: id }) : send({ error: 'No such board.' }, 404)
   }
 
   // What is on a board, as prose. The document itself is a CRDT that only a browser composes, so
