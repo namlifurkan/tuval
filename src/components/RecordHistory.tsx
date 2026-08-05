@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Undo2 } from 'lucide-react'
+import { go } from '../board/boards'
 import { listRevisions, undoRevision } from '../board/revisions'
 import type { Revision } from '../board/revisions'
 import type { Record as Issue } from '../board/records'
@@ -61,9 +62,20 @@ export function RecordHistory({ record, nameOf }: {
             className="group/rev flex items-center gap-2 rounded-md px-1 py-0.5 text-[12px] hover:bg-tint"
           >
             <span className="w-[64px] shrink-0 text-[11px] text-faint">{when(revision.at)}</span>
-            <span className={`shrink-0 truncate text-[11px] ${revision.via ? 'text-pigment' : 'text-muted'}`}>
-              {revision.via ? `${revision.via} · ${t('agent')}` : nameOf(revision.actor) || t('Somebody')}
-            </span>
+            {revision.run ? (
+              <button
+                type="button"
+                title={t('See the whole run')}
+                onClick={() => go(`/runs?run=${encodeURIComponent(revision.run as string)}`)}
+                className="shrink-0 truncate text-[11px] text-pigment underline decoration-transparent underline-offset-2 hover:decoration-current"
+              >
+                {revision.via ? `${revision.via} · ${t('agent')}` : t('agent')}
+              </button>
+            ) : (
+              <span className={`shrink-0 truncate text-[11px] ${revision.via ? 'text-pigment' : 'text-muted'}`}>
+                {revision.via ? `${revision.via} · ${t('agent')}` : nameOf(revision.actor) || t('Somebody')}
+              </span>
+            )}
             <span className="min-w-0 flex-1 truncate text-ink">
               {revision.changed.length
                 ? revision.changed.map((column) => t(FIELD[column] ?? column)).join(', ')

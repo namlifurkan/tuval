@@ -30,7 +30,11 @@ export function Runs() {
   const workspace = useSyncExternalStore(subscribeWorkspace, getWorkspace, getWorkspace)
   const looked = useSyncExternalStore(subscribeSeen, lastLooked, lastLooked)
   const [runs, setRuns] = useState<Run[]>([])
-  const [open, setOpen] = useState<string | null>(null)
+  // A change on a record links here by name, so arriving with one opens it rather than leaving
+  // somebody to find the row that sent them.
+  const [open, setOpen] = useState<string | null>(
+    () => new URLSearchParams(location.search).get('run'),
+  )
   const [touches, setTouches] = useState<Touch[]>([])
   const [busy, setBusy] = useState(false)
 

@@ -10,6 +10,9 @@ export interface Revision {
   at: string
   actor: string | null
   via: string | null
+  // The run this edit belonged to, so a change on a record leads back to the night it came from
+  // rather than ending here. Null when a person made it.
+  run: string | null
   changed: string[]
   was: { [key: string]: unknown }
 }
@@ -17,7 +20,7 @@ export interface Revision {
 export async function listRevisions(record: string): Promise<Revision[]> {
   if (!supabase) return []
   const { data } = await supabase
-    .from('record_revisions').select('id, at, actor, via, changed, was')
+    .from('record_revisions').select('id, at, actor, via, run, changed, was')
     .eq('record_id', record).order('id', { ascending: false }).limit(30)
   return (data ?? []) as Revision[]
 }
