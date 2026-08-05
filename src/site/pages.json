@@ -454,12 +454,12 @@
       "title": "MCP server — the workspace in Claude Code | Tuval",
       "description": "An MCP server for Claude Code and Cursor: search the workspace, read a page as Markdown, list what is in flight, and file issues and pages back. One line to mount it, and the key decides what it sees and whether it may write.",
       "claim": "Mount the workspace in Claude Code.",
-      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Seven tools: search pages, databases, issues and projects in one call, open any of them as Markdown, list what is in flight — and, with a key made to write, file a new record, change one, or add to a page. The key decides which workspace, whether it may write at all, and the agent is shown exactly what the person who made that key can see.",
+      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Ten tools: search pages, databases, issues and projects in one call, open any of them as Markdown, read a board as prose, list what is in flight — and, with a key made to write, file a new record, change one, add to a page, or hand back a brief that becomes a board. The key decides which workspace, whether it may write at all, and the agent is shown exactly what the person who made that key can see.",
       "bands": [
         {
           "id": "tools",
           "tone": "paper",
-          "heading": "The seven tools",
+          "heading": "The ten tools",
           "points": [
             {
               "title": "search",
@@ -468,6 +468,14 @@
             {
               "title": "read_page",
               "body": "One page or issue in full, as Markdown, with its headings, lists and code intact. Not the JSON shape of a row — the text a model can reason over."
+            },
+            {
+              "title": "read_board",
+              "body": "A canvas as prose: frames become sections, notes become bullets, connectors become a graph, comments stay attached to what they were about. It is the reading the browser wrote on its last save, and it comes back dated so a board nobody has opened lately is out of date on the record rather than in secret."
+            },
+            {
+              "title": "list_boards",
+              "body": "The boards in this workspace, newest first, with how many items and frames each holds and the address to read it in full. What an agent asks before it decides which canvas the question is about."
             },
             {
               "title": "list_records",
@@ -488,6 +496,10 @@
             {
               "title": "append_to_page",
               "body": "Add Markdown to the end of a page or issue. It becomes real paragraphs — headings, lists, code — the next time somebody opens that page, because a page is a shared document only a browser can edit. The band below says exactly what that delay costs."
+            },
+            {
+              "title": "create_board",
+              "body": "Hand back a Markdown brief and get a board. Headings become frames, bullets become notes inside them, and a mermaid flowchart becomes the arrows between them. The brief waits on the board and the first browser to open it does the drawing, so what comes back is an address rather than a canvas full of work — and it says so in those words."
             }
           ]
         },
@@ -504,7 +516,7 @@
         {
           "tone": "paper",
           "heading": "What is not behind this door",
-          "body": "Boards are not records, so no tool here opens one. A canvas reaches a model the other way and on purpose: the board turns its frames, connectors and comments into a Markdown brief you hand over. What this server reads is the rows — pages, databases, issues, projects, people, companies, events and files — and it stops there. The first four have screens; the rest are rows kept and not yet drawn anywhere."
+          "body": "A board can be read and a board can be made, and between those two there is nothing. No tool moves a sticky note somebody already put down, draws a connector between two that are there, or edits a frame: the canvas is a shared document only a browser composes. The rows are the other half — pages, databases, issues, projects, people, companies, events, files and collections — and there the same line falls in the same place, at the paragraph already written."
         },
         {
           "tone": "paper",
@@ -528,8 +540,8 @@
         },
         {
           "tone": "pigment",
-          "heading": "The half that does not exist yet",
-          "body": "A board goes out to an agent as a brief. A workspace comes back as records and goes back again as records. Neither direction ends with an agent drawing on a canvas: there is no endpoint that makes a board, adds a sticky note or draws a connector, so whatever a model concludes about a canvas still reaches it through a person. Nor can anything here rewrite a paragraph already in a page, delete one or reorder blocks. That is a limit rather than an oversight, and it belongs on the page where you are deciding rather than in week two."
+          "heading": "The round trip, and where it stops",
+          "body": "A board goes out to an agent as a brief and a brief comes back as a board: the model writes Markdown, the endpoint keeps it, and the first browser to open that board turns it into frames, notes and arrows. Until somebody looks, the board is a brief waiting, and the answer says that rather than reporting a canvas full of work. Where it stops is editing. Nothing here moves a note already on a board, and nothing rewrites a paragraph already in a page, deletes one or reorders blocks. That is a limit rather than an oversight, and it belongs on the page where you are deciding rather than in week two."
         },
         {
           "tone": "pigment",

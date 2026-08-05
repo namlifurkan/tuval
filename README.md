@@ -35,9 +35,10 @@ item, code blocks stay fenced code — and exported as a prompt, Markdown or JSO
 agent can actually act on. Spatial layout is resolved into reading order, so the output is not
 a screenshot but a brief.
 
-The loop closes: paste an agent's Markdown back into **Build a board from a brief** and headings
-become frames, bullets become stickies, fenced code becomes code blocks and a mermaid flow
-becomes connectors.
+The loop closes from either end. Paste an agent's Markdown into **Build a board from a brief**, or
+let the agent post the brief itself over the [MCP server](docs/mcp.md) and open the board it names:
+headings become frames, bullets become stickies, fenced code becomes code blocks and a mermaid
+flow becomes connectors.
 
 ## Boards
 
@@ -136,7 +137,7 @@ rewrite rather than the work.
 a board export and how to write Markdown that Tuval can rebuild into a board. Install it with
 
 ```bash
-npx skills add <owner>/<repo>@tuval-board
+npx skills add namlifurkan/tuval@tuval-board
 ```
 
 or copy the file into your agent's skills directory.

@@ -2,14 +2,14 @@
 
 What an agent can do with a Tuval workspace today, and — the longer half — what it cannot.
 
-There are two directions and they are not symmetric. A board goes out to an agent as a brief. A
-workspace comes back to an agent as records, and goes back again as records. Nothing goes the
-other way onto a board over the network, and this page says so in as many words rather than
-leaving it to be discovered.
+There are two directions and they are no longer one-way. A board goes out to an agent as a brief,
+and a brief comes back as a board. A workspace comes back to an agent as records, and goes back
+again as records. What an agent still cannot do is edit either one in place, and this page says
+where that line falls rather than leaving it to be discovered.
 
 ## Reading and writing the workspace
 
-Seven tools, mounted over stdio, which is what Claude Code and Cursor speak.
+Ten tools, mounted over stdio, which is what Claude Code and Cursor speak.
 
 ```bash
 claude mcp add tuval -- node /path/to/tuval/scripts/mcp.mjs
@@ -19,13 +19,16 @@ claude mcp add tuval -- node /path/to/tuval/scripts/mcp.mjs
 |---|---|
 | `search` | Words in titles and bodies across pages, databases, issues and projects. An excerpt and an id back |
 | `read_page` | One page or issue as Markdown, headings and lists intact |
+| `read_board` | One board as Markdown — its frames, notes, connectors and comments, as the last browser to open it wrote them |
+| `list_boards` | The boards in this workspace, with how many items and frames each holds |
 | `list_records` | Records of one kind, filtered by status, assignee, project or cycle |
 | `workspace` | What this key can reach, whether it may write, and how many writes are left today |
 | `create_record` | File an issue, page, project, person, company or event |
 | `update_record` | Change a title, status, assignee, priority, due date, parent, project or cycle |
 | `append_to_page` | Add Markdown to the end of a page or issue |
+| `create_board` | Make a board from a Markdown brief. The browser draws it — see below |
 
-The first four are `GET` and work with any key. The last three go through the same door as `curl`,
+The first six are `GET` and work with any key. The last four go through the same door as `curl`,
 and want a key whose scope is `write`: a `read` key answers `403`, a key past its daily allowance
 answers `429`, and the server turns both into a sentence rather than a number, because the two
 call for opposite decisions.
@@ -45,9 +48,15 @@ door, one more verb — and a script that is not an agent uses it the same way.
 |---|---|
 | `GET /records` · `GET /records/<id>` · `GET /records/<id>/markdown` | Read |
 | `GET /search?q=` · `GET /cycles` · `GET /labels` · `GET /` | Read |
+| `GET /boards` · `GET /boards/<id>/markdown` | Read |
 | `POST /records` | Create. `kind` defaults to `issue`, returns `201` |
 | `PATCH /records/<id>` | Change what you send and nothing else |
 | `DELETE /records/<id>` | Archives. Returns `{"archived":"<id>"}` |
+| `POST /boards` | Make a board from a brief. Returns `201` and where it will be |
+
+A record comes back under a `record` key, and a listing under `records`, both beside a `note`
+saying the text was written by people and is not addressed to the reader. Same sentence `/search`
+carries, on every door that hands back something somebody typed.
 
 ```bash
 curl -X POST -H "authorization: Bearer tuv_..." -H "content-type: application/json" \
@@ -123,14 +132,17 @@ early and start giving orders.
 
 Plainly, because the shape of the door is easy to mistake for the shape of the product.
 
-- **No board writing.** The API serves `records`, `search`, `cycles` and `labels`. Anything else
-  answers `404`. Boards live in `board_snapshots` and are written by `save_board_snapshot()`,
-  which is granted to signed-in users and the service role, and called only by the app in the
-  browser. There is no endpoint that
-  creates a board, adds a sticky note or draws a connector.
-- **A brief becomes a board in the browser.** `briefToItems()` has exactly one caller in the
-  product — the import panel — and it writes into the local Yjs document. An agent can produce the
-  Markdown; a person still pastes it into an open board.
+- **No editing a board that exists.** `POST /boards` makes a new one from a brief, and that is the
+  whole verb. Nothing adds a sticky note to a board already drawn, moves one, or draws a connector
+  between two that are there: the canvas is a Yjs document only a browser composes, and
+  `save_board_snapshot()` is called by the app rather than by this door.
+- **A brief becomes a board on the first open.** `POST /boards` writes the Markdown to
+  `boards.pending_brief` and answers with the address. `briefToItems()` turns it into frames,
+  notes and arrows in the first browser that opens that board — nobody pastes anything, but until
+  somebody looks, the board is a brief waiting rather than a board. The reply says so.
+- **A board is read as a copy.** `GET /boards/<id>/markdown` serves the reading the browser wrote
+  beside the document on its last save, and dates it in `X-Tuval-Read-At`. A board nobody has
+  opened since the last change reads as it was then, honestly and out of date.
 - **No editing a page in place.** Prose can be added to the end of a page and it will be there
   the next time somebody opens it. Nothing can rewrite a paragraph that is already in the
   document, delete one, or reorder blocks: that is the CRDT, and only a browser holds it.
@@ -157,5 +169,5 @@ What that is worth is measured rather than asserted: [Reproducing](REPRODUCING.m
 ## Related
 
 - [HTTP API](api.md) — every endpoint, in full
-- [MCP server](mcp.md) — setup and the seven tools
+- [MCP server](mcp.md) — setup and the ten tools
 - [Self-hosting](self-hosting.md) — the switch that turns the API on
