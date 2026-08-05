@@ -454,12 +454,12 @@
       "title": "MCP server — the workspace in Claude Code | Tuval",
       "description": "An MCP server for Claude Code and Cursor: search the workspace, read a page as Markdown, list what is in flight, and file issues and pages back. One line to mount it, and the key decides what it sees and whether it may write.",
       "claim": "Mount the workspace in Claude Code.",
-      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Ten tools: search pages, databases, issues and projects in one call, open any of them as Markdown, read a board as prose, list what is in flight — and, with a key made to write, file a new record, change one, add to a page, or hand back a brief that becomes a board. The key decides which workspace, whether it may write at all, and the agent is shown exactly what the person who made that key can see.",
+      "lede": "One line adds a Tuval workspace to Claude Code or Cursor as an MCP server. Twelve tools: search pages, databases, issues and projects in one call, open any of them as Markdown, read a board as prose, list what is in flight — and, with a key made to write, file a new record, change one, add to a page, or hand back a brief that becomes a board. The key decides which workspace, whether it may write at all, and the agent is shown exactly what the person who made that key can see.",
       "bands": [
         {
           "id": "tools",
           "tone": "paper",
-          "heading": "The ten tools",
+          "heading": "The twelve tools",
           "points": [
             {
               "title": "search",
@@ -500,6 +500,14 @@
             {
               "title": "create_board",
               "body": "Hand back a Markdown brief and get a board. Headings become frames, bullets become notes inside them, and a mermaid flowchart becomes the arrows between them. The brief waits on the board and the first browser to open it does the drawing, so what comes back is an address rather than a canvas full of work — and it says so in those words."
+            },
+            {
+              "title": "update_board",
+              "body": "The same board again. Rename it, or send it another brief: append draws below what is already there, replace takes back what the last brief drew and redraws in its place. Every item a brief draws is marked as such, so replace never touches what a person put on the canvas by hand. A report that runs every week lives on one board instead of leaving a new one behind each time."
+            },
+            {
+              "title": "trash_board",
+              "body": "Put a board in the trash, so an integration can clear up after itself instead of leaving its drafts for somebody to find. Marked rather than removed — everything drawn on a board hangs off one row, which makes deleting it the single thing here nobody could undo, so a person can still restore it from the board list."
             }
           ]
         },

@@ -48,7 +48,8 @@ const BASE = read('TUVAL_API_URL')
 const REASONS = {
   401: 'the key is not valid, or this workspace is on the free plan, where the API is off',
   403: 'this key may only read. Make one with write access in Settings → API and webhooks',
-  404: 'no such record, or this key cannot see it',
+  404: 'no such record or board, or this key cannot see it — a board somebody may only view '
+    + 'answers this to a write as well',
   429: 'this key has spent its writes for the day. It can still read, and it can write again '
     + 'tomorrow. Raise the allowance on the key if a thousand a day is not enough',
 }
@@ -319,6 +320,56 @@ const TOOLS = [
       required: ['title', 'brief'],
     },
     run: ({ title, brief }) => ask('/boards', { method: 'POST', body: { title, brief } }),
+  },
+  {
+    name: 'update_board',
+    description:
+      'Rename a board, or send one that already exists another brief. Needs a key with write '
+      + 'access. This is how a report that runs every week lives on one board instead of leaving '
+      + 'a new one behind every time.\n\n'
+      + 'mode says what the new brief does about what is already on the canvas. "replace" takes '
+      + 'back what the last brief drew and draws this one where it stood; anything a person put '
+      + 'there by hand stays, though their edits to a brief\'s own notes go with the redraw. '
+      + '"append" is the default and draws below everything, for a board meant to accumulate.\n\n'
+      + 'It lands the same way create_board does: the brief waits on the board and becomes frames '
+      + 'and notes the first time somebody opens it in Tuval.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'The board id — the part after /b/ in its address' },
+        title: { type: 'string', description: 'A new name for the board' },
+        brief: { type: 'string', description: 'The Markdown the board is drawn from' },
+        mode: { type: 'string', description: 'append (default) or replace' },
+      },
+      required: ['id'],
+    },
+    run: ({ id, ...rest }) => {
+      const body = {}
+      for (const key of ['title', 'brief', 'mode']) {
+        if (rest[key] !== undefined && rest[key] !== null && rest[key] !== '') body[key] = rest[key]
+      }
+      // Refused here rather than sent: an empty change spends one of the key's writes for the day
+      // and answers with the board unchanged, which reads like it did something.
+      if (!body.title && !body.brief) {
+        throw new Error('Nothing to change. Send a title, a brief, or both.')
+      }
+      return ask(`/boards/${encodeURIComponent(id)}`, { method: 'PATCH', body })
+    },
+  },
+  {
+    name: 'trash_board',
+    description:
+      'Put a board in the trash. Needs a key with write access. It is marked rather than removed '
+      + '— a person can restore it from the board list — because everything drawn on a board '
+      + 'hangs off that one row, which makes deleting it the one thing here nobody can undo.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'The board id — the part after /b/ in its address' },
+      },
+      required: ['id'],
+    },
+    run: ({ id }) => ask(`/boards/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
 ]
 

@@ -370,6 +370,12 @@ Deno.serve(async (request) => {
     return send({ note: UNTRUSTED, results })
   }
 
+  // Answered here rather than falling through to the record door, which tells somebody who asked
+  // for a board wrongly that there is no such collection — while there plainly is.
+  if (parts[0] === 'boards') {
+    return send({ error: 'A board is /boards, /boards/<id> or /boards/<id>/markdown.' }, 404)
+  }
+
   if (parts[0] !== 'records') return send({ error: 'No such collection.' }, 404)
 
   const id = parts[1]

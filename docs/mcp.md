@@ -40,11 +40,13 @@ install.
 | `create_board` | Open an infinite canvas drawn from a Markdown brief |
 | `read_board` | What is drawn on a board, as prose: frames, reading order, the flow between items |
 | `list_boards` | The boards in this workspace, with item and frame counts |
+| `update_board` | Rename a board, or send it another brief: `append` under what is there, `replace` over what the last brief drew |
+| `trash_board` | Put a board in the trash — marked rather than removed, so a person can restore it |
 
 ## Writing
 
-The last four want a key whose scope is **write**. Scope is chosen when the key is made, in
-Settings → API and webhooks; a `read` key answers `403` to all three and the server says so in
+The last six want a key whose scope is **write**. Scope is chosen when the key is made, in
+Settings → API and webhooks; a `read` key answers `403` to every one of them and the server says so in
 words rather than as a number. There is a daily allowance — 1000 writes by default — and past it
 every write answers `429`, which is a different problem from `403` and worth telling apart: one
 means come back with a better key, the other means come back tomorrow.
@@ -127,7 +129,7 @@ opened the page and typed.
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node scripts/mcp.mjs
 ```
 
-Ten tools come back. If the key is missing, the plan has the API off, the key may only read or
+Twelve tools come back. If the key is missing, the plan has the API off, the key may only read or
 it has spent its writes, `tools/call` answers with the reason as text rather than a transport
 error, so the model can read it and decide what to do.
 

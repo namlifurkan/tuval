@@ -9,7 +9,7 @@ where that line falls rather than leaving it to be discovered.
 
 ## Reading and writing the workspace
 
-Ten tools, mounted over stdio, which is what Claude Code and Cursor speak.
+Twelve tools, mounted over stdio, which is what Claude Code and Cursor speak.
 
 ```bash
 claude mcp add tuval -- node /path/to/tuval/scripts/mcp.mjs
@@ -27,8 +27,10 @@ claude mcp add tuval -- node /path/to/tuval/scripts/mcp.mjs
 | `update_record` | Change a title, status, assignee, priority, due date, parent, project or cycle |
 | `append_to_page` | Add Markdown to the end of a page or issue |
 | `create_board` | Make a board from a Markdown brief. The browser draws it — see below |
+| `update_board` | Rename a board, or send it another brief — appended under what is there, or replacing what the last brief drew |
+| `trash_board` | Put a board in the trash. Marked, not removed |
 
-The first six are `GET` and work with any key. The last four go through the same door as `curl`,
+The first six are `GET` and work with any key. The last six go through the same door as `curl`,
 and want a key whose scope is `write`: a `read` key answers `403`, a key past its daily allowance
 answers `429`, and the server turns both into a sentence rather than a number, because the two
 call for opposite decisions.
@@ -41,7 +43,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node scripts/mcp.mjs
 
 ## Writing the workspace directly
 
-The three write tools above are a thin wrapper on the [HTTP API](api.md). The same key, the same
+The six write tools above are a thin wrapper on the [HTTP API](api.md). The same key, the same
 door, one more verb — and a script that is not an agent uses it the same way.
 
 | | |
@@ -173,5 +175,5 @@ What that is worth is measured rather than asserted: [Reproducing](REPRODUCING.m
 ## Related
 
 - [HTTP API](api.md) — every endpoint, in full
-- [MCP server](mcp.md) — setup and the ten tools
+- [MCP server](mcp.md) — setup and the twelve tools
 - [Self-hosting](self-hosting.md) — the switch that turns the API on
