@@ -169,7 +169,8 @@ const TOOLS = [
   {
     name: 'list_records',
     description:
-      'List records of one kind: issue, doc, database, project, person, company, event or file. '
+      'List records of one kind: issue, doc, database, collection, project, person, company, '
+      + 'event or file. '
       + 'Filter by status, assignee, project or cycle. Archived rows are left out.',
     inputSchema: {
       type: 'object',
@@ -228,7 +229,7 @@ const TOOLS = [
       })
       // Filed, but not handed to anybody. An issue with no command that proves it finished is a
       // description of a wish, and the seat that reviews agent work is one person.
-      if ((args.kind || 'issue') === 'issue' && !made?.data?.check) {
+      if ((args.kind || 'issue') === 'issue' && !made?.record?.data?.check) {
         return { ...made, waiting: 'No check on this issue yet, so it will not be dispatched. Add data { "check": "…" } when you know what proves it done.' }
       }
       return made
@@ -258,7 +259,7 @@ const TOOLS = [
       // criterion is written when the work is described — written afterwards it only describes
       // whatever the agent happened to do.
       if (body.status === 'review') {
-        const held = body.data ?? (await ask(`/records/${encodeURIComponent(id)}`)).data
+        const held = body.data ?? (await ask(`/records/${encodeURIComponent(id)}`)).record?.data
         if (!held?.check) {
           throw new Error(
             'This record carries no check, so it cannot go to review. Give it one first: '
@@ -290,7 +291,7 @@ const TOOLS = [
       const at = `/records/${encodeURIComponent(id)}`
       // Read then write, because the column holds whatever has not been folded in yet and
       // replacing it would throw away somebody else's waiting paragraph.
-      const held = ((await ask(at)).description ?? '').trimEnd()
+      const held = ((await ask(at)).record?.description ?? '').trimEnd()
       return ask(at, {
         method: 'PATCH',
         body: { description: held ? `${held}\n\n${text}` : text },

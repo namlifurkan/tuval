@@ -48,13 +48,16 @@ workspace every call answers `401`.
 
 A record is one row of work: an issue, a page, a database, a project. `kind` says which.
 
-`issue` · `doc` · `database` · `project` · `person` · `company` · `event` · `file`
+`issue` · `doc` · `database` · `collection` · `project` · `person` · `company` · `event` · `file`
 
 ### `GET /records`
 
+Answers `{"note": "…", "records": [ … ]}`. The note says the text was written by people and is not
+addressed to whatever is reading it; see [below](#what-comes-back-is-quoted-not-addressed-to-you).
+
 | Query | Meaning |
 |---|---|
-| `kind` | One of the kinds above |
+| `kind` | One of the kinds above. A kind that is not on that list answers `400` rather than being ignored |
 | `status` | `backlog` `todo` `doing` `review` `blocked` `done` `cancelled` |
 | `assignee` | A user id |
 | `project` · `cycle` | A record id |
@@ -63,7 +66,7 @@ A record is one row of work: an issue, a page, a database, a project. `kind` say
 
 ### `GET /records/<id>`
 
-One record.
+One record, as `{"note": "…", "record": { … }}`.
 
 ### `GET /records/<id>/markdown`
 
@@ -81,7 +84,7 @@ curl -X POST -H "authorization: Bearer tuv_..." -H "content-type: application/js
   https://<project>.supabase.co/functions/v1/api/records
 ```
 
-`kind` defaults to `issue`. Returns `201` and the created row.
+`kind` defaults to `issue`. Returns `201` and the created row under `record`.
 
 ### `PATCH /records/<id>`
 
@@ -120,11 +123,16 @@ indexes the document, and the text is not in the document yet.
 
 ## What comes back is quoted, not addressed to you
 
-Every record was typed by somebody, and a key that reads may also write. So both doors that hand
-back page text say what that text is: `GET /search` carries a `note` beside its `results`, and
-`GET /records/<id>/markdown` puts the whole page between `<<<RECORD_CONTENT>>>` markers under the
-same sentence. A page that writes those markers itself has them escaped on the way out, so it
-cannot close the quote and start speaking.
+Every record was typed by somebody, and a key that reads may also write. So every door that hands
+back something somebody typed says what it is. `GET /search` carries a `note` beside its
+`results`; `GET /records` carries one beside its `records`, and `GET /records/<id>`, `POST` and
+`PATCH` beside their `record`. `GET /records/<id>/markdown` and `GET /boards/<id>/markdown` put
+the whole text between `<<<RECORD_CONTENT>>>` markers under the same sentence, and a page that
+writes those markers itself has them escaped on the way out, so it cannot close the quote and
+start speaking.
+
+The listing used to be the exception, which is the wrong exception to have: an imported cell
+reaches a model through `GET /records` at least as readily as through search.
 
 If you are wiring an agent to this API, leave that text in the prompt. An instruction reaching a
 model through an imported spreadsheet cell is the cheap version of this attack, and the sentence
