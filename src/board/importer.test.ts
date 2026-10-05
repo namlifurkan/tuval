@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parseBrief } from './importer'
+import { briefToItems, parseBrief } from './importer'
+import type { ShapeItem } from './types'
 
 const brief = `# Checkout redesign
 
@@ -94,5 +95,45 @@ describe('parseBrief', () => {
   it('keeps loose text when there is no heading', () => {
     const loose = parseBrief('- one\n- two')
     expect(loose.sections[0].nodes).toHaveLength(2)
+  })
+})
+
+describe('briefToItems with only a flow', () => {
+  const tree = `# Org
+
+## Flow
+
+\`\`\`mermaid
+flowchart TD
+  ceo["Ada<br>CEO"]
+  cto["Mina<br>CTO"]
+  dev1["Can"]
+  dev2["Ela"]
+  sales["Sales"]
+  lead["Lead"]
+  rep["Rep"]
+  ceo --> cto
+  ceo --> sales
+  cto --> dev1
+  cto --> dev2
+  sales --> lead
+  lead --> rep
+  rep --> ceo
+\`\`\`
+`
+
+  it('draws a box per node and an arrow per edge, as a tree', () => {
+    const { items, title } = briefToItems(tree, { x: 0, y: 0 })
+    const boxes = items.filter((i) => i.type === 'shape') as ShapeItem[]
+    const arrows = items.filter((i) => i.type === 'connector')
+    expect(title).toBe('Org')
+    expect(boxes).toHaveLength(7)
+    expect(arrows).toHaveLength(6)
+    const at = (text: string) => boxes.find((b) => b.text === text)!
+    expect(at('Ada\nCEO').y).toBeLessThan(at('Mina\nCTO').y)
+    expect(at('Mina\nCTO').y).toBeLessThan(at('Can').y)
+    expect(at('Can').x).toBe(at('Ela').x)
+    expect(at('Ela').y).toBeGreaterThan(at('Can').y)
+    expect(at('Mina\nCTO').x + at('Mina\nCTO').w).toBeLessThanOrEqual(at('Sales').x)
   })
 })

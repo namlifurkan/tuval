@@ -1,5 +1,5 @@
 import { personNamed } from './people'
-import { codeHeight, makeCode, makeConnector, makeFrame, makeSticky, makeTable, STICKY_SIZE } from './items'
+import { codeHeight, makeCode, makeConnector, makeFrame, makeShape, makeSticky, makeTable, STICKY_SIZE } from './items'
 import { PIGMENTS } from './brand'
 import { DEFAULT_TEXT_STYLE } from './types'
 import type { Item, Vec } from './types'
@@ -130,8 +130,105 @@ function sizeOf(node: Node) {
 
 const FILLS = [PIGMENTS.naples, PIGMENTS.celadon, PIGMENTS.rose, PIGMENTS.cerulean, PIGMENTS.ochre]
 
+const TREE_W = 248
+const TREE_H = 96
+const TREE_GAP_X = 40
+const TREE_GAP_Y = 96
+const STACK_GAP = 24
+const STACK_INDENT = TREE_W / 2 + 32
+const TREE_FILL = ['#3E5C93', '#7FA5BE', '#CBD79A', '#F0E3B0', '#E7B7B4']
+
+function treeToItems(parsed: Parsed, origin: Vec): Item[] {
+  const names = new Map(parsed.labels)
+  for (const edge of parsed.edges) {
+    if (!names.has(edge.from)) names.set(edge.from, edge.from)
+    if (!names.has(edge.to)) names.set(edge.to, edge.to)
+  }
+
+  const kids = new Map<string, string[]>()
+  const parent = new Map<string, string>()
+  const edgeLabel = new Map<string, string>()
+  for (const edge of parsed.edges) {
+    if (edge.from === edge.to || parent.has(edge.to)) continue
+    let up: string | undefined = edge.from
+    while (up && up !== edge.to) up = parent.get(up)
+    if (up) continue
+    parent.set(edge.to, edge.from)
+    edgeLabel.set(edge.to, edge.label)
+    kids.set(edge.from, [...(kids.get(edge.from) ?? []), edge.to])
+  }
+
+  const childrenOf = (id: string) => kids.get(id) ?? []
+  const stacks = (id: string) => {
+    const own = childrenOf(id)
+    return own.length > 1 && own.every((k) => !childrenOf(k).length)
+  }
+  const widthOf = (id: string): number => {
+    const own = childrenOf(id)
+    if (!own.length) return TREE_W
+    if (stacks(id)) return STACK_INDENT + TREE_W
+    const sum = own.reduce((total, k) => total + widthOf(k), 0) + (own.length - 1) * TREE_GAP_X
+    return Math.max(TREE_W, sum)
+  }
+
+  const items: Item[] = []
+  const made = new Map<string, Item>()
+  const box = (id: string, x: number, y: number, depth: number) => {
+    const fill = TREE_FILL[Math.min(depth, TREE_FILL.length - 1)]
+    const node = makeShape(x, y, TREE_W, TREE_H, {
+      kind: 'roundRect', fill, stroke: 'transparent', strokeWidth: 0, strokeStyle: 'solid',
+    }, { fontSize: 18, bold: depth === 0, textColor: depth === 0 ? '#FCFBF8' : '#1F1D1A' })
+    node.text = (names.get(id) ?? id).replace(/<br\s*\/?>/gi, '\n')
+    made.set(id, node)
+    items.push(node)
+  }
+  const link = (from: string, to: string, fromSide: 'bottom', toSide: 'top' | 'left') => {
+    const a = made.get(from)!
+    const b = made.get(to)!
+    const connector = makeConnector(
+      { itemId: a.id, anchor: fromSide, x: a.x + a.w / 2, y: a.y + a.h },
+      toSide === 'top'
+        ? { itemId: b.id, anchor: 'top', x: b.x + b.w / 2, y: b.y }
+        : { itemId: b.id, anchor: 'left', x: b.x, y: b.y + b.h / 2 },
+      { shape: 'elbow', stroke: '#1F1D1A', strokeWidth: 2, strokeStyle: 'solid', capStart: 'none', capEnd: 'arrow' },
+    )
+    connector.text = edgeLabel.get(to) ?? ''
+    items.push(connector)
+  }
+
+  const place = (id: string, left: number, top: number, depth: number) => {
+    const own = childrenOf(id)
+    if (stacks(id)) {
+      box(id, left, top, depth)
+      own.forEach((k, i) => {
+        box(k, left + STACK_INDENT, top + (i + 1) * (TREE_H + STACK_GAP), depth + 1)
+        link(id, k, 'bottom', 'left')
+      })
+      return
+    }
+    box(id, left + (widthOf(id) - TREE_W) / 2, top, depth)
+    let cursor = left
+    for (const k of own) {
+      place(k, cursor, top + TREE_H + TREE_GAP_Y, depth + 1)
+      link(id, k, 'bottom', 'top')
+      cursor += widthOf(k) + TREE_GAP_X
+    }
+  }
+
+  let cursor = origin.x
+  for (const id of names.keys()) {
+    if (parent.has(id)) continue
+    place(id, cursor, origin.y, 0)
+    cursor += widthOf(id) + TREE_GAP_X * 3
+  }
+  return items
+}
+
 export function briefToItems(md: string, origin: Vec): { items: Item[]; title: string } {
   const parsed = parseBrief(md)
+  if (!parsed.sections.length && parsed.labels.size + parsed.edges.length) {
+    return { items: treeToItems(parsed, origin), title: parsed.title }
+  }
   const items: Item[] = []
   const order: Item[] = []
   let cursorX = origin.x

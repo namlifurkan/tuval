@@ -308,6 +308,9 @@ const TOOLS = [
       + 'heading becomes a frame, and the bullets under it become notes inside that frame. A '
       + 'section headed "## Flow" holding a mermaid flowchart becomes the arrows: name a node '
       + 'with the same words as a bullet and the arrow lands on that note.\n\n'
+      + 'A brief that holds nothing but the "## Flow" section is drawn as a tree instead: one box '
+      + 'per node, parents above children, for an org chart or any hierarchy. "<br>" in a node '
+      + 'label breaks the line.\n\n'
       + 'Be aware of when it lands. A canvas is a shared document that only a browser can draw, '
       + 'so the brief waits on the board and becomes real frames, notes and arrows the first '
       + 'time somebody opens it in Tuval. Say so rather than reporting a board full of work.',
