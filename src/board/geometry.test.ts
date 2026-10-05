@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { connectorBounds, curveControls, onFrameTitle, resizeBox, snapMove } from './geometry'
+import { connectorBounds, connectorPath, curveControls, onFrameTitle, resizeBox, snapMove } from './geometry'
 import type { Item } from './types'
 
 const box = (x: number, y: number, w: number, h: number) => ({ x, y, w, h, rotation: 0 })
@@ -90,5 +90,13 @@ describe('snapMove', () => {
   it('leaves a distant edge alone', () => {
     const snap = snapMove(box(400, 0, 100, 100), [{ x: 100, y: 300, w: 100, h: 100 }], 8)
     expect(snap.dx).toBe(0)
+  })
+})
+
+describe('connectorPath', () => {
+  it('turns an elbow from a bottom anchor into a left anchor once, not along the target', () => {
+    const elbow = { ...wire('a', 'b', 'bottom'), shape: 'elbow' } as Item & { type: 'connector' }
+    const path = connectorPath(elbow, { a: { x: 100, y: 100 }, b: { x: 160, y: 400 } })
+    expect(path).toEqual([{ x: 100, y: 100 }, { x: 100, y: 400 }, { x: 160, y: 400 }])
   })
 })

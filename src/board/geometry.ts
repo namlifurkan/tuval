@@ -426,6 +426,9 @@ export function connectorPath(item: Item & { type: 'connector' }, ends: Ends): V
   if (item.shape === 'straight') return [a, b]
   if (item.shape === 'elbow') {
     const dir = normalOf(item.from.anchor)
+    const end = normalOf(item.to.anchor)
+    if (dir && end && dir.y !== 0 && end.x !== 0) return [a, { x: a.x, y: b.y }, b]
+    if (dir && end && dir.x !== 0 && end.y !== 0) return [a, { x: b.x, y: a.y }, b]
     if (dir && dir.y !== 0) {
       const my = (a.y + b.y) / 2
       return [a, { x: a.x, y: my }, { x: b.x, y: my }, b]
