@@ -892,7 +892,9 @@ function updateHover(p: Vec, screen: Vec) {
 export function wheel(e: WheelEvent, screen: Vec) {
   const s = store()
   if (e.ctrlKey || e.metaKey) {
-    const factor = Math.exp(-e.deltaY * 0.01)
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1
+    const delta = Math.max(-12, Math.min(12, e.deltaY * unit))
+    const factor = Math.exp(-delta * 0.01)
     s.setCamera(zoomAt(s.camera, screen.x, screen.y, s.camera.z * factor))
   } else {
     const dx = e.shiftKey ? e.deltaY : e.deltaX

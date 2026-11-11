@@ -59,7 +59,7 @@ export function EmbedLayer() {
                 onClick={() => { update({ activeEmbed: null }); requestRender() }}
                 className="absolute right-2 top-2 rounded-lg bg-ink px-2 py-1 text-[11px] font-semibold text-paper"
               >
-                Kilidi kapat
+                {t('Lock')}
               </button>
             )}
           </div>

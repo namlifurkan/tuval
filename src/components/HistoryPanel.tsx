@@ -1,4 +1,4 @@
-import { t } from '../i18n'
+import { getLang, t } from '../i18n'
 import { History, RotateCcw, Trash2, X } from 'lucide-react'
 import { useEffect, useSyncExternalStore } from 'react'
 import {
@@ -11,7 +11,7 @@ const when = (at: number) => {
   if (mins < 1) return t('just now')
   if (mins < 60) return t('{n} min ago', { n: mins })
   if (mins < 1440) return t('{n} h ago', { n: Math.floor(mins / 60) })
-  return new Date(at).toLocaleDateString('tr-TR')
+  return new Date(at).toLocaleDateString(getLang() === 'tr' ? 'tr-TR' : 'en-GB')
 }
 
 export function HistoryPanel() {

@@ -149,25 +149,27 @@ export function TextEditor() {
     }
     patchItem(item.id, { text: next })
     if (isTable) return
+    const text = next || ' '
     if (item.type === 'sticky' || item.type === 'shape') {
-      const fitted = layoutText(value || ' ', box.w, box.h, style)
+      const fitted = layoutText(text, box.w, box.h, style)
       if (fitted.fontSize <= MIN_AUTOFIT) {
-        const lines = wrapText(value || ' ', box.w, fontString(style, fitted.fontSize))
+        const lines = wrapText(text, box.w, fontString(style, fitted.fontSize))
         const needed = lines.length * fitted.fontSize * LINE_HEIGHT
         if (needed > box.h + 1) patchItem(item.id, { h: Math.ceil(needed * (item.h / box.h)) })
       }
     }
-    if (item.type === 'text' && item.autoWidth) {
-      const font = fontString(style, style.fontSize)
-      const widest = Math.max(...(value || ' ').split('\n').map((line) => measureWidth(line, font)))
-      patchItem(item.id, { w: Math.min(1600, Math.max(120, Math.ceil(widest) + 12)) })
-    }
     if (item.type === 'text') {
+      let w = box.w
+      if (item.autoWidth) {
+        const font = fontString(style, style.fontSize)
+        const widest = Math.max(...text.split('\n').map((line) => measureWidth(line, font)))
+        w = Math.min(1600, Math.max(120, Math.ceil(widest) + 12))
+      }
       const h = Math.max(
         style.fontSize * LINE_HEIGHT,
-        layoutText(value || ' ', box.w, 1e6, { ...style, autoFit: false }).lines.length * style.fontSize * LINE_HEIGHT,
+        layoutText(text, w, 1e6, { ...style, autoFit: false }).lines.length * style.fontSize * LINE_HEIGHT,
       )
-      patchItem(item.id, { h })
+      patchItem(item.id, item.autoWidth ? { w, h } : { h })
     }
     requestRender()
   }
